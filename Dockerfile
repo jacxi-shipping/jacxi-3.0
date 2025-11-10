@@ -1,7 +1,7 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 
-ARG DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres?schema=public"
+ARG DATABASE_URL="postgresql://postgres:q6UU6jbo168IZISkiAdG@database-1.cda8cem8oi5h.us-east-2.rds.amazonaws.com:5432/jacxi_shipping"
 ENV DATABASE_URL=${DATABASE_URL}
 
 # Install dependencies with Prisma schema available
