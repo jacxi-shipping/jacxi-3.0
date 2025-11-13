@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useLayoutEffect, useState, useEffect } from 'react';
+import { createContext, useContext, useLayoutEffect, useState, useEffect, startTransition } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -18,26 +18,30 @@ function getSystemTheme(): Theme {
 	return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function getInitialTheme(): Theme {
+	if (typeof window === 'undefined') return 'dark';
+	
+	// Check localStorage first
+	const savedTheme = localStorage.getItem('theme') as Theme | null;
+	if (savedTheme === 'light' || savedTheme === 'dark') {
+		return savedTheme;
+	}
+	
+	// Fall back to system preference
+	return getSystemTheme();
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-	const [state, setState] = useState<{ theme: Theme; mounted: boolean }>({
-		theme: 'dark',
-		mounted: false
-	});
+	// Use lazy initialization to read from localStorage/system preference
+	const [theme, setTheme] = useState<Theme>(getInitialTheme);
+	const [mounted, setMounted] = useState(false);
 
-	// Handle client-side theme initialization
+	// Mark as mounted after first render to avoid hydration mismatch
+	// Using startTransition to avoid cascading renders warning
 	useEffect(() => {
-		let initialTheme: Theme = 'dark';
-
-		// Check localStorage first
-		const savedTheme = localStorage.getItem('theme') as Theme | null;
-		if (savedTheme === 'light' || savedTheme === 'dark') {
-			initialTheme = savedTheme;
-		} else {
-			// Fall back to system preference
-			initialTheme = getSystemTheme();
-		}
-
-		setState({ theme: initialTheme, mounted: true });
+		startTransition(() => {
+			setMounted(true);
+		});
 	}, []);
 
 	const updateDocumentClass = (newTheme: Theme) => {
@@ -54,23 +58,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 	// Use useLayoutEffect to update DOM synchronously before paint
 	useLayoutEffect(() => {
-		updateDocumentClass(state.theme);
-	}, [state.theme]);
+		updateDocumentClass(theme);
+	}, [theme]);
 
 	const toggleTheme = () => {
-		setState((prevState) => {
-			const newTheme = prevState.theme === 'dark' ? 'light' : 'dark';
+		setTheme((prevTheme) => {
+			const newTheme = prevTheme === 'dark' ? 'light' : 'dark';
 			// Update localStorage
 			if (typeof window !== 'undefined') {
 				localStorage.setItem('theme', newTheme);
 			}
 			// updateDocumentClass will be called by useLayoutEffect
-			return { ...prevState, theme: newTheme };
+			return newTheme;
 		});
 	};
 
 	const setThemeValue = (newTheme: Theme) => {
-		setState((prevState) => ({ ...prevState, theme: newTheme }));
+		setTheme(newTheme);
 		if (typeof window !== 'undefined') {
 			localStorage.setItem('theme', newTheme);
 		}
@@ -80,10 +84,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	// Always provide the context, even during SSR
 	return (
 		<ThemeContext.Provider value={{
-			theme: state.theme,
+			theme,
 			toggleTheme,
 			setTheme: setThemeValue,
-			mounted: state.mounted
+			mounted
 		}}>
 			{children}
 		</ThemeContext.Provider>
