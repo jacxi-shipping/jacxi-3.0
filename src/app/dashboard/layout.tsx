@@ -10,7 +10,7 @@ export default function DashboardLayout({
 }) {
 	return (
 		<ProtectedRoute>
-			<div className="min-h-screen bg-[#020817] flex">
+			<div className="min-h-screen bg-background flex">
 				{/* Sidebar */}
 				<Sidebar />
 

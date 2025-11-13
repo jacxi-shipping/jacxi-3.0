@@ -127,7 +127,7 @@ export default function Sidebar() {
 					variant="ghost"
 					size="icon"
 					onClick={() => setMobileOpen(!mobileOpen)}
-					className="bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 text-white hover:bg-cyan-500/10"
+					className="bg-card/50 backdrop-blur-sm border border-accent/30 text-foreground hover:bg-accent/10"
 				>
 					{mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
 				</Button>
@@ -142,7 +142,7 @@ export default function Sidebar() {
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ duration: 0.2 }}
-							className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+							className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
 							onClick={() => setMobileOpen(false)}
 						/>
 
@@ -188,16 +188,16 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 				whileHover={{ x: 2 }}
 				className={cn(
 					'group relative flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 cursor-pointer',
-					active ? 'bg-cyan-500/10 text-cyan-400' : 'text-white/70 hover:text-white hover:bg-white/5'
+					active ? 'bg-accent/10 text-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/5'
 				)}
 			>
 				{active && (
 					<motion.div
 						layoutId="activeIndicator"
-						className="absolute left-0 top-1 bottom-1 w-0.5 bg-cyan-400 rounded-r-full"
+						className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent rounded-r-full"
 					/>
 				)}
-				<Icon className={cn('w-5 h-5 transition-colors', active ? 'text-cyan-400' : 'text-white/70 group-hover:text-white')} strokeWidth={2} />
+				<Icon className={cn('w-5 h-5 transition-colors', active ? 'text-accent' : 'text-muted-foreground group-hover:text-foreground')} strokeWidth={2} />
 				<span className="text-sm font-medium">{item.name}</span>
 			</motion.div>
 		</Link>
@@ -218,7 +218,7 @@ function NavSection({ title, items, baseIndex = 0, isAdmin, isActive, onNavClick
 		<div className="space-y-1">
 			{title && (
 				<div className="px-4 py-2">
-					<span className="text-xs font-semibold text-white/40 uppercase tracking-wider">{title}</span>
+					<span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</span>
 				</div>
 			)}
 			{items
@@ -253,16 +253,16 @@ function SidebarContent({
 	};
 
 	return (
-		<div className="flex flex-col h-full bg-[#0a1628]/95 backdrop-blur-md border-r border-cyan-500/20">
+		<div className="flex flex-col h-full backdrop-blur-md border-r border-border" style={{ backgroundColor: '#0A1F44' }}>
 			{/* Logo/Header */}
-			<div className="flex items-center gap-3 px-6 py-5 border-b border-cyan-500/10">
-				<div className="relative w-9 h-9 rounded-lg bg-[#020817] border border-cyan-500/40 flex items-center justify-center">
-					<div className="absolute inset-0 rounded-lg bg-cyan-500/10 blur-md" />
-					<Package className="relative w-5 h-5 text-cyan-400" strokeWidth={2} />
+			<div className="flex items-center gap-3 px-6 py-5 border-b border-border">
+				<div className="relative w-9 h-9 rounded-lg bg-background border border-accent/40 flex items-center justify-center">
+					<div className="absolute inset-0 rounded-lg bg-accent/10 blur-md" />
+					<Package className="relative w-5 h-5 text-accent" strokeWidth={2} />
 				</div>
 				<div>
-					<h2 className="text-base font-bold text-white">Jacxi</h2>
-					<p className="text-[10px] text-white/50 uppercase tracking-wider">Dashboard</p>
+					<h2 className="text-base font-bold text-foreground">Jacxi</h2>
+					<p className="text-[10px] text-muted-foreground uppercase tracking-wider">Dashboard</p>
 				</div>
 			</div>
 
@@ -284,27 +284,27 @@ function SidebarContent({
 
 				{/* Settings */}
 				<div className="pt-4">
-					<div className="h-px bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent mb-4" />
+					<div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-4" />
 					<NavSection items={settingsNavigation} baseIndex={isAdmin ? 9 : 6} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 				</div>
 			</nav>
 
 			{/* User Section */}
-			<div className="px-3 py-4 border-t border-cyan-500/10">
-				<div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#020817]/50 border border-cyan-500/20 mb-2">
-					<div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-400/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-						<User className="w-4 h-4 text-cyan-400" strokeWidth={2} />
+			<div className="px-3 py-4 border-t border-border">
+				<div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/50 border border-border mb-2">
+					<div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/30 flex items-center justify-center flex-shrink-0">
+						<User className="w-4 h-4 text-accent" strokeWidth={2} />
 					</div>
 					<div className="flex-1 min-w-0">
-						<p className="text-xs font-medium text-white truncate">{session?.user?.name || 'User'}</p>
-						<p className="text-[10px] text-white/50 truncate">{session?.user?.email || ''}</p>
+						<p className="text-xs font-medium text-foreground truncate">{session?.user?.name || 'User'}</p>
+						<p className="text-[10px] text-muted-foreground truncate">{session?.user?.email || ''}</p>
 					</div>
 				</div>
 
 				<Button
 					variant="ghost"
 					onClick={onSignOut}
-					className="w-full justify-start text-white/60 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border border-transparent text-xs py-2 h-auto"
+					className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:border-destructive/20 border border-transparent text-xs py-2 h-auto"
 				>
 					<LogOut className="w-4 h-4 mr-2" strokeWidth={2} />
 					Sign Out

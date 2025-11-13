@@ -111,6 +111,28 @@ export const colors = {
     900: '#171717',
   },
 
+  // Light Theme Specific - JACXI Light Mode
+  light: {
+    background: {
+      primary: '#FFFFFF',
+      secondary: '#F8F9FA',
+      tertiary: '#E9ECEF',
+      card: '#FFFFFF',
+      overlay: '#F8F9FA',
+    },
+    surface: {
+      elevated: '#FFFFFF',
+      card: '#FFFFFF',
+      overlay: '#F8F9FA',
+    },
+    text: {
+      primary: '#0A1F44',
+      secondary: '#2B2E34',
+      tertiary: '#404040',
+      muted: '#6B7280',
+    },
+  },
+
   // Dark Theme Specific - JACXI Dark Mode
   dark: {
     background: {

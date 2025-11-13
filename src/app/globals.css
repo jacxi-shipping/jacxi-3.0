@@ -169,15 +169,15 @@
   --subtle-gold: 212 175 55; /* #D4AF37 */
   --charcoal: 43 46 52; /* #2B2E34 */
   --light-gray: 233 236 239; /* #E9ECEF */
-  
+
   /* Futuristic Accent Colors */
   --cyber-blue: 0 191 255; /* #00BFFF - Neon cyan blue */
   --neon-purple: 138 43 226; /* #8A2BE2 - Electric purple */
   --electric-green: 0 255 127; /* #00FF7F - Neon green */
   --metallic-silver: 192 192 192; /* #C0C0C0 - Silver */
   --glow-gold: 255 215 0; /* #FFD700 - Bright gold */
-  
-  /* System Colors - shadcn/ui compatible */
+
+  /* System Colors - shadcn/ui compatible - Light Theme (default) */
   --background: 248 249 250; /* Platinum White */
   --foreground: 43 46 52; /* Charcoal */
   --card: 255 255 255; /* Pure White with glass effect */
@@ -201,7 +201,6 @@
 }
 
 .dark {
-  --background: 15 20 30; /* Deep navy-black */
   --foreground: 240 240 240; /* Almost white */
   --card: 20 25 35; /* Dark card with slight blue tint */
   --card-foreground: 240 240 240;
