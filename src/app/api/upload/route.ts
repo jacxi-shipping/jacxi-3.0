@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
+import { put } from '@vercel/blob';
+import { randomUUID } from 'crypto';
 
 export async function POST(request: NextRequest) {
 	try {
@@ -48,32 +47,30 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// Create uploads directory if it doesn't exist
-		const uploadsDir = join(process.cwd(), 'public', 'uploads', 'containers');
-		if (!existsSync(uploadsDir)) {
-			await mkdir(uploadsDir, { recursive: true });
+		const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+		if (!blobToken) {
+			console.error('BLOB_READ_WRITE_TOKEN is not configured');
+			return NextResponse.json(
+				{ message: 'Blob storage is not configured. Set BLOB_READ_WRITE_TOKEN.' },
+				{ status: 500 },
+			);
 		}
 
-		// Generate unique filename
-		const timestamp = Date.now();
-		const randomString = Math.random().toString(36).substring(2, 15);
-		const fileExtension = file.name.split('.').pop();
-		const filename = `container_${timestamp}_${randomString}.${fileExtension}`;
-		const filepath = join(uploadsDir, filename);
+		const sanitizedBaseName =
+			file.name?.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.\-_]/g, '') || 'upload.jpg';
+		const objectKey = `shipments/${Date.now()}-${randomUUID()}-${sanitizedBaseName}`;
 
-		// Convert file to buffer and save
-		const bytes = await file.arrayBuffer();
-		const buffer = Buffer.from(bytes);
-		await writeFile(filepath, buffer);
-
-		// Return the public URL
-		const publicUrl = `/uploads/containers/${filename}`;
+		const blob = await put(objectKey, file, {
+			access: 'public',
+			token: blobToken,
+			contentType: file.type,
+		});
 
 		return NextResponse.json(
 			{
 				message: 'File uploaded successfully',
-				url: publicUrl,
-				filename,
+				url: blob.url,
+				filename: blob.pathname,
 			},
 			{ status: 200 }
 		);
