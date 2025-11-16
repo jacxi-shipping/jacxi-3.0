@@ -21,10 +21,15 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
     const {
+      status,
       containerId,
       vin,
       lotNumber,
       auctionCity,
+      trackingNumber,
+      shippingOrigin,
+      shippingDestination,
+      estimatedDelivery,
       freightCost,
       towingCost,
       clearanceCost,
@@ -33,31 +38,47 @@ export async function POST(request: NextRequest) {
       otherCost,
     } = data;
 
-    if (!containerId || !vin || !lotNumber || !auctionCity) {
+    // Validate required fields
+    if (!vin || !lotNumber || !auctionCity) {
       return NextResponse.json(
-        { message: 'Container ID, VIN, Lot Number, and Auction City are required' },
+        { message: 'VIN, Lot Number, and Auction City are required' },
         { status: 400 }
       );
     }
 
-    // Verify container exists
-    const container = await prisma.container.findUnique({
-      where: { id: containerId },
-    });
+    // Validate READY_FOR_SHIPMENT status requirements
+    if (status === 'READY_FOR_SHIPMENT') {
+      if (!containerId || !trackingNumber || !shippingOrigin || !shippingDestination) {
+        return NextResponse.json(
+          { message: 'Container, tracking number, origin, and destination are required for ready-to-ship items' },
+          { status: 400 }
+        );
+      }
 
-    if (!container) {
-      return NextResponse.json(
-        { message: 'Container not found' },
-        { status: 404 }
-      );
+      // Verify container exists
+      const container = await prisma.container.findUnique({
+        where: { id: containerId },
+      });
+
+      if (!container) {
+        return NextResponse.json(
+          { message: 'Container not found' },
+          { status: 404 }
+        );
+      }
     }
 
     const item = await prisma.item.create({
       data: {
-        containerId,
+        status: status || 'ON_HAND',
+        containerId: containerId || null,
         vin,
         lotNumber,
         auctionCity,
+        trackingNumber: trackingNumber || null,
+        shippingOrigin: shippingOrigin || null,
+        shippingDestination: shippingDestination || null,
+        estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
         freightCost: freightCost ? parseFloat(freightCost) : 0,
         towingCost: towingCost ? parseFloat(towingCost) : 0,
         clearanceCost: clearanceCost ? parseFloat(clearanceCost) : 0,

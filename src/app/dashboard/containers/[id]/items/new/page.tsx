@@ -49,6 +49,7 @@ export default function NewItemPage() {
 	});
 
 	const watchedValues = watch();
+	
 	const totalCost = useMemo(() => {
 		const toNumber = (value: string | undefined) => {
 			const parsed = Number.parseFloat(value ?? '0');
@@ -77,23 +78,18 @@ export default function NewItemPage() {
 	const containerId = Array.isArray(containerIdRaw) ? containerIdRaw[0] : containerIdRaw;
 
 	const onSubmit = async (data: ItemFormData) => {
-		if (!containerId) {
-			setError('Missing container identifier. Please navigate from a valid container.');
-			return;
-		}
-
 		setIsSubmitting(true);
 		setError('');
 
 		const payload = {
 			...data,
+			containerId: containerId, // Always use the current container ID from the URL
 			freightCost: Number.parseFloat(data.freightCost) || 0,
 			towingCost: Number.parseFloat(data.towingCost) || 0,
 			clearanceCost: Number.parseFloat(data.clearanceCost) || 0,
 			vatCost: Number.parseFloat(data.vatCost) || 0,
 			customsCost: Number.parseFloat(data.customsCost) || 0,
 			otherCost: Number.parseFloat(data.otherCost) || 0,
-			containerId,
 		};
 
 		try {

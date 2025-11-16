@@ -1,5 +1,71 @@
 @import "tailwindcss";
 
+/* Smooth Scroll Behavior */
+html {
+	scroll-behavior: smooth;
+	scroll-padding-top: 80px; /* Account for fixed header */
+}
+
+/* Shake Animation for Form Errors */
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+	20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.shake {
+	animation: shake 0.5s ease-in-out;
+}
+
+/* Skip Link for Accessibility */
+.skip-link {
+	position: absolute;
+	top: -40px;
+	left: 0;
+	background: #0056D2;
+	color: white;
+	padding: 8px 16px;
+	text-decoration: none;
+	border-radius: 0 0 4px 0;
+	z-index: 100;
+	font-weight: 600;
+}
+
+.skip-link:focus {
+	top: 0;
+}
+
+/* Mobile Touch Optimization */
+@media (max-width: 768px) {
+	/* Minimum touch target size for mobile (44x44px recommended by Apple/Google) */
+	button, 
+	a, 
+	input[type="button"], 
+	input[type="submit"],
+	.touch-target {
+		min-height: 44px;
+		min-width: 44px;
+	}
+
+	/* Prevent text size adjustment on mobile */
+	html {
+		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
+	}
+
+	/* Better tap highlighting */
+	button, 
+	a {
+		-webkit-tap-highlight-color: rgba(0, 86, 210, 0.2);
+	}
+}
+
+/* Focus Visible Styles for Keyboard Navigation */
+*:focus-visible {
+	outline: 2px solid rgb(0, 86, 210);
+	outline-offset: 2px;
+}
+
 /* JACXI Design System - Tailwind v4 Configuration */
 @theme {
   /* JACXI Brand Colors */
@@ -162,7 +228,11 @@
 }
 
 :root {
-  /* Futuristic Premium Theme Colors */
+  /* Premium Light Theme - Jacxi Shipping */
+  --jacxi-blue: 0 86 210; /* #0056D2 */
+  --uae-gold: 212 175 55; /* #D4AF37 */
+  --soft-white: 249 250 251; /* #F9FAFB */
+  --frosted-glass: 228 233 240; /* #E4E9F0 */
   --royal-navy: 10 31 68; /* #0A1F44 */
   --platinum-white: 248 249 250; /* #F8F9FA */
   --platinum-gray: 206 212 218; /* #CED4DA */
@@ -177,27 +247,27 @@
   --metallic-silver: 192 192 192; /* #C0C0C0 - Silver */
   --glow-gold: 255 215 0; /* #FFD700 - Bright gold */
 
-  /* System Colors - shadcn/ui compatible - Light Theme (default) */
-  --background: 248 249 250; /* Platinum White */
+  /* System Colors - shadcn/ui compatible - Premium Light Theme */
+  --background: 249 250 251; /* Soft White */
   --foreground: 43 46 52; /* Charcoal */
   --card: 255 255 255; /* Pure White with glass effect */
   --card-foreground: 43 46 52; /* Charcoal */
   --popover: 255 255 255;
   --popover-foreground: 43 46 52;
-  --primary: 10 31 68; /* Royal Navy */
-  --primary-foreground: 248 249 250; /* Platinum White */
-  --secondary: 206 212 218; /* Platinum Gray */
+  --primary: 0 86 210; /* Jacxi Blue */
+  --primary-foreground: 255 255 255; /* White */
+  --secondary: 228 233 240; /* Frosted Glass */
   --secondary-foreground: 43 46 52; /* Charcoal */
   --muted: 233 236 239; /* Light Gray */
-  --muted-foreground: 206 212 218; /* Platinum Gray */
-  --accent: 0 191 255; /* Cyber Blue for futuristic feel */
+  --muted-foreground: 107 114 128; /* Gray 500 */
+  --accent: 212 175 55; /* UAE Gold */
   --accent-foreground: 255 255 255; /* White */
-  --destructive: 230 57 70; /* #E63946 */
-  --destructive-foreground: 248 249 250;
-  --border: 206 212 218; /* Platinum Gray */
-  --input: 206 212 218;
-  --ring: 0 191 255; /* Cyber Blue for focus rings */
-  --radius: 0.5rem; /* 8px - slightly larger for modern feel */
+  --destructive: 220 38 38; /* Red 600 */
+  --destructive-foreground: 255 255 255;
+  --border: 228 233 240; /* Frosted Glass */
+  --input: 228 233 240;
+  --ring: 0 86 210; /* Jacxi Blue for focus rings */
+  --radius: 0.75rem; /* 12px - modern rounded corners */
 }
 
 .dark {

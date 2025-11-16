@@ -14,8 +14,8 @@ export const shipmentSchema = z.object({
     (val) => !val || val.length >= 17,
     { message: 'VIN must be at least 17 characters' }
   ),
-  origin: z.string().min(3, 'Origin must be at least 3 characters'),
-  destination: z.string().min(3, 'Destination must be at least 3 characters'),
+  origin: z.string().optional(), // Made optional - will be validated conditionally
+  destination: z.string().optional(), // Made optional - will be validated conditionally
   weight: z.string().optional().refine(
     (val) => !val || (parseFloat(val) > 0 && parseFloat(val) <= 50000),
     { message: 'Weight must be between 0 and 50,000 lbs' }
@@ -38,6 +38,10 @@ export const shipmentSchema = z.object({
   ),
   containerPhotos: z.array(z.string()).default([]),
   trackingNumber: z.string().optional(),
+  // New fields
+  hasKey: z.boolean().optional(),
+  hasTitle: z.boolean().optional(),
+  titleStatus: z.enum(['PENDING', 'DELIVERED']).optional(),
 });
 
 export const shipmentUpdateSchema = z.object({

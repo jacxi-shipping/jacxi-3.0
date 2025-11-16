@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, PrismaClient, ShipmentStatus } from '@prisma/client';
+import { Prisma, PrismaClient, ShipmentStatus, TitleStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
@@ -120,6 +120,9 @@ type CreateShipmentPayload = {
   progress?: number | string | null;
   trackingEvents?: unknown;
   trackingCompany?: string | null;
+  hasKey?: boolean | null;
+  hasTitle?: boolean | null;
+  titleStatus?: string | null;
 };
 
 const isTrackingEventPayload = (value: unknown): value is TrackingEventPayload =>
@@ -167,12 +170,25 @@ export async function POST(request: NextRequest) {
       progress,
       trackingEvents,
       trackingCompany,
+      hasKey,
+      hasTitle,
+      titleStatus,
     } = data;
 
     // Validate required fields
-    if (!vehicleType || !origin || !destination || !userId) {
+    if (!vehicleType || !userId) {
       return NextResponse.json(
-        { message: 'Missing required fields: vehicleType, origin, destination, and userId are required' },
+        { message: 'Missing required fields: vehicleType and userId are required' },
+        { status: 400 }
+      );
+    }
+
+    // For shipments that are ready for shipment (not pending/on-hand), require origin and destination
+    const normalizedProvidedStatus = typeof providedStatus === 'string' ? providedStatus.toUpperCase() : providedStatus;
+    const isReadyForShipment = normalizedProvidedStatus && normalizedProvidedStatus !== 'PENDING';
+    if (isReadyForShipment && (!origin || !destination)) {
+      return NextResponse.json(
+        { message: 'Origin and destination are required for shipments that are ready for shipment' },
         { status: 400 }
       );
     }
@@ -224,27 +240,14 @@ export async function POST(request: NextRequest) {
     const parsedPrice =
       typeof price === 'number' ? price : typeof price === 'string' ? parseFloat(price) : null;
     
-    const normalizeContainerNumber = (value?: string | null) => {
-      if (!value) return '';
-      return value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
-    };
-
-    const generateBaseContainerNumber = () => {
-      const normalizedTracking = normalizeContainerNumber(trackingNumber);
-      if (normalizedTracking) return normalizedTracking;
-      const randomSuffix = Math.random().toString(36).slice(2, 6).toUpperCase();
-      return `CNT${Date.now().toString(36).toUpperCase()}${randomSuffix}`;
-    };
-
-    const containerStatusFromShipment = (statusValue?: string | null) => {
-      const normalized = (statusValue || '').toUpperCase();
-      if (['DELIVERED', 'COMPLETED', 'ARCHIVED', 'CLOSED'].includes(normalized)) {
-        return 'INACTIVE';
-      }
-      return 'ACTIVE';
-    };
-
-    const { shipment, container } = await prisma.$transaction(async (tx) => {
+    // Calculate vehicle age if vehicleYear is provided
+    const currentYear = new Date().getFullYear();
+    const calculatedVehicleAge = parsedVehicleYear ? currentYear - parsedVehicleYear : null;
+    
+    // Validate titleStatus - only allowed if hasTitle is true
+    const finalTitleStatus = (hasTitle === true && titleStatus) ? titleStatus as TitleStatus : null;
+    
+    const shipment = await prisma.$transaction(async (tx) => {
       const createdShipment = await tx.shipment.create({
         data: {
           trackingNumber,
@@ -254,10 +257,10 @@ export async function POST(request: NextRequest) {
           vehicleModel,
           vehicleYear: parsedVehicleYear,
           vehicleVIN,
-          origin,
-          destination,
+          origin: origin || 'TBD', // Default to 'TBD' for on-hand shipments
+          destination: destination || 'TBD', // Default to 'TBD' for on-hand shipments
           status: normalizedStatus,
-          currentLocation: currentLocation || origin,
+          currentLocation: currentLocation || origin || 'Warehouse',
           estimatedDelivery: parsedEstimatedDelivery,
           weight: parsedWeight,
           dimensions,
@@ -267,6 +270,11 @@ export async function POST(request: NextRequest) {
           containerPhotos: sanitizedContainerPhotos,
           paymentStatus: 'PENDING',
           progress: parsedProgress !== null && !Number.isNaN(parsedProgress) ? parsedProgress : undefined,
+          // New fields
+          hasKey: typeof hasKey === 'boolean' ? hasKey : null,
+          hasTitle: typeof hasTitle === 'boolean' ? hasTitle : null,
+          titleStatus: finalTitleStatus,
+          vehicleAge: calculatedVehicleAge,
         },
       });
 
@@ -319,42 +327,13 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      const baseNumber = generateBaseContainerNumber();
-      let finalNumber = baseNumber;
-      let attempt = 1;
-
-      // Ensure unique container number
-      while (true) {
-        const existing = await tx.container.findUnique({
-          where: { containerNumber: finalNumber },
-        });
-        if (!existing) break;
-        finalNumber = `${baseNumber}-${attempt}`;
-        attempt += 1;
-      }
-
-      const createdContainer = await tx.container.create({
-        data: {
-          containerNumber: finalNumber,
-          shipmentId: createdShipment.id,
-          status: containerStatusFromShipment(normalizedStatus),
-        },
-        select: {
-          id: true,
-          containerNumber: true,
-          status: true,
-          shipmentId: true,
-        },
-      });
-
-      return { shipment: createdShipment, container: createdContainer };
+      return createdShipment;
     });
 
     return NextResponse.json(
       { 
         message: 'Shipment created successfully',
         shipment,
-        container,
       },
       { status: 201 }
     );

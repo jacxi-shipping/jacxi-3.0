@@ -58,6 +58,10 @@ interface Shipment {
   insuranceValue: number | null;
   containerPhotos: string[];
   arrivalPhotos: string[];
+  hasKey: boolean | null;
+  hasTitle: boolean | null;
+  titleStatus: string | null;
+  vehicleAge: number | null;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -495,6 +499,83 @@ export default function ShipmentDetailPage() {
                           <div className="sm:col-span-2">
                             <dt className="text-xs uppercase tracking-wide text-white/50">VIN Number</dt>
                             <dd className="mt-1 text-sm text-white/80 font-mono">{shipment.vehicleVIN}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    </CardContent>
+                  </Card>
+
+                  {/* Vehicle Details */}
+                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="text-white text-lg">Vehicle Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-white/70">
+                        <div>
+                          <dt className="text-xs uppercase tracking-wide text-white/50">Has Key</dt>
+                          <dd className="mt-1 text-white">
+                            {shipment.hasKey === true ? (
+                              <span className="inline-flex items-center gap-1 text-green-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Yes
+                              </span>
+                            ) : shipment.hasKey === false ? (
+                              <span className="inline-flex items-center gap-1 text-red-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                No
+                              </span>
+                            ) : (
+                              <span className="text-white/50">Not specified</span>
+                            )}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs uppercase tracking-wide text-white/50">Has Title</dt>
+                          <dd className="mt-1 text-white">
+                            {shipment.hasTitle === true ? (
+                              <span className="inline-flex items-center gap-1 text-green-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Yes
+                              </span>
+                            ) : shipment.hasTitle === false ? (
+                              <span className="inline-flex items-center gap-1 text-red-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                No
+                              </span>
+                            ) : (
+                              <span className="text-white/50">Not specified</span>
+                            )}
+                          </dd>
+                        </div>
+                        {shipment.hasTitle && shipment.titleStatus && (
+                          <div>
+                            <dt className="text-xs uppercase tracking-wide text-white/50">Title Status</dt>
+                            <dd className="mt-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                shipment.titleStatus === 'DELIVERED' 
+                                  ? 'bg-green-500/20 text-green-400' 
+                                  : 'bg-yellow-500/20 text-yellow-400'
+                              }`}>
+                                {shipment.titleStatus === 'DELIVERED' ? 'Delivered' : 'Pending'}
+                              </span>
+                            </dd>
+                          </div>
+                        )}
+                        {shipment.vehicleAge !== null && shipment.vehicleAge !== undefined && (
+                          <div>
+                            <dt className="text-xs uppercase tracking-wide text-white/50">Vehicle Age</dt>
+                            <dd className="mt-1 text-white">
+                              <span className="text-cyan-400 font-semibold">{shipment.vehicleAge}</span> {shipment.vehicleAge === 1 ? 'year' : 'years'}
+                            </dd>
                           </div>
                         )}
                       </dl>

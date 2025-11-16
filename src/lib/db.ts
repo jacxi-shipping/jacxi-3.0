@@ -141,25 +141,6 @@ export class DatabaseService {
     });
   }
 
-  static async createQuote(quoteData: {
-    userId: string;
-    vehicleType: string;
-    vehicleMake?: string;
-    vehicleModel?: string;
-    vehicleYear?: number;
-    origin: string;
-    destination: string;
-    price?: number;
-    notes?: string;
-  }) {
-    return await prisma.quote.create({
-      data: {
-        ...quoteData,
-        validUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      },
-    });
-  }
-
   static async updateQuoteStatus(quoteId: string, status: QuoteStatus) {
     return await prisma.quote.update({
       where: { id: quoteId },

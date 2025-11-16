@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Search, User, Mail, Shield, Users, UserPlus, Calendar } from 'lucide-react';
+import { Search, User, Mail, Shield, Users, UserPlus, Calendar, Eye, EyeOff, Key, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import Section from '@/components/layout/Section';
@@ -25,6 +25,8 @@ export default function UsersPage() {
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filterRole, setFilterRole] = useState<string>('all');
+	const [showEmailsFor, setShowEmailsFor] = useState<Set<string>>(new Set());
+	const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (status === 'loading') return;
@@ -82,6 +84,36 @@ export default function UsersPage() {
 
 	const formatRole = (role: string) => {
 		return role.charAt(0).toUpperCase() + role.slice(1);
+	};
+
+	const toggleEmailVisibility = (userId: string) => {
+		setShowEmailsFor((prev) => {
+			const newSet = new Set(prev);
+			if (newSet.has(userId)) {
+				newSet.delete(userId);
+			} else {
+				newSet.add(userId);
+			}
+			return newSet;
+		});
+	};
+
+	const copyToClipboard = async (text: string, userId: string) => {
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopiedEmail(userId);
+			setTimeout(() => setCopiedEmail(null), 2000);
+		} catch (err) {
+			console.error('Failed to copy:', err);
+		}
+	};
+
+	const maskEmail = (email: string) => {
+		const [username, domain] = email.split('@');
+		if (username.length <= 3) {
+			return `${username[0]}***@${domain}`;
+		}
+		return `${username.substring(0, 3)}***@${domain}`;
 	};
 
 	if (status === 'loading' || loading) {
@@ -299,35 +331,98 @@ export default function UsersPage() {
 									transition={{ duration: 0.4, delay: index * 0.05 }}
 									className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 hover:border-cyan-500/50 transition-all duration-300 shadow-lg shadow-cyan-500/5 hover:shadow-cyan-500/10"
 								>
+									{/* Header with User Info */}
 									<div className="flex items-start justify-between mb-4">
-										<div className="flex items-center gap-3">
-											<div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-400/20 border border-cyan-500/30 flex items-center justify-center">
+										<div className="flex items-center gap-3 flex-1">
+											<div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-400/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
 												<User className="w-6 h-6 text-cyan-400" />
 											</div>
-											<div>
-												<h3 className="text-lg font-semibold text-white">
+											<div className="flex-1 min-w-0">
+												<h3 className="text-lg font-semibold text-white truncate">
 													{user.name || 'No Name'}
 												</h3>
-												<p className="text-sm text-white/60 flex items-center gap-1 mt-1">
-													<Mail className="w-4 h-4" />
-													{user.email}
-												</p>
+												<span
+													className={`inline-block px-2 py-0.5 mt-1 text-xs font-medium rounded-full border ${getRoleBadgeColor(
+														user.role
+													)}`}
+												>
+													{formatRole(user.role)}
+												</span>
 											</div>
 										</div>
 									</div>
 
+									{/* Email Section with Show/Hide */}
+									<div className="space-y-2 mb-4">
+										<div className="flex items-center justify-between">
+											<span className="text-xs text-white/50 flex items-center gap-1">
+												<Mail className="w-3 h-3" />
+												Email Address
+											</span>
+											<button
+												onClick={() => toggleEmailVisibility(user.id)}
+												className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+											>
+												{showEmailsFor.has(user.id) ? (
+													<>
+														<EyeOff className="w-3 h-3" />
+														Hide
+													</>
+												) : (
+													<>
+														<Eye className="w-3 h-3" />
+														Show
+													</>
+												)}
+											</button>
+										</div>
+										<div className="flex items-center gap-2 bg-[#020817]/50 border border-cyan-500/20 rounded-lg p-2">
+											<span className="text-sm text-white/80 font-mono flex-1 truncate">
+												{showEmailsFor.has(user.id) ? user.email : maskEmail(user.email)}
+											</span>
+											{showEmailsFor.has(user.id) && (
+												<button
+													onClick={() => copyToClipboard(user.email, user.id)}
+													className="p-1 hover:bg-cyan-500/10 rounded transition-colors flex-shrink-0"
+													title="Copy email"
+												>
+													{copiedEmail === user.id ? (
+														<Check className="w-4 h-4 text-green-400" />
+													) : (
+														<Copy className="w-4 h-4 text-cyan-400" />
+													)}
+												</button>
+											)}
+										</div>
+									</div>
+
+									{/* Password Info */}
+									<div className="space-y-2 mb-4">
+										<div className="flex items-center justify-between">
+											<span className="text-xs text-white/50 flex items-center gap-1">
+												<Key className="w-3 h-3" />
+												Password
+											</span>
+										</div>
+										<div className="flex items-center gap-2 bg-[#020817]/50 border border-cyan-500/20 rounded-lg p-2">
+											<span className="text-sm text-white/60 flex-1">
+												••••••••••
+											</span>
+											<span className="text-xs text-white/40 bg-yellow-500/10 border border-yellow-500/30 px-2 py-0.5 rounded">
+												Encrypted
+											</span>
+										</div>
+										<p className="text-xs text-white/40 italic">
+											Passwords are securely hashed and cannot be viewed
+										</p>
+									</div>
+
+									{/* Footer with Date */}
 									<div className="flex items-center justify-between pt-4 border-t border-cyan-500/10">
-										<span
-											className={`px-3 py-1 text-xs font-medium rounded-full border ${getRoleBadgeColor(
-												user.role
-											)}`}
-										>
-											{formatRole(user.role)}
-										</span>
 										{user.createdAt && (
 											<span className="text-xs text-white/50 flex items-center gap-1">
 												<Calendar className="w-3 h-3" />
-												{new Date(user.createdAt).toLocaleDateString()}
+												Joined {new Date(user.createdAt).toLocaleDateString()}
 											</span>
 										)}
 									</div>

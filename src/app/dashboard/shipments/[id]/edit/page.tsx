@@ -7,7 +7,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Section from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { ArrowLeft, Image as ImageIcon, Upload, X } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Upload, X, Loader2 } from 'lucide-react';
 import { TruckIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -24,6 +24,10 @@ export default function EditShipmentPage() {
   const [uploading, setUploading] = useState<{ section: PhotoSection | null; state: boolean }>({ section: null, state: false });
   const [containerPhotos, setContainerPhotos] = useState<string[]>([]);
   const [arrivalPhotos, setArrivalPhotos] = useState<string[]>([]);
+  const [trackingFetching, setTrackingFetching] = useState(false);
+  const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
+  const [trackingError, setTrackingError] = useState<string | null>(null);
+  const [trackingNumber, setTrackingNumber] = useState('');
   
   const [formData, setFormData] = useState({
     vehicleType: '',
@@ -97,6 +101,60 @@ export default function EditShipmentPage() {
       router.replace(`/dashboard/shipments/${params.id}`);
     }
   }, [status, session, isAdmin, params.id, router]);
+
+  const handleFetchTrackingDetails = async () => {
+    const tracking = trackingNumber.trim();
+    setTrackingMessage(null);
+    setTrackingError(null);
+
+    if (!tracking) {
+      setTrackingError('Tracking number is required.');
+      return;
+    }
+
+    setTrackingFetching(true);
+
+    try {
+      const response = await fetch('/api/tracking', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trackNumber: tracking, needRoute: true }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setTrackingError(payload?.message || 'Failed to fetch tracking information.');
+        return;
+      }
+
+      const details = payload?.tracking;
+      if (!details) {
+        setTrackingError('No tracking data returned from carrier.');
+        return;
+      }
+
+      // Update form with tracking details
+      setFormData(prev => ({
+        ...prev,
+        origin: details.origin || prev.origin,
+        destination: details.destination || prev.destination,
+        currentLocation: details.currentLocation || prev.currentLocation,
+        status: details.shipmentStatus || prev.status,
+        progress: details.progress?.toString() || prev.progress,
+      }));
+
+      setTrackingMessage('Shipping details retrieved from carrier and updated in form.');
+    } catch (error) {
+      console.error('Error fetching tracking details:', error);
+      const message = error instanceof Error ? error.message : 'Failed to fetch tracking details.';
+      setTrackingError(message);
+    } finally {
+      setTrackingFetching(false);
+    }
+  };
 
   if (!isAdmin && status !== 'loading') {
     return (
@@ -376,6 +434,45 @@ export default function EditShipmentPage() {
                 <CardTitle className="text-white text-lg">Shipping Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Tracking Number with Fetch Button */}
+                <div>
+                  <label htmlFor="trackingNumber" className="block text-sm font-medium text-white/70 mb-2">
+                    Tracking / Container Number
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="text"
+                      id="trackingNumber"
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      placeholder="e.g., UETU6059142"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="sm:w-auto w-full border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 whitespace-nowrap"
+                      onClick={handleFetchTrackingDetails}
+                      disabled={trackingFetching}
+                    >
+                      {trackingFetching ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Fetching...
+                        </>
+                      ) : (
+                        'Fetch Shipping Details'
+                      )}
+                    </Button>
+                  </div>
+                  {trackingMessage && (
+                    <p className="mt-2 text-sm text-green-400">{trackingMessage}</p>
+                  )}
+                  {trackingError && (
+                    <p className="mt-2 text-sm text-red-400">{trackingError}</p>
+                  )}
+                </div>
+
                 <div>
                   <label htmlFor="origin" className="block text-sm font-medium text-white/70 mb-2">
                     Origin

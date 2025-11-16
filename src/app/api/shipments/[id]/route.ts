@@ -5,6 +5,13 @@ import { auth } from '@/lib/auth';
 const prisma = new PrismaClient();
 
 type UpdateShipmentPayload = {
+  vehicleType?: string;
+  vehicleMake?: string | null;
+  vehicleModel?: string | null;
+  vehicleYear?: number | string | null;
+  vehicleVIN?: string | null;
+  origin?: string;
+  destination?: string;
   status?: ShipmentStatus;
   currentLocation?: string | null;
   estimatedDelivery?: string | null;
@@ -14,6 +21,8 @@ type UpdateShipmentPayload = {
   containerPhotos?: string[] | null;
   replaceArrivalPhotos?: boolean;
   weight?: number | string | null;
+  dimensions?: string | null;
+  specialInstructions?: string | null;
   insuranceValue?: number | string | null;
   price?: number | string | null;
 };
@@ -101,6 +110,13 @@ export async function PATCH(
 
     const data = (await request.json()) as UpdateShipmentPayload;
     const {
+      vehicleType,
+      vehicleMake,
+      vehicleModel,
+      vehicleYear,
+      vehicleVIN,
+      origin,
+      destination,
       status,
       currentLocation,
       estimatedDelivery,
@@ -110,6 +126,8 @@ export async function PATCH(
       containerPhotos,
       replaceArrivalPhotos,
       weight,
+      dimensions,
+      specialInstructions,
       insuranceValue,
       price,
     } = data;
@@ -129,16 +147,40 @@ export async function PATCH(
 
     const updateData: Prisma.ShipmentUncheckedUpdateInput = {};
 
+    // Vehicle information
+    if (vehicleType) updateData.vehicleType = vehicleType;
+    if (vehicleMake !== undefined) updateData.vehicleMake = vehicleMake;
+    if (vehicleModel !== undefined) updateData.vehicleModel = vehicleModel;
+    if (vehicleVIN !== undefined) updateData.vehicleVIN = vehicleVIN;
+    
+    if (vehicleYear !== undefined) {
+      const parsedYear = typeof vehicleYear === 'string' ? parseInt(vehicleYear, 10) : vehicleYear;
+      if (typeof parsedYear === 'number' && !Number.isNaN(parsedYear)) {
+        updateData.vehicleYear = parsedYear;
+        // Recalculate vehicle age
+        const currentYear = new Date().getFullYear();
+        updateData.vehicleAge = currentYear - parsedYear;
+      }
+    }
+
+    // Shipping information
+    if (origin !== undefined) updateData.origin = origin;
+    if (destination !== undefined) updateData.destination = destination;
     if (status) updateData.status = status;
     if (currentLocation !== undefined) updateData.currentLocation = currentLocation;
     if (estimatedDelivery) updateData.estimatedDelivery = new Date(estimatedDelivery);
     if (actualDelivery) updateData.actualDelivery = new Date(actualDelivery);
+    
     if (progress !== undefined && progress !== null) {
       const parsedProgress = typeof progress === 'string' ? parseInt(progress, 10) : progress;
       if (typeof parsedProgress === 'number' && !Number.isNaN(parsedProgress)) {
         updateData.progress = parsedProgress;
       }
     }
+
+    // Additional details
+    if (dimensions !== undefined) updateData.dimensions = dimensions;
+    if (specialInstructions !== undefined) updateData.specialInstructions = specialInstructions;
 
     if (weight !== undefined) {
       const parsedWeight = typeof weight === 'string' ? parseFloat(weight) : weight;

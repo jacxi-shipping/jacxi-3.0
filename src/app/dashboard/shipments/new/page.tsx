@@ -96,6 +96,7 @@ export default function NewShipmentPage() {
 		},
 	});
 
+	const [shipmentStatus, setShipmentStatus] = useState<'ON_HAND' | 'READY_FOR_SHIPMENT'>('ON_HAND');
 	const vehicleVINValue = watch('vehicleVIN');
 	const trackingNumberValue = watch('trackingNumber');
 
@@ -365,7 +366,22 @@ export default function NewShipmentPage() {
 
 	const onSubmit = async (data: ShipmentFormData) => {
 		try {
+			// Validate required fields for READY_FOR_SHIPMENT
+			if (shipmentStatus === 'READY_FOR_SHIPMENT') {
+				if (!data.origin || data.origin.trim().length < 3) {
+					setError('origin', { type: 'manual', message: 'Origin is required for ready-to-ship items (min 3 characters)' });
+					return;
+				}
+				if (!data.destination || data.destination.trim().length < 3) {
+					setError('destination', { type: 'manual', message: 'Destination is required for ready-to-ship items (min 3 characters)' });
+					return;
+				}
+			}
+
 			const payload: ShipmentCreatePayload = { ...data, containerPhotos };
+
+			// Add shipment status to payload (use uppercase enum values)
+			payload.status = shipmentStatus === 'ON_HAND' ? 'PENDING' : 'IN_TRANSIT';
 
 			if (trackingDetails) {
 				payload.trackingNumber = trackingDetails.containerNumber;
@@ -533,6 +549,60 @@ export default function NewShipmentPage() {
 							</div>
 						</motion.div>
 
+						{/* Shipment Status Selection */}
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.6, delay: 0.05 }}
+							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+						>
+							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Shipment Status</h2>
+							<div className="space-y-4">
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+									<label 
+										className={`relative flex items-start p-6 border-2 rounded-xl cursor-pointer transition-all hover:border-cyan-500/50 ${
+											shipmentStatus === 'ON_HAND' ? 'border-cyan-500 bg-cyan-500/10' : 'border-cyan-500/30'
+										}`}
+									>
+										<input
+											type="radio"
+											name="shipmentStatus"
+											value="ON_HAND"
+											checked={shipmentStatus === 'ON_HAND'}
+											onChange={() => setShipmentStatus('ON_HAND')}
+											className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+										/>
+										<div>
+											<div className="text-white font-semibold text-lg mb-1">On Hand</div>
+											<div className="text-white/60 text-sm">
+												Vehicle is in inventory. Shipping details not needed yet.
+											</div>
+										</div>
+									</label>
+									<label 
+										className={`relative flex items-start p-6 border-2 rounded-xl cursor-pointer transition-all hover:border-cyan-500/50 ${
+											shipmentStatus === 'READY_FOR_SHIPMENT' ? 'border-cyan-500 bg-cyan-500/10' : 'border-cyan-500/30'
+										}`}
+									>
+										<input
+											type="radio"
+											name="shipmentStatus"
+											value="READY_FOR_SHIPMENT"
+											checked={shipmentStatus === 'READY_FOR_SHIPMENT'}
+											onChange={() => setShipmentStatus('READY_FOR_SHIPMENT')}
+											className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+										/>
+										<div>
+											<div className="text-white font-semibold text-lg mb-1">Ready for Shipment</div>
+											<div className="text-white/60 text-sm">
+												Vehicle is ready to ship. Shipping details required.
+											</div>
+										</div>
+									</label>
+								</div>
+							</div>
+						</motion.div>
+
 						{/* Vehicle Information */}
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
@@ -661,14 +731,134 @@ export default function NewShipmentPage() {
 							</div>
 						</motion.div>
 
-						{/* Shipping Information */}
+						{/* Vehicle Details */}
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.2 }}
+							transition={{ duration: 0.6, delay: 0.15 }}
 							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 						>
-							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Shipping Information</h2>
+							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Vehicle Details</h2>
+							<div className="space-y-6">
+								{/* Has Key */}
+								<div>
+									<label className="block text-sm font-medium text-white/90 mb-3">
+										Does the vehicle have a key?
+									</label>
+									<div className="flex items-center gap-6">
+										<label className="flex items-center gap-2 cursor-pointer">
+											<input
+												type="radio"
+												name="hasKey"
+												value="yes"
+												checked={watch('hasKey') === true}
+												onChange={() => setValue('hasKey', true)}
+												className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<span className="text-white">Yes</span>
+										</label>
+										<label className="flex items-center gap-2 cursor-pointer">
+											<input
+												type="radio"
+												name="hasKey"
+												value="no"
+												checked={watch('hasKey') === false}
+												onChange={() => setValue('hasKey', false)}
+												className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<span className="text-white">No</span>
+										</label>
+									</div>
+								</div>
+
+								{/* Has Title */}
+								<div>
+									<label className="block text-sm font-medium text-white/90 mb-3">
+										Does the vehicle have a title?
+									</label>
+									<div className="flex items-center gap-6">
+										<label className="flex items-center gap-2 cursor-pointer">
+											<input
+												type="radio"
+												name="hasTitle"
+												value="yes"
+												checked={watch('hasTitle') === true}
+												onChange={() => {
+													setValue('hasTitle', true);
+													clearErrors('titleStatus');
+												}}
+												className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<span className="text-white">Yes</span>
+										</label>
+										<label className="flex items-center gap-2 cursor-pointer">
+											<input
+												type="radio"
+												name="hasTitle"
+												value="no"
+												checked={watch('hasTitle') === false}
+												onChange={() => {
+													setValue('hasTitle', false);
+													setValue('titleStatus', undefined);
+													clearErrors('titleStatus');
+												}}
+												className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<span className="text-white">No</span>
+										</label>
+									</div>
+								</div>
+
+								{/* Title Status - Only show if hasTitle is true */}
+								{watch('hasTitle') === true && (
+									<motion.div
+										initial={{ opacity: 0, height: 0 }}
+										animate={{ opacity: 1, height: 'auto' }}
+										exit={{ opacity: 0, height: 0 }}
+										transition={{ duration: 0.3 }}
+									>
+										<label htmlFor="titleStatus" className="block text-sm font-medium text-white/90 mb-2">
+											Title Status
+										</label>
+										<select
+											id="titleStatus"
+											{...register('titleStatus')}
+											className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+										>
+											<option value="">Select title status</option>
+											<option value="PENDING">Pending</option>
+											<option value="DELIVERED">Delivered</option>
+										</select>
+									</motion.div>
+								)}
+
+								{/* Vehicle Age - Auto calculated and displayed */}
+								{watch('vehicleYear') && (
+									<motion.div
+										initial={{ opacity: 0, y: 10 }}
+										animate={{ opacity: 1, y: 0 }}
+										className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30"
+									>
+										<div className="flex items-center justify-between">
+											<span className="text-sm font-medium text-white/90">Vehicle Age:</span>
+											<span className="text-lg font-bold text-cyan-400">
+												{new Date().getFullYear() - parseInt(watch('vehicleYear') || '0')} years
+											</span>
+										</div>
+									</motion.div>
+								)}
+							</div>
+						</motion.div>
+
+						{/* Shipping Information - Only for READY_FOR_SHIPMENT */}
+						{shipmentStatus === 'READY_FOR_SHIPMENT' && (
+							<motion.div
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ duration: 0.6, delay: 0.2 }}
+								className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							>
+								<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Shipping Information <span className="text-red-400">*</span></h2>
 							<div className="space-y-4">
 								<div>
 									<label htmlFor="trackingNumber" className="block text-sm font-medium text-white/90 mb-2">
@@ -858,7 +1048,8 @@ export default function NewShipmentPage() {
 									)}
 								</div>
 							</div>
-						</motion.div>
+							</motion.div>
+						)}
 
 						{/* Container Photos */}
 						<motion.div
