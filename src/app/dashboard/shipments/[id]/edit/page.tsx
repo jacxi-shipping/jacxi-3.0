@@ -30,6 +30,7 @@ export default function EditShipmentPage() {
   const [trackingNumber, setTrackingNumber] = useState('');
   
   const [formData, setFormData] = useState({
+    userId: '',
     vehicleType: '',
     vehicleMake: '',
     vehicleModel: '',
@@ -46,9 +47,26 @@ export default function EditShipmentPage() {
     specialInstructions: '',
     insuranceValue: '',
     price: '',
+    hasKey: null as boolean | null,
+    hasTitle: null as boolean | null,
+    titleStatus: '',
   });
 
+  const [users, setUsers] = useState<Array<{ id: string; name: string | null; email: string }>>([]);
+
   const isAdmin = useMemo(() => session?.user?.role === 'admin', [session]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await fetch('/api/users');
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users || []);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  }, []);
 
   const fetchShipmentData = useCallback(async () => {
     try {
@@ -59,6 +77,7 @@ export default function EditShipmentPage() {
       if (response.ok) {
         const shipment = data.shipment;
         setFormData({
+          userId: shipment.userId || '',
           vehicleType: shipment.vehicleType,
           vehicleMake: shipment.vehicleMake || '',
           vehicleModel: shipment.vehicleModel || '',
@@ -77,6 +96,9 @@ export default function EditShipmentPage() {
           specialInstructions: shipment.specialInstructions || '',
           insuranceValue: shipment.insuranceValue?.toString() || '',
           price: shipment.price?.toString() || '',
+          hasKey: shipment.hasKey ?? null,
+          hasTitle: shipment.hasTitle ?? null,
+          titleStatus: shipment.titleStatus || '',
         });
         setContainerPhotos(shipment.containerPhotos || []);
         setArrivalPhotos(shipment.arrivalPhotos || []);
@@ -94,7 +116,8 @@ export default function EditShipmentPage() {
   useEffect(() => {
     if (!isAdmin || status === 'loading') return;
     fetchShipmentData();
-  }, [fetchShipmentData, isAdmin, status]);
+    fetchUsers();
+  }, [fetchShipmentData, fetchUsers, isAdmin, status]);
 
   useEffect(() => {
     if (status !== 'loading' && session && !isAdmin) {
@@ -338,6 +361,36 @@ export default function EditShipmentPage() {
 
         <Section className="pb-16">
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* User Assignment */}
+            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white text-lg">User Assignment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <label htmlFor="userId" className="block text-sm font-medium text-white/70 mb-2">
+                    Assign to User <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    id="userId"
+                    name="userId"
+                    value={formData.userId}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                  >
+                    <option value="">Select a user...</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name || user.email} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.userId && <p className="mt-1 text-sm text-red-400">{errors.userId}</p>}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Vehicle Information */}
             <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
               <CardHeader>
@@ -423,6 +476,129 @@ export default function EditShipmentPage() {
                       onChange={handleChange}
                       className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
+                  </div>
+                </div>
+
+                {/* Vehicle Details */}
+                <div className="pt-4 border-t border-cyan-500/10">
+                  <h3 className="text-white font-medium mb-4">Additional Vehicle Details</h3>
+                  
+                  <div className="space-y-4">
+                    {/* Has Key */}
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-3">
+                        Does the vehicle have a key?
+                      </label>
+                      <div className="flex items-center gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasKey"
+                            value="yes"
+                            checked={formData.hasKey === true}
+                            onChange={() => setFormData(prev => ({ ...prev, hasKey: true }))}
+                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+                          />
+                          <span className="text-white">Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasKey"
+                            value="no"
+                            checked={formData.hasKey === false}
+                            onChange={() => setFormData(prev => ({ ...prev, hasKey: false }))}
+                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+                          />
+                          <span className="text-white">No</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasKey"
+                            value="null"
+                            checked={formData.hasKey === null}
+                            onChange={() => setFormData(prev => ({ ...prev, hasKey: null }))}
+                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+                          />
+                          <span className="text-white/60">Not Specified</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Has Title */}
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-3">
+                        Does the vehicle have a title?
+                      </label>
+                      <div className="flex items-center gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasTitle"
+                            value="yes"
+                            checked={formData.hasTitle === true}
+                            onChange={() => setFormData(prev => ({ ...prev, hasTitle: true }))}
+                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+                          />
+                          <span className="text-white">Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasTitle"
+                            value="no"
+                            checked={formData.hasTitle === false}
+                            onChange={() => setFormData(prev => ({ ...prev, hasTitle: false, titleStatus: '' }))}
+                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+                          />
+                          <span className="text-white">No</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="hasTitle"
+                            value="null"
+                            checked={formData.hasTitle === null}
+                            onChange={() => setFormData(prev => ({ ...prev, hasTitle: null, titleStatus: '' }))}
+                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+                          />
+                          <span className="text-white/60">Not Specified</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Title Status - Only show if hasTitle is true */}
+                    {formData.hasTitle === true && (
+                      <div>
+                        <label htmlFor="titleStatus" className="block text-sm font-medium text-white/70 mb-2">
+                          Title Status
+                        </label>
+                        <select
+                          id="titleStatus"
+                          name="titleStatus"
+                          value={formData.titleStatus}
+                          onChange={handleChange}
+                          className="w-full px-4 py-2 bg-[#020817] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                        >
+                          <option value="">Select title status</option>
+                          <option value="PENDING">Pending</option>
+                          <option value="DELIVERED">Delivered</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Vehicle Age - Display only */}
+                    {formData.vehicleYear && (
+                      <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-white/90">Vehicle Age:</span>
+                          <span className="text-lg font-bold text-cyan-400">
+                            {new Date().getFullYear() - parseInt(formData.vehicleYear || '0')} years
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, PrismaClient, ShipmentStatus } from '@prisma/client';
+import { Prisma, PrismaClient, ShipmentStatus, TitleStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
 type UpdateShipmentPayload = {
+  userId?: string;
   vehicleType?: string;
   vehicleMake?: string | null;
   vehicleModel?: string | null;
@@ -25,6 +26,9 @@ type UpdateShipmentPayload = {
   specialInstructions?: string | null;
   insuranceValue?: number | string | null;
   price?: number | string | null;
+  hasKey?: boolean | null;
+  hasTitle?: boolean | null;
+  titleStatus?: string | null;
 };
 
 export async function GET(
@@ -110,6 +114,7 @@ export async function PATCH(
 
     const data = (await request.json()) as UpdateShipmentPayload;
     const {
+      userId,
       vehicleType,
       vehicleMake,
       vehicleModel,
@@ -130,6 +135,9 @@ export async function PATCH(
       specialInstructions,
       insuranceValue,
       price,
+      hasKey,
+      hasTitle,
+      titleStatus,
     } = data;
 
     // Get existing shipment to merge arrival photos
@@ -146,6 +154,9 @@ export async function PATCH(
       : undefined;
 
     const updateData: Prisma.ShipmentUncheckedUpdateInput = {};
+
+    // User assignment
+    if (userId) updateData.userId = userId;
 
     // Vehicle information
     if (vehicleType) updateData.vehicleType = vehicleType;
@@ -212,6 +223,19 @@ export async function PATCH(
       updateData.arrivalPhotos = replaceArrivalPhotos
         ? sanitizedArrivalPhotos
         : [...(existingShipment?.arrivalPhotos ?? []), ...sanitizedArrivalPhotos];
+    }
+
+    // Vehicle details
+    if (hasKey !== undefined) updateData.hasKey = hasKey;
+    if (hasTitle !== undefined) {
+      updateData.hasTitle = hasTitle;
+      // If hasTitle is false or null, clear titleStatus
+      if (!hasTitle) {
+        updateData.titleStatus = null;
+      }
+    }
+    if (titleStatus !== undefined && hasTitle === true) {
+      updateData.titleStatus = titleStatus ? titleStatus as TitleStatus : null;
     }
 
     const shipment = await prisma.shipment.update({
