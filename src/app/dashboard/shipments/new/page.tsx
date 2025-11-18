@@ -468,7 +468,7 @@ export default function NewShipmentPage() {
 	return (
 		<>
 			{/* Header */}
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
+			<Section className="relative bg-[#020817] py-6 sm:py-12 lg:py-16 overflow-hidden">
 				{/* Background gradient */}
 				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
 
@@ -485,22 +485,22 @@ export default function NewShipmentPage() {
 				</div>
 
 				<div className="relative z-10">
-					<div className="flex items-center gap-6">
+					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6">
 						<Link href="/dashboard/shipments">
 							<Button
 								variant="outline"
 								size="sm"
-								className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+								className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 flex-shrink-0 text-xs sm:text-sm"
 							>
-								<ArrowLeft className="w-4 h-4 mr-2" />
+								<ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
 								Back
 							</Button>
 						</Link>
-						<div>
-							<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
+						<div className="min-w-0 flex-1">
+							<h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
 								Create New Shipment
 							</h1>
-							<p className="text-lg sm:text-xl text-white/70 mt-2">
+							<p className="text-sm sm:text-lg md:text-xl text-white/70 mt-1 sm:mt-2 line-clamp-2">
 								Add a new vehicle shipment and assign it to a user
 							</p>
 						</div>
@@ -509,23 +509,23 @@ export default function NewShipmentPage() {
 			</Section>
 
 			{/* Form */}
-			<Section className="bg-[#020817] py-8 sm:py-12">
-				<div className="max-w-4xl mx-auto">
-					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+			<Section className="bg-[#020817] py-6 sm:py-12">
+				<div className="max-w-4xl mx-auto px-4 sm:px-0">
+					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 md:space-y-8">
 						{/* User Assignment - Admin Only */}
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6 }}
-							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							className="relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-4 sm:p-6 md:p-8"
 						>
-							<div className="flex items-center gap-3 mb-6">
-								<div className="w-10 h-10 rounded-xl bg-[#020817] border border-cyan-500/40 flex items-center justify-center">
-									<User className="w-5 h-5 text-cyan-400" />
+							<div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+								<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#020817] border border-cyan-500/40 flex items-center justify-center flex-shrink-0">
+									<User className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
 								</div>
-								<div>
-									<h2 className="text-xl sm:text-2xl font-bold text-white">Assign to User</h2>
-									<p className="text-sm text-white/70">Select the user for this shipment</p>
+								<div className="min-w-0 flex-1">
+									<h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white truncate">Assign to User</h2>
+									<p className="text-xs sm:text-sm text-white/70 line-clamp-1">Select the user for this shipment</p>
 								</div>
 							</div>
 
