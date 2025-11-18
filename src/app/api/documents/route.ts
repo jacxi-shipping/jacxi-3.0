@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       OR?: Array<{ userId: string | undefined } | { isPublic: boolean }>;
       shipmentId?: string;
       userId?: string;
-      category?: string;
+      category?: typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
       isPublic?: boolean;
     };
     const where: WhereType = {};
@@ -50,16 +50,9 @@ export async function GET(request: NextRequest) {
 
     if (shipmentId) where.shipmentId = shipmentId;
     if (userId && session.user?.role === 'admin') where.userId = userId;
-    if (category) where.category = category;
+    if (category) where.category = category as typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
     if (isPublic !== null) where.isPublic = isPublic === 'true';
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Document management feature will be available after migration',
-      documents: [],
-    });
-
-    /*
     const documents = await prisma.document.findMany({
       where,
       include: {
@@ -82,7 +75,6 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ documents });
-    */
   } catch (error) {
     console.error('Error fetching documents:', error);
     return NextResponse.json(
@@ -121,26 +113,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Document management feature will be available after migration',
-      document: {
-        id: 'temp-id',
-        name,
-        description,
-        fileUrl,
-        fileType,
-        fileSize,
-        category,
-        shipmentId,
-        userId: userId || session.user?.id,
-        uploadedBy: session.user?.name || session.user?.email,
-        isPublic: isPublic || false,
-        tags: tags || [],
-      },
-    }, { status: 201 });
-
-    /*
     const document = await prisma.document.create({
       data: {
         name,
@@ -148,7 +120,7 @@ export async function POST(request: NextRequest) {
         fileUrl,
         fileType,
         fileSize: fileSize || 0,
-        category: category as DocumentCategory,
+        category: category as typeof TempDocumentCategory[keyof typeof TempDocumentCategory],
         shipmentId: shipmentId || null,
         userId: userId || session.user?.id,
         uploadedBy: session.user?.name || session.user?.email || 'Unknown',
@@ -168,7 +140,6 @@ export async function POST(request: NextRequest) {
       { message: 'Document uploaded successfully', document },
       { status: 201 }
     );
-    */
   } catch (error) {
     console.error('Error uploading document:', error);
     return NextResponse.json(

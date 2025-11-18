@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
+
+// Temporary enum until migration
+enum TempRouteStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  OPTIMIZING = 'OPTIMIZING',
+  ARCHIVED = 'ARCHIVED',
+}
 
 // GET: Get single route with shipments
 export async function GET(
@@ -17,13 +25,6 @@ export async function GET(
 
     const { id } = await params;
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Route optimization feature will be available after migration',
-      route: null,
-    });
-
-    /*
     const route = await prisma.route.findUnique({
       where: { id },
       include: {
@@ -48,7 +49,6 @@ export async function GET(
     }
 
     return NextResponse.json({ route });
-    */
   } catch (error) {
     console.error('Error fetching route:', error);
     return NextResponse.json(
@@ -79,26 +79,25 @@ export async function PATCH(
     const { id } = await params;
     const data = await request.json();
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Route optimization feature will be available after migration',
-      route: {
-        id,
-        ...data,
-      },
-    });
-
-    /*
     const { name, status, waypoints, distance, estimatedTime, cost, preferences } = data;
     
-    const updateData: any = {};
+    type UpdateDataType = {
+      name?: string;
+      status?: typeof TempRouteStatus[keyof typeof TempRouteStatus];
+      waypoints?: Array<{lat: number; lng: number; name?: string}>;
+      distance?: number | null;
+      estimatedTime?: number | null;
+      cost?: number | null;
+      preferences?: Prisma.InputJsonValue;
+    };
+    const updateData: UpdateDataType = {};
     if (name) updateData.name = name;
-    if (status) updateData.status = status as RouteStatus;
+    if (status) updateData.status = status as typeof TempRouteStatus[keyof typeof TempRouteStatus];
     if (waypoints) updateData.waypoints = waypoints;
     if (distance !== undefined) updateData.distance = distance;
     if (estimatedTime !== undefined) updateData.estimatedTime = estimatedTime;
     if (cost !== undefined) updateData.cost = cost;
-    if (preferences !== undefined) updateData.preferences = preferences;
+    if (preferences !== undefined) updateData.preferences = preferences as Prisma.InputJsonValue;
 
     const route = await prisma.route.update({
       where: { id },
@@ -117,7 +116,6 @@ export async function PATCH(
       message: 'Route updated successfully',
       route,
     });
-    */
   } catch (error) {
     console.error('Error updating route:', error);
     return NextResponse.json(
@@ -147,12 +145,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Route optimization feature will be available after migration',
-    });
-
-    /*
     await prisma.route.delete({
       where: { id },
     });
@@ -160,7 +152,6 @@ export async function DELETE(
     return NextResponse.json({
       message: 'Route deleted successfully',
     });
-    */
   } catch (error) {
     console.error('Error deleting route:', error);
     return NextResponse.json(

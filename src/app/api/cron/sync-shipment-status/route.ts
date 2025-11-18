@@ -17,21 +17,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get all shipments that are in transit
-    // Note: autoStatusUpdate filter will be available after migration
+    // Get all shipments that are in transit and have auto-update enabled
     const shipmentsToSync = await prisma.shipment.findMany({
       where: {
         status: {
           in: [ShipmentStatus.PENDING, ShipmentStatus.IN_TRANSIT],
         },
-        // autoStatusUpdate: true, // Available after migration
+        autoStatusUpdate: true,
       },
       select: {
         id: true,
         trackingNumber: true,
         status: true,
         estimatedDelivery: true,
-        // lastStatusSync: true, // Available after migration
+        lastStatusSync: true,
       },
     });
 
@@ -111,7 +110,7 @@ export async function POST(request: NextRequest) {
               status: newStatus,
               currentLocation: tracking.currentLocation || undefined,
               progress: tracking.progress || undefined,
-              // lastStatusSync: new Date(), // Available after migration
+              lastStatusSync: new Date(),
             },
           });
 
@@ -134,8 +133,15 @@ export async function POST(request: NextRequest) {
             newStatus: newStatus,
             success: true,
           });
+        } else {
+          // Just update sync time
+          await prisma.shipment.update({
+            where: { id: shipment.id },
+            data: {
+              lastStatusSync: new Date(),
+            },
+          });
         }
-        // Note: lastStatusSync tracking will be available after migration
       } catch (error) {
         console.error(`Error processing shipment ${shipment.id}:`, error);
         results.errors++;

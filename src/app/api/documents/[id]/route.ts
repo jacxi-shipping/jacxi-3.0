@@ -4,6 +4,19 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
+// Temporary enum until migration
+enum TempDocumentCategory {
+  INVOICE = 'INVOICE',
+  BILL_OF_LADING = 'BILL_OF_LADING',
+  CUSTOMS = 'CUSTOMS',
+  INSURANCE = 'INSURANCE',
+  TITLE = 'TITLE',
+  INSPECTION_REPORT = 'INSPECTION_REPORT',
+  PHOTO = 'PHOTO',
+  CONTRACT = 'CONTRACT',
+  OTHER = 'OTHER',
+}
+
 // GET: Get single document
 export async function GET(
   request: NextRequest,
@@ -17,13 +30,6 @@ export async function GET(
 
     const { id } = await params;
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Document management feature will be available after migration',
-      document: null,
-    });
-
-    /*
     const document = await prisma.document.findUnique({
       where: { id },
       include: {
@@ -60,7 +66,6 @@ export async function GET(
     }
 
     return NextResponse.json({ document });
-    */
   } catch (error) {
     console.error('Error fetching document:', error);
     return NextResponse.json(
@@ -84,16 +89,6 @@ export async function PATCH(
     const { id } = await params;
     const data = await request.json();
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Document management feature will be available after migration',
-      document: {
-        id,
-        ...data,
-      },
-    });
-
-    /*
     const existingDocument = await prisma.document.findUnique({
       where: { id },
     });
@@ -116,10 +111,17 @@ export async function PATCH(
 
     const { name, description, category, isPublic, tags } = data;
     
-    const updateData: any = {};
+    type UpdateDataType = {
+      name?: string;
+      description?: string | null;
+      category?: typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
+      isPublic?: boolean;
+      tags?: string[];
+    };
+    const updateData: UpdateDataType = {};
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
-    if (category) updateData.category = category;
+    if (category) updateData.category = category as typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
     if (isPublic !== undefined) updateData.isPublic = isPublic;
     if (tags) updateData.tags = tags;
 
@@ -132,7 +134,6 @@ export async function PATCH(
       message: 'Document updated successfully',
       document,
     });
-    */
   } catch (error) {
     console.error('Error updating document:', error);
     return NextResponse.json(
@@ -155,12 +156,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Document management feature will be available after migration',
-    });
-
-    /*
     const existingDocument = await prisma.document.findUnique({
       where: { id },
     });
@@ -188,7 +183,6 @@ export async function DELETE(
     return NextResponse.json({
       message: 'Document deleted successfully',
     });
-    */
   } catch (error) {
     console.error('Error deleting document:', error);
     return NextResponse.json(

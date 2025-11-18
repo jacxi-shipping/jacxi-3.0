@@ -35,22 +35,16 @@ export async function PATCH(
     const data = await request.json();
     const { status, inspector, notes, photos } = data;
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Quality checks feature will be available after migration',
-      qualityCheck: {
-        id,
-        status,
-        inspector,
-        notes,
-        photos,
-      },
-    });
-
-    /*
-    const updateData: any = {};
+    type UpdateDataType = {
+      status?: typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
+      checkedAt?: Date;
+      inspector?: string;
+      notes?: string | null;
+      photos?: string[];
+    };
+    const updateData: UpdateDataType = {};
     if (status) {
-      updateData.status = status as QualityCheckStatus;
+      updateData.status = status as typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
       if (status === 'PASSED' || status === 'FAILED') {
         updateData.checkedAt = new Date();
       }
@@ -82,7 +76,6 @@ export async function PATCH(
       message: 'Quality check updated successfully',
       qualityCheck,
     });
-    */
   } catch (error) {
     console.error('Error updating quality check:', error);
     return NextResponse.json(
@@ -112,12 +105,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Quality checks feature will be available after migration',
-    });
-
-    /*
     await prisma.qualityCheck.delete({
       where: { id },
     });
@@ -125,7 +112,6 @@ export async function DELETE(
     return NextResponse.json({
       message: 'Quality check deleted successfully',
     });
-    */
   } catch (error) {
     console.error('Error deleting quality check:', error);
     return NextResponse.json(

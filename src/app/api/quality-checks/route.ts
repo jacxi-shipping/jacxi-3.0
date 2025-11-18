@@ -37,20 +37,13 @@ export async function GET(request: NextRequest) {
     type WhereType = {
       shipmentId?: string;
       itemId?: string;
-      status?: string;
+      status?: typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
     };
     const where: WhereType = {};
     if (shipmentId) where.shipmentId = shipmentId;
     if (itemId) where.itemId = itemId;
-    if (status) where.status = status;
+    if (status) where.status = status as typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Quality checks feature will be available after migration',
-      qualityChecks: [],
-    });
-
-    /*
     const qualityChecks = await prisma.qualityCheck.findMany({
       where,
       include: {
@@ -73,7 +66,6 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ qualityChecks });
-    */
   } catch (error) {
     console.error('Error fetching quality checks:', error);
     return NextResponse.json(
@@ -108,28 +100,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Quality checks feature will be available after migration',
-      qualityCheck: {
-        id: 'temp-id',
-        shipmentId,
-        itemId,
-        checkType,
-        status: 'PENDING',
-        inspector,
-        notes,
-        photos,
-      },
-    }, { status: 201 });
-
-    /*
     const qualityCheck = await prisma.qualityCheck.create({
       data: {
         shipmentId,
         itemId: itemId || null,
-        checkType: checkType as QualityCheckType,
-        status: TempQualityCheckStatus.PENDING as unknown as QualityCheckStatus,
+        checkType: checkType as typeof TempQualityCheckType[keyof typeof TempQualityCheckType],
+        status: TempQualityCheckStatus.PENDING as unknown as typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus],
         inspector: inspector || session.user?.name || session.user?.email,
         notes: notes || null,
         photos: photos || [],
@@ -148,7 +124,6 @@ export async function POST(request: NextRequest) {
       { message: 'Quality check created successfully', qualityCheck },
       { status: 201 }
     );
-    */
   } catch (error) {
     console.error('Error creating quality check:', error);
     return NextResponse.json(

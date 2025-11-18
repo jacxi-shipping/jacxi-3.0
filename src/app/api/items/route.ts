@@ -14,8 +14,6 @@ enum ContainerStatus {
 }
 
 // Helper function to update container status based on capacity
-// Note: This will be fully functional after migration
-/*
 async function updateContainerStatus(containerId: string) {
   const container = await prisma.container.findUnique({
     where: { id: containerId },
@@ -38,10 +36,9 @@ async function updateContainerStatus(containerId: string) {
 
   await prisma.container.update({
     where: { id: containerId },
-    data: { status: newStatus as unknown as string },
+    data: { status: newStatus as typeof ContainerStatus[keyof typeof ContainerStatus] },
   });
 }
-*/
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,9 +91,14 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Verify container exists
+      // Verify container exists and check capacity
       const container = await prisma.container.findUnique({
         where: { id: containerId },
+        select: {
+          currentCount: true,
+          maxCapacity: true,
+          status: true,
+        },
       });
 
       if (!container) {
@@ -106,9 +108,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Note: Container capacity checking will be available after migration
-      // Uncomment after running migration:
-      /*
       // Check if container is full
       if (container.currentCount >= container.maxCapacity) {
         return NextResponse.json(
@@ -124,51 +123,52 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      */
     }
 
-    // Create item
-    const item = await prisma.item.create({
-      data: {
-        status: status || 'ON_HAND',
-        containerId: containerId || null,
-        vin,
-        lotNumber,
-        auctionCity,
-        trackingNumber: trackingNumber || null,
-        shippingOrigin: shippingOrigin || null,
-        shippingDestination: shippingDestination || null,
-        estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
-        freightCost: freightCost ? parseFloat(freightCost) : 0,
-        towingCost: towingCost ? parseFloat(towingCost) : 0,
-        clearanceCost: clearanceCost ? parseFloat(clearanceCost) : 0,
-        vatCost: vatCost ? parseFloat(vatCost) : 0,
-        customsCost: customsCost ? parseFloat(customsCost) : 0,
-        otherCost: otherCost ? parseFloat(otherCost) : 0,
-      },
-      include: {
-        container: {
-          select: {
-            containerNumber: true,
+    // Create item and update container count in a transaction
+    const item = await prisma.$transaction(async (tx) => {
+      const createdItem = await tx.item.create({
+        data: {
+          status: status || 'ON_HAND',
+          containerId: containerId || null,
+          vin,
+          lotNumber,
+          auctionCity,
+          trackingNumber: trackingNumber || null,
+          shippingOrigin: shippingOrigin || null,
+          shippingDestination: shippingDestination || null,
+          estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
+          freightCost: freightCost ? parseFloat(freightCost) : 0,
+          towingCost: towingCost ? parseFloat(towingCost) : 0,
+          clearanceCost: clearanceCost ? parseFloat(clearanceCost) : 0,
+          vatCost: vatCost ? parseFloat(vatCost) : 0,
+          customsCost: customsCost ? parseFloat(customsCost) : 0,
+          otherCost: otherCost ? parseFloat(otherCost) : 0,
+        },
+        include: {
+          container: {
+            select: {
+              containerNumber: true,
+              currentCount: true,
+              maxCapacity: true,
+            },
           },
         },
-      },
-    });
-
-    // Note: Container count management will be available after migration
-    // Uncomment after running migration:
-    /*
-    // Increment container count if item is assigned to a container
-    if (containerId) {
-      await prisma.container.update({
-        where: { id: containerId },
-        data: { currentCount: { increment: 1 } },
       });
 
-      // Update container status
-      await updateContainerStatus(containerId);
-    }
-    */
+      // Increment container count if item is assigned to a container
+      if (containerId) {
+        await tx.container.update({
+          where: { id: containerId },
+          data: { currentCount: { increment: 1 } },
+        });
+
+        // Update container status
+        await updateContainerStatus(containerId);
+      }
+
+      return createdItem;
+    });
 
     return NextResponse.json(
       { message: 'Item created successfully', item },

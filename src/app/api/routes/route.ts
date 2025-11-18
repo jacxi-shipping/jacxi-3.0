@@ -26,22 +26,15 @@ export async function GET(request: NextRequest) {
     const destination = searchParams.get('destination');
 
     type WhereType = {
-      status?: string;
+      status?: typeof TempRouteStatus[keyof typeof TempRouteStatus];
       origin?: { contains: string; mode: 'insensitive' };
       destination?: { contains: string; mode: 'insensitive' };
     };
     const where: WhereType = {};
-    if (status) where.status = status;
+    if (status) where.status = status as typeof TempRouteStatus[keyof typeof TempRouteStatus];
     if (origin) where.origin = { contains: origin, mode: 'insensitive' };
     if (destination) where.destination = { contains: destination, mode: 'insensitive' };
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Route optimization feature will be available after migration',
-      routes: [],
-    });
-
-    /*
     const routes = await prisma.route.findMany({
       where,
       include: {
@@ -64,7 +57,6 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ routes });
-    */
   } catch (error) {
     console.error('Error fetching routes:', error);
     return NextResponse.json(
@@ -129,23 +121,6 @@ export async function POST(request: NextRequest) {
       optimizedTime = optimizationResult.estimatedTime;
     }
 
-    // Note: This will work after migration
-    return NextResponse.json({
-      message: 'Route optimization feature will be available after migration',
-      route: {
-        id: 'temp-id',
-        name,
-        origin,
-        destination,
-        waypoints: optimizedWaypoints,
-        distance: optimizedDistance,
-        estimatedTime: optimizedTime,
-        cost,
-        status: 'ACTIVE',
-      },
-    }, { status: 201 });
-
-    /*
     const route = await prisma.route.create({
       data: {
         name,
@@ -155,7 +130,7 @@ export async function POST(request: NextRequest) {
         distance: optimizedDistance,
         estimatedTime: optimizedTime,
         cost: cost || null,
-        status: TempRouteStatus.ACTIVE as unknown as RouteStatus,
+        status: TempRouteStatus.ACTIVE as unknown as typeof TempRouteStatus[keyof typeof TempRouteStatus],
         preferences: preferences || null,
       },
     });
@@ -164,7 +139,6 @@ export async function POST(request: NextRequest) {
       { message: 'Route created successfully', route },
       { status: 201 }
     );
-    */
   } catch (error) {
     console.error('Error creating route:', error);
     return NextResponse.json(

@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     // Get all shipments that are not delivered and have an estimated delivery date
-    // Note: deliveryAlertStatus field will be available after migration
     const shipmentsToCheck = await prisma.shipment.findMany({
       where: {
         status: {
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
         id: true,
         trackingNumber: true,
         estimatedDelivery: true,
-        // deliveryAlertStatus: true, // Available after migration
+        deliveryAlertStatus: true,
         user: {
           select: {
             name: true,
@@ -89,14 +88,12 @@ export async function POST(request: NextRequest) {
           results.onTime++;
         }
 
-        // Update if status changed (will work after migration)
-        // Note: Uncomment after running migration
-        /*
+        // Update if status changed
         if (newAlertStatus !== shipment.deliveryAlertStatus) {
           await prisma.shipment.update({
             where: { id: shipment.id },
             data: {
-              deliveryAlertStatus: newAlertStatus as unknown as string,
+              deliveryAlertStatus: newAlertStatus as typeof DeliveryAlertStatus[keyof typeof DeliveryAlertStatus],
             },
           });
 
@@ -112,17 +109,6 @@ export async function POST(request: NextRequest) {
           // TODO: Send notification to user
           // You can implement email/SMS notifications here based on the alert status
         }
-        */
-       
-        // For now, just track the alert levels
-        results.details.push({
-          shipmentId: shipment.id,
-          trackingNumber: shipment.trackingNumber,
-          oldStatus: 'N/A',
-          newStatus: newAlertStatus,
-          estimatedDelivery: eta,
-          userName: shipment.user.name || shipment.user.email,
-        });
       } catch (error) {
         console.error(`Error checking shipment ${shipment.id}:`, error);
       }

@@ -99,10 +99,9 @@ export async function POST(request: NextRequest) {
       data: {
         containerNumber,
         shipmentId: shipmentId || null,
-        status: status || 'ACTIVE',
-        // maxCapacity and currentCount will be available after migration
-        // maxCapacity: maxCapacity || 4,
-        // currentCount: 0,
+        status: (status as unknown as typeof ContainerStatus[keyof typeof ContainerStatus]) || (ContainerStatus.EMPTY as unknown as string),
+        maxCapacity: maxCapacity || 4,
+        currentCount: 0,
       },
       include: {
         items: true,
