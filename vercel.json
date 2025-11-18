@@ -1,0 +1,12 @@
+{
+    "crons": [
+      {
+        "path": "/api/cron/sync-shipment-status",
+        "schedule": "0 * * * *"
+      },
+      {
+        "path": "/api/cron/check-delivery-alerts",
+        "schedule": "0 6 * * *"
+      }
+    ]
+  }

@@ -4,6 +4,45 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
+// Container status enum (matches Prisma schema)
+enum ContainerStatus {
+  EMPTY = 'EMPTY',
+  PARTIAL = 'PARTIAL',
+  FULL = 'FULL',
+  SHIPPED = 'SHIPPED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+// Helper function to update container status based on capacity
+// Note: This will be fully functional after migration
+/*
+async function updateContainerStatus(containerId: string) {
+  const container = await prisma.container.findUnique({
+    where: { id: containerId },
+    select: {
+      currentCount: true,
+      maxCapacity: true,
+    },
+  });
+
+  if (!container) return;
+
+  let newStatus: ContainerStatus;
+  if (container.currentCount === 0) {
+    newStatus = ContainerStatus.EMPTY;
+  } else if (container.currentCount >= container.maxCapacity) {
+    newStatus = ContainerStatus.FULL;
+  } else {
+    newStatus = ContainerStatus.PARTIAL;
+  }
+
+  await prisma.container.update({
+    where: { id: containerId },
+    data: { status: newStatus as unknown as string },
+  });
+}
+*/
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -66,8 +105,29 @@ export async function POST(request: NextRequest) {
           { status: 404 }
         );
       }
+
+      // Note: Container capacity checking will be available after migration
+      // Uncomment after running migration:
+      /*
+      // Check if container is full
+      if (container.currentCount >= container.maxCapacity) {
+        return NextResponse.json(
+          { message: `Container is full. Maximum capacity: ${container.maxCapacity} vehicles` },
+          { status: 400 }
+        );
+      }
+
+      // Check if container is already shipped
+      if (container.status === ContainerStatus.SHIPPED) {
+        return NextResponse.json(
+          { message: 'Cannot add items to a shipped container' },
+          { status: 400 }
+        );
+      }
+      */
     }
 
+    // Create item
     const item = await prisma.item.create({
       data: {
         status: status || 'ON_HAND',
@@ -94,6 +154,21 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Note: Container count management will be available after migration
+    // Uncomment after running migration:
+    /*
+    // Increment container count if item is assigned to a container
+    if (containerId) {
+      await prisma.container.update({
+        where: { id: containerId },
+        data: { currentCount: { increment: 1 } },
+      });
+
+      // Update container status
+      await updateContainerStatus(containerId);
+    }
+    */
 
     return NextResponse.json(
       { message: 'Item created successfully', item },

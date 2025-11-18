@@ -58,6 +58,7 @@ model User {
   quotes Quote[]
   payments Payment[]
   settings UserSettings?
+  documents Document[]
 }
 
 model VerificationToken {
@@ -97,6 +98,10 @@ model Shipment {
   hasTitle         Boolean?      // Whether vehicle has title
   titleStatus      TitleStatus?  // Title status (only if hasTitle is true)
   vehicleAge       Int?          // Calculated vehicle age
+  // Delivery alerts
+  deliveryAlertStatus DeliveryAlertStatus @default(ON_TIME)
+  lastStatusSync      DateTime?   // Last time status was synced from tracking
+  autoStatusUpdate    Boolean     @default(true) // Enable automatic status updates
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
@@ -104,6 +109,17 @@ model Shipment {
   events ShipmentEvent[]
   payments Payment[]
   containers Container[]
+  qualityChecks QualityCheck[]
+  documents Document[]
+  route Route? @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  routeId String?
+}
+
+enum DeliveryAlertStatus {
+  ON_TIME
+  WARNING      // 3 days before ETA, not delivered
+  OVERDUE      // Past ETA, not delivered
+  DELIVERED
 }
 
 model ShipmentEvent {
@@ -275,6 +291,98 @@ enum TitleStatus {
   DELIVERED
 }
 
+// Quality Control Checklist
+model QualityCheck {
+  id          String   @id @default(cuid())
+  shipmentId  String
+  itemId      String?
+  checkType   QualityCheckType
+  status      QualityCheckStatus @default(PENDING)
+  inspector   String?
+  notes       String?
+  photos      String[] @default([])
+  checkedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  item     Item?    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+enum QualityCheckType {
+  INITIAL_INSPECTION
+  PRE_LOADING
+  POST_LOADING
+  DELIVERY_INSPECTION
+  DAMAGE_ASSESSMENT
+}
+
+enum QualityCheckStatus {
+  PENDING
+  IN_PROGRESS
+  PASSED
+  FAILED
+  REQUIRES_ATTENTION
+}
+
+// Document Management
+model Document {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  fileUrl     String
+  fileType    String
+  fileSize    Int
+  category    DocumentCategory
+  shipmentId  String?
+  userId      String?
+  uploadedBy  String
+  isPublic    Boolean      @default(false)
+  tags        String[]     @default([])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  shipment Shipment? @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum DocumentCategory {
+  INVOICE
+  BILL_OF_LADING
+  CUSTOMS
+  INSURANCE
+  TITLE
+  INSPECTION_REPORT
+  PHOTO
+  CONTRACT
+  OTHER
+}
+
+// Route Optimization
+model Route {
+  id              String       @id @default(cuid())
+  name            String
+  origin          String
+  destination     String
+  waypoints       Json[]       @default([])
+  distance        Float?       // in km
+  estimatedTime   Int?         // in minutes
+  cost            Float?
+  status          RouteStatus  @default(ACTIVE)
+  preferences     Json?        // Optimization preferences
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  shipments Shipment[]
+}
+
+enum RouteStatus {
+  ACTIVE
+  INACTIVE
+  OPTIMIZING
+  ARCHIVED
+}
+
 enum PaymentMethod {
   CREDIT_CARD
   DEBIT_CARD
@@ -312,16 +420,26 @@ enum InvoiceStatus {
 }
 
 model Container {
-  id              String   @id @default(cuid())
-  containerNumber String   @unique
+  id              String          @id @default(cuid())
+  containerNumber String          @unique
   shipmentId      String?
-  status          String   @default("ACTIVE")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  status          ContainerStatus @default(EMPTY)
+  maxCapacity     Int             @default(4)  // Maximum number of vehicles
+  currentCount    Int             @default(0)  // Current number of vehicles
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   shipment Shipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
   items    Item[]
   invoices Invoice[]
+}
+
+enum ContainerStatus {
+  EMPTY
+  PARTIAL
+  FULL
+  SHIPPED
+  ARCHIVED
 }
 
 model Item {
@@ -348,6 +466,7 @@ model Item {
 
   container Container? @relation(fields: [containerId], references: [id], onDelete: Cascade)
   invoices  InvoiceItem[]
+  qualityChecks QualityCheck[]
 }
 
 enum ItemStatus {

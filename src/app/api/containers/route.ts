@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
+// Container status enum (matches Prisma schema)
+enum ContainerStatus {
+  EMPTY = 'EMPTY',
+  PARTIAL = 'PARTIAL',
+  FULL = 'FULL',
+  SHIPPED = 'SHIPPED',
+  ARCHIVED = 'ARCHIVED',
+}
+
 const prisma = new PrismaClient();
 
 export async function GET() {
@@ -58,6 +67,7 @@ type CreateContainerPayload = {
   containerNumber: string;
   shipmentId?: string | null;
   status?: string;
+  maxCapacity?: number;
 };
 
 export async function POST(request: NextRequest) {
@@ -76,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = (await request.json()) as CreateContainerPayload;
-    const { containerNumber, shipmentId, status } = data;
+    const { containerNumber, shipmentId, status, maxCapacity } = data;
 
     if (!containerNumber) {
       return NextResponse.json(
@@ -90,6 +100,9 @@ export async function POST(request: NextRequest) {
         containerNumber,
         shipmentId: shipmentId || null,
         status: status || 'ACTIVE',
+        // maxCapacity and currentCount will be available after migration
+        // maxCapacity: maxCapacity || 4,
+        // currentCount: 0,
       },
       include: {
         items: true,

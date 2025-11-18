@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Eye, Edit, ArrowRight, CreditCard, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { Eye, Edit, ArrowRight, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
@@ -60,8 +59,6 @@ const paymentStatusColors: Record<string, { bg: string; text: string; border: st
 	CANCELLED: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/30' },
 };
 
-const STATUS_OPTIONS = Object.keys(statusColors);
-
 export default function ShipmentRow({
 	id,
 	trackingNumber,
@@ -77,56 +74,10 @@ export default function ShipmentRow({
 	paymentStatus,
 	user,
 	showCustomer = false,
-	isAdmin = false,
-	onStatusUpdated,
 	delay = 0,
 }: ShipmentRowProps) {
 	const statusConfig = statusColors[status] || statusColors.PENDING;
 	const paymentConfig = paymentStatus ? (paymentStatusColors[paymentStatus] || paymentStatusColors.PENDING) : null;
-	const [statusMenuOpen, setStatusMenuOpen] = useState(false);
-	const [updatingStatus, setUpdatingStatus] = useState(false);
-	const menuRef = useRef<HTMLDivElement | null>(null);
-
-	useEffect(() => {
-		if (!statusMenuOpen) return;
-		const handleClick = (event: MouseEvent) => {
-			if (!menuRef.current) return;
-			if (!menuRef.current.contains(event.target as Node)) {
-				setStatusMenuOpen(false);
-			}
-		};
-		document.addEventListener('mousedown', handleClick);
-		return () => {
-			document.removeEventListener('mousedown', handleClick);
-		};
-	}, [statusMenuOpen]);
-
-	const handleStatusUpdate = async (nextStatus: string) => {
-		if (nextStatus === status) {
-			setStatusMenuOpen(false);
-			return;
-		}
-		setUpdatingStatus(true);
-		try {
-			const response = await fetch(`/api/shipments/${id}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ status: nextStatus }),
-			});
-			if (!response.ok) {
-				const payload = await response.json();
-				throw new Error(payload?.message || 'Failed to update status');
-			}
-			onStatusUpdated?.();
-			setStatusMenuOpen(false);
-		} catch (error) {
-			console.error(error);
-			const message = error instanceof Error ? error.message : 'Unable to update shipment status';
-			alert(message);
-		} finally {
-			setUpdatingStatus(false);
-		}
-	};
 
 	return (
 		<motion.div
@@ -194,49 +145,7 @@ export default function ShipmentRow({
 								Edit
 							</Button>
 						</Link>
-						{isAdmin && (
-							<div className="relative" ref={menuRef}>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setStatusMenuOpen((prev) => !prev)}
-									className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-500/50 flex items-center gap-2"
-									disabled={updatingStatus}
-								>
-									{updatingStatus ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
-									) : (
-										<ChevronDown className="w-4 h-4" />
-									)}
-									Change Status
-								</Button>
-								{statusMenuOpen && (
-									<div className="absolute right-0 mt-2 w-56 rounded-lg border border-cyan-500/20 bg-[#071427] shadow-xl shadow-cyan-500/10 backdrop-blur-md z-20 p-1">
-										<p className="px-3 py-2 text-[11px] uppercase tracking-wide text-white/40">Set status</p>
-										<div className="max-h-64 overflow-y-auto">
-											{STATUS_OPTIONS.map((option) => {
-												const active = option === status;
-												return (
-													<button
-														key={option}
-														type="button"
-														onClick={() => handleStatusUpdate(option)}
-														disabled={updatingStatus}
-														className={cn(
-															'flex w-full items-center justify-between gap-2 rounded-md px-3 py-2 text-sm transition',
-															active ? 'bg-cyan-500/20 text-cyan-200' : 'text-white/70 hover:bg-white/5'
-														)}
-													>
-														<span>{formatStatus(option)}</span>
-														{active && <Check className="w-4 h-4" />}
-													</button>
-												);
-											})}
-										</div>
-									</div>
-								)}
-							</div>
-						)}
+						{/* Status changes now handled automatically via tracking API and in edit page only */}
 					</div>
 				</div>
 
