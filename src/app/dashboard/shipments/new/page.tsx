@@ -734,7 +734,7 @@ export default function NewShipmentPage() {
 								</div>
 
 								{/* Color, Lot Number, Auction Name */}
-								<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+								<div className={`grid grid-cols-1 gap-4 mt-4 ${role === 'admin' ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
 									<div>
 										<label htmlFor="vehicleColor" className="block text-sm font-medium text-white/90 mb-2">
 											Color
@@ -769,23 +769,25 @@ export default function NewShipmentPage() {
 											<p className="mt-2 text-sm text-red-400">{errors.lotNumber.message}</p>
 										)}
 									</div>
-									<div>
-										<label htmlFor="auctionName" className="block text-sm font-medium text-white/90 mb-2">
-											Auction
-										</label>
-										<input
-											type="text"
-											id="auctionName"
-											{...register('auctionName')}
-											placeholder="e.g., Copart, IAA"
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
-												errors.auctionName ? 'border-red-500/50' : 'border-cyan-500/30'
-											}`}
-										/>
-										{errors.auctionName && (
-											<p className="mt-2 text-sm text-red-400">{errors.auctionName.message}</p>
-										)}
-									</div>
+									{role === 'admin' && (
+										<div>
+											<label htmlFor="auctionName" className="block text-sm font-medium text-white/90 mb-2">
+												Auction
+											</label>
+											<input
+												type="text"
+												id="auctionName"
+												{...register('auctionName')}
+												placeholder="e.g., Copart, IAA"
+												className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+													errors.auctionName ? 'border-red-500/50' : 'border-cyan-500/30'
+												}`}
+											/>
+											{errors.auctionName && (
+												<p className="mt-2 text-sm text-red-400">{errors.auctionName.message}</p>
+											)}
+										</div>
+									)}
 								</div>
 							</div>
 						</motion.div>

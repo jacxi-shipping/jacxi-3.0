@@ -486,7 +486,7 @@ export default function EditShipmentPage() {
                 </div>
 
                 {/* Color, Lot Number, Auction Name */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className={`grid grid-cols-1 gap-4 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                   <div>
                     <label htmlFor="vehicleColor" className="block text-sm font-medium text-white/70 mb-2">
                       Color
@@ -515,20 +515,22 @@ export default function EditShipmentPage() {
                       className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
-                  <div>
-                    <label htmlFor="auctionName" className="block text-sm font-medium text-white/70 mb-2">
-                      Auction
-                    </label>
-                    <input
-                      type="text"
-                      id="auctionName"
-                      name="auctionName"
-                      value={formData.auctionName}
-                      onChange={handleChange}
-                      placeholder="e.g., Copart, IAA"
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
-                    />
-                  </div>
+                  {isAdmin && (
+                    <div>
+                      <label htmlFor="auctionName" className="block text-sm font-medium text-white/70 mb-2">
+                        Auction
+                      </label>
+                      <input
+                        type="text"
+                        id="auctionName"
+                        name="auctionName"
+                        value={formData.auctionName}
+                        onChange={handleChange}
+                        placeholder="e.g., Copart, IAA"
+                        className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Vehicle Details */}
