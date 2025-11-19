@@ -1,11 +1,11 @@
 "use client";
 
-import { type LucideIcon } from 'lucide-react';
+import { SvgIconComponent } from '@mui/icons-material';
+import { Card, CardContent, Box, Typography, Chip } from '@mui/material';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 type StatsCardProps = {
-	icon: LucideIcon;
+	icon: SvgIconComponent;
 	title: string;
 	value: string | number;
 	subtitle?: string;
@@ -13,7 +13,6 @@ type StatsCardProps = {
 		value: number;
 		isPositive: boolean;
 	};
-	className?: string;
 	delay?: number;
 };
 
@@ -23,7 +22,6 @@ export default function StatsCard({
 	value, 
 	subtitle, 
 	trend,
-	className,
 	delay = 0
 }: StatsCardProps) {
 	return (
@@ -33,57 +31,143 @@ export default function StatsCard({
 			viewport={{ once: true }}
 			transition={{ duration: 0.6, delay }}
 			whileHover={{ y: -4 }}
-			className={cn(
-				'group relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-3 sm:p-6 md:p-8',
-				'hover:border-cyan-500/60 hover:shadow-lg hover:shadow-cyan-500/20',
-				'transition-all duration-300',
-				className
-			)}
+			style={{ height: '100%' }}
 		>
-			{/* Glowing border effect on hover */}
-			<div className="absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+			<Card
+				sx={{
+					height: '100%',
+					background: 'rgba(10, 22, 40, 0.5)',
+					backdropFilter: 'blur(8px)',
+					border: '1px solid rgba(6, 182, 212, 0.3)',
+					borderRadius: { xs: 2, sm: 3 },
+					p: { xs: 1.5, sm: 3, md: 4 },
+					position: 'relative',
+					overflow: 'hidden',
+					transition: 'all 0.3s ease',
+					'&:hover': {
+						borderColor: 'rgba(6, 182, 212, 0.6)',
+						boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)',
+						'&::before': {
+							opacity: 1,
+						},
+					},
+					'&::before': {
+						content: '""',
+						position: 'absolute',
+						inset: 0,
+						background: 'linear-gradient(90deg, rgba(6, 182, 212, 0) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(6, 182, 212, 0) 100%)',
+						opacity: 0,
+						transition: 'opacity 0.3s ease',
+					},
+				}}
+			>
+				<CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, position: 'relative', zIndex: 1 }}>
+					{/* Icon and Trend */}
+					<Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: { xs: 1, sm: 2, md: 3 } }}>
+						<Box
+							sx={{
+								position: 'relative',
+								width: { xs: 40, sm: 48, md: 56 },
+								height: { xs: 40, sm: 48, md: 56 },
+								borderRadius: { xs: 2, sm: 3 },
+								bgcolor: '#020817',
+								border: '1px solid rgba(6, 182, 212, 0.4)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+								transition: 'all 0.3s ease',
+								'&:hover': {
+									borderColor: 'rgba(6, 182, 212, 0.8)',
+								},
+								'&::before': {
+									content: '""',
+									position: 'absolute',
+									inset: 0,
+									borderRadius: { xs: 2, sm: 3 },
+									background: 'rgba(6, 182, 212, 0.1)',
+									filter: 'blur(8px)',
+									transition: 'all 0.3s ease',
+								},
+								'&:hover::before': {
+									background: 'rgba(6, 182, 212, 0.2)',
+								},
+							}}
+						>
+							<Icon
+								sx={{
+									fontSize: { xs: 20, sm: 24, md: 28 },
+									color: 'rgb(34, 211, 238)',
+									position: 'relative',
+									transition: 'color 0.3s ease',
+								}}
+							/>
+						</Box>
+						{trend && (
+							<Chip
+								label={`${trend.isPositive ? '↑' : '↓'} ${Math.abs(trend.value)}%`}
+								size="small"
+								sx={{
+									fontSize: { xs: '0.7rem', sm: '0.75rem' },
+									fontWeight: 500,
+									px: { xs: 0.5, sm: 1 },
+									py: { xs: 0.25, sm: 0.5 },
+									height: 'auto',
+									bgcolor: trend.isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+									color: trend.isPositive ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
+									border: 'none',
+								}}
+							/>
+						)}
+					</Box>
 
-			<div className="relative z-10">
-				{/* Icon and Title */}
-				<div className="flex items-start justify-between mb-2 sm:mb-4 md:mb-6">
-					<div className="relative">
-						<div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg sm:rounded-xl bg-[#020817] border border-cyan-500/40 flex items-center justify-center group-hover:border-cyan-500/80 transition-colors duration-300">
-							{/* Icon glow effect */}
-							<div className="absolute inset-0 rounded-lg sm:rounded-xl bg-cyan-500/10 blur-md group-hover:bg-cyan-500/20 transition-all duration-300" />
-							<Icon className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300" strokeWidth={1.5} />
-						</div>
-					</div>
-					{trend && (
-						<div className={cn(
-							'flex items-center gap-0.5 sm:gap-1 text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full',
-							trend.isPositive ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
-						)}>
-							<span>{trend.isPositive ? '↑' : '↓'}</span>
-							<span>{Math.abs(trend.value)}%</span>
-						</div>
-					)}
-				</div>
-
-				{/* Value */}
-				<div className="mb-1 sm:mb-2">
-					<p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">
+					{/* Value */}
+					<Typography
+						variant="h3"
+						sx={{
+							fontSize: { xs: '1.5rem', sm: '1.875rem', md: '2.25rem' },
+							fontWeight: 700,
+							color: 'white',
+							mb: { xs: 0.5, sm: 1 },
+							lineHeight: 1.2,
+						}}
+					>
 						{value}
-					</p>
-				</div>
+					</Typography>
 
-				{/* Title */}
-				<p className="text-xs sm:text-sm md:text-base text-white/80 font-medium mb-0.5 sm:mb-1 line-clamp-1">
-					{title}
-				</p>
+					{/* Title */}
+					<Typography
+						variant="body2"
+						sx={{
+							fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+							fontWeight: 500,
+							color: 'rgba(255, 255, 255, 0.8)',
+							mb: { xs: 0.25, sm: 0.5 },
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+						}}
+					>
+						{title}
+					</Typography>
 
-				{/* Subtitle */}
-				{subtitle && (
-					<p className="text-[10px] sm:text-xs md:text-sm text-white/60 line-clamp-1">
-						{subtitle}
-					</p>
-				)}
-			</div>
+					{/* Subtitle */}
+					{subtitle && (
+						<Typography
+							variant="caption"
+							sx={{
+								fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
+								color: 'rgba(255, 255, 255, 0.6)',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+								display: 'block',
+							}}
+						>
+							{subtitle}
+						</Typography>
+					)}
+				</CardContent>
+			</Card>
 		</motion.div>
 	);
 }
-

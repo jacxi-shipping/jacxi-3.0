@@ -4,20 +4,31 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
-  Filter, 
-  X, 
-  Calendar,
-  DollarSign,
-  User,
-  Package,
-  Truck,
-  MapPin,
-  ChevronDown,
-  ChevronUp,
-  Loader2
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/utils';
+  FilterAlt, 
+  Close, 
+  CalendarMonth,
+  AttachMoney,
+  Person,
+  Inventory2,
+  LocalShipping,
+  ExpandMore,
+  ExpandLess
+} from '@mui/icons-material';
+import { 
+  TextField,
+  InputAdornment,
+  IconButton,
+  Button,
+  Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
+  Typography,
+  Collapse,
+  CircularProgress
+} from '@mui/material';
 
 interface SmartSearchProps {
   onSearch: (filters: SearchFilters) => void;
@@ -122,249 +133,475 @@ export default function SmartSearch({
   const hasActiveFilters = query || activeFiltersCount > 0;
 
   return (
-    <div className="space-y-4">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       {/* Search Bar */}
-      <div className="relative">
-        <div className="relative flex items-center">
-          <div className="absolute left-4 pointer-events-none">
-            {isSearching ? (
-              <Loader2 className="h-5 w-5 text-cyan-400 animate-spin" />
-            ) : (
-              <Search className="h-5 w-5 text-white/40" />
-            )}
-          </div>
-          <input
-            type="text"
+      <Box sx={{ position: 'relative' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+          <TextField
+            fullWidth
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
-            className="w-full pl-12 pr-32 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-all"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  {isSearching ? (
+                    <CircularProgress size={20} sx={{ color: 'rgb(34, 211, 238)' }} />
+                  ) : (
+                    <Search sx={{ fontSize: 20, color: 'rgba(255, 255, 255, 0.4)' }} />
+                  )}
+                </InputAdornment>
+              ),
+              sx: {
+                bgcolor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 3,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(6, 182, 212, 0.5)',
+                  borderWidth: 2,
+                },
+                '& input': {
+                  color: 'white',
+                  '&::placeholder': {
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    opacity: 1,
+                  },
+                },
+              },
+            }}
           />
-          <div className="absolute right-2 flex items-center gap-2">
+          <Box sx={{ position: 'absolute', right: 8, display: 'flex', alignItems: 'center', gap: 1 }}>
             {hasActiveFilters && (
               <Button
-                variant="ghost"
-                size="sm"
+                size="small"
+                startIcon={<Close sx={{ fontSize: 16 }} />}
                 onClick={clearFilters}
-                className="text-white/60 hover:text-white hover:bg-white/10"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  '&:hover': {
+                    color: 'white',
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
               >
-                <X className="h-4 w-4 mr-1" />
                 Clear
               </Button>
             )}
             <Button
-              variant="outline"
-              size="sm"
+              size="small"
+              variant={showFilters ? 'contained' : 'outlined'}
+              startIcon={<FilterAlt sx={{ fontSize: 16 }} />}
+              endIcon={showFilters ? <ExpandLess sx={{ fontSize: 16 }} /> : <ExpandMore sx={{ fontSize: 16 }} />}
               onClick={() => setShowFilters(!showFilters)}
-              className={cn(
-                'border-white/20 text-white hover:bg-white/10',
-                showFilters && 'bg-cyan-500/20 border-cyan-500/40'
-              )}
+              sx={{
+                borderColor: showFilters ? 'rgba(6, 182, 212, 0.4)' : 'rgba(255, 255, 255, 0.2)',
+                bgcolor: showFilters ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: showFilters ? 'rgba(6, 182, 212, 0.3)' : 'rgba(255, 255, 255, 0.1)',
+                  borderColor: showFilters ? 'rgba(6, 182, 212, 0.6)' : 'rgba(255, 255, 255, 0.3)',
+                },
+              }}
             >
-              <Filter className="h-4 w-4 mr-2" />
               Filters
               {activeFiltersCount > 0 && (
-                <span className="ml-2 px-1.5 py-0.5 bg-cyan-500 text-white text-xs rounded-full">
-                  {activeFiltersCount}
-                </span>
-              )}
-              {showFilters ? (
-                <ChevronUp className="h-4 w-4 ml-1" />
-              ) : (
-                <ChevronDown className="h-4 w-4 ml-1" />
+                <Chip
+                  label={activeFiltersCount}
+                  size="small"
+                  sx={{
+                    ml: 1,
+                    height: 20,
+                    fontSize: '0.75rem',
+                    bgcolor: 'rgb(6, 182, 212)',
+                    color: 'white',
+                  }}
+                />
               )}
             </Button>
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {/* Quick Type Filter */}
         {showTypeFilter && (
-          <div className="flex items-center gap-2 mt-3">
-            <span className="text-sm text-white/60">Search in:</span>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
+            <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+              Search in:
+            </Typography>
             {[
               { value: 'all', label: 'All', icon: Search },
-              { value: 'shipments', label: 'Shipments', icon: Truck },
-              { value: 'items', label: 'Items', icon: Package },
-              ...(showUserFilter ? [{ value: 'users', label: 'Users', icon: User }] : []),
+              { value: 'shipments', label: 'Shipments', icon: LocalShipping },
+              { value: 'items', label: 'Items', icon: Inventory2 },
+              ...(showUserFilter ? [{ value: 'users', label: 'Users', icon: Person }] : []),
             ].map(({ value, label, icon: Icon }) => (
-              <button
+              <Button
                 key={value}
+                size="small"
+                variant={filters.type === value ? 'contained' : 'outlined'}
+                startIcon={<Icon sx={{ fontSize: 16 }} />}
                 onClick={() => updateFilter('type', value as 'all' | 'shipments' | 'items' | 'users')}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2',
-                  filters.type === value
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                    : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white'
-                )}
+                sx={{
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  borderColor: filters.type === value ? 'rgba(6, 182, 212, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+                  bgcolor: filters.type === value ? 'rgba(6, 182, 212, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  color: filters.type === value ? 'rgb(34, 211, 238)' : 'rgba(255, 255, 255, 0.6)',
+                  '&:hover': {
+                    bgcolor: filters.type === value ? 'rgba(6, 182, 212, 0.3)' : 'rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                  },
+                }}
               >
-                <Icon className="h-4 w-4" />
                 {label}
-              </button>
+              </Button>
             ))}
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
 
       {/* Advanced Filters */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+      <Collapse in={showFilters}>
+        <Box
+          sx={{
+            p: { xs: 2, sm: 3 },
+            bgcolor: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: 3,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: { xs: '1rem', sm: '1.125rem' },
+                fontWeight: 600,
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <FilterAlt sx={{ fontSize: 20, color: 'rgb(34, 211, 238)' }} />
+              Advanced Filters
+            </Typography>
+            {activeFiltersCount > 0 && (
+              <Button
+                size="small"
+                onClick={clearFilters}
+                sx={{
+                  fontSize: '0.875rem',
+                  color: 'rgb(34, 211, 238)',
+                  '&:hover': {
+                    color: 'rgb(6, 182, 212)',
+                  },
+                }}
+              >
+                Clear all filters
+              </Button>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' },
+              gap: 2,
+            }}
           >
-            <div className="p-6 bg-white/5 border border-white/10 rounded-xl space-y-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <Filter className="h-5 w-5 text-cyan-400" />
-                  Advanced Filters
-                </h3>
-                {activeFiltersCount > 0 && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
-                  >
-                    Clear all filters
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Status Filter */}
-                {showStatusFilter && (
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-cyan-400" />
-                      Status
-                    </label>
-                    <select
-                      value={filters.status || ''}
-                      onChange={(e) => updateFilter('status', e.target.value)}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-all"
-                    >
-                      <option value="">All Statuses</option>
-                      {(filters.type === 'items' ? ITEM_STATUSES : SHIPMENT_STATUSES).map((statusOption) => (
-                        <option key={statusOption.value} value={statusOption.value}>
-                          {statusOption.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Date From */}
-                {showDateFilter && (
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-cyan-400" />
-                      Date From
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.dateFrom || ''}
-                      onChange={(e) => updateFilter('dateFrom', e.target.value)}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-all"
-                    />
-                  </div>
-                )}
-
-                {/* Date To */}
-                {showDateFilter && (
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-cyan-400" />
-                      Date To
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.dateTo || ''}
-                      onChange={(e) => updateFilter('dateTo', e.target.value)}
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-all"
-                    />
-                  </div>
-                )}
-
-                {/* Min Price */}
-                {showPriceFilter && filters.type !== 'users' && (
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-cyan-400" />
-                      Min Price
-                    </label>
-                    <input
-                      type="number"
-                      value={filters.minPrice || ''}
-                      onChange={(e) => updateFilter('minPrice', e.target.value)}
-                      placeholder="0"
-                      min="0"
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-all"
-                    />
-                  </div>
-                )}
-
-                {/* Max Price */}
-                {showPriceFilter && filters.type !== 'users' && (
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-cyan-400" />
-                      Max Price
-                    </label>
-                    <input
-                      type="number"
-                      value={filters.maxPrice || ''}
-                      onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                      placeholder="10000"
-                      min="0"
-                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/50 transition-all"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Filter Summary */}
-              {hasActiveFilters && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg"
+            {/* Status Filter */}
+            {showStatusFilter && (
+              <FormControl fullWidth>
+                <InputLabel
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem',
+                    '&.Mui-focused': {
+                      color: 'rgb(34, 211, 238)',
+                    },
+                  }}
                 >
-                  <div className="flex items-start gap-2">
-                    <Filter className="h-4 w-4 text-cyan-400 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-cyan-300">Active Filters:</p>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {query && (
-                          <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full">
-                            Query: &ldquo;{query}&rdquo;
-                          </span>
-                        )}
-                        {filters.status && (
-                          <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full">
-                            Status: {filters.status}
-                          </span>
-                        )}
-                        {(filters.dateFrom || filters.dateTo) && (
-                          <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full">
-                            Date Range
-                          </span>
-                        )}
-                        {(filters.minPrice || filters.maxPrice) && (
-                          <span className="px-2 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full">
-                            Price Range
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                  Status
+                </InputLabel>
+                <Select
+                  value={filters.status || ''}
+                  onChange={(e) => updateFilter('status', e.target.value)}
+                  label="Status"
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                    },
+                    '& .MuiSvgIcon-root': {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                    },
+                  }}
+                >
+                  <MenuItem value="">All Statuses</MenuItem>
+                  {(filters.type === 'items' ? ITEM_STATUSES : SHIPMENT_STATUSES).map((statusOption) => (
+                    <MenuItem key={statusOption.value} value={statusOption.value}>
+                      {statusOption.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            {/* Date From */}
+            {showDateFilter && (
+              <TextField
+                type="date"
+                label="Date From"
+                value={filters.dateFrom || ''}
+                onChange={(e) => updateFilter('dateFrom', e.target.value)}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem',
+                    '&.Mui-focused': {
+                      color: 'rgb(34, 211, 238)',
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarMonth sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                    },
+                  },
+                }}
+              />
+            )}
+
+            {/* Date To */}
+            {showDateFilter && (
+              <TextField
+                type="date"
+                label="Date To"
+                value={filters.dateTo || ''}
+                onChange={(e) => updateFilter('dateTo', e.target.value)}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem',
+                    '&.Mui-focused': {
+                      color: 'rgb(34, 211, 238)',
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CalendarMonth sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                    </InputAdornment>
+                  ),
+                  sx: {
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                    },
+                  },
+                }}
+              />
+            )}
+
+            {/* Min Price */}
+            {showPriceFilter && filters.type !== 'users' && (
+              <TextField
+                type="number"
+                label="Min Price"
+                value={filters.minPrice || ''}
+                onChange={(e) => updateFilter('minPrice', e.target.value)}
+                placeholder="0"
+                InputLabelProps={{
+                  sx: {
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem',
+                    '&.Mui-focused': {
+                      color: 'rgb(34, 211, 238)',
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AttachMoney sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                    </InputAdornment>
+                  ),
+                  inputProps: { min: 0 },
+                  sx: {
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                    },
+                    '& input::placeholder': {
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      opacity: 1,
+                    },
+                  },
+                }}
+              />
+            )}
+
+            {/* Max Price */}
+            {showPriceFilter && filters.type !== 'users' && (
+              <TextField
+                type="number"
+                label="Max Price"
+                value={filters.maxPrice || ''}
+                onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                placeholder="10000"
+                InputLabelProps={{
+                  sx: {
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '0.875rem',
+                    '&.Mui-focused': {
+                      color: 'rgb(34, 211, 238)',
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AttachMoney sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                    </InputAdornment>
+                  ),
+                  inputProps: { min: 0 },
+                  sx: {
+                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'white',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                    },
+                    '& input::placeholder': {
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      opacity: 1,
+                    },
+                  },
+                }}
+              />
+            )}
+          </Box>
+
+          {/* Filter Summary */}
+          {hasActiveFilters && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Box
+                sx={{
+                  mt: 2,
+                  p: 1.5,
+                  bgcolor: 'rgba(6, 182, 212, 0.1)',
+                  border: '1px solid rgba(6, 182, 212, 0.3)',
+                  borderRadius: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'start', gap: 1 }}>
+                  <FilterAlt sx={{ fontSize: 16, color: 'rgb(34, 211, 238)', mt: 0.25, flexShrink: 0 }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'rgb(34, 211, 238)', mb: 1 }}>
+                      Active Filters:
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {query && (
+                        <Chip
+                          label={`Query: "${query}"`}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(6, 182, 212, 0.2)',
+                            color: 'rgb(34, 211, 238)',
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                      )}
+                      {filters.status && (
+                        <Chip
+                          label={`Status: ${filters.status}`}
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(6, 182, 212, 0.2)',
+                            color: 'rgb(34, 211, 238)',
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                      )}
+                      {(filters.dateFrom || filters.dateTo) && (
+                        <Chip
+                          label="Date Range"
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(6, 182, 212, 0.2)',
+                            color: 'rgb(34, 211, 238)',
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                      )}
+                      {(filters.minPrice || filters.maxPrice) && (
+                        <Chip
+                          label="Price Range"
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(6, 182, 212, 0.2)',
+                            color: 'rgb(34, 211, 238)',
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            </motion.div>
+          )}
+        </Box>
+      </Collapse>
+    </Box>
   );
 }
-
