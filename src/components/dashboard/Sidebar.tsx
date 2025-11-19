@@ -5,32 +5,42 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from 'next-auth';
-import type { LucideIcon } from 'lucide-react';
+import type { SvgIconComponent } from '@mui/icons-material';
 import {
-	LayoutDashboard,
-	Package,
-	FileText,
+	Dashboard,
+	Inventory2,
+	Description,
 	Settings,
-	User,
-	LogOut,
+	Person,
+	Logout,
 	Menu,
-	X,
-	Plus,
+	Close,
+	Add,
 	Search,
-	BarChart3,
-	Users,
-	Container as ContainerIcon,
+	Analytics,
+	Group,
+	AllInbox,
 	Receipt,
-} from 'lucide-react';
+} from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
 import { useSession } from 'next-auth/react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
+import {
+	Drawer,
+	Box,
+	List,
+	ListItemButton,
+	ListItemIcon,
+	ListItemText,
+	Avatar,
+	Typography,
+	Divider,
+	IconButton,
+} from '@mui/material';
 
 type NavigationItem = {
 	name: string;
 	href: string;
-	icon: LucideIcon;
+	icon: SvgIconComponent;
 	adminOnly?: boolean;
 };
 
@@ -38,7 +48,7 @@ const mainNavigation: NavigationItem[] = [
 	{
 		name: 'Dashboard',
 		href: '/dashboard',
-		icon: LayoutDashboard,
+		icon: Dashboard,
 	},
 ];
 
@@ -46,12 +56,12 @@ const shipmentNavigation: NavigationItem[] = [
 	{
 		name: 'Shipments',
 		href: '/dashboard/shipments',
-		icon: Package,
+		icon: Inventory2,
 	},
 	{
 		name: 'New Shipment',
 		href: '/dashboard/shipments/new',
-		icon: Plus,
+		icon: Add,
 		adminOnly: true,
 	},
 ];
@@ -60,22 +70,22 @@ const adminNavigation: NavigationItem[] = [
 	{
 		name: 'Analytics',
 		href: '/dashboard/analytics',
-		icon: BarChart3,
+		icon: Analytics,
 	},
 	{
 		name: 'Users',
 		href: '/dashboard/users',
-		icon: Users,
+		icon: Group,
 	},
 	{
 		name: 'Create User',
 		href: '/dashboard/users/new',
-		icon: User,
+		icon: Person,
 	},
 	{
 		name: 'Containers',
 		href: '/dashboard/containers',
-		icon: ContainerIcon,
+		icon: AllInbox,
 	},
 	{
 		name: 'Invoices',
@@ -93,7 +103,7 @@ const otherNavigation: NavigationItem[] = [
 	{
 		name: 'Documents',
 		href: '/dashboard/documents',
-		icon: FileText,
+		icon: Description,
 	},
 ];
 
@@ -101,7 +111,7 @@ const settingsNavigation: NavigationItem[] = [
 	{
 		name: 'Profile',
 		href: '/dashboard/profile',
-		icon: User,
+		icon: Person,
 	},
 	{
 		name: 'Settings',
@@ -122,48 +132,71 @@ export default function Sidebar() {
 	return (
 		<>
 			{/* Mobile Menu Button */}
-			<div className="lg:hidden fixed top-4 left-4 z-50">
-				<Button
-					variant="ghost"
-					size="icon"
+			<Box
+				sx={{
+					display: { xs: 'block', lg: 'none' },
+					position: 'fixed',
+					top: 16,
+					left: 16,
+					zIndex: 50,
+				}}
+			>
+				<IconButton
 					onClick={() => setMobileOpen(!mobileOpen)}
-					className="bg-card/50 backdrop-blur-sm border border-accent/30 text-foreground hover:bg-accent/10"
+					sx={{
+						bgcolor: 'rgba(10, 22, 40, 0.5)',
+						backdropFilter: 'blur(8px)',
+						border: '1px solid rgba(6, 182, 212, 0.3)',
+						color: 'white',
+						'&:hover': {
+							bgcolor: 'rgba(6, 182, 212, 0.1)',
+						},
+					}}
 				>
-					{mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-				</Button>
-			</div>
+					{mobileOpen ? <Close /> : <Menu />}
+				</IconButton>
+			</Box>
 
-			{/* Mobile Overlay */}
-			<AnimatePresence>
-				{mobileOpen && (
-					<>
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							transition={{ duration: 0.2 }}
-							className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
-							onClick={() => setMobileOpen(false)}
-						/>
+			{/* Mobile Drawer */}
+			<Drawer
+				variant="temporary"
+				open={mobileOpen}
+				onClose={() => setMobileOpen(false)}
+				sx={{
+					display: { xs: 'block', lg: 'none' },
+					'& .MuiDrawer-paper': {
+						width: 288,
+						boxSizing: 'border-box',
+					},
+				}}
+			>
+				<SidebarContent
+					pathname={pathname}
+					session={session}
+					onSignOut={handleSignOut}
+					onNavClick={() => setMobileOpen(false)}
+				/>
+			</Drawer>
 
-						{/* Mobile Sidebar */}
-						<motion.div
-							initial={{ x: -300 }}
-							animate={{ x: 0 }}
-							exit={{ x: -300 }}
-							transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-							className="fixed inset-y-0 left-0 z-50 w-72 lg:hidden"
-						>
-							<SidebarContent pathname={pathname} session={session} onSignOut={handleSignOut} onNavClick={() => setMobileOpen(false)} />
-						</motion.div>
-					</>
-				)}
-			</AnimatePresence>
-
-			{/* Desktop Sidebar */}
-			<aside className="hidden lg:flex lg:flex-col lg:w-72 lg:fixed lg:inset-y-0 lg:left-0 z-30">
-				<SidebarContent pathname={pathname} session={session} onSignOut={handleSignOut} />
-			</aside>
+			{/* Desktop Drawer */}
+			<Drawer
+				variant="permanent"
+				sx={{
+					display: { xs: 'none', lg: 'block' },
+					width: 288,
+					flexShrink: 0,
+					'& .MuiDrawer-paper': {
+						width: 288,
+						boxSizing: 'border-box',
+					},
+				}}
+			>
+				<SidebarContent
+					pathname={pathname}
+					session={session}
+					onSignOut={handleSignOut}
+				/>
+			</Drawer>
 		</>
 	);
 }
@@ -180,25 +213,57 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 	const active = isActive(item.href);
 
 	return (
-		<Link href={item.href} onClick={onNavClick}>
+		<Link href={item.href} onClick={onNavClick} style={{ textDecoration: 'none' }}>
 			<motion.div
 				initial={{ opacity: 0, x: -20 }}
 				animate={{ opacity: 1, x: 0 }}
 				transition={{ duration: 0.2, delay: index * 0.03 }}
 				whileHover={{ x: 2 }}
-				className={cn(
-					'group relative flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 cursor-pointer',
-					active ? 'bg-accent/10 text-accent' : 'text-muted-foreground hover:text-foreground hover:bg-accent/5'
-				)}
 			>
-				{active && (
-					<motion.div
-						layoutId="activeIndicator"
-						className="absolute left-0 top-1 bottom-1 w-0.5 bg-accent rounded-r-full"
+				<ListItemButton
+					selected={active}
+					sx={{
+						position: 'relative',
+						borderRadius: 2,
+						mx: 1,
+						my: 0.5,
+						transition: 'all 0.2s ease',
+						color: active ? 'rgb(34, 211, 238)' : 'rgba(255, 255, 255, 0.6)',
+						bgcolor: active ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
+						'&:hover': {
+							bgcolor: active ? 'rgba(6, 182, 212, 0.15)' : 'rgba(6, 182, 212, 0.05)',
+							color: 'white',
+						},
+						'&::before': active
+							? {
+									content: '""',
+									position: 'absolute',
+									left: 0,
+									top: 4,
+									bottom: 4,
+									width: 2,
+									bgcolor: 'rgb(34, 211, 238)',
+									borderRadius: '0 2px 2px 0',
+							  }
+							: {},
+					}}
+				>
+					<ListItemIcon
+						sx={{
+							minWidth: 40,
+							color: 'inherit',
+						}}
+					>
+						<Icon sx={{ fontSize: 20 }} />
+					</ListItemIcon>
+					<ListItemText
+						primary={item.name}
+						primaryTypographyProps={{
+							fontSize: '0.875rem',
+							fontWeight: 500,
+						}}
 					/>
-				)}
-				<Icon className={cn('w-5 h-5 transition-colors', active ? 'text-accent' : 'text-muted-foreground group-hover:text-foreground')} strokeWidth={2} />
-				<span className="text-sm font-medium">{item.name}</span>
+				</ListItemButton>
 			</motion.div>
 		</Link>
 	);
@@ -215,18 +280,31 @@ type NavSectionProps = {
 
 function NavSection({ title, items, baseIndex = 0, isAdmin, isActive, onNavClick }: NavSectionProps) {
 	return (
-		<div className="space-y-1">
+		<Box sx={{ mb: 2 }}>
 			{title && (
-				<div className="px-4 py-2">
-					<span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</span>
-				</div>
+				<Box sx={{ px: 2, py: 1 }}>
+					<Typography
+						variant="caption"
+						sx={{
+							fontSize: '0.75rem',
+							fontWeight: 600,
+							color: 'rgba(255, 255, 255, 0.5)',
+							textTransform: 'uppercase',
+							letterSpacing: 1,
+						}}
+					>
+						{title}
+					</Typography>
+				</Box>
 			)}
-			{items
-				.filter((item) => !item.adminOnly || isAdmin)
-				.map((item, index) => (
-					<NavItem key={item.name} item={item} index={baseIndex + index} isActive={isActive} onNavClick={onNavClick} />
-				))}
-		</div>
+			<List sx={{ py: 0.5 }}>
+				{items
+					.filter((item) => !item.adminOnly || isAdmin)
+					.map((item, index) => (
+						<NavItem key={item.name} item={item} index={baseIndex + index} isActive={isActive} onNavClick={onNavClick} />
+					))}
+			</List>
+		</Box>
 	);
 }
 
@@ -253,21 +331,97 @@ function SidebarContent({
 	};
 
 	return (
-		<div className="flex flex-col h-full backdrop-blur-md border-r border-border" style={{ backgroundColor: '#0A1F44' }}>
+		<Box
+			sx={{
+				display: 'flex',
+				flexDirection: 'column',
+				height: '100%',
+				bgcolor: '#0A1F44',
+				backdropFilter: 'blur(16px)',
+				borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+			}}
+		>
 			{/* Logo/Header */}
-			<div className="flex items-center gap-3 px-6 py-5 border-b border-border">
-				<div className="relative w-9 h-9 rounded-lg bg-background border border-accent/40 flex items-center justify-center">
-					<div className="absolute inset-0 rounded-lg bg-accent/10 blur-md" />
-					<Package className="relative w-5 h-5 text-accent" strokeWidth={2} />
-				</div>
-				<div>
-					<h2 className="text-base font-bold text-foreground">Jacxi</h2>
-					<p className="text-[10px] text-muted-foreground uppercase tracking-wider">Dashboard</p>
-				</div>
-			</div>
+			<Box
+				sx={{
+					display: 'flex',
+					alignItems: 'center',
+					gap: 1.5,
+					px: 3,
+					py: 2.5,
+					borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+				}}
+			>
+				<Box
+					sx={{
+						position: 'relative',
+						width: 36,
+						height: 36,
+						borderRadius: 2,
+						bgcolor: '#020817',
+						border: '1px solid rgba(6, 182, 212, 0.4)',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						'&::before': {
+							content: '""',
+							position: 'absolute',
+							inset: 0,
+							borderRadius: 2,
+							bgcolor: 'rgba(6, 182, 212, 0.1)',
+							filter: 'blur(8px)',
+						},
+					}}
+				>
+					<Inventory2 sx={{ position: 'relative', fontSize: 20, color: 'rgb(34, 211, 238)' }} />
+				</Box>
+				<Box>
+					<Typography
+						variant="subtitle1"
+						sx={{
+							fontSize: '1rem',
+							fontWeight: 700,
+							color: 'white',
+						}}
+					>
+						Jacxi
+					</Typography>
+					<Typography
+						variant="caption"
+						sx={{
+							fontSize: '0.625rem',
+							color: 'rgba(255, 255, 255, 0.6)',
+							textTransform: 'uppercase',
+							letterSpacing: 1,
+						}}
+					>
+						Dashboard
+					</Typography>
+				</Box>
+			</Box>
 
 			{/* Navigation */}
-			<nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
+			<Box
+				sx={{
+					flex: 1,
+					px: 1.5,
+					py: 2,
+					overflowY: 'auto',
+					'&::-webkit-scrollbar': {
+						width: 6,
+					},
+					'&::-webkit-scrollbar-track': {
+						bgcolor: 'transparent',
+					},
+					'&::-webkit-scrollbar-thumb': {
+						bgcolor: 'rgba(255, 255, 255, 0.2)',
+						borderRadius: 3,
+						'&:hover': {
+							bgcolor: 'rgba(255, 255, 255, 0.3)',
+						},
+					},
+				}}
+			>
 				{/* Main */}
 				<NavSection items={mainNavigation} baseIndex={0} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
@@ -283,33 +437,108 @@ function SidebarContent({
 				<NavSection items={otherNavigation} baseIndex={isAdmin ? 6 : 3} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
 				{/* Settings */}
-				<div className="pt-4">
-					<div className="h-px bg-gradient-to-r from-transparent via-border to-transparent mb-4" />
+				<Box sx={{ pt: 2 }}>
+					<Divider
+						sx={{
+							mb: 2,
+							background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%)',
+							border: 'none',
+							height: 1,
+						}}
+					/>
 					<NavSection items={settingsNavigation} baseIndex={isAdmin ? 9 : 6} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
-				</div>
-			</nav>
+				</Box>
+			</Box>
 
 			{/* User Section */}
-			<div className="px-3 py-4 border-t border-border">
-				<div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/50 border border-border mb-2">
-					<div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/30 flex items-center justify-center flex-shrink-0">
-						<User className="w-4 h-4 text-accent" strokeWidth={2} />
-					</div>
-					<div className="flex-1 min-w-0">
-						<p className="text-xs font-medium text-foreground truncate">{session?.user?.name || 'User'}</p>
-						<p className="text-[10px] text-muted-foreground truncate">{session?.user?.email || ''}</p>
-					</div>
-				</div>
-
-				<Button
-					variant="ghost"
-					onClick={onSignOut}
-					className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-destructive/10 hover:border-destructive/20 border border-transparent text-xs py-2 h-auto"
+			<Box
+				sx={{
+					px: 1.5,
+					py: 2,
+					borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+				}}
+			>
+				<Box
+					sx={{
+						display: 'flex',
+						alignItems: 'center',
+						gap: 1.5,
+						px: 1.5,
+						py: 1.25,
+						borderRadius: 2,
+						bgcolor: 'rgba(255, 255, 255, 0.05)',
+						border: '1px solid rgba(255, 255, 255, 0.1)',
+						mb: 1,
+					}}
 				>
-					<LogOut className="w-4 h-4 mr-2" strokeWidth={2} />
-					Sign Out
-				</Button>
-			</div>
-		</div>
+					<Avatar
+						sx={{
+							width: 32,
+							height: 32,
+							background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%)',
+							border: '1px solid rgba(6, 182, 212, 0.3)',
+						}}
+					>
+						<Person sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+					</Avatar>
+					<Box sx={{ flex: 1, minWidth: 0 }}>
+						<Typography
+							variant="caption"
+							sx={{
+								fontSize: '0.75rem',
+								fontWeight: 500,
+								color: 'white',
+								display: 'block',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{session?.user?.name || 'User'}
+						</Typography>
+						<Typography
+							variant="caption"
+							sx={{
+								fontSize: '0.625rem',
+								color: 'rgba(255, 255, 255, 0.6)',
+								display: 'block',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{session?.user?.email || ''}
+						</Typography>
+					</Box>
+				</Box>
+
+				<ListItemButton
+					onClick={onSignOut}
+					sx={{
+						borderRadius: 2,
+						border: '1px solid transparent',
+						color: 'rgba(255, 255, 255, 0.6)',
+						py: 1,
+						px: 1.5,
+						'&:hover': {
+							bgcolor: 'rgba(239, 68, 68, 0.1)',
+							borderColor: 'rgba(239, 68, 68, 0.2)',
+							color: 'white',
+						},
+					}}
+				>
+					<ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
+						<Logout sx={{ fontSize: 16 }} />
+					</ListItemIcon>
+					<ListItemText
+						primary="Sign Out"
+						primaryTypographyProps={{
+							fontSize: '0.75rem',
+							fontWeight: 500,
+						}}
+					/>
+				</ListItemButton>
+			</Box>
+		</Box>
 	);
 }
