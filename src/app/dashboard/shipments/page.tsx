@@ -4,8 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Plus, ChevronLeft, ChevronRight, Package } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Add, ChevronLeft, ChevronRight, Inventory2 } from '@mui/icons-material';
+import { Button, Box, CircularProgress, Typography } from '@mui/material';
 import ShipmentRow from '@/components/dashboard/ShipmentRow';
 import Section from '@/components/layout/Section';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
@@ -126,12 +126,27 @@ export default function ShipmentsListPage() {
 								transition={{ duration: 0.6, delay: 0.2 }}
 								className="w-full sm:w-auto"
 							>
-								<Link href="/dashboard/shipments/new" className="block">
+								<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
 									<Button
-										size="lg"
-										className="group relative overflow-hidden bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base md:text-lg font-semibold w-full sm:w-auto"
+										variant="contained"
+										size="large"
+										startIcon={<Add />}
+										sx={{
+											bgcolor: '#00bfff',
+											color: 'white',
+											fontWeight: 600,
+											fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
+											px: { xs: 2, sm: 3 },
+											py: { xs: 1.25, sm: 1.5 },
+											width: { xs: '100%', sm: 'auto' },
+											boxShadow: '0 8px 16px rgba(0, 191, 255, 0.3)',
+											'&:hover': {
+												bgcolor: '#00a8e6',
+												boxShadow: '0 12px 24px rgba(0, 191, 255, 0.5)',
+											},
+											transition: 'all 0.3s ease',
+										}}
 									>
-										<Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
 										New Shipment
 									</Button>
 								</Link>
@@ -164,21 +179,78 @@ export default function ShipmentsListPage() {
 
 				{/* Shipments List */}
 				{loading ? (
-					<div className="relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-12 text-center">
-						<div className="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
-						<p className="mt-4 text-sm sm:text-base text-white/70">Loading shipments...</p>
-					</div>
+					<Box
+						sx={{
+							position: 'relative',
+							borderRadius: { xs: 2, sm: 3 },
+							background: 'rgba(10, 22, 40, 0.5)',
+							backdropFilter: 'blur(8px)',
+							border: '1px solid rgba(6, 182, 212, 0.3)',
+							p: { xs: 4, sm: 6 },
+							textAlign: 'center',
+						}}
+					>
+						<CircularProgress
+							size={48}
+							sx={{
+								color: 'rgb(34, 211, 238)',
+							}}
+						/>
+						<Typography
+							sx={{
+								mt: 2,
+								fontSize: { xs: '0.875rem', sm: '1rem' },
+								color: 'rgba(255, 255, 255, 0.7)',
+							}}
+						>
+							Loading shipments...
+						</Typography>
+					</Box>
 				) : shipments.length === 0 ? (
-					<div className="relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-12 text-center">
-						<Package className="w-12 h-12 sm:w-16 sm:h-16 text-white/30 mx-auto mb-4" />
-						<p className="text-sm sm:text-base text-white/70 mb-4 sm:mb-6">No shipments found</p>
-						<Link href="/dashboard/shipments/new" className="inline-block">
-							<Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6] text-sm sm:text-base">
-								<Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+					<Box
+						sx={{
+							position: 'relative',
+							borderRadius: { xs: 2, sm: 3 },
+							background: 'rgba(10, 22, 40, 0.5)',
+							backdropFilter: 'blur(8px)',
+							border: '1px solid rgba(6, 182, 212, 0.3)',
+							p: { xs: 4, sm: 6 },
+							textAlign: 'center',
+						}}
+					>
+						<Inventory2
+							sx={{
+								fontSize: { xs: 48, sm: 64 },
+								color: 'rgba(255, 255, 255, 0.3)',
+								mb: 2,
+							}}
+						/>
+						<Typography
+							sx={{
+								fontSize: { xs: '0.875rem', sm: '1rem' },
+								color: 'rgba(255, 255, 255, 0.7)',
+								mb: { xs: 2, sm: 3 },
+							}}
+						>
+							No shipments found
+						</Typography>
+						<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
+							<Button
+								variant="contained"
+								startIcon={<Add />}
+								sx={{
+									fontSize: { xs: '0.875rem', sm: '1rem' },
+									bgcolor: '#00bfff',
+									color: 'white',
+									'&:hover': {
+										bgcolor: '#00a8e6',
+									},
+								}}
+							>
 								Create Your First Shipment
 							</Button>
 						</Link>
-					</div>
+					</Box>
 				) : (
 					<>
 						{/* Results Count */}
@@ -208,31 +280,77 @@ export default function ShipmentsListPage() {
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.6, delay: 0.5 }}
-								className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4"
 							>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-									disabled={currentPage === 1}
-									className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto text-xs sm:text-sm"
+								<Box
+									sx={{
+										mt: { xs: 3, sm: 4 },
+										display: 'flex',
+										flexDirection: { xs: 'column', sm: 'row' },
+										justifyContent: 'center',
+										alignItems: 'center',
+										gap: { xs: 1.5, sm: 2 },
+									}}
 								>
-									<ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-									Previous
-								</Button>
-								<span className="text-xs sm:text-sm text-white/70 px-4">
-									Page {currentPage} of {totalPages}
-								</span>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-									disabled={currentPage === totalPages}
-									className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto text-xs sm:text-sm"
-								>
-									Next
-									<ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-2" />
-								</Button>
+									<Button
+										variant="outlined"
+										size="small"
+										startIcon={<ChevronLeft sx={{ fontSize: { xs: 12, sm: 16 } }} />}
+										onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+										disabled={currentPage === 1}
+										sx={{
+											fontSize: { xs: '0.75rem', sm: '0.875rem' },
+											borderColor: 'rgba(6, 182, 212, 0.3)',
+											color: 'rgb(34, 211, 238)',
+											width: { xs: '100%', sm: 'auto' },
+											'&:hover': {
+												bgcolor: 'rgba(6, 182, 212, 0.1)',
+												borderColor: 'rgba(6, 182, 212, 0.5)',
+											},
+											'&:disabled': {
+												opacity: 0.5,
+												cursor: 'not-allowed',
+												borderColor: 'rgba(6, 182, 212, 0.2)',
+												color: 'rgba(34, 211, 238, 0.5)',
+											},
+										}}
+									>
+										Previous
+									</Button>
+									<Typography
+										sx={{
+											fontSize: { xs: '0.75rem', sm: '0.875rem' },
+											color: 'rgba(255, 255, 255, 0.7)',
+											px: 2,
+										}}
+									>
+										Page {currentPage} of {totalPages}
+									</Typography>
+									<Button
+										variant="outlined"
+										size="small"
+										endIcon={<ChevronRight sx={{ fontSize: { xs: 12, sm: 16 } }} />}
+										onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+										disabled={currentPage === totalPages}
+										sx={{
+											fontSize: { xs: '0.75rem', sm: '0.875rem' },
+											borderColor: 'rgba(6, 182, 212, 0.3)',
+											color: 'rgb(34, 211, 238)',
+											width: { xs: '100%', sm: 'auto' },
+											'&:hover': {
+												bgcolor: 'rgba(6, 182, 212, 0.1)',
+												borderColor: 'rgba(6, 182, 212, 0.5)',
+											},
+											'&:disabled': {
+												opacity: 0.5,
+												cursor: 'not-allowed',
+												borderColor: 'rgba(6, 182, 212, 0.2)',
+												color: 'rgba(34, 211, 238, 0.5)',
+											},
+										}}
+									>
+										Next
+									</Button>
+								</Box>
 							</motion.div>
 						)}
 					</>
