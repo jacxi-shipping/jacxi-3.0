@@ -1,26 +1,33 @@
 "use client";
 
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/components/providers/ThemeProvider';
-import { Button } from './Button';
-import { cn } from '@/lib/utils';
+import { DarkMode, LightMode } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import { useState } from 'react';
 
 export default function ThemeToggle({ className }: { className?: string }) {
-	const { theme, toggleTheme } = useTheme();
+	// For now, we'll keep the UI dark mode only as per the design
+	// This is a placeholder for future theme toggle functionality
+	const [theme] = useState('dark');
 
 	return (
-		<Button
-			variant="ghost"
-			size="icon"
-			onClick={toggleTheme}
-			className={cn('h-10 w-10 rounded-lg text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5', className)}
+		<IconButton
 			aria-label="Toggle theme"
+			disabled
+			sx={{
+				width: 40,
+				height: 40,
+				color: 'rgba(255, 255, 255, 0.6)',
+				'&:hover': {
+					bgcolor: 'rgba(255, 255, 255, 0.05)',
+				},
+			}}
+			className={className}
 		>
 			{theme === 'dark' ? (
-				<Sun className="h-5 w-5" />
+				<LightMode sx={{ fontSize: 20 }} />
 			) : (
-				<Moon className="h-5 w-5" />
+				<DarkMode sx={{ fontSize: 20 }} />
 			)}
-		</Button>
+		</IconButton>
 	);
 }
