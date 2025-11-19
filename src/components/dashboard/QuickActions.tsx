@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Add, Search, Inventory2, Description } from '@mui/icons-material';
-import { Box, Card, CardContent, Typography, SvgIcon } from '@mui/material';
+import { Box, Card, CardContent, Typography, SvgIcon, Fade } from '@mui/material';
+import { useState, useEffect } from 'react';
 
 const actions = [
 	{
@@ -61,13 +61,14 @@ const actions = [
 ];
 
 export default function QuickActions() {
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		setIsVisible(true);
+	}, []);
+
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true }}
-			transition={{ duration: 0.6 }}
-		>
+		<Fade in={isVisible} timeout={600}>
 			<Box sx={{ mb: { xs: 1.5, sm: 2, md: 2.5 } }}>
 				<Typography
 					variant="h5"
@@ -103,15 +104,35 @@ export default function QuickActions() {
 					const { border, borderHover, text, bgHover } = action.colorValues;
 
 					return (
-						<Link key={action.title} href={action.href} style={{ textDecoration: 'none' }}>
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true }}
-								transition={{ duration: 0.5, delay: index * 0.1 }}
-								whileHover={{ y: -4, scale: 1.02 }}
-							>
-								<Card
+						<ActionCard
+							key={action.title}
+							action={action}
+							index={index}
+							Icon={Icon}
+							border={border}
+							borderHover={borderHover}
+							text={text}
+							bgHover={bgHover}
+						/>
+					);
+				})}
+			</Box>
+		</Fade>
+	);
+}
+
+function ActionCard({ action, index, Icon, border, borderHover, text, bgHover }: any) {
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setIsVisible(true), index * 100);
+		return () => clearTimeout(timer);
+	}, [index]);
+
+	return (
+		<Link href={action.href} style={{ textDecoration: 'none' }}>
+			<Fade in={isVisible} timeout={500}>
+				<Card
 									sx={{
 										position: 'relative',
 										background: 'rgba(10, 22, 40, 0.6)',
@@ -124,10 +145,12 @@ export default function QuickActions() {
 										cursor: 'pointer',
 										transition: 'all 0.3s ease',
 										overflow: 'hidden',
+										transform: 'translateY(0) scale(1)',
 										'&:hover': {
 											borderColor: borderHover,
 											bgcolor: bgHover,
 											boxShadow: `0 8px 16px ${border}`,
+											transform: 'translateY(-4px) scale(1.02)',
 											'&::before': {
 												opacity: 1,
 											},
@@ -222,11 +245,7 @@ export default function QuickActions() {
 										</Box>
 									</CardContent>
 								</Card>
-							</motion.div>
-						</Link>
-					);
-				})}
-			</Box>
-		</motion.div>
+			</Fade>
+		</Link>
 	);
 }

@@ -2,7 +2,6 @@
 
 import { useSession } from 'next-auth/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Add, Inventory2, TrendingUp, LocalShipping, LocationOn } from '@mui/icons-material';
 import { Button, Box, CircularProgress, Typography } from '@mui/material';
@@ -124,26 +123,16 @@ export default function DashboardPage() {
 
 					<div className="relative z-10">
 						<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.6 }}
-								className="space-y-1 sm:space-y-2 max-w-full"
-							>
+							<div className="space-y-1 sm:space-y-2 max-w-full">
 								<h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight break-words">
 									Welcome back{session?.user?.name && `, ${session.user.name}`}!
 								</h1>
 								<p className="text-sm sm:text-lg md:text-xl text-white/70">
 									Here&apos;s your shipment overview
 								</p>
-							</motion.div>
+							</div>
 						{session?.user?.role === 'admin' && (
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.6, delay: 0.2 }}
-								className="w-full sm:w-auto"
-							>
+							<div className="w-full sm:w-auto">
 								<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
 									<Button
 										variant="contained"
@@ -168,7 +157,7 @@ export default function DashboardPage() {
 										New Shipment
 									</Button>
 								</Link>
-							</motion.div>
+							</div>
 						)}
 						</div>
 					</div>
@@ -225,11 +214,6 @@ export default function DashboardPage() {
 					>
 						{/* Recent Shipments - Takes 2 columns */}
 						<Box
-							component={motion.div}
-							initial={{ opacity: 0, y: 20 }}
-							whileInView={{ opacity: 1, y: 0 }}
-							viewport={{ once: true }}
-							transition={{ duration: 0.6, delay: 0.4 }}
 							sx={{
 								gridColumn: { xs: '1', lg: 'span 2' },
 								display: 'flex',

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import type { Session } from 'next-auth';
 import type { SvgIconComponent } from '@mui/icons-material';
 import {
@@ -214,13 +213,7 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 
 	return (
 		<Link href={item.href} onClick={onNavClick} style={{ textDecoration: 'none' }}>
-			<motion.div
-				initial={{ opacity: 0, x: -20 }}
-				animate={{ opacity: 1, x: 0 }}
-				transition={{ duration: 0.2, delay: index * 0.03 }}
-				whileHover={{ x: 2 }}
-			>
-				<ListItemButton
+			<ListItemButton
 					selected={active}
 					sx={{
 						position: 'relative',
@@ -228,11 +221,13 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 						mx: 1,
 						my: 0.5,
 						transition: 'all 0.2s ease',
+						transform: 'translateX(0)',
 						color: active ? 'rgb(34, 211, 238)' : 'rgba(255, 255, 255, 0.6)',
 						bgcolor: active ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
 						'&:hover': {
 							bgcolor: active ? 'rgba(6, 182, 212, 0.15)' : 'rgba(6, 182, 212, 0.05)',
 							color: 'white',
+							transform: 'translateX(2px)',
 						},
 						'&::before': active
 							? {
@@ -264,7 +259,6 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 						}}
 					/>
 				</ListItemButton>
-			</motion.div>
 		</Link>
 	);
 }

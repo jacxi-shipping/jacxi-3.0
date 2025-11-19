@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Visibility, ArrowForward } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip, LinearProgress, Button } from '@mui/material';
+import { Card, CardContent, Box, Typography, Chip, LinearProgress, Button, Fade } from '@mui/material';
+import { useState, useEffect } from 'react';
 
 type ShipmentCardProps = {
 	id: string;
@@ -57,15 +57,15 @@ export default function ShipmentCard({
 	delay = 0,
 }: ShipmentCardProps) {
 	const colors = statusColors[status] || defaultColors;
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setIsVisible(true), delay * 1000);
+		return () => clearTimeout(timer);
+	}, [delay]);
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, x: -20 }}
-			whileInView={{ opacity: 1, x: 0 }}
-			viewport={{ once: true }}
-			transition={{ duration: 0.5, delay }}
-			whileHover={{ y: -2 }}
-		>
+		<Fade in={isVisible} timeout={500}>
 			<Card
 				sx={{
 					background: 'rgba(10, 22, 40, 0.5)',
@@ -76,9 +76,11 @@ export default function ShipmentCard({
 					position: 'relative',
 					overflow: 'hidden',
 					transition: 'all 0.3s ease',
+					transform: 'translateY(0)',
 					'&:hover': {
 						borderColor: 'rgba(6, 182, 212, 0.6)',
 						boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)',
+						transform: 'translateY(-2px)',
 						'&::before': {
 							opacity: 1,
 						},
@@ -242,6 +244,6 @@ export default function ShipmentCard({
 					</Box>
 				</CardContent>
 			</Card>
-		</motion.div>
+		</Fade>
 	);
 }

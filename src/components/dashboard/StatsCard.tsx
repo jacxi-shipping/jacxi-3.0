@@ -1,8 +1,8 @@
 "use client";
 
 import { SvgIconComponent } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip } from '@mui/material';
-import { motion } from 'framer-motion';
+import { Card, CardContent, Box, Typography, Chip, Fade } from '@mui/material';
+import { useState, useEffect } from 'react';
 
 type StatsCardProps = {
 	icon: SvgIconComponent;
@@ -24,15 +24,15 @@ export default function StatsCard({
 	trend,
 	delay = 0
 }: StatsCardProps) {
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setIsVisible(true), delay * 1000);
+		return () => clearTimeout(timer);
+	}, [delay]);
+
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true }}
-			transition={{ duration: 0.6, delay }}
-			whileHover={{ y: -4 }}
-			style={{ height: '100%' }}
-		>
+		<Fade in={isVisible} timeout={600}>
 			<Card
 				sx={{
 					height: '100%',
@@ -44,9 +44,11 @@ export default function StatsCard({
 					position: 'relative',
 					overflow: 'hidden',
 					transition: 'all 0.3s ease',
+					transform: 'translateY(0)',
 					'&:hover': {
 						borderColor: 'rgba(6, 182, 212, 0.6)',
 						boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)',
+						transform: 'translateY(-4px)',
 						'&::before': {
 							opacity: 1,
 						},
@@ -168,6 +170,6 @@ export default function StatsCard({
 					)}
 				</CardContent>
 			</Card>
-		</motion.div>
+		</Fade>
 	);
 }

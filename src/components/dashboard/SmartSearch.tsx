@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   FilterAlt, 
@@ -27,7 +26,8 @@ import {
   Box,
   Typography,
   Collapse,
-  CircularProgress
+  CircularProgress,
+  Fade
 } from '@mui/material';
 
 interface SmartSearchProps {
@@ -529,11 +529,7 @@ export default function SmartSearch({
           </Box>
 
           {/* Filter Summary */}
-          {hasActiveFilters && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
+          <Fade in={hasActiveFilters} timeout={300}>
               <Box
                 sx={{
                   mt: 2,
@@ -598,8 +594,7 @@ export default function SmartSearch({
                   </Box>
                 </Box>
               </Box>
-            </motion.div>
-          )}
+          </Fade>
         </Box>
       </Collapse>
     </Box>

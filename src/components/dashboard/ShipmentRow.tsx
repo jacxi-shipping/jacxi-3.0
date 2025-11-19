@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Visibility, Edit, ArrowForward, CreditCard } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip, Button, LinearProgress } from '@mui/material';
+import { Card, CardContent, Box, Typography, Chip, Button, LinearProgress, Fade } from '@mui/material';
+import { useState, useEffect } from 'react';
 
 interface ShipmentRowProps {
 	id: string;
@@ -83,14 +83,15 @@ export default function ShipmentRow({
 }: ShipmentRowProps) {
 	const statusConfig = statusColors[status] || statusColors.PENDING;
 	const paymentConfig = paymentStatus ? (paymentStatusColors[paymentStatus] || paymentStatusColors.PENDING) : null;
+	const [isVisible, setIsVisible] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setIsVisible(true), delay * 1000);
+		return () => clearTimeout(timer);
+	}, [delay]);
 
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 20 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.5, delay }}
-			whileHover={{ y: -2 }}
-		>
+		<Fade in={isVisible} timeout={500}>
 			<Card
 				sx={{
 					background: 'rgba(10, 22, 40, 0.5)',
@@ -101,9 +102,11 @@ export default function ShipmentRow({
 					position: 'relative',
 					overflow: 'hidden',
 					transition: 'all 0.3s ease',
+					transform: 'translateY(0)',
 					'&:hover': {
 						borderColor: 'rgba(6, 182, 212, 0.6)',
 						boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)',
+						transform: 'translateY(-2px)',
 						'&::before': {
 							opacity: 1,
 						},
@@ -374,10 +377,14 @@ export default function ShipmentRow({
 									{progress}%
 								</Typography>
 							</Box>
-							<motion.div
-								initial={{ width: 0 }}
-								animate={{ width: '100%' }}
-								transition={{ duration: 1, delay: delay + 0.2 }}
+							<Box
+								sx={{
+									'@keyframes progressExpand': {
+										from: { width: 0 },
+										to: { width: '100%' },
+									},
+									animation: isVisible ? 'progressExpand 1s ease-out' : 'none',
+								}}
 							>
 								<LinearProgress
 									variant="determinate"
@@ -401,11 +408,11 @@ export default function ShipmentRow({
 										},
 									}}
 								/>
-							</motion.div>
+							</Box>
 						</Box>
 					</Box>
 				</CardContent>
 			</Card>
-		</motion.div>
+		</Fade>
 	);
 }
