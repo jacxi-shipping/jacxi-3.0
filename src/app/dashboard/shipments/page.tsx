@@ -2,7 +2,6 @@
 
 import { useSession } from 'next-auth/react';
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Add, ChevronLeft, ChevronRight, Inventory2 } from '@mui/icons-material';
 import { Button, Box, CircularProgress, Typography } from '@mui/material';
@@ -106,26 +105,16 @@ export default function ShipmentsListPage() {
 
 				<div className="relative z-10">
 					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6 }}
-							className="space-y-1 sm:space-y-2 max-w-full"
-						>
+						<div className="space-y-1 sm:space-y-2 max-w-full">
 							<h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight break-words">
 								Shipments Management
 							</h1>
 							<p className="text-sm sm:text-lg md:text-xl text-white/70">
 								Manage and track all shipments
 							</p>
-						</motion.div>
+						</div>
 						{isAdmin && (
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.6, delay: 0.2 }}
-								className="w-full sm:w-auto"
-							>
+							<div className="w-full sm:w-auto">
 								<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
 									<Button
 										variant="contained"
@@ -150,7 +139,7 @@ export default function ShipmentsListPage() {
 										New Shipment
 									</Button>
 								</Link>
-							</motion.div>
+							</div>
 						)}
 					</div>
 				</div>
@@ -159,12 +148,7 @@ export default function ShipmentsListPage() {
 			{/* Main Content */}
 			<Section className="bg-[#020817] py-6 sm:py-12">
 				{/* Smart Search & Filters */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.6, delay: 0.3 }}
-					className="mb-6 sm:mb-8"
-				>
+				<div className="mb-6 sm:mb-8">
 					<SmartSearch
 						onSearch={handleSearch}
 						placeholder="Search shipments by tracking number, VIN, origin, destination..."
@@ -175,7 +159,7 @@ export default function ShipmentsListPage() {
 						showUserFilter={isAdmin}
 						defaultType="shipments"
 					/>
-				</motion.div>
+				</div>
 
 				{/* Shipments List */}
 				{loading ? (
@@ -274,14 +258,9 @@ export default function ShipmentsListPage() {
 							))}
 						</div>
 
-						{/* Pagination */}
-						{totalPages > 1 && (
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.6, delay: 0.5 }}
-							>
-								<Box
+					{/* Pagination */}
+					{totalPages > 1 && (
+						<Box
 									sx={{
 										mt: { xs: 3, sm: 4 },
 										display: 'flex',
@@ -351,7 +330,7 @@ export default function ShipmentsListPage() {
 										Next
 									</Button>
 								</Box>
-							</motion.div>
+						</Box>
 						)}
 					</>
 				)}
