@@ -330,7 +330,6 @@ export default function ShipmentsListPage() {
 										Next
 									</Button>
 								</Box>
-						</Box>
 						)}
 					</>
 				)}
