@@ -2,16 +2,22 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Plus, Package, FileText, Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Add, Search, Inventory2, Description } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, SvgIcon } from '@mui/material';
 
 const actions = [
 	{
-		icon: Plus,
+		icon: Add,
 		title: 'New Shipment',
 		description: 'Create a new shipping request',
 		href: '/dashboard/shipments/new',
 		color: 'cyan',
+		colorValues: {
+			border: 'rgba(6, 182, 212, 0.3)',
+			borderHover: 'rgba(6, 182, 212, 0.6)',
+			text: 'rgb(34, 211, 238)',
+			bgHover: 'rgba(6, 182, 212, 0.1)',
+		},
 	},
 	{
 		icon: Search,
@@ -19,20 +25,38 @@ const actions = [
 		description: 'Track an existing shipment',
 		href: '/dashboard/tracking',
 		color: 'blue',
+		colorValues: {
+			border: 'rgba(59, 130, 246, 0.3)',
+			borderHover: 'rgba(59, 130, 246, 0.6)',
+			text: 'rgb(96, 165, 250)',
+			bgHover: 'rgba(59, 130, 246, 0.1)',
+		},
 	},
 	{
-		icon: Package,
+		icon: Inventory2,
 		title: 'All Shipments',
 		description: 'View all your shipments',
 		href: '/dashboard/shipments',
 		color: 'purple',
+		colorValues: {
+			border: 'rgba(139, 92, 246, 0.3)',
+			borderHover: 'rgba(139, 92, 246, 0.6)',
+			text: 'rgb(167, 139, 250)',
+			bgHover: 'rgba(139, 92, 246, 0.1)',
+		},
 	},
 	{
-		icon: FileText,
+		icon: Description,
 		title: 'Documents',
 		description: 'Manage shipping documents',
 		href: '/dashboard/documents',
 		color: 'green',
+		colorValues: {
+			border: 'rgba(34, 197, 94, 0.3)',
+			borderHover: 'rgba(34, 197, 94, 0.6)',
+			text: 'rgb(74, 222, 128)',
+			bgHover: 'rgba(34, 197, 94, 0.1)',
+		},
 	},
 ];
 
@@ -43,68 +67,166 @@ export default function QuickActions() {
 			whileInView={{ opacity: 1, y: 0 }}
 			viewport={{ once: true }}
 			transition={{ duration: 0.6 }}
-			className="space-y-3 sm:space-y-4 md:space-y-5"
 		>
-			<div>
-				<h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2">
+			<Box sx={{ mb: { xs: 1.5, sm: 2, md: 2.5 } }}>
+				<Typography
+					variant="h5"
+					sx={{
+						fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.875rem' },
+						fontWeight: 700,
+						color: 'white',
+						mb: { xs: 0.5, sm: 1 },
+					}}
+				>
 					Quick Actions
-				</h2>
-				<p className="text-xs sm:text-sm md:text-base text-white/70">
+				</Typography>
+				<Typography
+					variant="body2"
+					sx={{
+						fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+						color: 'rgba(255, 255, 255, 0.7)',
+					}}
+				>
 					Common tasks
-				</p>
-			</div>
+				</Typography>
+			</Box>
 
-			<div className="grid grid-cols-2 lg:grid-cols-1 gap-2 sm:gap-3 md:gap-4">
+			<Box
+				sx={{
+					display: 'grid',
+					gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: '1fr' },
+					gap: { xs: 1, sm: 1.5, md: 2 },
+				}}
+			>
 				{actions.map((action, index) => {
 					const Icon = action.icon;
-					const colorClasses = {
-						cyan: 'border-cyan-500/30 hover:border-cyan-500/60 text-cyan-400 hover:bg-cyan-500/10',
-						blue: 'border-blue-500/30 hover:border-blue-500/60 text-blue-400 hover:bg-blue-500/10',
-						purple: 'border-purple-500/30 hover:border-purple-500/60 text-purple-400 hover:bg-purple-500/10',
-						green: 'border-green-500/30 hover:border-green-500/60 text-green-400 hover:bg-green-500/10',
-					};
+					const { border, borderHover, text, bgHover } = action.colorValues;
 
 					return (
-						<Link key={action.title} href={action.href} className="block">
+						<Link key={action.title} href={action.href} style={{ textDecoration: 'none' }}>
 							<motion.div
 								initial={{ opacity: 0, y: 20 }}
 								whileInView={{ opacity: 1, y: 0 }}
 								viewport={{ once: true }}
 								transition={{ duration: 0.5, delay: index * 0.1 }}
 								whileHover={{ y: -4, scale: 1.02 }}
-								className={cn(
-									'group relative rounded-lg bg-[#0a1628]/60 backdrop-blur-sm border p-3 sm:p-4 md:p-5',
-									'hover:shadow-lg transition-all duration-300 cursor-pointer',
-									'h-[100px] sm:h-[120px] lg:h-auto lg:min-h-[140px]',
-									'w-full flex flex-col',
-									colorClasses[action.color as keyof typeof colorClasses]
-								)}
 							>
-								{/* Glowing border effect on hover */}
-								<div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-								<div className="relative z-10 flex flex-col h-full">
-									<div className="mb-2 sm:mb-3">
-										<div className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg bg-[#020817] border border-current/40 flex items-center justify-center group-hover:border-current/80 transition-colors duration-300">
-											<div className="absolute inset-0 rounded-lg bg-current/10 blur-md group-hover:bg-current/20 transition-all duration-300" />
-											<Icon className="relative w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-current group-hover:scale-110 transition-transform duration-300" strokeWidth={1.5} />
-										</div>
-									</div>
-									<div className="flex-1">
-										<h3 className="text-sm sm:text-base md:text-lg font-semibold text-white mb-0.5 sm:mb-1 line-clamp-1">
-											{action.title}
-										</h3>
-										<p className="text-[10px] sm:text-xs md:text-sm text-white/70 line-clamp-2">
-											{action.description}
-										</p>
-									</div>
-								</div>
+								<Card
+									sx={{
+										position: 'relative',
+										background: 'rgba(10, 22, 40, 0.6)',
+										backdropFilter: 'blur(8px)',
+										border: `1px solid ${border}`,
+										borderRadius: 2,
+										p: { xs: 1.5, sm: 2, md: 2.5 },
+										height: { xs: '100px', sm: '120px', lg: 'auto' },
+										minHeight: { lg: '140px' },
+										cursor: 'pointer',
+										transition: 'all 0.3s ease',
+										overflow: 'hidden',
+										'&:hover': {
+											borderColor: borderHover,
+											bgcolor: bgHover,
+											boxShadow: `0 8px 16px ${border}`,
+											'&::before': {
+												opacity: 1,
+											},
+										},
+										'&::before': {
+											content: '""',
+											position: 'absolute',
+											inset: 0,
+											background: `linear-gradient(90deg, ${border}00 0%, ${border} 50%, ${border}00 100%)`,
+											opacity: 0,
+											transition: 'opacity 0.3s ease',
+										},
+									}}
+								>
+									<CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+										<Box sx={{ mb: { xs: 1, sm: 1.5 } }}>
+											<Box
+												sx={{
+													position: 'relative',
+													width: { xs: 32, sm: 40, md: 48 },
+													height: { xs: 32, sm: 40, md: 48 },
+													borderRadius: 2,
+													bgcolor: '#020817',
+													border: `1px solid ${border}`,
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													transition: 'all 0.3s ease',
+													'&:hover': {
+														borderColor: borderHover,
+													},
+													'&::before': {
+														content: '""',
+														position: 'absolute',
+														inset: 0,
+														borderRadius: 2,
+														bgcolor: text,
+														opacity: 0.1,
+														filter: 'blur(8px)',
+														transition: 'all 0.3s ease',
+													},
+													'&:hover::before': {
+														opacity: 0.2,
+													},
+												}}
+											>
+												<SvgIcon
+													component={Icon}
+													sx={{
+														position: 'relative',
+														fontSize: { xs: 16, sm: 20, md: 24 },
+														color: text,
+														transition: 'transform 0.3s ease',
+														'&:hover': {
+															transform: 'scale(1.1)',
+														},
+													}}
+												/>
+											</Box>
+										</Box>
+										<Box sx={{ flex: 1 }}>
+											<Typography
+												variant="h6"
+												sx={{
+													fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
+													fontWeight: 600,
+													color: 'white',
+													mb: { xs: 0.25, sm: 0.5 },
+													overflow: 'hidden',
+													textOverflow: 'ellipsis',
+													display: '-webkit-box',
+													WebkitLineClamp: 1,
+													WebkitBoxOrient: 'vertical',
+												}}
+											>
+												{action.title}
+											</Typography>
+											<Typography
+												variant="body2"
+												sx={{
+													fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
+													color: 'rgba(255, 255, 255, 0.7)',
+													overflow: 'hidden',
+													textOverflow: 'ellipsis',
+													display: '-webkit-box',
+													WebkitLineClamp: 2,
+													WebkitBoxOrient: 'vertical',
+												}}
+											>
+												{action.description}
+											</Typography>
+										</Box>
+									</CardContent>
+								</Card>
 							</motion.div>
 						</Link>
 					);
 				})}
-			</div>
+			</Box>
 		</motion.div>
 	);
 }
-
