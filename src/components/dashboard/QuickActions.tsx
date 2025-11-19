@@ -69,36 +69,37 @@ export default function QuickActions() {
 
 	return (
 		<Fade in={isVisible} timeout={600}>
-			<Box sx={{ mb: { xs: 1.5, sm: 2, md: 2.5 } }}>
-				<Typography
-					variant="h5"
-					sx={{
-						fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.875rem' },
-						fontWeight: 700,
-						color: 'white',
-						mb: { xs: 0.5, sm: 1 },
-					}}
-				>
-					Quick Actions
-				</Typography>
-				<Typography
-					variant="body2"
-					sx={{
-						fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-						color: 'rgba(255, 255, 255, 0.7)',
-					}}
-				>
-					Common tasks
-				</Typography>
-			</Box>
+			<Box>
+				<Box sx={{ mb: { xs: 1.5, sm: 2, md: 2.5 } }}>
+					<Typography
+						variant="h5"
+						sx={{
+							fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.875rem' },
+							fontWeight: 700,
+							color: 'white',
+							mb: { xs: 0.5, sm: 1 },
+						}}
+					>
+						Quick Actions
+					</Typography>
+					<Typography
+						variant="body2"
+						sx={{
+							fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+							color: 'rgba(255, 255, 255, 0.7)',
+						}}
+					>
+						Common tasks
+					</Typography>
+				</Box>
 
-			<Box
-				sx={{
-					display: 'grid',
-					gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: '1fr' },
-					gap: { xs: 1, sm: 1.5, md: 2 },
-				}}
-			>
+				<Box
+					sx={{
+						display: 'grid',
+						gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: '1fr' },
+						gap: { xs: 1, sm: 1.5, md: 2 },
+					}}
+				>
 				{actions.map((action, index) => {
 					const Icon = action.icon;
 					const { border, borderHover, text, bgHover } = action.colorValues;
@@ -116,6 +117,7 @@ export default function QuickActions() {
 						/>
 					);
 				})}
+				</Box>
 			</Box>
 		</Fade>
 	);
