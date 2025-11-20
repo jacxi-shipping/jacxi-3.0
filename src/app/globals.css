@@ -692,6 +692,18 @@ button[class*="bg-"] {
   background-clip: text;
 }
 
+/* Dashboard Layout Helpers */
+.dashboard-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.dashboard-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;

@@ -4,11 +4,11 @@ import { useSession } from 'next-auth/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Add, Inventory2, TrendingUp, LocalShipping, LocationOn } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography, Fade, Slide, Zoom } from '@mui/material';
+import { Button, Box, CircularProgress, Typography } from '@mui/material';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ShipmentCard from '@/components/dashboard/ShipmentCard';
 import QuickActions from '@/components/dashboard/QuickActions';
-import Section from '@/components/layout/Section';
+import { DashboardSurface, DashboardHeader, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
 interface Shipment {
 	id: string;
@@ -103,247 +103,126 @@ export default function DashboardPage() {
 	const recentShipments = useMemo(() => shipments.slice(0, 3), [shipments]);
 
 	return (
-		<>
+		<DashboardSurface>
+			<DashboardHeader
+				title="Mission control"
+				description="Live overview of shipment health and the next actions that need your attention."
+				meta={[
+					{ label: 'Active', value: stats.active, helper: 'moving now', intent: 'positive' },
+					{ label: 'In transit', value: stats.inTransit },
+					{ label: 'Delivered', value: stats.delivered, intent: 'positive' },
+					{ label: 'Total', value: stats.total },
+				]}
+				actions={
+					<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
+						<Button
+							variant="contained"
+							size="small"
+							startIcon={<Add fontSize="small" />}
+							sx={{
+								textTransform: 'none',
+								backgroundColor: '#00bcd4',
+								fontSize: '0.8rem',
+								fontWeight: 600,
+								px: 2.5,
+								py: 0.75,
+								'&:hover': {
+									backgroundColor: '#00a4bb',
+								},
+							}}
+						>
+							New shipment
+						</Button>
+					</Link>
+				}
+			/>
 
-			{/* Main Content */}
-			<Section className="bg-[#020817] py-2 sm:py-3">
-				{/* Stats Grid */}
-				<Box
-					sx={{
-						display: 'grid',
-					gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' },
-					gap: 1.5,
-					mb: 3,
-					}}
-				>
-					<StatsCard
-						icon={LocalShipping}
-						title="Active Shipments"
-						value={stats.active}
-						subtitle="Currently in progress"
-						delay={0}
-					/>
-					<StatsCard
-						icon={Inventory2}
-						title="In Transit"
-						value={stats.inTransit}
-						subtitle="On the way"
-						delay={0.1}
-					/>
-					<StatsCard
-						icon={LocationOn}
-						title="Total Shipments"
-						value={stats.total}
-						subtitle="All time"
-						delay={0.2}
-					/>
-					<StatsCard
-						icon={TrendingUp}
-						title="Delivered"
-						value={stats.delivered}
-						subtitle="Successfully completed"
-						delay={0.3}
-					/>
-				</Box>
+			<DashboardGrid className="grid-cols-2 md:grid-cols-4">
+				<StatsCard icon={LocalShipping} title="Active shipments" value={stats.active} subtitle="In progress" />
+				<StatsCard icon={Inventory2} title="In transit" value={stats.inTransit} subtitle="On the move" />
+				<StatsCard icon={LocationOn} title="Total shipments" value={stats.total} subtitle="All-time" />
+				<StatsCard icon={TrendingUp} title="Delivered" value={stats.delivered} subtitle="Completed" />
+			</DashboardGrid>
 
-				{/* Content Grid */}
-				<Box
-					sx={{
-						display: 'grid',
-					gridTemplateColumns: { xs: '1fr', lg: 'repeat(3, 1fr)' },
-					gap: 2,
-					}}
-				>
-					{/* Recent Shipments */}
-					<Box
-						sx={{
-							gridColumn: { xs: '1', lg: 'span 2' },
-							display: 'flex',
-							flexDirection: 'column',
-							gap: 2,
-						}}
-					>
-						<Fade in={showContent} timeout={800} style={{ transitionDelay: '600ms' }}>
-							<Box
-								sx={{
-									display: 'flex',
-									flexDirection: { xs: 'column', sm: 'row' },
-									alignItems: { xs: 'flex-start', sm: 'center' },
-									justifyContent: 'space-between',
-									gap: 1.5,
-								}}
-							>
-								<Box sx={{ flex: 1, minWidth: 0 }}>
-									<Typography
-										variant="h5"
-										sx={{
-											fontSize: '1.125rem',
-											fontWeight: 700,
-											background: 'linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(200, 220, 255) 100%)',
-											WebkitBackgroundClip: 'text',
-											WebkitTextFillColor: 'transparent',
-											backgroundClip: 'text',
-											mb: { xs: 0.75, sm: 1 },
-											letterSpacing: '-0.02em',
-										}}
-									>
-										Recent Shipments
-									</Typography>
-									<Typography
-										variant="body2"
-										sx={{
-											fontSize: '0.8125rem',
-											color: 'rgba(255, 255, 255, 0.7)',
-											fontWeight: 500,
-										}}
-									>
-										Your latest activity
-									</Typography>
-								</Box>
-								{shipments.length > 0 && (
-									<Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
-										<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-											<Button
-												variant="outlined"
-												size="medium"
-												sx={{
-													fontSize: { xs: '0.875rem', sm: '1rem' },
-													fontWeight: 600,
-													borderColor: 'rgba(6, 182, 212, 0.4)',
-													background: 'rgba(6, 182, 212, 0.05)',
-													color: 'rgb(34, 211, 238)',
-													width: { xs: '100%', sm: 'auto' },
-													px: { xs: 3, sm: 4 },
-													py: { xs: 1.25, sm: 1.5 },
-													borderRadius: 2.5,
-													transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-													'&:hover': {
-														background: 'rgba(6, 182, 212, 0.15)',
-														borderColor: 'rgba(6, 182, 212, 0.6)',
-														boxShadow: '0 0 30px rgba(6, 182, 212, 0.3)',
-														transform: 'translateY(-2px)',
-													},
-												}}
-											>
-												View All
-											</Button>
-										</Link>
-									</Box>
-								)}
-							</Box>
-						</Fade>
-
-						{loading ? (
-							<Fade in timeout={600}>
-								<Box
+			<DashboardGrid className="lg:grid-cols-[minmax(0,2.2fr)_minmax(0,0.8fr)]">
+				<DashboardPanel
+					title="Recent shipments"
+					description="The latest files updated in the last sync."
+					fullHeight
+					actions={
+						shipments.length > 0 ? (
+							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
+								<Button
+									variant="outlined"
+									size="small"
 									sx={{
-										position: 'relative',
-										borderRadius: 4,
-										background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.4) 100%)',
-										backdropFilter: 'blur(20px)',
-										border: '1px solid rgba(6, 182, 212, 0.2)',
-										p: 8,
-										textAlign: 'center',
+										textTransform: 'none',
+										borderColor: 'rgba(59,130,246,0.4)',
+										color: 'rgba(191,219,254,0.9)',
 									}}
 								>
-									<CircularProgress
-										size={60}
-										thickness={4}
-										sx={{
-											color: 'rgb(34, 211, 238)',
-											filter: 'drop-shadow(0 0 15px rgba(34, 211, 238, 0.5))',
-										}}
-									/>
-									<Typography
-										sx={{
-											mt: 3,
-											color: 'rgba(255, 255, 255, 0.7)',
-											fontSize: '1.125rem',
-											fontWeight: 600,
-										}}
-									>
-										Loading shipments...
-									</Typography>
-								</Box>
-							</Fade>
-						) : recentShipments.length === 0 ? (
-							<Zoom in timeout={800}>
-								<Box
+									Open board
+								</Button>
+							</Link>
+						) : null
+					}
+				>
+					{loading ? (
+						<Box sx={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+							<CircularProgress size={28} sx={{ color: 'rgb(94,234,212)' }} />
+						</Box>
+					) : recentShipments.length === 0 ? (
+						<Box
+							sx={{
+								minHeight: 220,
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+								justifyContent: 'center',
+								gap: 1,
+								textAlign: 'center',
+							}}
+						>
+							<Inventory2 sx={{ fontSize: 40, color: 'rgba(255,255,255,0.25)' }} />
+							<Typography sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)' }}>
+								No shipments yet
+							</Typography>
+							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
+								<Button
+									variant="contained"
+									size="small"
+									startIcon={<Add fontSize="small" />}
 									sx={{
-										position: 'relative',
-										borderRadius: 4,
-										background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.4) 100%)',
-										backdropFilter: 'blur(20px)',
-										border: '1px solid rgba(6, 182, 212, 0.2)',
-										p: 8,
-										textAlign: 'center',
+										textTransform: 'none',
+										backgroundColor: '#00bcd4',
+										fontSize: '0.78rem',
+										fontWeight: 600,
+										mt: 0.5,
 									}}
 								>
-									<Inventory2
-										sx={{
-											fontSize: 80,
-											color: 'rgba(255, 255, 255, 0.2)',
-											mb: 3,
-											filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.1))',
-										}}
-									/>
-									<Typography
-										sx={{
-											color: 'rgba(255, 255, 255, 0.8)',
-											fontSize: '1.25rem',
-											fontWeight: 600,
-											mb: 4,
-										}}
-									>
-										No shipments yet
-									</Typography>
-									<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
-										<Button
-											variant="contained"
-											startIcon={<Add />}
-											sx={{
-												background: 'linear-gradient(135deg, #00bfff 0%, #0099cc 100%)',
-												color: 'white',
-												fontWeight: 600,
-												fontSize: '1rem',
-												px: 4,
-												py: 1.5,
-												borderRadius: 2.5,
-												'&:hover': {
-													background: 'linear-gradient(135deg, #00d4ff 0%, #00bfff 100%)',
-													boxShadow: '0 10px 30px rgba(0, 191, 255, 0.4)',
-													transform: 'translateY(-2px)',
-												},
-											}}
-										>
-											Create Your First Shipment
-										</Button>
-									</Link>
-								</Box>
-							</Zoom>
-						) : (
-							<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3.5 } }}>
-								{recentShipments.map((shipment, index) => (
-									<ShipmentCard
-										key={shipment.id}
-										{...shipment}
-										delay={0.7 + index * 0.1}
-									/>
-								))}
-							</Box>
-						)}
-					</Box>
+									Create shipment
+								</Button>
+							</Link>
+						</Box>
+					) : (
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+							{recentShipments.map((shipment, index) => (
+								<ShipmentCard key={shipment.id} {...shipment} delay={0.2 + index * 0.05} />
+							))}
+						</Box>
+					)}
+				</DashboardPanel>
 
-					{/* Quick Actions */}
-					<Box
-						sx={{
-							gridColumn: { xs: '1', lg: 'span 1' },
-						}}
-					>
+				<DashboardPanel
+					title="Quick actions"
+					description="Launch routine workflows in one click."
+					noBodyPadding
+				>
+					<Box sx={{ px: 1.5, pb: 1.5, pt: 1.5 }}>
 						<QuickActions />
 					</Box>
-				</Box>
-			</Section>
-		</>
+				</DashboardPanel>
+			</DashboardGrid>
+		</DashboardSurface>
 	);
 }

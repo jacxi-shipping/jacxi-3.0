@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Add, Search, Inventory2, Description } from '@mui/icons-material';
-import { Box, Card, CardContent, Typography, Fade, Zoom } from '@mui/material';
+import { Box, Typography, Fade } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
 
 const actions = [
@@ -64,48 +64,44 @@ const actions = [
 	},
 ];
 
-export default function QuickActions() {
-	const show = true;
+type QuickActionsProps = {
+	showHeading?: boolean;
+};
 
+export default function QuickActions({ showHeading = false }: QuickActionsProps = {}) {
 	return (
-		<Fade in={show} timeout={600}>
+		<Fade in timeout={600}>
 			<Box>
-				<Box sx={{ mb: 1.5 }}>
-					<Typography
-						variant="h6"
-						sx={{
-							fontSize: '1rem',
-							fontWeight: 700,
-							color: 'white',
-							mb: 0.25,
-						}}
-					>
-						Quick Actions
-					</Typography>
-					<Typography
-						variant="body2"
-						sx={{
-							fontSize: '0.75rem',
-							color: 'rgba(255, 255, 255, 0.6)',
-						}}
-					>
-						Common tasks
-					</Typography>
-				</Box>
-
+				{showHeading && (
+					<Box sx={{ mb: 1 }}>
+						<Typography
+							sx={{
+								fontSize: '0.8rem',
+								textTransform: 'uppercase',
+								letterSpacing: '0.2em',
+								color: 'rgba(255,255,255,0.55)',
+							}}
+						>
+							Action Center
+						</Typography>
+						<Typography sx={{ fontSize: '0.85rem', color: 'white', fontWeight: 600 }}>
+							Start a workflow
+						</Typography>
+					</Box>
+				)}
 				<Box
 					sx={{
 						display: 'grid',
 						gridTemplateColumns: {
-							xs: '1fr',
-							sm: 'repeat(2, 1fr)',
-							lg: 'repeat(4, 1fr)',
+							xs: 'repeat(2, minmax(0, 1fr))',
+							sm: 'repeat(2, minmax(0, 1fr))',
+							md: 'repeat(2, minmax(0, 1fr))',
 						},
-						gap: 1.5,
+						gap: 1,
 					}}
 				>
-					{actions.map((action, index) => (
-						<ActionCard key={action.title} {...action} delay={index * 0.1} />
+					{actions.map((action) => (
+						<ActionCard key={action.title} {...action} />
 					))}
 				</Box>
 			</Box>
@@ -126,83 +122,74 @@ interface ActionCardProps {
 		bgHover: string;
 		glow: string;
 	};
-	delay: number;
 }
 
-function ActionCard({ icon: Icon, title, description, href, colorValues, delay }: ActionCardProps) {
+function ActionCard({ icon: Icon, title, description, href, colorValues }: ActionCardProps) {
 	return (
-		<Zoom in timeout={400} style={{ transitionDelay: `${delay * 1000}ms` }}>
-			<Link href={href} style={{ textDecoration: 'none' }}>
-				<Card
+		<Link href={href} style={{ textDecoration: 'none' }}>
+			<Box
+				sx={{
+					borderRadius: 2,
+					border: `1px solid ${colorValues.border}`,
+					background: 'rgba(4, 10, 22, 0.9)',
+					boxShadow: `0 12px 24px rgba(0,0,0,0.25)`,
+					padding: 1,
+					display: 'flex',
+					flexDirection: 'column',
+					gap: 0.5,
+					minHeight: 92,
+					transition: 'border-color 0.2s ease, transform 0.2s ease',
+					'&:hover': {
+						borderColor: colorValues.borderHover,
+						transform: 'translateY(-2px)',
+					},
+				}}
+			>
+				<Box
 					sx={{
-						height: '100%',
-						background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.4) 100%)',
-						backdropFilter: 'blur(20px)',
-						border: `1px solid ${colorValues.border}`,
-						borderRadius: 2,
-						p: 1.5,
-						cursor: 'pointer',
-						transition: 'all 0.3s ease',
-						'&:hover': {
-							borderColor: colorValues.borderHover,
-							boxShadow: `0 8px 20px ${colorValues.glow}`,
-							transform: 'translateY(-2px)',
-							'& .icon-box': {
-								transform: 'scale(1.05)',
-							},
-						},
+						display: 'flex',
+						alignItems: 'center',
+						gap: 0.75,
 					}}
 				>
-					<CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-						<Fade in timeout={400} style={{ transitionDelay: `${delay * 1000 + 200}ms` }}>
-							<Box
-								className="icon-box"
-								sx={{
-									width: 36,
-									height: 36,
-									borderRadius: 1.5,
-									background: `linear-gradient(135deg, ${colorValues.bgHover}, transparent)`,
-									border: `1px solid ${colorValues.border}`,
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									mb: 1,
-									transition: 'transform 0.3s ease',
-								}}
-							>
-								<Icon sx={{ fontSize: 18, color: colorValues.text }} />
-							</Box>
-						</Fade>
-
-						<Fade in timeout={400} style={{ transitionDelay: `${delay * 1000 + 300}ms` }}>
-							<Typography
-								variant="subtitle1"
-								sx={{
-									fontSize: '0.875rem',
-									fontWeight: 600,
-									color: 'white',
-									mb: 0.25,
-								}}
-							>
-								{title}
-							</Typography>
-						</Fade>
-
-						<Fade in timeout={400} style={{ transitionDelay: `${delay * 1000 + 400}ms` }}>
-							<Typography
-								variant="body2"
-								sx={{
-									fontSize: '0.6875rem',
-									color: 'rgba(255, 255, 255, 0.5)',
-									lineHeight: 1.4,
-								}}
-							>
-								{description}
-							</Typography>
-						</Fade>
-					</CardContent>
-				</Card>
-			</Link>
-		</Zoom>
+					<Box
+						sx={{
+							width: 28,
+							height: 28,
+							borderRadius: 1,
+							border: `1px solid ${colorValues.border}`,
+							background: colorValues.bgHover,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+						}}
+					>
+						<Icon sx={{ fontSize: 16, color: colorValues.text }} />
+					</Box>
+					<Typography
+						sx={{
+							fontSize: '0.78rem',
+							fontWeight: 600,
+							color: 'white',
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+						}}
+					>
+						{title}
+					</Typography>
+				</Box>
+				<Typography
+					sx={{
+						fontSize: '0.68rem',
+						color: 'rgba(255,255,255,0.55)',
+						lineHeight: 1.4,
+						flex: 1,
+					}}
+				>
+					{description}
+				</Typography>
+			</Box>
+		</Link>
 	);
 }

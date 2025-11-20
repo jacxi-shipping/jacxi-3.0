@@ -32,7 +32,7 @@ import {
 } from 'recharts';
 import { Box, Button, Typography, Fade, Slide, Zoom, CircularProgress } from '@mui/material';
 
-import Section from '@/components/layout/Section';
+import { DashboardSurface, DashboardHeader, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
 interface SummaryRow {
 	totalShipments: number;
@@ -238,165 +238,109 @@ export default function AnalyticsPage() {
 	}
 
 	return (
-		<>
-			<Section className="bg-[#020817] py-2 sm:py-3">
-				<Box sx={{ px: { xs: 2, sm: 3 } }}>
-					{error && (
-						<Fade in timeout={600}>
-							<Box
-								sx={{
-									borderRadius: 3,
-									border: '1px solid rgba(239, 68, 68, 0.3)',
-									background: 'rgba(239, 68, 68, 0.1)',
-									px: 3,
-									py: 2,
-									fontSize: '0.875rem',
-									color: 'rgb(248, 113, 113)',
-									backdropFilter: 'blur(10px)',
-									mb: 4,
-								}}
-							>
-								{error}
-							</Box>
-						</Fade>
-					)}
-
-					<Box
-						sx={{
-							display: 'grid',
-							gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', xl: 'repeat(3, 1fr)' },
-							gap: { xs: 3, sm: 4 },
-						}}
+		<DashboardSurface>
+			<DashboardHeader
+				title="Analytics"
+				description="Financial and operational intelligence updated in real time."
+				meta={[
+					{ label: 'Shipments', value: data.summary.totalShipments },
+					{ label: 'Revenue', value: formatCurrency(data.summary.totalRevenue), intent: 'positive' },
+					{ label: 'Admins', value: data.summary.adminUsers },
+				]}
+				actions={
+					<Button
+						variant="outlined"
+						size="small"
+						startIcon={<RefreshCcw size={14} />}
+						onClick={handleRefresh}
+						disabled={refreshing}
+						sx={{ textTransform: 'none', fontSize: '0.75rem' }}
 					>
-						{summaryCards.map((card, index) => {
-							const Icon = card.icon;
-							return (
-								<Zoom key={card.label} in={show} timeout={600} style={{ transitionDelay: `${(index + 2) * 100}ms` }}>
-									<Box
-										className={`rounded-xl border ${card.accent} backdrop-blur-md p-5 shadow-lg`}
-										sx={{
-											background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.4) 100%)',
-											transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-											'&:hover': {
-												transform: 'translateY(-4px)',
-												boxShadow: `0 20px 40px ${card.glow}`,
-											},
-										}}
-									>
-										<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-											<Box>
-												<Typography sx={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255, 255, 255, 0.6)', mb: 1.5 }}>
-													{card.label}
-												</Typography>
-												<Typography
-													sx={{
-														fontSize: { xs: '1.75rem', sm: '2rem' },
-														fontWeight: 700,
-														color: 'white',
-														mt: 1,
-													}}
-												>
-													{card.value}
-												</Typography>
-											</Box>
-											<Box
-												sx={{
-													borderRadius: 2.5,
-													background: 'rgba(0, 0, 0, 0.3)',
-													p: 1.5,
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'center',
-												}}
-											>
-												<Icon style={{ width: 24, height: 24, color: 'white' }} />
-											</Box>
-										</Box>
-										<Typography sx={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', mt: 2.5 }}>
-											{card.description}
+						Refresh
+					</Button>
+				}
+			/>
+
+			{error && (
+				<Box
+					sx={{
+						borderRadius: 2,
+						border: '1px solid rgba(239,68,68,0.3)',
+						background: 'rgba(239,68,68,0.08)',
+						px: 2.5,
+						py: 1.5,
+						color: 'rgb(248,113,113)',
+					}}
+				>
+					{error}
+				</Box>
+			)}
+
+			<DashboardGrid className="grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+				{summaryCards.map((card, index) => {
+					const Icon = card.icon;
+					return (
+						<Zoom key={card.label} in={show} timeout={600} style={{ transitionDelay: `${(index + 2) * 80}ms` }}>
+							<Box
+								className={`rounded-xl border ${card.accent} backdrop-blur-md p-4 shadow-lg`}
+								sx={{
+									background: 'rgba(4,10,22,0.85)',
+									minHeight: 140,
+									display: 'flex',
+									flexDirection: 'column',
+									gap: 1.5,
+								}}
+							>
+								<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+									<Box>
+										<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
+											{card.label}
 										</Typography>
+										<Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>{card.value}</Typography>
 									</Box>
-								</Zoom>
-							);
-						})}
-					</Box>
-				</Box>
-			</Section>
-
-			<Section className="bg-[#020817] py-4 sm:py-6">
-				<Box sx={{ maxWidth: '90rem', mx: 'auto', px: { xs: 2, sm: 3, lg: 4 } }}>
-					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' }, gap: { xs: 4, sm: 5 }, mb: { xs: 4, sm: 6 } }}>
-						<Slide in={show} direction="up" timeout={800} style={{ transitionDelay: '400ms' }}>
-							<Box
-								sx={{
-									borderRadius: 4,
-									border: '1px solid rgba(6, 182, 212, 0.3)',
-									background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.5) 100%)',
-									backdropFilter: 'blur(20px)',
-									p: { xs: 3, sm: 4 },
-									boxShadow: '0 10px 30px rgba(6, 182, 212, 0.1)',
-								}}
-							>
-								<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-									<Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-										<Activity style={{ width: 20, height: 20 }} />
-										Shipment volume (6 mo)
-									</Typography>
+									<Box sx={{ p: 1, borderRadius: 2, background: 'rgba(0,0,0,0.2)' }}>
+										<Icon style={{ width: 22, height: 22, color: 'white' }} />
+									</Box>
 								</Box>
-								<Box sx={{ height: 288 }}>
-									<ResponsiveContainer width="100%" height="100%">
-										<LineChart data={data.shipmentsByMonth}>
-											<CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-											<XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
-											<YAxis allowDecimals={false} stroke="#94a3b8" tickLine={false} axisLine={false} />
-											<Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }} />
-											<Line type="monotone" dataKey="count" stroke="#22d3ee" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-										</LineChart>
-									</ResponsiveContainer>
-								</Box>
+								<Typography sx={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)' }}>{card.description}</Typography>
 							</Box>
-						</Slide>
+						</Zoom>
+					);
+				})}
+			</DashboardGrid>
 
-						<Slide in={show} direction="up" timeout={800} style={{ transitionDelay: '500ms' }}>
-							<Box
-								sx={{
-									borderRadius: 4,
-									border: '1px solid rgba(168, 85, 247, 0.3)',
-									background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.5) 100%)',
-									backdropFilter: 'blur(20px)',
-									p: { xs: 3, sm: 4 },
-									boxShadow: '0 10px 30px rgba(168, 85, 247, 0.1)',
-								}}
-							>
-								<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-									<Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'white', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-										<BarChart3 style={{ width: 20, height: 20 }} />
-										Revenue (USD, 6 mo)
-									</Typography>
-									<Typography sx={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.4)' }}>Includes paid invoices</Typography>
-								</Box>
-								<Box sx={{ height: 288 }}>
-									<ResponsiveContainer width="100%" height="100%">
-										<BarChart data={data.revenueByMonth}>
-											<CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-											<XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
-											<YAxis tickFormatter={(value) => `${Math.round(value / 1000)}k`} stroke="#94a3b8" tickLine={false} axisLine={false} />
-											<Tooltip
-												contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #312e81', borderRadius: '8px' }}
-												formatter={(value: number) => formatCurrency(value)}
-											/>
-											<Bar dataKey="totalUSD" fill="#a855f7" radius={[8, 8, 0, 0]} />
-										</BarChart>
-									</ResponsiveContainer>
-								</Box>
-							</Box>
-						</Slide>
+			<DashboardGrid className="lg:grid-cols-2">
+				<DashboardPanel title="Shipment volume" description="Six month rolling window" fullHeight>
+					<Box sx={{ height: 300 }}>
+						<ResponsiveContainer width="100%" height="100%">
+							<LineChart data={data.shipmentsByMonth}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+								<XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+								<YAxis allowDecimals={false} stroke="#94a3b8" tickLine={false} axisLine={false} />
+								<Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: 8 }} />
+								<Line type="monotone" dataKey="count" stroke="#22d3ee" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+							</LineChart>
+						</ResponsiveContainer>
 					</Box>
+				</DashboardPanel>
 
-					{/* Additional charts and tables would continue with similar enhancements */}
-					{/* For brevity, keeping the rest of the structure similar */}
-				</Box>
-			</Section>
-		</>
+				<DashboardPanel title="Revenue (USD)" description="Paid invoices (six months)" fullHeight>
+					<Box sx={{ height: 300 }}>
+						<ResponsiveContainer width="100%" height="100%">
+							<BarChart data={data.revenueByMonth}>
+								<CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+								<XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+								<YAxis tickFormatter={(value) => `${Math.round(value / 1000)}k`} stroke="#94a3b8" tickLine={false} axisLine={false} />
+								<Tooltip
+									contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #312e81', borderRadius: 8 }}
+									formatter={(value: number) => formatCurrency(value)}
+								/>
+								<Bar dataKey="totalUSD" fill="#a855f7" radius={[6, 6, 0, 0]} />
+							</BarChart>
+						</ResponsiveContainer>
+					</Box>
+				</DashboardPanel>
+			</DashboardGrid>
+		</DashboardSurface>
 	);
 }

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { User, Mail, Shield, Users, UserPlus, Calendar, Eye, EyeOff, Key, Copy, Check, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import Section from '@/components/layout/Section';
+import { DashboardSurface, DashboardHeader, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
 
 interface UserData {
@@ -138,8 +138,16 @@ export default function UsersPage() {
 	}
 
 	return (
-		<>
-			{/* Header */}
+		<DashboardSurface>
+			<DashboardHeader
+				title="Users"
+				description="Search, review, and manage every account."
+				meta={[
+					{ label: 'Total', value: stats.total },
+					{ label: 'Admins', value: stats.admins },
+				]}
+			/>
+			<DashboardPanel title="Team directory" description="All users in one view" fullHeight>
 			<Section className="relative bg-[#020817] py-6 sm:py-12 lg:py-16 overflow-hidden">
 				{/* Background gradient */}
 				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
@@ -425,7 +433,8 @@ export default function UsersPage() {
 					)}
 				</motion.div>
 			</Section>
-		</>
+			</DashboardPanel>
+		</DashboardSurface>
 	);
 }
 

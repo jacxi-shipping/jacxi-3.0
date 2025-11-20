@@ -176,10 +176,17 @@ export default function DocumentsPage() {
 	}
 
 	return (
-		<>
-			<Section className="bg-[#020817] py-2 sm:py-3">
-				<Box sx={{ px: { xs: 2, sm: 3 } }}>
-
+		<DashboardSurface>
+			<DashboardHeader
+				title="Documents"
+				description="Templates, uploads, and compliance artifacts managed centrally."
+				meta={[
+					{ label: 'Categories', value: categories.length },
+					{ label: 'Required', value: pendingDocumentsCount },
+				]}
+			/>
+			<DashboardPanel title="Snapshot" description="Quick glance at activity" noBodyPadding>
+				<Box sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -203,8 +210,9 @@ export default function DocumentsPage() {
 						</div>
 					</motion.div>
 				</Box>
-			</Section>
+			</DashboardPanel>
 
+			<DashboardPanel title="Document library" description="Search and manage every document">
 			<Section className="bg-[#020817] py-4 sm:py-6">
 				<div className="max-w-6xl mx-auto space-y-10">
 					<motion.div
@@ -329,7 +337,8 @@ export default function DocumentsPage() {
 					)}
 				</div>
 			</Section>
-		</>
+			</DashboardPanel>
+		</DashboardSurface>
 	);
 }
 

@@ -43,11 +43,21 @@ export default function DashboardLayout({
 						sx={{
 							flexGrow: 1,
 							minWidth: 0,
-							overflow: 'auto',
 							height: 'calc(100vh - 48px)',
+							bgcolor: '#01060f',
+							backgroundImage: 'radial-gradient(circle at top, rgba(15, 118, 255, 0.08), transparent 40%)',
 						}}
 					>
-						{children}
+						<Box
+							sx={{
+								height: '100%',
+								display: 'flex',
+								flexDirection: 'column',
+								overflow: 'hidden',
+							}}
+						>
+							<div className="dashboard-scroll">{children}</div>
+						</Box>
 					</Box>
 				</Box>
 			</Box>

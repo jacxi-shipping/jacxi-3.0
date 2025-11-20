@@ -93,357 +93,170 @@ export default function ShipmentRow({
 
 	return (
 		<Slide in={isVisible} direction="up" timeout={600}>
-			<Card
+			<Box
+				component="article"
 				sx={{
-					background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.9) 0%, rgba(10, 22, 40, 0.6) 100%)',
-					backdropFilter: 'blur(20px)',
-					border: '1px solid rgba(6, 182, 212, 0.2)',
-					borderRadius: { xs: 3, sm: 4 },
-					p: { xs: 2.5, sm: 3.5, md: 4 },
-					position: 'relative',
-					overflow: 'hidden',
-					transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-					transform: 'translateY(0)',
-					'&:hover': {
-						borderColor: 'rgba(6, 182, 212, 0.5)',
-						boxShadow: '0 20px 40px rgba(6, 182, 212, 0.25)',
-						transform: 'translateY(-4px)',
-						'&::before': {
-							opacity: 1,
-						},
-						'& .action-button': {
-							transform: 'translateX(2px)',
-						},
+					background: 'rgba(3, 7, 18, 0.85)',
+					border: '1px solid rgba(148, 163, 184, 0.24)',
+					borderRadius: 2,
+					boxShadow: '0 18px 36px rgba(0, 0, 0, 0.4)',
+					padding: { xs: 1.5, md: 1.75 },
+					display: 'grid',
+					gridTemplateColumns: {
+						xs: '1fr',
+						md: 'minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1fr) auto',
 					},
-					'&::before': {
-						content: '""',
-						position: 'absolute',
-						inset: 0,
-						background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(6, 182, 212, 0.05) 50%, rgba(6, 182, 212, 0) 100%)',
-						opacity: 0,
-						transition: 'opacity 0.4s ease',
-					},
+					gap: { xs: 1.25, md: 1.5 },
+					alignItems: 'center',
 				}}
 			>
-				<CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, position: 'relative', zIndex: 1 }}>
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 2.5 } }}>
-						{/* Header Row */}
-						<Box
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+					<Typography
+						sx={{
+							fontSize: '0.9rem',
+							fontWeight: 600,
+							color: 'white',
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
+						}}
+					>
+						{trackingNumber}
+					</Typography>
+					<Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)' }}>
+						Created {new Date(createdAt).toLocaleDateString()}
+					</Typography>
+					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+						<Chip
+							label={formatStatus(status)}
+							size="small"
 							sx={{
-								display: 'flex',
-								flexDirection: { xs: 'column', sm: 'row' },
-								alignItems: { xs: 'flex-start', sm: 'center' },
-								justifyContent: 'space-between',
-								gap: { xs: 2, sm: 2.5 },
+								height: 20,
+								fontSize: '0.65rem',
+								fontWeight: 600,
+								bgcolor: statusConfig.bg,
+								color: statusConfig.text,
+								borderColor: statusConfig.border,
 							}}
-						>
-							<Box sx={{ flex: 1, minWidth: 0 }}>
-								<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
-									<Typography
-										variant="h6"
-										sx={{
-											fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.375rem' },
-											fontWeight: 700,
-											background: 'linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(200, 220, 255) 100%)',
-											WebkitBackgroundClip: 'text',
-											WebkitTextFillColor: 'transparent',
-											backgroundClip: 'text',
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-											whiteSpace: 'nowrap',
-											maxWidth: { xs: '200px', sm: 'none' },
-										}}
-									>
-										{trackingNumber}
-									</Typography>
-									<Chip
-										label={formatStatus(status)}
-										size="small"
-										sx={{
-											fontSize: { xs: '0.6875rem', sm: '0.75rem' },
-											fontWeight: 600,
-											height: 'auto',
-											py: 0.75,
-											px: 1.5,
-											bgcolor: statusConfig.bg,
-											color: statusConfig.text,
-											border: `1px solid ${statusConfig.border}`,
-											boxShadow: `0 0 15px ${statusConfig.glow}`,
-											flexShrink: 0,
-											transition: 'all 0.3s ease',
-											'&:hover': {
-												transform: 'scale(1.05)',
-											},
-										}}
-									/>
-									{paymentStatus && paymentConfig && (
-										<Chip
-											icon={<CreditCard sx={{ fontSize: 14, color: paymentConfig.text }} />}
-											label={formatStatus(paymentStatus)}
-											size="small"
-											sx={{
-												fontSize: { xs: '0.6875rem', sm: '0.75rem' },
-												fontWeight: 600,
-												height: 'auto',
-												py: 0.75,
-												px: 1.5,
-												bgcolor: paymentConfig.bg,
-												color: paymentConfig.text,
-												border: `1px solid ${paymentConfig.border}`,
-												boxShadow: `0 0 15px ${paymentConfig.glow}`,
-												flexShrink: 0,
-												transition: 'all 0.3s ease',
-												'&:hover': {
-													transform: 'scale(1.05)',
-												},
-											}}
-										/>
-									)}
-								</Box>
-								<Typography
-									variant="caption"
-									sx={{
-										fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-										color: 'rgba(255, 255, 255, 0.6)',
-										fontWeight: 500,
-									}}
-								>
-									Created: {new Date(createdAt).toLocaleDateString()}
-								</Typography>
-							</Box>
-
-							{/* Actions */}
-							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: { xs: '100%', sm: 'auto' } }}>
-								<Box sx={{ flex: { xs: 1, sm: 'none' }, minWidth: 0 }}>
-									<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none' }}>
-										<Button
-											className="action-button"
-											variant="outlined"
-											size="small"
-											startIcon={<Visibility sx={{ fontSize: { xs: 14, sm: 16 } }} />}
-											sx={{
-												fontSize: { xs: '0.75rem', sm: '0.875rem' },
-												fontWeight: 600,
-												borderColor: 'rgba(6, 182, 212, 0.4)',
-												background: 'rgba(6, 182, 212, 0.05)',
-												color: 'rgb(34, 211, 238)',
-												width: '100%',
-												px: 2,
-												py: 1,
-												transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-												'&:hover': {
-													background: 'rgba(6, 182, 212, 0.15)',
-													borderColor: 'rgba(6, 182, 212, 0.6)',
-													boxShadow: '0 0 20px rgba(6, 182, 212, 0.3)',
-												},
-											}}
-										>
-											View
-										</Button>
-									</Link>
-								</Box>
-								<Box sx={{ flex: { xs: 1, sm: 'none' }, minWidth: 0 }}>
-									<Link href={`/dashboard/shipments/${id}/edit`} style={{ textDecoration: 'none' }}>
-										<Button
-											className="action-button"
-											variant="outlined"
-											size="small"
-											startIcon={<Edit sx={{ fontSize: { xs: 14, sm: 16 } }} />}
-											sx={{
-												fontSize: { xs: '0.75rem', sm: '0.875rem' },
-												fontWeight: 600,
-												borderColor: 'rgba(139, 92, 246, 0.4)',
-												background: 'rgba(139, 92, 246, 0.05)',
-												color: 'rgb(167, 139, 250)',
-												width: '100%',
-												px: 2,
-												py: 1,
-												transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-												'&:hover': {
-													background: 'rgba(139, 92, 246, 0.15)',
-													borderColor: 'rgba(139, 92, 246, 0.6)',
-													boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)',
-												},
-											}}
-										>
-											Edit
-										</Button>
-									</Link>
-								</Box>
-							</Box>
-						</Box>
-
-						{/* Vehicle Info */}
-						<Box
-							sx={{
-								display: 'grid',
-								gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' },
-								gap: { xs: 2, sm: 2.5 },
-								p: 2.5,
-								borderRadius: 2.5,
-								background: 'rgba(255, 255, 255, 0.03)',
-								border: '1px solid rgba(255, 255, 255, 0.05)',
-							}}
-						>
-							<Box sx={{ minWidth: 0 }}>
-								<Typography variant="caption" sx={{ fontSize: { xs: '0.6875rem', sm: '0.75rem' }, color: 'rgba(255, 255, 255, 0.6)', mb: 0.75, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-									Vehicle Type
-								</Typography>
-								<Typography
-									variant="body2"
-									sx={{
-										fontSize: { xs: '0.875rem', sm: '0.9375rem' },
-										fontWeight: 600,
-										color: 'white',
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{vehicleType}
-								</Typography>
-								{vehicleMake && vehicleModel && (
-									<Typography
-										variant="body2"
-										sx={{
-											fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-											color: 'rgba(255, 255, 255, 0.7)',
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-											whiteSpace: 'nowrap',
-											mt: 0.5,
-										}}
-									>
-										{vehicleMake} {vehicleModel}
-									</Typography>
-								)}
-							</Box>
-
-							<Box sx={{ minWidth: 0 }}>
-								<Typography variant="caption" sx={{ fontSize: { xs: '0.6875rem', sm: '0.75rem' }, color: 'rgba(255, 255, 255, 0.6)', mb: 0.75, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-									Route
-								</Typography>
-								<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: { xs: '0.875rem', sm: '0.9375rem' }, color: 'white', minWidth: 0 }}>
-									<Typography
-										component="span"
-										sx={{
-											fontWeight: 600,
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-											whiteSpace: 'nowrap',
-											fontSize: 'inherit',
-										}}
-									>
-										{origin}
-									</Typography>
-									<ArrowForward sx={{ fontSize: 16, color: 'rgb(34, 211, 238)', flexShrink: 0 }} />
-									<Typography
-										component="span"
-										sx={{
-											fontWeight: 600,
-											overflow: 'hidden',
-											textOverflow: 'ellipsis',
-											whiteSpace: 'nowrap',
-											fontSize: 'inherit',
-										}}
-									>
-										{destination}
-									</Typography>
-								</Box>
-							</Box>
-
-							<Box sx={{ minWidth: 0 }}>
-								<Typography variant="caption" sx={{ fontSize: { xs: '0.6875rem', sm: '0.75rem' }, color: 'rgba(255, 255, 255, 0.6)', mb: 0.75, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-									Estimated Delivery
-								</Typography>
-								<Typography
-									variant="body2"
-									sx={{
-										fontSize: { xs: '0.875rem', sm: '0.9375rem' },
-										fontWeight: 600,
-										color: 'white',
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{estimatedDelivery ? new Date(estimatedDelivery).toLocaleDateString() : 'TBD'}
-								</Typography>
-							</Box>
-						</Box>
-
-						{/* Customer Info (if admin) */}
-						{showCustomer && user && (
-							<Box sx={{ pt: 2, borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-								<Typography variant="caption" sx={{ fontSize: { xs: '0.6875rem', sm: '0.75rem' }, color: 'rgba(255, 255, 255, 0.6)', mb: 0.75, display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-									Customer
-								</Typography>
-								<Typography
-									variant="body2"
-									sx={{
-										fontSize: { xs: '0.875rem', sm: '0.9375rem' },
-										fontWeight: 600,
-										color: 'white',
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{user.name || 'N/A'}
-								</Typography>
-								<Typography
-									variant="body2"
-									sx={{
-										fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-										color: 'rgba(255, 255, 255, 0.7)',
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-										mt: 0.5,
-									}}
-								>
-									{user.email}
-								</Typography>
-							</Box>
-						)}
-
-						{/* Progress Bar */}
-						<Box sx={{ pt: 1.5 }}>
-							<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-								<Typography variant="caption" sx={{ fontSize: { xs: '0.6875rem', sm: '0.75rem' }, color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-									Progress
-								</Typography>
-								<Typography variant="caption" sx={{ fontSize: { xs: '0.8125rem', sm: '0.875rem' }, color: 'rgb(34, 211, 238)', fontWeight: 700, textShadow: '0 0 10px rgba(34, 211, 238, 0.5)' }}>
-									{progress}%
-								</Typography>
-							</Box>
-							<LinearProgress
-								variant="determinate"
-								value={progress}
+							variant="outlined"
+						/>
+						{paymentStatus && paymentConfig && (
+							<Chip
+								icon={<CreditCard sx={{ fontSize: 14, color: paymentConfig.text }} />}
+								label={formatStatus(paymentStatus)}
+								size="small"
 								sx={{
-									height: { xs: 8, sm: 10 },
-									borderRadius: 2,
-									bgcolor: 'rgba(6, 182, 212, 0.1)',
-									overflow: 'visible',
-									'& .MuiLinearProgress-bar': {
-										background: 'linear-gradient(90deg, rgb(34, 211, 238) 0%, rgb(6, 182, 212) 100%)',
-										borderRadius: 2,
-										boxShadow: '0 0 15px rgba(34, 211, 238, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
-										position: 'relative',
-										'&::after': {
-											content: '""',
-											position: 'absolute',
-											inset: 0,
-											background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent)',
-											borderRadius: 2,
-										},
-									},
+									height: 20,
+									fontSize: '0.62rem',
+									fontWeight: 600,
+									bgcolor: paymentConfig.bg,
+									color: paymentConfig.text,
+									borderColor: paymentConfig.border,
 								}}
+								variant="outlined"
 							/>
-						</Box>
+						)}
 					</Box>
-				</CardContent>
-			</Card>
+				</Box>
+
+				<Box sx={{ minWidth: 0 }}>
+					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', mb: 0.3 }}>
+						Vehicle
+					</Typography>
+					<Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: 'white' }}>{vehicleType}</Typography>
+					{(vehicleMake || vehicleModel) && (
+						<Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>
+							{vehicleMake || ''} {vehicleModel || ''}
+						</Typography>
+					)}
+					{showCustomer && user && (
+						<Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)', mt: 0.3 }}>
+							{user.name || user.email}
+						</Typography>
+					)}
+				</Box>
+
+				<Box sx={{ minWidth: 0 }}>
+					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', mb: 0.3 }}>
+						Route
+					</Typography>
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.78rem', fontWeight: 600, color: 'white', overflow: 'hidden' }}>
+						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{origin}</Typography>
+						<ArrowForward sx={{ fontSize: 14, color: 'rgb(94,234,212)' }} />
+						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{destination}</Typography>
+					</Box>
+					<Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)', mt: 0.2 }}>
+						ETA {estimatedDelivery ? new Date(estimatedDelivery).toLocaleDateString() : 'Pending'}
+					</Typography>
+				</Box>
+
+				<Box sx={{ minWidth: 0 }}>
+					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', mb: 0.3 }}>
+						Progress
+					</Typography>
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
+						<Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>Pipeline</Typography>
+						<Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: statusConfig.text }}>{progress}%</Typography>
+					</Box>
+					<LinearProgress
+						variant="determinate"
+						value={progress}
+						sx={{
+							height: 4,
+							borderRadius: 2,
+							bgcolor: 'rgba(255,255,255,0.08)',
+							'& .MuiLinearProgress-bar': {
+								background: statusConfig.text,
+								borderRadius: 2,
+							},
+						}}
+					/>
+				</Box>
+
+				<Box
+					sx={{
+						display: 'flex',
+						flexDirection: { xs: 'row', md: 'column' },
+						gap: 0.75,
+						justifyContent: { xs: 'flex-end', md: 'center' },
+						alignItems: { xs: 'center', md: 'flex-end' },
+					}}
+				>
+					<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none' }}>
+						<Button
+							variant="outlined"
+							size="small"
+							startIcon={<Visibility sx={{ fontSize: 14 }} />}
+							sx={{
+								fontSize: '0.7rem',
+								fontWeight: 600,
+								borderColor: 'rgba(59, 130, 246, 0.4)',
+								color: 'rgb(144, 205, 244)',
+								paddingX: 1.2,
+								textTransform: 'none',
+							}}
+						>
+							View
+						</Button>
+					</Link>
+					<Link href={`/dashboard/shipments/${id}/edit`} style={{ textDecoration: 'none' }}>
+						<Button
+							variant="text"
+							size="small"
+							startIcon={<Edit sx={{ fontSize: 14 }} />}
+							sx={{
+								fontSize: '0.7rem',
+								fontWeight: 600,
+								color: 'rgba(255,255,255,0.8)',
+								textTransform: 'none',
+								paddingX: 0.5,
+							}}
+						>
+							Edit
+						</Button>
+					</Link>
+				</Box>
+			</Box>
 		</Slide>
 	);
 }

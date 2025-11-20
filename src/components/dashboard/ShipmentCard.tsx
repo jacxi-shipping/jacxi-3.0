@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Visibility, ArrowForward } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip, LinearProgress, Button, Fade, Slide } from '@mui/material';
+import { Box, Typography, Chip, LinearProgress, Button, Fade, Slide } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 type ShipmentCardProps = {
@@ -68,153 +68,160 @@ export default function ShipmentCard({
 
 	return (
 		<Slide in={isVisible} direction="up" timeout={400}>
-			<Card
+			<Box
+				component="article"
 				sx={{
-					background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.9) 0%, rgba(10, 22, 40, 0.6) 100%)',
-					backdropFilter: 'blur(20px)',
-					border: '1px solid rgba(6, 182, 212, 0.2)',
 					borderRadius: 2,
-					p: 1.5,
-					position: 'relative',
-					overflow: 'hidden',
-					transition: 'all 0.3s ease',
-					'&:hover': {
-						borderColor: 'rgba(6, 182, 212, 0.4)',
-						boxShadow: '0 8px 20px rgba(6, 182, 212, 0.15)',
-						transform: 'translateY(-2px)',
-					},
+					border: '1px solid rgba(148, 163, 184, 0.18)',
+					background: 'rgba(4, 10, 22, 0.85)',
+					boxShadow: '0 18px 35px rgba(1, 6, 17, 0.45)',
+					padding: 1.25,
+					display: 'flex',
+					flexDirection: 'column',
+					gap: 1.25,
 				}}
 			>
-				<CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-					{/* Header */}
-					<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-						<Fade in={isVisible} timeout={400}>
-							<Box>
-								<Typography
-									variant="h6"
-									sx={{
-										fontSize: '0.875rem',
-										fontWeight: 600,
-										color: 'white',
-										mb: 0.25,
-									}}
-								>
-									{trackingNumber}
-								</Typography>
-								<Typography
-									variant="caption"
-									sx={{
-										fontSize: '0.6875rem',
-										color: 'rgba(255, 255, 255, 0.5)',
-									}}
-								>
-									ID: {id.slice(0, 8)}
-								</Typography>
-							</Box>
-						</Fade>
-						<Fade in={isVisible} timeout={400}>
-							<Chip
-								label={status.replace(/_/g, ' ')}
-								size="small"
-								sx={{
-									fontSize: '0.6875rem',
-									fontWeight: 600,
-									height: 20,
-									px: 0.75,
-									bgcolor: colors.bg,
-									color: colors.text,
-									border: `1px solid ${colors.border}`,
-								}}
-							/>
-						</Fade>
+				<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+					<Box sx={{ minWidth: 0 }}>
+						<Typography
+							sx={{
+								fontSize: '0.8rem',
+								fontWeight: 600,
+								color: 'white',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{trackingNumber}
+						</Typography>
+						<Typography
+							sx={{
+								fontSize: '0.65rem',
+								color: 'rgba(255,255,255,0.55)',
+								marginTop: 0.2,
+							}}
+						>
+							ID: {id.slice(0, 8)}
+						</Typography>
 					</Box>
+					<Chip
+						label={status.replace(/_/g, ' ')}
+						size="small"
+						sx={{
+							height: 20,
+							fontSize: '0.65rem',
+							fontWeight: 600,
+							borderColor: colors.border,
+							color: colors.text,
+							backgroundColor: colors.bg,
+						}}
+						variant="outlined"
+					/>
+				</Box>
 
-					{/* Route */}
-					<Fade in={isVisible} timeout={400}>
-						<Box sx={{ mb: 1.5 }}>
-							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-								<Typography sx={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-									From:
-								</Typography>
-								<Typography sx={{ fontSize: '0.75rem', fontWeight: 500, color: 'white' }}>
-									{origin}
-								</Typography>
-							</Box>
-							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-								<Typography sx={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-									To:
-								</Typography>
-								<Typography sx={{ fontSize: '0.75rem', fontWeight: 500, color: 'white' }}>
-									{destination}
-								</Typography>
-							</Box>
-						</Box>
-					</Fade>
-
-					{/* Progress */}
-					<Fade in={isVisible} timeout={400}>
-						<Box sx={{ mb: 1 }}>
-							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-								<Typography sx={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
-									Progress
-								</Typography>
-								<Typography sx={{ fontSize: '0.6875rem', fontWeight: 600, color: colors.text }}>
-									{progress}%
-								</Typography>
-							</Box>
-							<LinearProgress
-								className="progress-bar"
-								variant="determinate"
-								value={progress}
-								sx={{
-									height: 4,
-									borderRadius: 2,
-									bgcolor: 'rgba(6, 182, 212, 0.1)',
-									transition: 'transform 0.3s ease',
-									'& .MuiLinearProgress-bar': {
-										bgcolor: colors.text,
-										borderRadius: 2,
-									},
-								}}
-							/>
-						</Box>
-					</Fade>
-
-					{/* Footer */}
-					<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
-						<Fade in={isVisible} timeout={400}>
-							<Typography sx={{ fontSize: '0.6875rem', color: 'rgba(255, 255, 255, 0.5)' }}>
-								{estimatedDelivery ? `ETA: ${estimatedDelivery}` : 'ETA: TBD'}
-							</Typography>
-						</Fade>
-						<Fade in={isVisible} timeout={400}>
-							<Link href={`/dashboard/tracking/${id}`} passHref style={{ textDecoration: 'none' }}>
-								<Button
-									className="view-button"
-									variant="text"
-									size="small"
-									endIcon={<ArrowForward sx={{ fontSize: 14 }} />}
-									sx={{
-										fontSize: '0.6875rem',
-										fontWeight: 600,
-										color: 'rgb(34, 211, 238)',
-										textTransform: 'none',
-										px: 1,
-										py: 0.5,
-										minWidth: 0,
-										transition: 'all 0.3s ease',
-										'&:hover': {
-											bgcolor: 'rgba(6, 182, 212, 0.1)',
-										},
-									}}
-								>
-									View
-								</Button>
-							</Link>
-						</Fade>
+				<Box
+					sx={{
+						display: 'grid',
+						gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+						gap: 1,
+					}}
+				>
+					<Box>
+						<Typography
+							sx={{
+								fontSize: '0.65rem',
+								textTransform: 'uppercase',
+								letterSpacing: '0.18em',
+								color: 'rgba(255,255,255,0.45)',
+								marginBottom: 0.35,
+							}}
+						>
+							Origin
+						</Typography>
+						<Typography
+							sx={{
+								fontSize: '0.78rem',
+								fontWeight: 500,
+								color: 'white',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{origin}
+						</Typography>
 					</Box>
-				</CardContent>
-			</Card>
+					<Box>
+						<Typography
+							sx={{
+								fontSize: '0.65rem',
+								textTransform: 'uppercase',
+								letterSpacing: '0.18em',
+								color: 'rgba(255,255,255,0.45)',
+								marginBottom: 0.35,
+							}}
+						>
+							Destination
+						</Typography>
+						<Typography
+							sx={{
+								fontSize: '0.78rem',
+								fontWeight: 500,
+								color: 'white',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{destination}
+						</Typography>
+					</Box>
+				</Box>
+
+				<Box>
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+						<Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)' }}>Progress</Typography>
+						<Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: colors.text }}>{progress}%</Typography>
+					</Box>
+					<LinearProgress
+						variant="determinate"
+						value={progress}
+						sx={{
+							height: 4,
+							borderRadius: 2,
+							backgroundColor: 'rgba(255,255,255,0.08)',
+							'& .MuiLinearProgress-bar': {
+								backgroundColor: colors.text,
+								borderRadius: 2,
+							},
+						}}
+					/>
+				</Box>
+
+				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+					<Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)' }}>
+						{estimatedDelivery ? `ETA ${new Date(estimatedDelivery).toLocaleDateString()}` : 'ETA pending'}
+					</Typography>
+					<Link href={`/dashboard/tracking/${id}`} style={{ textDecoration: 'none' }}>
+						<Button
+							variant="text"
+							size="small"
+							endIcon={<ArrowForward sx={{ fontSize: 14 }} />}
+							sx={{
+								fontSize: '0.7rem',
+								fontWeight: 600,
+								textTransform: 'none',
+								color: 'rgb(94, 234, 212)',
+								minWidth: 0,
+								padding: 0,
+							}}
+						>
+							Track
+						</Button>
+					</Link>
+				</Box>
+			</Box>
 		</Slide>
 	);
 }
