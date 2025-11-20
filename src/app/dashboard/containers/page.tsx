@@ -111,80 +111,8 @@ export default function ContainersPage() {
 
 	return (
 		<>
-		{/* Header */}
-		<Section className="relative bg-[#020817] py-4 sm:py-5 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				
-				{/* Animated gradient orbs */}
-				<div className="absolute top-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-				<div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
-				
-				<div className="absolute inset-0 opacity-[0.02]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-containers" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-containers)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<Fade in={show} timeout={800}>
-						<Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 2, sm: 3 } }}>
-							<Box>
-								<Typography
-									component="h1"
-									sx={{
-										fontSize: { xs: '1.5rem', sm: '1.875rem' },
-										fontWeight: 700,
-										color: 'white',
-										mb: 0.5,
-										lineHeight: 1.2,
-									}}
-								>
-									Containers Management
-								</Typography>
-								<Typography
-									sx={{
-										fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-										color: 'rgba(255, 255, 255, 0.6)',
-										fontWeight: 500,
-									}}
-								>
-									Manage containers and track items
-								</Typography>
-							</Box>
-							<Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
-								<Button
-									variant="contained"
-									startIcon={<Plus />}
-									sx={{
-										background: 'linear-gradient(135deg, #00bfff 0%, #0099cc 100%)',
-										color: 'white',
-										fontWeight: 600,
-										fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-										px: { xs: 2, sm: 3 },
-										py: { xs: 0.75, sm: 1 },
-										boxShadow: '0 4px 12px rgba(0, 191, 255, 0.3)',
-										transition: 'all 0.3s ease',
-										'&:hover': {
-											boxShadow: '0 6px 16px rgba(0, 191, 255, 0.4)',
-											transform: 'translateY(-2px)',
-										},
-									}}
-								>
-									New Container
-								</Button>
-							</Link>
-						</Box>
-					</Fade>
-				</div>
-			</Section>
-
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[#020817] py-4 sm:py-6">
 				{/* Smart Search */}
 				<Slide in={show} direction="up" timeout={800} style={{ transitionDelay: '300ms' }}>
 					<Box sx={{ mb: { xs: 4, sm: 6 } }}>

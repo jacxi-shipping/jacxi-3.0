@@ -104,89 +104,9 @@ export default function DashboardPage() {
 
 	return (
 		<>
-		{/* Premium Hero Header */}
-		<Section className="relative bg-[#020817] py-4 sm:py-5 overflow-hidden">
-				{/* Animated background */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				
-				{/* Animated gradient orbs */}
-				<div className="absolute top-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animation: 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
-				<div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animation: 'pulse 10s cubic-bezier(0.4, 0, 0.6, 1) infinite', animationDelay: '2s' }} />
-				
-				{/* Premium grid pattern */}
-				<div className="absolute inset-0 opacity-[0.02]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="premium-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-								<path
-									d="M 60 0 L 0 0 0 60"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="1"
-								/>
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#premium-grid)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-			<div className="relative z-10">
-				<Fade in={showContent} timeout={800}>
-					<Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 2, sm: 3 } }}>
-						<Box>
-							<Typography
-								component="h1"
-								sx={{
-									fontSize: { xs: '1.5rem', sm: '1.875rem' },
-									fontWeight: 700,
-									color: 'white',
-									mb: 0.5,
-									lineHeight: 1.2,
-								}}
-							>
-								Welcome back{session?.user?.name && `, ${session.user.name.split(' ')[0]}`}
-							</Typography>
-							<Typography
-								sx={{
-									fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-									color: 'rgba(255, 255, 255, 0.6)',
-									fontWeight: 500,
-								}}
-							>
-								Here&apos;s your shipment overview
-							</Typography>
-						</Box>
-						{session?.user?.role === 'admin' && (
-							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
-								<Button
-									variant="contained"
-									startIcon={<Add />}
-									sx={{
-										background: 'linear-gradient(135deg, #00bfff 0%, #0099cc 100%)',
-										color: 'white',
-										fontWeight: 600,
-										fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-										px: { xs: 2, sm: 3 },
-										py: { xs: 0.75, sm: 1 },
-										boxShadow: '0 4px 12px rgba(0, 191, 255, 0.3)',
-										transition: 'all 0.3s ease',
-										'&:hover': {
-											boxShadow: '0 6px 16px rgba(0, 191, 255, 0.4)',
-											transform: 'translateY(-2px)',
-										},
-									}}
-								>
-									New Shipment
-								</Button>
-							</Link>
-						)}
-					</Box>
-				</Fade>
-			</div>
-			</Section>
 
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-8 sm:py-12 lg:py-16">
+			<Section className="bg-[#020817] py-4 sm:py-6">
 				{/* Stats Grid */}
 				<Box
 					sx={{

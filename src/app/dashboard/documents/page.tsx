@@ -177,63 +177,8 @@ export default function DocumentsPage() {
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-4 sm:py-5 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-documents" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-documents)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 2, sm: 3 } }}>
-						<Box>
-							<Typography
-								component="h1"
-								sx={{
-									fontSize: { xs: '1.5rem', sm: '1.875rem' },
-									fontWeight: 700,
-									color: 'white',
-									mb: 0.5,
-									lineHeight: 1.2,
-								}}
-							>
-								Document Center
-							</Typography>
-							<Typography
-								sx={{
-									fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-									color: 'rgba(255, 255, 255, 0.6)',
-									fontWeight: 500,
-								}}
-							>
-								Manage templates, uploads, and compliance documents
-							</Typography>
-						</Box>
-						<Link href="/dashboard" style={{ textDecoration: 'none' }}>
-							<MuiButton variant="outlined" size="small" sx={{
-								borderColor: 'rgba(6, 182, 212, 0.4)',
-								background: 'rgba(6, 182, 212, 0.05)',
-								color: 'rgb(34, 211, 238)',
-								fontWeight: 600,
-								fontSize: '0.8125rem',
-								px: 2,
-								py: 0.75,
-								'&:hover': {
-									background: 'rgba(6, 182, 212, 0.15)',
-									borderColor: 'rgba(6, 182, 212, 0.6)',
-								},
-							}}>
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Back
-							</MuiButton>
-						</Link>
-					</Box>
+			<Section className="bg-[#020817] py-4 sm:py-6">
+				<Box sx={{ px: { xs: 2, sm: 3 } }}>
 
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
@@ -257,7 +202,7 @@ export default function DocumentsPage() {
 							<p className="text-xs text-white/40 mt-2">Includes uploaded manifests and certificates.</p>
 						</div>
 					</motion.div>
-				</div>
+				</Box>
 			</Section>
 
 			<Section className="bg-[#020817] py-8 sm:py-12">

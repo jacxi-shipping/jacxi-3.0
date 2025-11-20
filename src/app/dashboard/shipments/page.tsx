@@ -81,83 +81,8 @@ export default function ShipmentsListPage() {
 
 	return (
 		<>
-		{/* Header */}
-		<Section className="relative bg-[#020817] py-4 sm:py-5 overflow-hidden">
-				{/* Background gradient */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-
-				{/* Subtle geometric grid pattern */}
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-shipments" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path
-									d="M 40 0 L 0 0 0 40"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="1"
-								/>
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-shipments)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 2, sm: 3 } }}>
-						<Box>
-							<Typography
-								component="h1"
-								sx={{
-									fontSize: { xs: '1.5rem', sm: '1.875rem' },
-									fontWeight: 700,
-									color: 'white',
-									mb: 0.5,
-									lineHeight: 1.2,
-								}}
-							>
-								Shipments Management
-							</Typography>
-							<Typography
-								sx={{
-									fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-									color: 'rgba(255, 255, 255, 0.6)',
-									fontWeight: 500,
-								}}
-							>
-								Manage and track all shipments
-							</Typography>
-						</Box>
-						{isAdmin && (
-							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
-								<Button
-									variant="contained"
-									startIcon={<Add />}
-									sx={{
-										bgcolor: '#00bfff',
-										color: 'white',
-										fontWeight: 600,
-										fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-										px: { xs: 2, sm: 3 },
-										py: { xs: 0.75, sm: 1 },
-										boxShadow: '0 4px 12px rgba(0, 191, 255, 0.3)',
-										'&:hover': {
-											bgcolor: '#00a8e6',
-											boxShadow: '0 6px 16px rgba(0, 191, 255, 0.4)',
-										},
-										transition: 'all 0.3s ease',
-									}}
-								>
-									New Shipment
-								</Button>
-							</Link>
-						)}
-					</Box>
-				</div>
-			</Section>
-
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-6 sm:py-12">
+			<Section className="bg-[#020817] py-4 sm:py-6">
 				{/* Smart Search & Filters */}
 				<div className="mb-6 sm:mb-8">
 					<SmartSearch

@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/dashboard/Sidebar';
+import Header from '@/components/dashboard/Header';
 import { Box } from '@mui/material';
 
 export default function DashboardLayout({
@@ -9,6 +11,8 @@ export default function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
+	const [mobileOpen, setMobileOpen] = useState(false);
+
 	return (
 		<ProtectedRoute>
 			<Box
@@ -16,21 +20,35 @@ export default function DashboardLayout({
 					minHeight: '100vh',
 					bgcolor: '#020817',
 					display: 'flex',
+					flexDirection: 'column',
 				}}
 			>
-				{/* Sidebar */}
-				<Sidebar />
+				{/* Header */}
+				<Header onMenuClick={() => setMobileOpen(!mobileOpen)} />
 
-				{/* Main Content */}
+				{/* Content Area with Sidebar */}
 				<Box
-					component="main"
 					sx={{
+						display: 'flex',
 						flexGrow: 1,
-						minWidth: 0,
-						overflow: 'auto',
+						overflow: 'hidden',
 					}}
 				>
-					{children}
+					{/* Sidebar */}
+					<Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+
+					{/* Main Content */}
+					<Box
+						component="main"
+						sx={{
+							flexGrow: 1,
+							minWidth: 0,
+							overflow: 'auto',
+							height: 'calc(100vh - 64px)',
+						}}
+					>
+						{children}
+					</Box>
 				</Box>
 			</Box>
 		</ProtectedRoute>

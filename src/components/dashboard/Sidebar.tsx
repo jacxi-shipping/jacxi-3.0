@@ -119,8 +119,12 @@ const settingsNavigation: NavigationItem[] = [
 	},
 ];
 
-export default function Sidebar() {
-	const [mobileOpen, setMobileOpen] = useState(false);
+interface SidebarProps {
+	mobileOpen?: boolean;
+	onMobileClose?: () => void;
+}
+
+export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
 	const pathname = usePathname();
 	const { data: session } = useSession();
 
@@ -128,44 +132,27 @@ export default function Sidebar() {
 		await signOut({ callbackUrl: '/' });
 	};
 
+	const drawerWidth = 260;
+
 	return (
 		<>
-			{/* Mobile Menu Button */}
-			<Box
-				sx={{
-					display: { xs: 'block', lg: 'none' },
-					position: 'fixed',
-					top: 16,
-					left: 16,
-					zIndex: 50,
-				}}
-			>
-				<IconButton
-					onClick={() => setMobileOpen(!mobileOpen)}
-					sx={{
-						bgcolor: 'rgba(10, 22, 40, 0.5)',
-						backdropFilter: 'blur(8px)',
-						border: '1px solid rgba(6, 182, 212, 0.3)',
-						color: 'white',
-						'&:hover': {
-							bgcolor: 'rgba(6, 182, 212, 0.1)',
-						},
-					}}
-				>
-					{mobileOpen ? <Close /> : <Menu />}
-				</IconButton>
-			</Box>
-
 			{/* Mobile Drawer */}
 			<Drawer
 				variant="temporary"
 				open={mobileOpen}
-				onClose={() => setMobileOpen(false)}
+				onClose={onMobileClose}
+				ModalProps={{
+					keepMounted: true,
+				}}
 				sx={{
 					display: { xs: 'block', lg: 'none' },
 					'& .MuiDrawer-paper': {
-						width: 288,
+						width: drawerWidth,
 						boxSizing: 'border-box',
+						bgcolor: 'rgba(10, 22, 40, 0.95)',
+						backdropFilter: 'blur(20px)',
+						borderRight: '1px solid rgba(6, 182, 212, 0.1)',
+						mt: '64px',
 					},
 				}}
 			>
@@ -173,7 +160,7 @@ export default function Sidebar() {
 					pathname={pathname}
 					session={session}
 					onSignOut={handleSignOut}
-					onNavClick={() => setMobileOpen(false)}
+					onNavClick={onMobileClose}
 				/>
 			</Drawer>
 
@@ -182,11 +169,15 @@ export default function Sidebar() {
 				variant="permanent"
 				sx={{
 					display: { xs: 'none', lg: 'block' },
-					width: 288,
+					width: drawerWidth,
 					flexShrink: 0,
 					'& .MuiDrawer-paper': {
-						width: 288,
+						width: drawerWidth,
 						boxSizing: 'border-box',
+						bgcolor: 'rgba(10, 22, 40, 0.5)',
+						backdropFilter: 'blur(20px)',
+						borderRight: '1px solid rgba(6, 182, 212, 0.1)',
+						position: 'relative',
 					},
 				}}
 			>

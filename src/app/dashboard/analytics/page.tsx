@@ -239,99 +239,8 @@ export default function AnalyticsPage() {
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-4 sm:py-5 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				
-				{/* Animated gradient orbs */}
-				<div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
-				<div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
-				
-				<div className="absolute inset-0 opacity-[0.02]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-analytics" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-analytics)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<Box className="relative z-10" sx={{ px: { xs: 2, sm: 3, lg: 4 } }}>
-					<Fade in={show} timeout={800}>
-						<Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: { xs: 2, sm: 3 }, mb: 4 }}>
-							<Box>
-								<Typography
-									component="h1"
-									sx={{
-										fontSize: { xs: '1.5rem', sm: '1.875rem' },
-										fontWeight: 700,
-										color: 'white',
-										mb: 0.5,
-										lineHeight: 1.2,
-									}}
-								>
-									Analytics Overview
-								</Typography>
-								<Typography
-									sx={{
-										fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-										color: 'rgba(255, 255, 255, 0.6)',
-										fontWeight: 500,
-									}}
-								>
-									Real-time shipment, revenue, and invoicing intelligence
-								</Typography>
-							</Box>
-							<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-								<Button
-									variant="outlined"
-									size="small"
-									onClick={handleRefresh}
-									disabled={refreshing}
-									sx={{
-										borderColor: 'rgba(6, 182, 212, 0.4)',
-										background: 'rgba(6, 182, 212, 0.05)',
-										color: 'rgb(34, 211, 238)',
-										fontWeight: 600,
-										fontSize: '0.8125rem',
-										px: 2,
-										py: 0.75,
-										'&:hover': {
-											background: 'rgba(6, 182, 212, 0.15)',
-											borderColor: 'rgba(6, 182, 212, 0.6)',
-										},
-									}}
-								>
-									<RefreshCcw style={{ width: 14, height: 14, marginRight: 6 }} className={refreshing ? 'animate-spin' : ''} />
-									{refreshing ? 'Refreshing…' : 'Refresh'}
-								</Button>
-								<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-									<Button
-										variant="outlined"
-										size="small"
-										sx={{
-											borderColor: 'rgba(6, 182, 212, 0.4)',
-											background: 'rgba(6, 182, 212, 0.05)',
-											color: 'rgb(34, 211, 238)',
-											fontWeight: 600,
-											fontSize: '0.8125rem',
-											px: 2,
-											py: 0.75,
-											'&:hover': {
-												background: 'rgba(6, 182, 212, 0.15)',
-												borderColor: 'rgba(6, 182, 212, 0.6)',
-											},
-										}}
-									>
-										<Package style={{ width: 14, height: 14, marginRight: 6 }} />
-										Shipments
-									</Button>
-								</Link>
-							</Box>
-						</Box>
-					</Fade>
-
+			<Section className="bg-[#020817] py-4 sm:py-6">
+				<Box sx={{ px: { xs: 2, sm: 3 } }}>
 					{error && (
 						<Fade in timeout={600}>
 							<Box
@@ -351,10 +260,6 @@ export default function AnalyticsPage() {
 							</Box>
 						</Fade>
 					)}
-
-					<Typography sx={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.4)', mb: 4 }}>
-						Updated {formatDate(data.lastUpdated)}
-					</Typography>
 
 					<Box
 						sx={{
