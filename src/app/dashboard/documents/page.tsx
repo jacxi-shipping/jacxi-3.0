@@ -177,7 +177,7 @@ export default function DocumentsPage() {
 
 	return (
 		<>
-			<Section className="bg-[#020817] py-4 sm:py-6">
+			<Section className="bg-[#020817] py-2 sm:py-3">
 				<Box sx={{ px: { xs: 2, sm: 3 } }}>
 
 					<motion.div
@@ -205,7 +205,7 @@ export default function DocumentsPage() {
 				</Box>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[#020817] py-4 sm:py-6">
 				<div className="max-w-6xl mx-auto space-y-10">
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}

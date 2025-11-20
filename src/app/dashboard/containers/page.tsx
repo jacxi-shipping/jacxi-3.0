@@ -112,7 +112,7 @@ export default function ContainersPage() {
 	return (
 		<>
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-4 sm:py-6">
+			<Section className="bg-[#020817] py-2 sm:py-3">
 				{/* Smart Search */}
 				<Slide in={show} direction="up" timeout={800} style={{ transitionDelay: '300ms' }}>
 					<Box sx={{ mb: { xs: 4, sm: 6 } }}>

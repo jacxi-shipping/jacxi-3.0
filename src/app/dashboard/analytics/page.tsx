@@ -239,7 +239,7 @@ export default function AnalyticsPage() {
 
 	return (
 		<>
-			<Section className="bg-[#020817] py-4 sm:py-6">
+			<Section className="bg-[#020817] py-2 sm:py-3">
 				<Box sx={{ px: { xs: 2, sm: 3 } }}>
 					{error && (
 						<Fade in timeout={600}>
@@ -323,7 +323,7 @@ export default function AnalyticsPage() {
 				</Box>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[#020817] py-4 sm:py-6">
 				<Box sx={{ maxWidth: '90rem', mx: 'auto', px: { xs: 2, sm: 3, lg: 4 } }}>
 					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, 1fr)' }, gap: { xs: 4, sm: 5 }, mb: { xs: 4, sm: 6 } }}>
 						<Slide in={show} direction="up" timeout={800} style={{ transitionDelay: '400ms' }}>

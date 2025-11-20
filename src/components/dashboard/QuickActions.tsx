@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { Add, Search, Inventory2, Description } from '@mui/icons-material';
-import { Box, Card, CardContent, Typography, SvgIcon, Fade, Zoom } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { Box, Card, CardContent, Typography, Fade, Zoom } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
 
 const actions = [
@@ -69,20 +68,16 @@ export default function QuickActions() {
 	const show = true;
 
 	return (
-		<Fade in={show} timeout={800}>
+		<Fade in={show} timeout={600}>
 			<Box>
-				<Box sx={{ mb: { xs: 2, sm: 2.5, md: 3 } }}>
+				<Box sx={{ mb: 1.5 }}>
 					<Typography
-						variant="h5"
+						variant="h6"
 						sx={{
-							fontSize: { xs: '1.375rem', sm: '1.625rem', md: '2rem' },
-							fontWeight: 800,
-							background: 'linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(200, 220, 255) 100%)',
-							WebkitBackgroundClip: 'text',
-							WebkitTextFillColor: 'transparent',
-							backgroundClip: 'text',
-							mb: { xs: 0.75, sm: 1 },
-							letterSpacing: '-0.02em',
+							fontSize: '1rem',
+							fontWeight: 700,
+							color: 'white',
+							mb: 0.25,
 						}}
 					>
 						Quick Actions
@@ -90,9 +85,8 @@ export default function QuickActions() {
 					<Typography
 						variant="body2"
 						sx={{
-							fontSize: { xs: '0.8125rem', sm: '0.9375rem', md: '1.0625rem' },
-							color: 'rgba(255, 255, 255, 0.7)',
-							fontWeight: 500,
+							fontSize: '0.75rem',
+							color: 'rgba(255, 255, 255, 0.6)',
 						}}
 					>
 						Common tasks
@@ -102,28 +96,17 @@ export default function QuickActions() {
 				<Box
 					sx={{
 						display: 'grid',
-						gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: '1fr' },
-						gap: { xs: 1.5, sm: 2, md: 2.5 },
+						gridTemplateColumns: {
+							xs: '1fr',
+							sm: 'repeat(2, 1fr)',
+							lg: 'repeat(4, 1fr)',
+						},
+						gap: 1.5,
 					}}
 				>
-					{actions.map((action, index) => {
-						const Icon = action.icon;
-						const { border, borderHover, text, bgHover, glow } = action.colorValues;
-
-						return (
-							<ActionCard
-								key={action.title}
-								action={action}
-								index={index}
-								Icon={Icon}
-								border={border}
-								borderHover={borderHover}
-								text={text}
-								bgHover={bgHover}
-								glow={glow}
-							/>
-						);
-					})}
+					{actions.map((action, index) => (
+						<ActionCard key={action.title} {...action} delay={index * 0.1} />
+					))}
 				</Box>
 			</Box>
 		</Fade>
@@ -131,156 +114,95 @@ export default function QuickActions() {
 }
 
 interface ActionCardProps {
-	action: typeof actions[number];
-	index: number;
-	Icon: SvgIconComponent;
-	border: string;
-	borderHover: string;
-	text: string;
-	bgHover: string;
-	glow: string;
+	icon: SvgIconComponent;
+	title: string;
+	description: string;
+	href: string;
+	color: string;
+	colorValues: {
+		border: string;
+		borderHover: string;
+		text: string;
+		bgHover: string;
+		glow: string;
+	};
+	delay: number;
 }
 
-function ActionCard({ action, index, Icon, border, borderHover, text, bgHover, glow }: ActionCardProps) {
-	const [isVisible, setIsVisible] = useState(false);
-
-	useEffect(() => {
-		const timer = setTimeout(() => setIsVisible(true), index * 100);
-		return () => clearTimeout(timer);
-	}, [index]);
-
+function ActionCard({ icon: Icon, title, description, href, colorValues, delay }: ActionCardProps) {
 	return (
-		<Link href={action.href} style={{ textDecoration: 'none' }}>
-			<Zoom in={isVisible} timeout={600}>
+		<Zoom in timeout={400} style={{ transitionDelay: `${delay * 1000}ms` }}>
+			<Link href={href} style={{ textDecoration: 'none' }}>
 				<Card
 					sx={{
-						position: 'relative',
+						height: '100%',
 						background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.4) 100%)',
 						backdropFilter: 'blur(20px)',
-						border: `1px solid ${border}`,
-						borderRadius: { xs: 2.5, sm: 3 },
-						p: { xs: 2, sm: 2.5, md: 3 },
-						height: { xs: '110px', sm: '130px', lg: 'auto' },
-						minHeight: { lg: '150px' },
+						border: `1px solid ${colorValues.border}`,
+						borderRadius: 2,
+						p: 1.5,
 						cursor: 'pointer',
-						transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-						overflow: 'hidden',
-						transform: 'translateY(0) scale(1)',
+						transition: 'all 0.3s ease',
 						'&:hover': {
-							borderColor: borderHover,
-							background: bgHover,
-							boxShadow: `0 20px 40px ${glow}, 0 0 60px ${glow}`,
-							transform: 'translateY(-6px) scale(1.03)',
-							'&::before': {
-								opacity: 1,
-							},
+							borderColor: colorValues.borderHover,
+							boxShadow: `0 8px 20px ${colorValues.glow}`,
+							transform: 'translateY(-2px)',
 							'& .icon-box': {
-								transform: 'scale(1.1) rotate(5deg)',
-								boxShadow: `0 0 30px ${glow}`,
+								transform: 'scale(1.05)',
 							},
-							'& .icon': {
-								transform: 'scale(1.1)',
-							},
-						},
-						'&::before': {
-							content: '""',
-							position: 'absolute',
-							inset: 0,
-							background: `linear-gradient(135deg, ${border}00 0%, ${border} 50%, ${border}00 100%)`,
-							opacity: 0,
-							transition: 'opacity 0.4s ease',
-						},
-						'&::after': {
-							content: '""',
-							position: 'absolute',
-							top: '-50%',
-							right: '-50%',
-							width: '150%',
-							height: '150%',
-							background: `radial-gradient(circle, ${glow} 0%, transparent 70%)`,
-							opacity: 0.1,
-							pointerEvents: 'none',
 						},
 					}}
 				>
-					<CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, position: 'relative', zIndex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
-						<Box sx={{ mb: { xs: 1.5, sm: 2 } }}>
+					<CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+						<Fade in timeout={400} style={{ transitionDelay: `${delay * 1000 + 200}ms` }}>
 							<Box
 								className="icon-box"
 								sx={{
-									position: 'relative',
-									width: { xs: 40, sm: 48, md: 56 },
-									height: { xs: 40, sm: 48, md: 56 },
-									borderRadius: { xs: 2, sm: 2.5 },
-									background: `linear-gradient(135deg, ${border} 0%, ${border}50 100%)`,
-									border: `1px solid ${border}`,
+									width: 36,
+									height: 36,
+									borderRadius: 1.5,
+									background: `linear-gradient(135deg, ${colorValues.bgHover}, transparent)`,
+									border: `1px solid ${colorValues.border}`,
 									display: 'flex',
 									alignItems: 'center',
 									justifyContent: 'center',
-									transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-									boxShadow: `0 0 15px ${glow}, inset 0 0 15px ${glow}50`,
-									'&::before': {
-										content: '""',
-										position: 'absolute',
-										inset: -2,
-										borderRadius: { xs: 2, sm: 2.5 },
-										background: `radial-gradient(circle, ${glow} 0%, transparent 70%)`,
-										filter: 'blur(10px)',
-										opacity: 0.5,
-										zIndex: -1,
-									},
+									mb: 1,
+									transition: 'transform 0.3s ease',
 								}}
 							>
-								<SvgIcon
-									component={Icon}
-									className="icon"
-									sx={{
-										position: 'relative',
-										fontSize: { xs: 20, sm: 24, md: 28 },
-										color: text,
-										filter: `drop-shadow(0 0 8px ${glow})`,
-										transition: 'all 0.3s ease',
-									}}
-								/>
+								<Icon sx={{ fontSize: 18, color: colorValues.text }} />
 							</Box>
-						</Box>
-						<Box sx={{ flex: 1 }}>
+						</Fade>
+
+						<Fade in timeout={400} style={{ transitionDelay: `${delay * 1000 + 300}ms` }}>
 							<Typography
-								variant="h6"
+								variant="subtitle1"
 								sx={{
-									fontSize: { xs: '0.9375rem', sm: '1.0625rem', md: '1.1875rem' },
-									fontWeight: 700,
+									fontSize: '0.875rem',
+									fontWeight: 600,
 									color: 'white',
-									mb: { xs: 0.5, sm: 0.75 },
-									overflow: 'hidden',
-									textOverflow: 'ellipsis',
-									display: '-webkit-box',
-									WebkitLineClamp: 1,
-									WebkitBoxOrient: 'vertical',
-									letterSpacing: '-0.01em',
+									mb: 0.25,
 								}}
 							>
-								{action.title}
+								{title}
 							</Typography>
+						</Fade>
+
+						<Fade in timeout={400} style={{ transitionDelay: `${delay * 1000 + 400}ms` }}>
 							<Typography
 								variant="body2"
 								sx={{
-									fontSize: { xs: '0.6875rem', sm: '0.75rem', md: '0.875rem' },
-									color: 'rgba(255, 255, 255, 0.7)',
-									overflow: 'hidden',
-									textOverflow: 'ellipsis',
-									display: '-webkit-box',
-									WebkitLineClamp: 2,
-									WebkitBoxOrient: 'vertical',
-									fontWeight: 500,
+									fontSize: '0.6875rem',
+									color: 'rgba(255, 255, 255, 0.5)',
+									lineHeight: 1.4,
 								}}
 							>
-								{action.description}
+								{description}
 							</Typography>
-						</Box>
+						</Fade>
 					</CardContent>
 				</Card>
-			</Zoom>
-		</Link>
+			</Link>
+		</Zoom>
 	);
 }

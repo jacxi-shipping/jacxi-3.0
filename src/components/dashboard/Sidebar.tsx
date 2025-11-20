@@ -145,7 +145,7 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 						bgcolor: 'rgba(10, 22, 40, 0.95)',
 						backdropFilter: 'blur(20px)',
 						borderRight: '1px solid rgba(6, 182, 212, 0.1)',
-						mt: '64px',
+						mt: '48px',
 					},
 				}}
 			>

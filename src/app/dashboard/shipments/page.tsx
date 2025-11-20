@@ -82,9 +82,9 @@ export default function ShipmentsListPage() {
 	return (
 		<>
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-4 sm:py-6">
+			<Section className="bg-[#020817] py-2 sm:py-3">
 				{/* Smart Search & Filters */}
-				<div className="mb-6 sm:mb-8">
+				<div className="mb-3 sm:mb-4">
 					<SmartSearch
 						onSearch={handleSearch}
 						placeholder="Search shipments by tracking number, VIN, origin, destination..."

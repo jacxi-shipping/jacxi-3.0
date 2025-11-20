@@ -60,8 +60,8 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 		>
 			<Toolbar
 				sx={{
-					minHeight: { xs: 56, sm: 64 },
-					px: { xs: 2, sm: 3 },
+					minHeight: 48,
+					px: 2,
 				}}
 			>
 				{/* Mobile Menu Button */}
@@ -81,35 +81,32 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 				{/* Logo/Title */}
 				<Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
 					<Link href="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-						<Box
-							sx={{
-								width: 36,
-								height: 36,
-								borderRadius: 2,
-								background: 'linear-gradient(135deg, #00bfff 0%, #0099cc 100%)',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								fontWeight: 900,
-								fontSize: '1.25rem',
-								color: 'white',
-								boxShadow: '0 4px 12px rgba(0, 191, 255, 0.3)',
-							}}
-						>
-							J
-						</Box>
-						<Typography
-							variant="h6"
-							sx={{
-								display: { xs: 'none', sm: 'block' },
-								fontWeight: 700,
-								fontSize: '1.125rem',
-								color: 'white',
-								letterSpacing: '-0.01em',
-							}}
-						>
-							JACXI Shipping
-						</Typography>
+					<Box
+						sx={{
+							width: 28,
+							height: 28,
+							borderRadius: 1.5,
+							background: 'linear-gradient(135deg, #00bfff 0%, #0099cc 100%)',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							fontWeight: 800,
+							fontSize: '0.9375rem',
+							color: 'white',
+						}}
+					>
+						J
+					</Box>
+					<Typography
+						sx={{
+							display: { xs: 'none', sm: 'block' },
+							fontWeight: 700,
+							fontSize: '0.9375rem',
+							color: 'white',
+						}}
+					>
+						JACXI
+					</Typography>
 					</Link>
 
 					{/* Page Title (if provided) */}
@@ -127,8 +124,8 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							<Typography
 								sx={{
 									display: { xs: 'none', md: 'block' },
-									fontSize: '0.875rem',
-									color: 'rgba(255, 255, 255, 0.7)',
+									fontSize: '0.75rem',
+									color: 'rgba(255, 255, 255, 0.6)',
 									fontWeight: 500,
 								}}
 							>
@@ -143,7 +140,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					{/* Notifications */}
 					<Tooltip title="Notifications">
 						<IconButton
-							size="medium"
+							size="small"
 							sx={{
 								color: 'rgba(255, 255, 255, 0.7)',
 								'&:hover': {
@@ -153,7 +150,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							}}
 						>
 							<Badge badgeContent={3} color="error">
-								<Notifications fontSize="small" />
+								<Notifications sx={{ fontSize: 18 }} />
 							</Badge>
 						</IconButton>
 					</Tooltip>
@@ -162,7 +159,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					<Tooltip title="Settings">
 						<Link href="/dashboard/settings" style={{ textDecoration: 'none' }}>
 							<IconButton
-								size="medium"
+								size="small"
 								sx={{
 									color: 'rgba(255, 255, 255, 0.7)',
 									'&:hover': {
@@ -171,7 +168,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 									},
 								}}
 							>
-								<Settings fontSize="small" />
+								<Settings sx={{ fontSize: 18 }} />
 							</IconButton>
 						</Link>
 					</Tooltip>
@@ -185,15 +182,15 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 								ml: 1,
 							}}
 						>
-							<Avatar
-								sx={{
-									width: 32,
-									height: 32,
-									bgcolor: 'rgb(34, 211, 238)',
-									fontSize: '0.875rem',
-									fontWeight: 600,
-								}}
-							>
+						<Avatar
+							sx={{
+								width: 28,
+								height: 28,
+								bgcolor: 'rgb(34, 211, 238)',
+								fontSize: '0.75rem',
+								fontWeight: 600,
+							}}
+						>
 								{session?.user?.name?.charAt(0).toUpperCase() || 'U'}
 							</Avatar>
 						</IconButton>

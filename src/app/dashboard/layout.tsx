@@ -44,7 +44,7 @@ export default function DashboardLayout({
 							flexGrow: 1,
 							minWidth: 0,
 							overflow: 'auto',
-							height: 'calc(100vh - 64px)',
+							height: 'calc(100vh - 48px)',
 						}}
 					>
 						{children}

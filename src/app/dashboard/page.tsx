@@ -106,14 +106,14 @@ export default function DashboardPage() {
 		<>
 
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-4 sm:py-6">
+			<Section className="bg-[#020817] py-2 sm:py-3">
 				{/* Stats Grid */}
 				<Box
 					sx={{
 						display: 'grid',
-						gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' },
-						gap: { xs: 2, sm: 3, md: 4 },
-						mb: { xs: 6, sm: 8, md: 10 },
+					gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' },
+					gap: 1.5,
+					mb: 3,
 					}}
 				>
 					<StatsCard
@@ -150,8 +150,8 @@ export default function DashboardPage() {
 				<Box
 					sx={{
 						display: 'grid',
-						gridTemplateColumns: { xs: '1fr', lg: 'repeat(3, 1fr)' },
-						gap: { xs: 4, sm: 5, md: 6 },
+					gridTemplateColumns: { xs: '1fr', lg: 'repeat(3, 1fr)' },
+					gap: 2,
 					}}
 				>
 					{/* Recent Shipments */}
@@ -160,7 +160,7 @@ export default function DashboardPage() {
 							gridColumn: { xs: '1', lg: 'span 2' },
 							display: 'flex',
 							flexDirection: 'column',
-							gap: { xs: 3, sm: 4 },
+							gap: 2,
 						}}
 					>
 						<Fade in={showContent} timeout={800} style={{ transitionDelay: '600ms' }}>
@@ -170,15 +170,15 @@ export default function DashboardPage() {
 									flexDirection: { xs: 'column', sm: 'row' },
 									alignItems: { xs: 'flex-start', sm: 'center' },
 									justifyContent: 'space-between',
-									gap: { xs: 2, sm: 2.5 },
+									gap: 1.5,
 								}}
 							>
 								<Box sx={{ flex: 1, minWidth: 0 }}>
 									<Typography
 										variant="h5"
 										sx={{
-											fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' },
-											fontWeight: 800,
+											fontSize: '1.125rem',
+											fontWeight: 700,
 											background: 'linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(200, 220, 255) 100%)',
 											WebkitBackgroundClip: 'text',
 											WebkitTextFillColor: 'transparent',
@@ -192,7 +192,7 @@ export default function DashboardPage() {
 									<Typography
 										variant="body2"
 										sx={{
-											fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
+											fontSize: '0.8125rem',
 											color: 'rgba(255, 255, 255, 0.7)',
 											fontWeight: 500,
 										}}
