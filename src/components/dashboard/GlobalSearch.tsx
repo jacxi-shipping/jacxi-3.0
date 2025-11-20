@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
@@ -42,11 +42,11 @@ export default function GlobalSearch() {
   }, []);
 
   // Save to recent searches
-  const saveToRecent = (search: string) => {
+  const saveToRecent = useCallback((search: string) => {
     const updated = [search, ...recentSearches.filter(s => s !== search)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
+  }, [recentSearches]);
 
   // Clear recent searches
   const clearRecent = () => {
@@ -154,12 +154,12 @@ export default function GlobalSearch() {
     }
   };
 
-  const handleSelect = (result: SearchResult) => {
+  const handleSelect = useCallback((result: SearchResult) => {
     saveToRecent(result.title);
     setIsOpen(false);
     setQuery('');
     router.push(result.link);
-  };
+  }, [router, saveToRecent]);
 
   const handleRecentClick = (search: string) => {
     setQuery(search);
@@ -184,7 +184,7 @@ export default function GlobalSearch() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex]);
+  }, [isOpen, results, selectedIndex, handleSelect]);
 
   const getIcon = (type: string) => {
     switch (type) {

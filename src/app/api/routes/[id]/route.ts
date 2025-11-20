@@ -4,13 +4,8 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary enum until migration
-enum TempRouteStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  OPTIMIZING = 'OPTIMIZING',
-  ARCHIVED = 'ARCHIVED',
-}
+// Temporary type until migration
+type TempRouteStatus = 'ACTIVE' | 'INACTIVE' | 'OPTIMIZING' | 'ARCHIVED';
 
 // GET: Get single route with shipments
 export async function GET(
@@ -83,7 +78,7 @@ export async function PATCH(
     
     type UpdateDataType = {
       name?: string;
-      status?: typeof TempRouteStatus[keyof typeof TempRouteStatus];
+      status?: TempRouteStatus;
       waypoints?: Array<{lat: number; lng: number; name?: string}>;
       distance?: number | null;
       estimatedTime?: number | null;
@@ -92,7 +87,7 @@ export async function PATCH(
     };
     const updateData: UpdateDataType = {};
     if (name) updateData.name = name;
-    if (status) updateData.status = status as typeof TempRouteStatus[keyof typeof TempRouteStatus];
+    if (status) updateData.status = status as TempRouteStatus;
     if (waypoints) updateData.waypoints = waypoints;
     if (distance !== undefined) updateData.distance = distance;
     if (estimatedTime !== undefined) updateData.estimatedTime = estimatedTime;

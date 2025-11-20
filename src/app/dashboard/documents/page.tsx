@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, FileText, ShieldCheck, Download, Upload, Search, AlertCircle } from 'lucide-react';
+import { Box, Typography, Button as MuiButton } from '@mui/material';
 
 import Section from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
@@ -176,46 +177,8 @@ export default function DocumentsPage() {
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-documents" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-documents)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10 space-y-6">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-						<div>
-							<motion.h1
-								initial={{ opacity: 0, y: 16 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5 }}
-								className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight"
-							>
-								Document Center
-							</motion.h1>
-							<motion.p
-								initial={{ opacity: 0, y: 16 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5, delay: 0.1 }}
-								className="text-lg sm:text-xl text-white/70 max-w-2xl"
-							>
-								Manage templates, uploads, and compliance documents in one unified workspace.
-							</motion.p>
-						</div>
-						<Link href="/dashboard">
-							<Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Back to Overview
-							</Button>
-						</Link>
-					</div>
+			<Section className="bg-[#020817] py-2 sm:py-3">
+				<Box sx={{ px: { xs: 2, sm: 3 } }}>
 
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
@@ -239,10 +202,10 @@ export default function DocumentsPage() {
 							<p className="text-xs text-white/40 mt-2">Includes uploaded manifests and certificates.</p>
 						</div>
 					</motion.div>
-				</div>
+				</Box>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[#020817] py-4 sm:py-6">
 				<div className="max-w-6xl mx-auto space-y-10">
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}

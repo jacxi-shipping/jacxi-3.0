@@ -81,74 +81,10 @@ export default function ShipmentsListPage() {
 
 	return (
 		<>
-			{/* Header */}
-			<Section className="relative bg-[#020817] py-6 sm:py-12 lg:py-16 overflow-hidden">
-				{/* Background gradient */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-
-				{/* Subtle geometric grid pattern */}
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-shipments" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path
-									d="M 40 0 L 0 0 0 40"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="1"
-								/>
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-shipments)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-						<div className="space-y-1 sm:space-y-2 max-w-full">
-							<h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight break-words">
-								Shipments Management
-							</h1>
-							<p className="text-sm sm:text-lg md:text-xl text-white/70">
-								Manage and track all shipments
-							</p>
-						</div>
-						{isAdmin && (
-							<div className="w-full sm:w-auto">
-								<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
-									<Button
-										variant="contained"
-										size="large"
-										startIcon={<Add />}
-										sx={{
-											bgcolor: '#00bfff',
-											color: 'white',
-											fontWeight: 600,
-											fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-											px: { xs: 2, sm: 3 },
-											py: { xs: 1.25, sm: 1.5 },
-											width: { xs: '100%', sm: 'auto' },
-											boxShadow: '0 8px 16px rgba(0, 191, 255, 0.3)',
-											'&:hover': {
-												bgcolor: '#00a8e6',
-												boxShadow: '0 12px 24px rgba(0, 191, 255, 0.5)',
-											},
-											transition: 'all 0.3s ease',
-										}}
-									>
-										New Shipment
-									</Button>
-								</Link>
-							</div>
-						)}
-					</div>
-				</div>
-			</Section>
-
 			{/* Main Content */}
-			<Section className="bg-[#020817] py-6 sm:py-12">
+			<Section className="bg-[#020817] py-2 sm:py-3">
 				{/* Smart Search & Filters */}
-				<div className="mb-6 sm:mb-8">
+				<div className="mb-3 sm:mb-4">
 					<SmartSearch
 						onSearch={handleSearch}
 						placeholder="Search shipments by tracking number, VIN, origin, destination..."

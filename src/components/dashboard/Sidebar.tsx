@@ -11,7 +11,6 @@ import {
 	Description,
 	Settings,
 	Person,
-	Logout,
 	Menu,
 	Close,
 	Add,
@@ -21,7 +20,6 @@ import {
 	AllInbox,
 	Receipt,
 } from '@mui/icons-material';
-import { signOut } from 'next-auth/react';
 import { useSession } from 'next-auth/react';
 import {
 	Drawer,
@@ -30,7 +28,6 @@ import {
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
-	Avatar,
 	Typography,
 	Divider,
 	IconButton,
@@ -119,62 +116,44 @@ const settingsNavigation: NavigationItem[] = [
 	},
 ];
 
-export default function Sidebar() {
-	const [mobileOpen, setMobileOpen] = useState(false);
+interface SidebarProps {
+	mobileOpen?: boolean;
+	onMobileClose?: () => void;
+}
+
+export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarProps) {
 	const pathname = usePathname();
 	const { data: session } = useSession();
 
-	const handleSignOut = async () => {
-		await signOut({ callbackUrl: '/' });
-	};
+	const drawerWidth = 260;
 
 	return (
 		<>
-			{/* Mobile Menu Button */}
-			<Box
-				sx={{
-					display: { xs: 'block', lg: 'none' },
-					position: 'fixed',
-					top: 16,
-					left: 16,
-					zIndex: 50,
-				}}
-			>
-				<IconButton
-					onClick={() => setMobileOpen(!mobileOpen)}
-					sx={{
-						bgcolor: 'rgba(10, 22, 40, 0.5)',
-						backdropFilter: 'blur(8px)',
-						border: '1px solid rgba(6, 182, 212, 0.3)',
-						color: 'white',
-						'&:hover': {
-							bgcolor: 'rgba(6, 182, 212, 0.1)',
-						},
-					}}
-				>
-					{mobileOpen ? <Close /> : <Menu />}
-				</IconButton>
-			</Box>
-
 			{/* Mobile Drawer */}
 			<Drawer
 				variant="temporary"
 				open={mobileOpen}
-				onClose={() => setMobileOpen(false)}
+				onClose={onMobileClose}
+				ModalProps={{
+					keepMounted: true,
+				}}
 				sx={{
 					display: { xs: 'block', lg: 'none' },
 					'& .MuiDrawer-paper': {
-						width: 288,
+						width: drawerWidth,
 						boxSizing: 'border-box',
+						bgcolor: 'rgba(10, 22, 40, 0.95)',
+						backdropFilter: 'blur(20px)',
+						borderRight: '1px solid rgba(6, 182, 212, 0.1)',
+						mt: '48px',
 					},
 				}}
 			>
-				<SidebarContent
-					pathname={pathname}
-					session={session}
-					onSignOut={handleSignOut}
-					onNavClick={() => setMobileOpen(false)}
-				/>
+			<SidebarContent
+				pathname={pathname}
+				session={session}
+				onNavClick={onMobileClose}
+			/>
 			</Drawer>
 
 			{/* Desktop Drawer */}
@@ -182,18 +161,21 @@ export default function Sidebar() {
 				variant="permanent"
 				sx={{
 					display: { xs: 'none', lg: 'block' },
-					width: 288,
+					width: drawerWidth,
 					flexShrink: 0,
 					'& .MuiDrawer-paper': {
-						width: 288,
+						width: drawerWidth,
 						boxSizing: 'border-box',
+						bgcolor: 'rgba(10, 22, 40, 0.5)',
+						backdropFilter: 'blur(20px)',
+						borderRight: '1px solid rgba(6, 182, 212, 0.1)',
+						position: 'relative',
 					},
 				}}
 			>
 				<SidebarContent
 					pathname={pathname}
 					session={session}
-					onSignOut={handleSignOut}
 				/>
 			</Drawer>
 		</>
@@ -202,12 +184,11 @@ export default function Sidebar() {
 
 type NavItemProps = {
 	item: NavigationItem;
-	index: number;
 	isActive: (href: string) => boolean;
 	onNavClick?: () => void;
 };
 
-function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
+function NavItem({ item, isActive, onNavClick }: NavItemProps) {
 	const Icon = item.icon;
 	const active = isActive(item.href);
 
@@ -217,12 +198,14 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 					selected={active}
 					sx={{
 						position: 'relative',
-						borderRadius: 2,
+						borderRadius: 1.5,
 						mx: 1,
-						my: 0.5,
+						my: 0.25,
+						py: 0.75,
+						minHeight: 0,
 						transition: 'all 0.2s ease',
 						transform: 'translateX(0)',
-						color: active ? 'rgb(34, 211, 238)' : 'rgba(255, 255, 255, 0.6)',
+						color: active ? 'rgb(34, 211, 238)' : 'rgba(255, 255, 255, 0.65)',
 						bgcolor: active ? 'rgba(6, 182, 212, 0.1)' : 'transparent',
 						'&:hover': {
 							bgcolor: active ? 'rgba(6, 182, 212, 0.15)' : 'rgba(6, 182, 212, 0.05)',
@@ -234,9 +217,9 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 									content: '""',
 									position: 'absolute',
 									left: 0,
-									top: 4,
-									bottom: 4,
-									width: 2,
+									top: 2,
+									bottom: 2,
+									width: 3,
 									bgcolor: 'rgb(34, 211, 238)',
 									borderRadius: '0 2px 2px 0',
 							  }
@@ -245,17 +228,18 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 				>
 					<ListItemIcon
 						sx={{
-							minWidth: 40,
+							minWidth: 32,
 							color: 'inherit',
 						}}
 					>
-						<Icon sx={{ fontSize: 20 }} />
+						<Icon sx={{ fontSize: 18 }} />
 					</ListItemIcon>
 					<ListItemText
 						primary={item.name}
 						primaryTypographyProps={{
-							fontSize: '0.875rem',
+							fontSize: '0.8125rem',
 							fontWeight: 500,
+							lineHeight: 1.2,
 						}}
 					/>
 				</ListItemButton>
@@ -266,37 +250,36 @@ function NavItem({ item, index, isActive, onNavClick }: NavItemProps) {
 type NavSectionProps = {
 	title?: string;
 	items: NavigationItem[];
-	baseIndex?: number;
 	isAdmin: boolean;
 	isActive: (href: string) => boolean;
 	onNavClick?: () => void;
 };
 
-function NavSection({ title, items, baseIndex = 0, isAdmin, isActive, onNavClick }: NavSectionProps) {
+function NavSection({ title, items, isAdmin, isActive, onNavClick }: NavSectionProps) {
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box sx={{ mb: 0.5 }}>
 			{title && (
-				<Box sx={{ px: 2, py: 1 }}>
+				<Box sx={{ px: 2, py: 0.5, mt: 1 }}>
 					<Typography
 						variant="caption"
 						sx={{
-							fontSize: '0.75rem',
+							fontSize: '0.6875rem',
 							fontWeight: 600,
-							color: 'rgba(255, 255, 255, 0.5)',
+							color: 'rgba(255, 255, 255, 0.4)',
 							textTransform: 'uppercase',
-							letterSpacing: 1,
+							letterSpacing: 0.5,
 						}}
 					>
 						{title}
 					</Typography>
 				</Box>
 			)}
-			<List sx={{ py: 0.5 }}>
+			<List sx={{ py: 0 }}>
 				{items
 					.filter((item) => !item.adminOnly || isAdmin)
-					.map((item, index) => (
-						<NavItem key={item.name} item={item} index={baseIndex + index} isActive={isActive} onNavClick={onNavClick} />
-					))}
+				.map((item) => (
+					<NavItem key={item.name} item={item} isActive={isActive} onNavClick={onNavClick} />
+				))}
 			</List>
 		</Box>
 	);
@@ -305,12 +288,10 @@ function NavSection({ title, items, baseIndex = 0, isAdmin, isActive, onNavClick
 function SidebarContent({
 	pathname,
 	session,
-	onSignOut,
 	onNavClick,
 }: {
 	pathname: string;
 	session: Session | null;
-	onSignOut: () => Promise<void>;
 	onNavClick?: () => void;
 }) {
 	type AppUser = Session['user'] & { role?: string };
@@ -330,208 +311,88 @@ function SidebarContent({
 				display: 'flex',
 				flexDirection: 'column',
 				height: '100%',
-				bgcolor: '#0A1F44',
-				backdropFilter: 'blur(16px)',
-				borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+				overflow: 'hidden',
 			}}
 		>
-			{/* Logo/Header */}
+			{/* Logo/Header - Compact */}
 			<Box
 				sx={{
 					display: 'flex',
 					alignItems: 'center',
-					gap: 1.5,
-					px: 3,
-					py: 2.5,
-					borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+					gap: 1.25,
+					px: 2,
+					py: 1.25,
+					borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+					flexShrink: 0,
 				}}
 			>
 				<Box
 					sx={{
-						position: 'relative',
-						width: 36,
-						height: 36,
-						borderRadius: 2,
-						bgcolor: '#020817',
-						border: '1px solid rgba(6, 182, 212, 0.4)',
+						width: 32,
+						height: 32,
+						borderRadius: 1.5,
+						background: 'linear-gradient(135deg, #00bfff 0%, #0099cc 100%)',
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						'&::before': {
-							content: '""',
-							position: 'absolute',
-							inset: 0,
-							borderRadius: 2,
-							bgcolor: 'rgba(6, 182, 212, 0.1)',
-							filter: 'blur(8px)',
-						},
+						flexShrink: 0,
 					}}
 				>
-					<Inventory2 sx={{ position: 'relative', fontSize: 20, color: 'rgb(34, 211, 238)' }} />
+					<Typography sx={{ fontSize: '1.125rem', fontWeight: 800, color: 'white' }}>
+						J
+					</Typography>
 				</Box>
 				<Box>
 					<Typography
-						variant="subtitle1"
 						sx={{
-							fontSize: '1rem',
+							fontSize: '0.9375rem',
 							fontWeight: 700,
 							color: 'white',
+							lineHeight: 1,
 						}}
 					>
-						Jacxi
-					</Typography>
-					<Typography
-						variant="caption"
-						sx={{
-							fontSize: '0.625rem',
-							color: 'rgba(255, 255, 255, 0.6)',
-							textTransform: 'uppercase',
-							letterSpacing: 1,
-						}}
-					>
-						Dashboard
+						JACXI
 					</Typography>
 				</Box>
 			</Box>
 
-			{/* Navigation */}
+			{/* Navigation - Fixed height, no scroll */}
 			<Box
 				sx={{
 					flex: 1,
-					px: 1.5,
-					py: 2,
-					overflowY: 'auto',
-					'&::-webkit-scrollbar': {
-						width: 6,
-					},
-					'&::-webkit-scrollbar-track': {
-						bgcolor: 'transparent',
-					},
-					'&::-webkit-scrollbar-thumb': {
-						bgcolor: 'rgba(255, 255, 255, 0.2)',
-						borderRadius: 3,
-						'&:hover': {
-							bgcolor: 'rgba(255, 255, 255, 0.3)',
-						},
-					},
+					px: 0.5,
+					py: 1.5,
+					overflow: 'hidden',
+					display: 'flex',
+					flexDirection: 'column',
 				}}
 			>
 				{/* Main */}
-				<NavSection items={mainNavigation} baseIndex={0} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+				<NavSection items={mainNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
 				{/* Shipments */}
-				<NavSection title="Shipments" items={shipmentNavigation} baseIndex={1} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+				<NavSection title="Shipments" items={shipmentNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
 				{/* Admin Section */}
 				{isAdmin && (
-					<NavSection title="Administration" items={adminNavigation} baseIndex={3} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+					<NavSection title="Admin" items={adminNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 				)}
 
 				{/* Other */}
-				<NavSection items={otherNavigation} baseIndex={isAdmin ? 6 : 3} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+				<NavSection items={otherNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
 				{/* Settings */}
-				<Box sx={{ pt: 2 }}>
+				<Box sx={{ mt: 'auto', pt: 1 }}>
 					<Divider
 						sx={{
-							mb: 2,
-							background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%)',
+							mb: 0.5,
+							background: 'rgba(255, 255, 255, 0.08)',
 							border: 'none',
 							height: 1,
 						}}
 					/>
-					<NavSection items={settingsNavigation} baseIndex={isAdmin ? 9 : 6} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+					<NavSection items={settingsNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 				</Box>
-			</Box>
-
-			{/* User Section */}
-			<Box
-				sx={{
-					px: 1.5,
-					py: 2,
-					borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-				}}
-			>
-				<Box
-					sx={{
-						display: 'flex',
-						alignItems: 'center',
-						gap: 1.5,
-						px: 1.5,
-						py: 1.25,
-						borderRadius: 2,
-						bgcolor: 'rgba(255, 255, 255, 0.05)',
-						border: '1px solid rgba(255, 255, 255, 0.1)',
-						mb: 1,
-					}}
-				>
-					<Avatar
-						sx={{
-							width: 32,
-							height: 32,
-							background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%)',
-							border: '1px solid rgba(6, 182, 212, 0.3)',
-						}}
-					>
-						<Person sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
-					</Avatar>
-					<Box sx={{ flex: 1, minWidth: 0 }}>
-						<Typography
-							variant="caption"
-							sx={{
-								fontSize: '0.75rem',
-								fontWeight: 500,
-								color: 'white',
-								display: 'block',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-							}}
-						>
-							{session?.user?.name || 'User'}
-						</Typography>
-						<Typography
-							variant="caption"
-							sx={{
-								fontSize: '0.625rem',
-								color: 'rgba(255, 255, 255, 0.6)',
-								display: 'block',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-							}}
-						>
-							{session?.user?.email || ''}
-						</Typography>
-					</Box>
-				</Box>
-
-				<ListItemButton
-					onClick={onSignOut}
-					sx={{
-						borderRadius: 2,
-						border: '1px solid transparent',
-						color: 'rgba(255, 255, 255, 0.6)',
-						py: 1,
-						px: 1.5,
-						'&:hover': {
-							bgcolor: 'rgba(239, 68, 68, 0.1)',
-							borderColor: 'rgba(239, 68, 68, 0.2)',
-							color: 'white',
-						},
-					}}
-				>
-					<ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-						<Logout sx={{ fontSize: 16 }} />
-					</ListItemIcon>
-					<ListItemText
-						primary="Sign Out"
-						primaryTypographyProps={{
-							fontSize: '0.75rem',
-							fontWeight: 500,
-						}}
-					/>
-				</ListItemButton>
 			</Box>
 		</Box>
 	);

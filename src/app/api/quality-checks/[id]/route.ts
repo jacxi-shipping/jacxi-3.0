@@ -4,14 +4,8 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary enum until migration
-enum TempQualityCheckStatus {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  PASSED = 'PASSED',
-  FAILED = 'FAILED',
-  REQUIRES_ATTENTION = 'REQUIRES_ATTENTION',
-}
+// Temporary type until migration
+type TempQualityCheckStatus = 'PENDING' | 'IN_PROGRESS' | 'PASSED' | 'FAILED' | 'REQUIRES_ATTENTION';
 
 // PATCH: Update quality check
 export async function PATCH(
@@ -36,7 +30,7 @@ export async function PATCH(
     const { status, inspector, notes, photos } = data;
 
     type UpdateDataType = {
-      status?: typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
+      status?: TempQualityCheckStatus;
       checkedAt?: Date;
       inspector?: string;
       notes?: string | null;
@@ -44,7 +38,7 @@ export async function PATCH(
     };
     const updateData: UpdateDataType = {};
     if (status) {
-      updateData.status = status as typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
+      updateData.status = status as TempQualityCheckStatus;
       if (status === 'PASSED' || status === 'FAILED') {
         updateData.checkedAt = new Date();
       }

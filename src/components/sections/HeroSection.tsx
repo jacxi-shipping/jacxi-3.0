@@ -1,9 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ArrowRight, TruckIcon } from 'lucide-react';
+import { Fade, Slide, Grow, Box, Button } from '@mui/material';
 
 export default function HeroSection() {
+	const show = true;
+
 	return (
 		<section className="relative min-h-[600px] md:min-h-[700px] flex items-center overflow-hidden">
 			{/* Background Image */}
@@ -19,62 +21,89 @@ export default function HeroSection() {
 			<div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-20 md:py-28 w-full">
 				<div className="max-w-2xl">
 					{/* Headline */}
-					<motion.h1
-						initial={{ opacity: 0, y: 30 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, delay: 0.2 }}
-						className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-gray-900 mb-6"
-					>
-						Reliable Vehicle Shipping<br />
-						From USA to the Middle East
-					</motion.h1>
+					<Slide in={show} direction="up" timeout={600}>
+						<Box>
+							<h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-gray-900 mb-6">
+								Reliable Vehicle Shipping<br />
+								From USA to the Middle East
+							</h1>
+						</Box>
+					</Slide>
 
 					{/* Subheadline */}
-					<motion.p
-						initial={{ opacity: 0, y: 30 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, delay: 0.4 }}
-						className="text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed"
-					>
-						Fast, secure, and fully managed logistics for cars,<br />
-						SUVs, motorcycles, and heavy vehicles.
-					</motion.p>
+					<Fade in={show} timeout={800} style={{ transitionDelay: '200ms' }}>
+						<Box>
+							<p className="text-lg sm:text-xl text-gray-700 mb-8 leading-relaxed">
+								Fast, secure, and fully managed logistics for cars,<br />
+								SUVs, motorcycles, and heavy vehicles.
+							</p>
+						</Box>
+					</Fade>
 
 					{/* CTA Buttons */}
-					<motion.div
-						initial={{ opacity: 0, y: 30 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6, delay: 0.6 }}
-						className="flex flex-col sm:flex-row gap-4"
-					>
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							onClick={() => window.location.href = '/auth/signin'}
-							className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-md font-semibold transition-all inline-flex items-center justify-center text-base shadow-lg hover:shadow-xl group relative overflow-hidden"
-						>
-							<span className="relative z-10">Calculate Shipping</span>
-							<ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
-							<motion.div
-								className="absolute inset-0 bg-blue-700"
-								initial={{ x: "-100%" }}
-								whileHover={{ x: 0 }}
-								transition={{ duration: 0.3 }}
-							/>
-						</motion.button>
-						<motion.button
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							onClick={() => window.location.href = '/tracking'}
-							className="bg-white hover:bg-gray-50 border-2 border-gray-300 hover:border-gray-400 text-gray-900 px-8 py-3.5 rounded-md font-semibold transition-all inline-flex items-center justify-center text-base shadow-md hover:shadow-lg group"
-						>
-							<TruckIcon className="mr-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-							Track Shipment
-						</motion.button>
-					</motion.div>
+					<Fade in={show} timeout={800} style={{ transitionDelay: '400ms' }}>
+						<Box className="flex flex-col sm:flex-row gap-4">
+							<Grow in={show} timeout={600} style={{ transitionDelay: '600ms' }}>
+								<Button
+									onClick={() => window.location.href = '/auth/signin'}
+									variant="contained"
+									sx={{
+										bgcolor: 'rgb(37 99 235)',
+										'&:hover': {
+											bgcolor: 'rgb(29 78 216)',
+											transform: 'scale(1.05)',
+										},
+										px: 4,
+										py: 1.75,
+										borderRadius: 1.5,
+										fontSize: '1rem',
+										fontWeight: 600,
+										textTransform: 'none',
+										boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+										transition: 'all 0.3s',
+										'&:active': {
+											transform: 'scale(0.95)',
+										},
+									}}
+									endIcon={<ArrowRight className="w-5 h-5" />}
+								>
+									Calculate Shipping
+								</Button>
+							</Grow>
+							<Grow in={show} timeout={600} style={{ transitionDelay: '700ms' }}>
+								<Button
+									onClick={() => window.location.href = '/tracking'}
+									variant="outlined"
+									sx={{
+										borderColor: 'rgb(209 213 219)',
+										borderWidth: 2,
+										color: 'rgb(17 24 39)',
+										'&:hover': {
+											borderColor: 'rgb(156 163 175)',
+											bgcolor: 'rgb(249 250 251)',
+											transform: 'scale(1.05)',
+										},
+										px: 4,
+										py: 1.75,
+										borderRadius: 1.5,
+										fontSize: '1rem',
+										fontWeight: 600,
+										textTransform: 'none',
+										boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+										transition: 'all 0.3s',
+										'&:active': {
+											transform: 'scale(0.95)',
+										},
+									}}
+									startIcon={<TruckIcon className="w-5 h-5" />}
+								>
+									Track Shipment
+								</Button>
+							</Grow>
+						</Box>
+					</Fade>
 				</div>
 			</div>
 		</section>
 	);
 }
-

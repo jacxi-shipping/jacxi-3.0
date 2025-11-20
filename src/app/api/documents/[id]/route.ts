@@ -4,18 +4,8 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary enum until migration
-enum TempDocumentCategory {
-  INVOICE = 'INVOICE',
-  BILL_OF_LADING = 'BILL_OF_LADING',
-  CUSTOMS = 'CUSTOMS',
-  INSURANCE = 'INSURANCE',
-  TITLE = 'TITLE',
-  INSPECTION_REPORT = 'INSPECTION_REPORT',
-  PHOTO = 'PHOTO',
-  CONTRACT = 'CONTRACT',
-  OTHER = 'OTHER',
-}
+// Temporary type until migration
+type TempDocumentCategory = 'INVOICE' | 'BILL_OF_LADING' | 'CUSTOMS' | 'INSURANCE' | 'TITLE' | 'INSPECTION_REPORT' | 'PHOTO' | 'CONTRACT' | 'OTHER';
 
 // GET: Get single document
 export async function GET(
@@ -114,14 +104,14 @@ export async function PATCH(
     type UpdateDataType = {
       name?: string;
       description?: string | null;
-      category?: typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
+      category?: TempDocumentCategory;
       isPublic?: boolean;
       tags?: string[];
     };
     const updateData: UpdateDataType = {};
     if (name) updateData.name = name;
     if (description !== undefined) updateData.description = description;
-    if (category) updateData.category = category as typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
+    if (category) updateData.category = category as TempDocumentCategory;
     if (isPublic !== undefined) updateData.isPublic = isPublic;
     if (tags) updateData.tags = tags;
 

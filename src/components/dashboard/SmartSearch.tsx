@@ -16,7 +16,6 @@ import {
 import { 
   TextField,
   InputAdornment,
-  IconButton,
   Button,
   Chip,
   Select,
@@ -130,7 +129,7 @@ export default function SmartSearch({
     handleSearch(clearedFilters);
   };
 
-  const hasActiveFilters = query || activeFiltersCount > 0;
+  const hasActiveFilters = Boolean(query) || activeFiltersCount > 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

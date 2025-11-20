@@ -4,22 +4,9 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary enums until migration
-enum TempQualityCheckType {
-  INITIAL_INSPECTION = 'INITIAL_INSPECTION',
-  PRE_LOADING = 'PRE_LOADING',
-  POST_LOADING = 'POST_LOADING',
-  DELIVERY_INSPECTION = 'DELIVERY_INSPECTION',
-  DAMAGE_ASSESSMENT = 'DAMAGE_ASSESSMENT',
-}
-
-enum TempQualityCheckStatus {
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  PASSED = 'PASSED',
-  FAILED = 'FAILED',
-  REQUIRES_ATTENTION = 'REQUIRES_ATTENTION',
-}
+// Temporary types until migration
+type TempQualityCheckType = 'INITIAL_INSPECTION' | 'PRE_LOADING' | 'POST_LOADING' | 'DELIVERY_INSPECTION' | 'DAMAGE_ASSESSMENT';
+type TempQualityCheckStatus = 'PENDING' | 'IN_PROGRESS' | 'PASSED' | 'FAILED' | 'REQUIRES_ATTENTION';
 
 // GET: Fetch quality checks
 export async function GET(request: NextRequest) {
@@ -37,12 +24,12 @@ export async function GET(request: NextRequest) {
     type WhereType = {
       shipmentId?: string;
       itemId?: string;
-      status?: typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
+      status?: TempQualityCheckStatus;
     };
     const where: WhereType = {};
     if (shipmentId) where.shipmentId = shipmentId;
     if (itemId) where.itemId = itemId;
-    if (status) where.status = status as typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus];
+    if (status) where.status = status as TempQualityCheckStatus;
 
     const qualityChecks = await prisma.qualityCheck.findMany({
       where,
@@ -104,8 +91,8 @@ export async function POST(request: NextRequest) {
       data: {
         shipmentId,
         itemId: itemId || null,
-        checkType: checkType as typeof TempQualityCheckType[keyof typeof TempQualityCheckType],
-        status: TempQualityCheckStatus.PENDING as unknown as typeof TempQualityCheckStatus[keyof typeof TempQualityCheckStatus],
+        checkType: checkType as TempQualityCheckType,
+        status: 'PENDING' as TempQualityCheckStatus,
         inspector: inspector || session.user?.name || session.user?.email,
         notes: notes || null,
         photos: photos || [],

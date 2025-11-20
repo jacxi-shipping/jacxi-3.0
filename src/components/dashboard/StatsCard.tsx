@@ -1,7 +1,7 @@
 "use client";
 
 import { SvgIconComponent } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip, Fade } from '@mui/material';
+import { Card, CardContent, Box, Typography, Chip, Fade, Zoom } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 type StatsCardProps = {
@@ -36,137 +36,125 @@ export default function StatsCard({
 			<Card
 				sx={{
 					height: '100%',
-					background: 'rgba(10, 22, 40, 0.5)',
-					backdropFilter: 'blur(8px)',
-					border: '1px solid rgba(6, 182, 212, 0.3)',
-					borderRadius: { xs: 2, sm: 3 },
-					p: { xs: 1.5, sm: 3, md: 4 },
+					background: 'linear-gradient(135deg, rgba(10, 22, 40, 0.8) 0%, rgba(10, 22, 40, 0.4) 100%)',
+					backdropFilter: 'blur(20px)',
+					border: '1px solid rgba(6, 182, 212, 0.2)',
+					borderRadius: 2,
+					p: 1.5,
 					position: 'relative',
 					overflow: 'hidden',
-					transition: 'all 0.3s ease',
-					transform: 'translateY(0)',
+					transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 					'&:hover': {
-						borderColor: 'rgba(6, 182, 212, 0.6)',
-						boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)',
-						transform: 'translateY(-4px)',
-						'&::before': {
-							opacity: 1,
+						borderColor: 'rgba(6, 182, 212, 0.5)',
+						boxShadow: '0 8px 20px rgba(6, 182, 212, 0.2)',
+						transform: 'translateY(-2px)',
+						'& .icon-container': {
+							transform: 'scale(1.05)',
 						},
-					},
-					'&::before': {
-						content: '""',
-						position: 'absolute',
-						inset: 0,
-						background: 'linear-gradient(90deg, rgba(6, 182, 212, 0) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(6, 182, 212, 0) 100%)',
-						opacity: 0,
-						transition: 'opacity 0.3s ease',
 					},
 				}}
 			>
 				<CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, position: 'relative', zIndex: 1 }}>
 					{/* Icon and Trend */}
-					<Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: { xs: 1, sm: 2, md: 3 } }}>
-						<Box
-							sx={{
-								position: 'relative',
-								width: { xs: 40, sm: 48, md: 56 },
-								height: { xs: 40, sm: 48, md: 56 },
-								borderRadius: { xs: 2, sm: 3 },
-								bgcolor: '#020817',
-								border: '1px solid rgba(6, 182, 212, 0.4)',
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-								transition: 'all 0.3s ease',
-								'&:hover': {
-									borderColor: 'rgba(6, 182, 212, 0.8)',
-								},
-								'&::before': {
-									content: '""',
-									position: 'absolute',
-									inset: 0,
-									borderRadius: { xs: 2, sm: 3 },
-									background: 'rgba(6, 182, 212, 0.1)',
-									filter: 'blur(8px)',
-									transition: 'all 0.3s ease',
-								},
-								'&:hover::before': {
-									background: 'rgba(6, 182, 212, 0.2)',
-								},
-							}}
-						>
-							<Icon
+					<Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
+						<Zoom in={isVisible} timeout={400}>
+							<Box
+								className="icon-container"
 								sx={{
-									fontSize: { xs: 20, sm: 24, md: 28 },
-									color: 'rgb(34, 211, 238)',
 									position: 'relative',
-									transition: 'color 0.3s ease',
+									width: 40,
+									height: 40,
+									borderRadius: 2,
+									background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0.05) 100%)',
+									border: '1px solid rgba(6, 182, 212, 0.3)',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									transition: 'all 0.3s ease',
 								}}
-							/>
-						</Box>
+							>
+								<Icon
+									sx={{
+										fontSize: 20,
+										color: 'rgb(34, 211, 238)',
+									}}
+								/>
+							</Box>
+						</Zoom>
 						{trend && (
-							<Chip
-								label={`${trend.isPositive ? '↑' : '↓'} ${Math.abs(trend.value)}%`}
-								size="small"
-								sx={{
-									fontSize: { xs: '0.7rem', sm: '0.75rem' },
-									fontWeight: 500,
-									px: { xs: 0.5, sm: 1 },
-									py: { xs: 0.25, sm: 0.5 },
-									height: 'auto',
-									bgcolor: trend.isPositive ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-									color: trend.isPositive ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-									border: 'none',
-								}}
-							/>
+							<Fade in={isVisible} timeout={400}>
+								<Chip
+									label={`${trend.isPositive ? '↑' : '↓'} ${Math.abs(trend.value)}%`}
+									size="small"
+									sx={{
+										fontSize: '0.6875rem',
+										fontWeight: 600,
+										px: 0.75,
+										py: 0.25,
+										height: 20,
+										background: trend.isPositive 
+											? 'rgba(34, 197, 94, 0.15)'
+											: 'rgba(239, 68, 68, 0.15)',
+										color: trend.isPositive ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
+										border: `1px solid ${trend.isPositive ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+									}}
+								/>
+							</Fade>
 						)}
 					</Box>
 
 					{/* Value */}
-					<Typography
-						variant="h3"
-						sx={{
-							fontSize: { xs: '1.5rem', sm: '1.875rem', md: '2.25rem' },
-							fontWeight: 700,
-							color: 'white',
-							mb: { xs: 0.5, sm: 1 },
-							lineHeight: 1.2,
-						}}
-					>
-						{value}
-					</Typography>
+					<Fade in={isVisible} timeout={600}>
+						<Typography
+							className="value"
+							variant="h3"
+							sx={{
+								fontSize: '1.5rem',
+								fontWeight: 700,
+								color: 'white',
+								mb: 0.5,
+								lineHeight: 1.2,
+							}}
+						>
+							{value}
+						</Typography>
+					</Fade>
 
 					{/* Title */}
-					<Typography
-						variant="body2"
-						sx={{
-							fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-							fontWeight: 500,
-							color: 'rgba(255, 255, 255, 0.8)',
-							mb: { xs: 0.25, sm: 0.5 },
-							overflow: 'hidden',
-							textOverflow: 'ellipsis',
-							whiteSpace: 'nowrap',
-						}}
-					>
-						{title}
-					</Typography>
-
-					{/* Subtitle */}
-					{subtitle && (
+					<Fade in={isVisible} timeout={600}>
 						<Typography
-							variant="caption"
+							variant="body2"
 							sx={{
-								fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
-								color: 'rgba(255, 255, 255, 0.6)',
+								fontSize: '0.8125rem',
+								fontWeight: 500,
+								color: 'rgba(255, 255, 255, 0.8)',
+								mb: subtitle ? 0.25 : 0,
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
-								display: 'block',
 							}}
 						>
-							{subtitle}
+							{title}
 						</Typography>
+					</Fade>
+
+					{/* Subtitle */}
+					{subtitle && (
+						<Fade in={isVisible} timeout={600}>
+							<Typography
+								variant="caption"
+								sx={{
+									fontSize: '0.6875rem',
+									color: 'rgba(255, 255, 255, 0.5)',
+									overflow: 'hidden',
+									textOverflow: 'ellipsis',
+									whiteSpace: 'nowrap',
+									display: 'block',
+								}}
+							>
+								{subtitle}
+							</Typography>
+						</Fade>
 					)}
 				</CardContent>
 			</Card>
