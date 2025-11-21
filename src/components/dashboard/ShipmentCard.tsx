@@ -28,11 +28,11 @@ const statusColors: Record<string, StatusColors> = {
 	'IN_TRANSIT_OCEAN': { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },
 	'AT_PORT': { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
 	'DELIVERED': { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(74, 222, 128)', border: 'rgba(34, 197, 94, 0.4)', glow: 'rgba(34, 197, 94, 0.3)' },
-	'PICKUP_SCHEDULED': { bg: 'rgba(245, 158, 11, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.3)' },
-	'PICKUP_COMPLETED': { bg: 'rgba(245, 158, 11, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.3)' },
-	'PENDING': { bg: 'rgba(245, 158, 11, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.3)' },
-	'QUOTE_REQUESTED': { bg: 'rgba(245, 158, 11, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.3)' },
-	'QUOTE_APPROVED': { bg: 'rgba(245, 158, 11, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.3)' },
+	'PICKUP_SCHEDULED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
+	'PICKUP_COMPLETED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
+	'PENDING': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
+	'QUOTE_REQUESTED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
+	'QUOTE_APPROVED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
 	'LOADED_ON_VESSEL': { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },
 	'ARRIVED_AT_DESTINATION': { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
 	'CUSTOMS_CLEARANCE': { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
@@ -41,11 +41,11 @@ const statusColors: Record<string, StatusColors> = {
 	'CANCELLED': { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.4)', glow: 'rgba(239, 68, 68, 0.3)' },
 };
 
-const defaultColors: StatusColors = { 
-	bg: 'rgba(245, 158, 11, 0.15)', 
-	text: 'rgb(251, 191, 36)', 
-	border: 'rgba(245, 158, 11, 0.4)',
-	glow: 'rgba(245, 158, 11, 0.3)'
+const defaultColors: StatusColors = {
+	bg: 'rgba(14, 165, 233, 0.15)',
+	text: 'rgb(14, 165, 233)',
+	border: 'rgba(14, 165, 233, 0.35)',
+	glow: 'rgba(14, 165, 233, 0.25)',
 };
 
 export default function ShipmentCard({

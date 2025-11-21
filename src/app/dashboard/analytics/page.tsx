@@ -197,8 +197,8 @@ export default function AnalyticsPage() {
 				value: summary.overdueInvoices,
 				icon: AlertTriangle,
 				description: 'Invoices past due date & unpaid.',
-				accent: 'border-amber-500/40 bg-amber-500/15 text-amber-200',
-				glow: 'rgba(245, 158, 11, 0.3)',
+				accent: 'border-sky-500/30 bg-sky-50 text-sky-700',
+				glow: 'rgba(14,165,233,0.25)',
 			},
 			{
 				label: 'Active Containers',

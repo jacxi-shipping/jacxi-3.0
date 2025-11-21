@@ -76,7 +76,7 @@ interface Shipment {
 }
 
 const statusColors: Record<string, { text: string; bg: string; ring: string }> = {
-  PENDING: { text: 'text-yellow-300', bg: 'bg-yellow-500/10', ring: 'ring-yellow-500/30' },
+  PENDING: { text: 'text-sky-300', bg: 'bg-sky-500/10', ring: 'ring-sky-500/30' },
   QUOTE_REQUESTED: { text: 'text-sky-300', bg: 'bg-sky-500/10', ring: 'ring-sky-500/30' },
   QUOTE_APPROVED: { text: 'text-green-300', bg: 'bg-green-500/10', ring: 'ring-green-500/30' },
   PICKUP_SCHEDULED: { text: 'text-blue-300', bg: 'bg-blue-500/10', ring: 'ring-blue-500/30' },
@@ -652,11 +652,11 @@ export default function ShipmentDetailPage() {
                           <div>
                             <dt className="text-xs uppercase tracking-wide text-white/50">Title Status</dt>
                             <dd className="mt-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                shipment.titleStatus === 'DELIVERED' 
-                                  ? 'bg-green-500/20 text-green-400' 
-                                  : 'bg-yellow-500/20 text-yellow-400'
-                              }`}>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  shipment.titleStatus === 'DELIVERED' 
+                                    ? 'bg-green-500/20 text-green-400' 
+                                    : 'bg-sky-500/20 text-sky-300'
+                                }`}>
                                 {shipment.titleStatus === 'DELIVERED' ? 'Delivered' : 'Pending'}
                               </span>
                             </dd>

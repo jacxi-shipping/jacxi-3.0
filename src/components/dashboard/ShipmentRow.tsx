@@ -39,8 +39,8 @@ const statusColors: Record<string, StatusColors> = {
 	PENDING: { bg: 'rgba(107, 114, 128, 0.15)', text: 'rgb(156, 163, 175)', border: 'rgba(107, 114, 128, 0.4)', glow: 'rgba(107, 114, 128, 0.3)' },
 	QUOTE_REQUESTED: { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },
 	QUOTE_APPROVED: { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(74, 222, 128)', border: 'rgba(34, 197, 94, 0.4)', glow: 'rgba(34, 197, 94, 0.3)' },
-	PICKUP_SCHEDULED: { bg: 'rgba(234, 179, 8, 0.15)', text: 'rgb(250, 204, 21)', border: 'rgba(234, 179, 8, 0.4)', glow: 'rgba(234, 179, 8, 0.3)' },
-	PICKUP_COMPLETED: { bg: 'rgba(249, 115, 22, 0.15)', text: 'rgb(251, 146, 60)', border: 'rgba(249, 115, 22, 0.4)', glow: 'rgba(249, 115, 22, 0.3)' },
+	PICKUP_SCHEDULED: { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.4)', glow: 'rgba(14, 165, 233, 0.3)' },
+	PICKUP_COMPLETED: { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.4)', glow: 'rgba(14, 165, 233, 0.3)' },
 	IN_TRANSIT: { bg: 'rgba(6, 182, 212, 0.15)', text: 'rgb(34, 211, 238)', border: 'rgba(6, 182, 212, 0.4)', glow: 'rgba(6, 182, 212, 0.3)' },
 	AT_PORT: { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
 	LOADED_ON_VESSEL: { bg: 'rgba(99, 102, 241, 0.15)', text: 'rgb(129, 140, 248)', border: 'rgba(99, 102, 241, 0.4)', glow: 'rgba(99, 102, 241, 0.3)' },
@@ -50,7 +50,7 @@ const statusColors: Record<string, StatusColors> = {
 	OUT_FOR_DELIVERY: { bg: 'rgba(132, 204, 22, 0.15)', text: 'rgb(163, 230, 53)', border: 'rgba(132, 204, 22, 0.4)', glow: 'rgba(132, 204, 22, 0.3)' },
 	DELIVERED: { bg: 'rgba(16, 185, 129, 0.15)', text: 'rgb(52, 211, 153)', border: 'rgba(16, 185, 129, 0.4)', glow: 'rgba(16, 185, 129, 0.3)' },
 	CANCELLED: { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.4)', glow: 'rgba(239, 68, 68, 0.3)' },
-	ON_HOLD: { bg: 'rgba(245, 158, 11, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.4)', glow: 'rgba(245, 158, 11, 0.3)' },
+	ON_HOLD: { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.4)', glow: 'rgba(14, 165, 233, 0.3)' },
 };
 
 const formatStatus = (status: string) => {
@@ -58,7 +58,7 @@ const formatStatus = (status: string) => {
 };
 
 const paymentStatusColors: Record<string, StatusColors> = {
-	PENDING: { bg: 'rgba(234, 179, 8, 0.15)', text: 'rgb(250, 204, 21)', border: 'rgba(234, 179, 8, 0.4)', glow: 'rgba(234, 179, 8, 0.3)' },
+	PENDING: { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.4)', glow: 'rgba(14, 165, 233, 0.3)' },
 	COMPLETED: { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(74, 222, 128)', border: 'rgba(34, 197, 94, 0.4)', glow: 'rgba(34, 197, 94, 0.3)' },
 	FAILED: { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.4)', glow: 'rgba(239, 68, 68, 0.3)' },
 	REFUNDED: { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },

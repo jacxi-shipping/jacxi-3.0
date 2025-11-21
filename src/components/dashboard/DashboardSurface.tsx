@@ -60,7 +60,7 @@ export function DashboardHeader({ title, description, meta, actions, className }
 								className={cn(
 									'min-w-[110px] rounded-xl border px-3 py-2 bg-white',
 									item.intent === 'positive' && 'border-emerald-100 text-emerald-700 bg-emerald-50',
-									item.intent === 'warning' && 'border-amber-100 text-amber-700 bg-amber-50',
+									item.intent === 'warning' && 'border-[#cbd5ff] text-[#1d4ed8] bg-[#eef2ff]',
 									item.intent === 'critical' && 'border-rose-100 text-rose-700 bg-rose-50',
 									(!item.intent || item.intent === 'default') && 'border-[#e2e8f0] text-[#0f172a]',
 								)}

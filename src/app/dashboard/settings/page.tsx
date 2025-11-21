@@ -495,8 +495,8 @@ export default function SettingsPage() {
 					: 'Enable MFA to protect privileged access.',
 				timestamp: formatRelativeTime(settings.updatedAt),
 				icon: Shield,
-				color: settings.twoFactorEnabled ? 'text-emerald-300' : 'text-amber-300',
-				border: settings.twoFactorEnabled ? 'border-emerald-500/30' : 'border-amber-500/30',
+				color: settings.twoFactorEnabled ? 'text-emerald-300' : 'text-sky-300',
+				border: settings.twoFactorEnabled ? 'border-emerald-500/30' : 'border-sky-500/30',
 			});
 			items.push({
 				id: 'notifications',
@@ -942,10 +942,10 @@ export default function SettingsPage() {
 							</form>
 						</div>
 
-						<div className="rounded-2xl border bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-amber-500/10 border-amber-500/20">
+						<div className="rounded-2xl border bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-sky-500/10 border-sky-500/20">
 							<div className="flex items-start gap-4 mb-6">
-								<div className="w-12 h-12 rounded-xl border border-amber-500/40 bg-amber-500/10 flex items-center justify-center">
-									<Bell className="w-6 h-6 text-amber-200" strokeWidth={1.6} />
+								<div className="w-12 h-12 rounded-xl border border-sky-500/30 bg-sky-500/10 flex items-center justify-center">
+									<Bell className="w-6 h-6 text-sky-200" strokeWidth={1.6} />
 								</div>
 								<div>
 									<h2 className="text-2xl font-semibold text-white">Notification rules</h2>
@@ -982,7 +982,7 @@ export default function SettingsPage() {
 										onClick={() => handleToggle(item.key)}
 										className={`w-full rounded-xl border px-4 py-3 text-left transition ${
 											settingsForm[item.key]
-												? 'border-amber-500/40 bg-amber-500/10'
+												? 'border-sky-500/30 bg-sky-500/10'
 												: 'border-white/10 bg-white/5 hover:border-white/20'
 										}`}
 									>
@@ -991,7 +991,7 @@ export default function SettingsPage() {
 												<p className="text-sm font-medium text-white">{item.label}</p>
 												<p className="text-xs text-white/60">{item.description}</p>
 											</div>
-											<span className={`text-xs font-semibold uppercase tracking-wide ${settingsForm[item.key] ? 'text-amber-200' : 'text-white/40'}`}>
+											<span className={`text-xs font-semibold uppercase tracking-wide ${settingsForm[item.key] ? 'text-sky-200' : 'text-white/40'}`}>
 												{settingsForm[item.key] ? 'Enabled' : 'Disabled'}
 											</span>
 										</div>

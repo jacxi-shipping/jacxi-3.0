@@ -410,7 +410,7 @@ export default function UsersPage() {
 											<span className="text-xs sm:text-sm text-white/60 flex-1">
 												••••••••••
 											</span>
-											<span className="text-[10px] sm:text-xs text-white/40 bg-yellow-500/10 border border-yellow-500/30 px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0">
+											<span className="text-[10px] sm:text-xs text-sky-200 bg-sky-500/10 border border-sky-500/30 px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0">
 												Encrypted
 											</span>
 										</div>

@@ -13,14 +13,14 @@ const badgeVariants = cva(
         warning: 'bg-warning-100 text-warning-800 hover:bg-warning-200',
         info: 'bg-info-100 text-info-800 hover:bg-info-200',
         outline: 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50',
-        // Brand variants
-        brand: 'bg-brand-navy text-brand-white hover:bg-brand-navy-light',
-        'brand-cyan': 'bg-brand-cyan text-white hover:bg-brand-cyan-dark',
-        'brand-gold': 'bg-brand-gold text-brand-charcoal hover:bg-brand-gold-light',
-        // Status variants (for shipments)
-        'status-pickup-scheduled': 'bg-blue-50 text-blue-700 border border-blue-200',
-        'status-picked-up': 'bg-yellow-50 text-yellow-700 border border-yellow-200',
-        'status-in-transit': 'bg-blue-50 text-blue-700 border border-blue-200',
+          // Brand variants
+          brand: 'bg-brand-navy text-brand-white hover:bg-brand-navy-light',
+          'brand-cyan': 'bg-brand-cyan text-white hover:bg-brand-cyan-dark',
+          'brand-gold': 'bg-brand-gold text-brand-charcoal hover:bg-brand-gold-light',
+          // Status variants (for shipments)
+          'status-pickup-scheduled': 'bg-blue-50 text-blue-700 border border-blue-200',
+          'status-picked-up': 'bg-sky-50 text-sky-700 border border-sky-200',
+          'status-in-transit': 'bg-blue-50 text-blue-700 border border-blue-200',
         'status-at-port': 'bg-purple-50 text-purple-700 border border-purple-200',
         'status-customs-clearance': 'bg-orange-50 text-orange-700 border border-orange-200',
         'status-out-for-delivery': 'bg-emerald-50 text-emerald-700 border border-emerald-200',

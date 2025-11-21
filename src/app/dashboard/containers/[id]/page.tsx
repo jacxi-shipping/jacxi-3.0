@@ -281,9 +281,9 @@ export default function ContainerDetailPage() {
 															? 'bg-green-500/20 text-green-400'
 															: shipment.status === 'IN_TRANSIT'
 															? 'bg-blue-500/20 text-blue-400'
-															: shipment.status === 'PENDING'
-															? 'bg-yellow-500/20 text-yellow-400'
-															: 'bg-gray-500/20 text-gray-400'
+														: shipment.status === 'PENDING'
+														? 'bg-sky-500/20 text-sky-300'
+														: 'bg-gray-500/20 text-gray-400'
 													}`}
 												>
 													{shipment.status.replace(/_/g, ' ')}
@@ -375,7 +375,7 @@ export default function ContainerDetailPage() {
 															? 'bg-green-500/20 text-green-400'
 															: invoice.status === 'OVERDUE'
 															? 'bg-red-500/20 text-red-400'
-															: 'bg-yellow-500/20 text-yellow-400'
+															: 'bg-sky-500/20 text-sky-300'
 													}`}
 												>
 													{invoice.status}
