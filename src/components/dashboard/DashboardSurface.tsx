@@ -47,7 +47,6 @@ export function DashboardHeader({ title, description, meta, actions, className }
 			)}
 		>
 			<div className="flex flex-col gap-1">
-				<p className="text-[0.65rem] uppercase tracking-[0.28em] text-[#94a3b8]">Jacxi Mission Control</p>
 				<h1 className="text-[1.05rem] font-semibold leading-tight text-[#0f172a] md:text-[1.25rem]">{title}</h1>
 				{description && <p className="text-[0.9rem] text-[#4b5563]">{description}</p>}
 			</div>
