@@ -99,10 +99,10 @@ export default function DashboardPage() {
 		void fetchDashboardData();
 	}, [fetchDashboardData]);
 
-	const recentShipments = useMemo(() => shipments.slice(0, 3), [shipments]);
+	const recentShipments = useMemo(() => shipments.slice(0, 2), [shipments]);
 
 	return (
-		<DashboardSurface>
+		<DashboardSurface className="flex-1 min-h-0">
 			<DashboardHeader
 				title="Dashboard"
 				meta={[
@@ -135,18 +135,20 @@ export default function DashboardPage() {
 				}
 			/>
 
-			<DashboardGrid className="grid-cols-2 md:grid-cols-4">
+			<DashboardGrid className="grid-cols-2 md:grid-cols-4 flex-shrink-0 gap-2">
 				<StatsCard icon={LocalShipping} title="Active shipments" value={stats.active} />
 				<StatsCard icon={Inventory2} title="In transit" value={stats.inTransit} />
 				<StatsCard icon={LocationOn} title="Total shipments" value={stats.total} />
 				<StatsCard icon={TrendingUp} title="Delivered" value={stats.delivered} />
 			</DashboardGrid>
 
-			<DashboardGrid className="grid-cols-1">
+			<DashboardGrid className="grid-cols-1 flex-1 min-h-0 gap-2">
 				<DashboardPanel
 					title="Recent shipments"
 					description="The latest files updated in the last sync."
 					fullHeight
+					className="flex-1 min-h-0"
+					bodyClassName="flex flex-col gap-1 min-h-0"
 					actions={
 						shipments.length > 0 ? (
 							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
@@ -166,23 +168,33 @@ export default function DashboardPage() {
 					}
 				>
 					{loading ? (
-						<Box sx={{ minHeight: 220, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+						<Box
+							sx={{
+								flex: 1,
+								minHeight: 0,
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
 							<CircularProgress size={28} sx={{ color: 'rgb(94,234,212)' }} />
 						</Box>
 					) : recentShipments.length === 0 ? (
 						<Box
 							sx={{
-								minHeight: 220,
+								flex: 1,
+								minHeight: 0,
 								display: 'flex',
 								flexDirection: 'column',
 								alignItems: 'center',
 								justifyContent: 'center',
 								gap: 1,
 								textAlign: 'center',
+								py: 3,
 							}}
 						>
-							<Inventory2 sx={{ fontSize: 40, color: 'rgba(255,255,255,0.25)' }} />
-							<Typography sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)' }}>
+							<Inventory2 sx={{ fontSize: 36, color: '#cbd5f5' }} />
+							<Typography sx={{ fontSize: '0.85rem', color: '#475569' }}>
 								No shipments yet
 							</Typography>
 							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
@@ -203,7 +215,7 @@ export default function DashboardPage() {
 							</Link>
 						</Box>
 					) : (
-						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flex: 1, minHeight: 0 }}>
 							{recentShipments.map((shipment, index) => (
 								<ShipmentCard key={shipment.id} {...shipment} delay={0.2 + index * 0.05} />
 							))}
