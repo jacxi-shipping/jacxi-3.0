@@ -4,29 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { Session } from 'next-auth';
 import type { SvgIconComponent } from '@mui/icons-material';
-import {
-	Dashboard,
-	Inventory2,
-	Description,
-	Settings,
-	Person,
-	Search,
-	Analytics,
-	Group,
-	AllInbox,
-	Receipt,
-} from '@mui/icons-material';
+import { Dashboard, Inventory2, Description, Search, Analytics, Group, AllInbox, Receipt } from '@mui/icons-material';
 import { useSession } from 'next-auth/react';
-import {
-	Drawer,
-	Box,
-	List,
-	ListItemButton,
-	ListItemIcon,
-	ListItemText,
-	Typography,
-	Divider,
-} from '@mui/material';
+import { Drawer, Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 
 type NavigationItem = {
 	name: string;
@@ -84,19 +64,6 @@ const otherNavigation: NavigationItem[] = [
 		name: 'Documents',
 		href: '/dashboard/documents',
 		icon: Description,
-	},
-];
-
-const settingsNavigation: NavigationItem[] = [
-	{
-		name: 'Profile',
-		href: '/dashboard/profile',
-		icon: Person,
-	},
-	{
-		name: 'Settings',
-		href: '/dashboard/settings',
-		icon: Settings,
 	},
 ];
 
@@ -324,18 +291,6 @@ function SidebarContent({
 				{/* Other */}
 				<NavSection items={otherNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
-				{/* Settings */}
-				<Box sx={{ mt: 'auto', pt: 1 }}>
-					<Divider
-						sx={{
-							mb: 0.5,
-							background: '#e2e8f0',
-							border: 'none',
-							height: 1,
-						}}
-					/>
-					<NavSection items={settingsNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
-				</Box>
 			</Box>
 		</Box>
 	);
