@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Visibility, Edit, ArrowForward, CreditCard } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip, Button, LinearProgress, Slide } from '@mui/material';
+import { Box, Typography, Chip, Button, LinearProgress, Slide } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 interface ShipmentRowProps {

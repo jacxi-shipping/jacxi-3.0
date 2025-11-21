@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { Session } from 'next-auth';
@@ -11,8 +10,6 @@ import {
 	Description,
 	Settings,
 	Person,
-	Menu,
-	Close,
 	Add,
 	Search,
 	Analytics,
@@ -30,7 +27,6 @@ import {
 	ListItemText,
 	Typography,
 	Divider,
-	IconButton,
 } from '@mui/material';
 
 type NavigationItem = {

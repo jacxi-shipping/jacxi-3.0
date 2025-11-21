@@ -1,8 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { Visibility, ArrowForward } from '@mui/icons-material';
-import { Box, Typography, Chip, LinearProgress, Button, Fade, Slide } from '@mui/material';
+import { ArrowForward } from '@mui/icons-material';
+import { Box, Typography, Chip, LinearProgress, Button, Slide } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 type ShipmentCardProps = {
