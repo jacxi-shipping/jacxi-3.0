@@ -10,7 +10,6 @@ import {
 	Description,
 	Settings,
 	Person,
-	Add,
 	Search,
 	Analytics,
 	Group,
@@ -50,12 +49,6 @@ const shipmentNavigation: NavigationItem[] = [
 		href: '/dashboard/shipments',
 		icon: Inventory2,
 	},
-	{
-		name: 'New Shipment',
-		href: '/dashboard/shipments/new',
-		icon: Add,
-		adminOnly: true,
-	},
 ];
 
 const adminNavigation: NavigationItem[] = [
@@ -68,11 +61,6 @@ const adminNavigation: NavigationItem[] = [
 		name: 'Users',
 		href: '/dashboard/users',
 		icon: Group,
-	},
-	{
-		name: 'Create User',
-		href: '/dashboard/users/new',
-		icon: Person,
 	},
 	{
 		name: 'Containers',
@@ -311,48 +299,6 @@ function SidebarContent({
 				overflow: 'hidden',
 			}}
 		>
-			{/* Logo/Header - Compact */}
-			<Box
-				sx={{
-					display: 'flex',
-					alignItems: 'center',
-					gap: 1.25,
-					px: 2,
-					py: 1.25,
-					borderBottom: '1px solid #e2e8f0',
-					flexShrink: 0,
-				}}
-			>
-				<Box
-					sx={{
-						width: 32,
-						height: 32,
-						borderRadius: 1.5,
-						background: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						flexShrink: 0,
-					}}
-				>
-					<Typography sx={{ fontSize: '1.125rem', fontWeight: 800, color: 'white' }}>
-						J
-					</Typography>
-				</Box>
-				<Box>
-					<Typography
-						sx={{
-							fontSize: '1rem',
-							fontWeight: 700,
-							color: '#0f172a',
-							lineHeight: 1,
-						}}
-					>
-						JACXI
-					</Typography>
-				</Box>
-			</Box>
-
 			{/* Navigation - Fixed height, no scroll */}
 			<Box
 				sx={{
