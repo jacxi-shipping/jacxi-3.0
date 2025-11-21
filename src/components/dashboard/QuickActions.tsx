@@ -74,17 +74,17 @@ export default function QuickActions({ showHeading = false }: QuickActionsProps 
 			<Box>
 				{showHeading && (
 					<Box sx={{ mb: 1 }}>
-						<Typography
-							sx={{
-								fontSize: '0.8rem',
-								textTransform: 'uppercase',
-								letterSpacing: '0.2em',
-								color: 'rgba(255,255,255,0.55)',
-							}}
-						>
+					<Typography
+						sx={{
+							fontSize: '0.8rem',
+							textTransform: 'uppercase',
+							letterSpacing: '0.2em',
+							color: '#94a3b8',
+						}}
+					>
 							Action Center
 						</Typography>
-						<Typography sx={{ fontSize: '0.85rem', color: 'white', fontWeight: 600 }}>
+					<Typography sx={{ fontSize: '0.85rem', color: '#0f172a', fontWeight: 600 }}>
 							Start a workflow
 						</Typography>
 					</Box>
@@ -131,8 +131,8 @@ function ActionCard({ icon: Icon, title, description, href, colorValues }: Actio
 				sx={{
 					borderRadius: 2,
 					border: `1px solid ${colorValues.border}`,
-					background: 'rgba(4, 10, 22, 0.9)',
-					boxShadow: `0 12px 24px rgba(0,0,0,0.25)`,
+					background: 'white',
+					boxShadow: `0 12px 24px rgba(15,23,42,0.08)`,
 					padding: 1,
 					display: 'flex',
 					flexDirection: 'column',
@@ -158,7 +158,7 @@ function ActionCard({ icon: Icon, title, description, href, colorValues }: Actio
 							height: 28,
 							borderRadius: 1,
 							border: `1px solid ${colorValues.border}`,
-							background: colorValues.bgHover,
+							background: 'rgba(148,163,184,0.15)',
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
@@ -170,7 +170,7 @@ function ActionCard({ icon: Icon, title, description, href, colorValues }: Actio
 						sx={{
 							fontSize: '0.78rem',
 							fontWeight: 600,
-							color: 'white',
+							color: '#0f172a',
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
 							whiteSpace: 'nowrap',
@@ -182,7 +182,7 @@ function ActionCard({ icon: Icon, title, description, href, colorValues }: Actio
 				<Typography
 					sx={{
 						fontSize: '0.68rem',
-						color: 'rgba(255,255,255,0.55)',
+							color: '#64748b',
 						lineHeight: 1.4,
 						flex: 1,
 					}}

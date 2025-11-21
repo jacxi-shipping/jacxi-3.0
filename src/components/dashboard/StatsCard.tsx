@@ -38,10 +38,9 @@ export default function StatsCard({
 				sx={{
 					height: '100%',
 					borderRadius: 2,
-					border: '1px solid rgba(148, 163, 184, 0.2)',
-					background:
-						'linear-gradient(135deg, rgba(4, 10, 22, 0.95) 0%, rgba(6, 14, 28, 0.75) 100%)',
-					boxShadow: '0 20px 40px rgba(2, 6, 23, 0.45)',
+					border: '1px solid rgba(226, 232, 240, 0.8)',
+					background: 'white',
+					boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
 					padding: 1.5,
 					display: 'flex',
 					alignItems: 'center',
@@ -55,15 +54,15 @@ export default function StatsCard({
 						width: 38,
 						height: 38,
 						borderRadius: 2,
-						border: '1px solid rgba(59, 130, 246, 0.3)',
-						background: 'rgba(59, 130, 246, 0.08)',
+						border: '1px solid rgba(148, 163, 184, 0.35)',
+						background: 'rgba(148, 191, 255, 0.15)',
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
 						flexShrink: 0,
 					}}
 				>
-					<Icon sx={{ fontSize: 18, color: 'rgb(96, 165, 250)' }} />
+					<Icon sx={{ fontSize: 18, color: 'rgb(37, 99, 235)' }} />
 				</Box>
 				<Box sx={{ flex: 1, minWidth: 0 }}>
 					<Typography
@@ -71,7 +70,7 @@ export default function StatsCard({
 							fontSize: '0.65rem',
 							textTransform: 'uppercase',
 							letterSpacing: '0.22em',
-							color: 'rgba(255, 255, 255, 0.5)',
+							color: 'rgba(100, 116, 139, 0.9)',
 							marginBottom: 0.5,
 						}}
 					>
@@ -81,7 +80,7 @@ export default function StatsCard({
 						sx={{
 							fontSize: '1.25rem',
 							fontWeight: 700,
-							color: 'white',
+							color: '#0f172a',
 							lineHeight: 1.15,
 						}}
 					>
@@ -91,7 +90,7 @@ export default function StatsCard({
 						<Typography
 							sx={{
 								fontSize: '0.72rem',
-								color: 'rgba(255, 255, 255, 0.55)',
+								color: '#64748b',
 								marginTop: 0.25,
 							}}
 						>

@@ -56,44 +56,14 @@ export default function SignInPage() {
 		<Box
 			sx={{
 				minHeight: '100vh',
-				bgcolor: '#020817',
+				bgcolor: '#f5f7fb',
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'center',
-				py: { xs: 6, sm: 12 },
+				py: { xs: 6, sm: 10 },
 				px: { xs: 2, sm: 3, lg: 4 },
-				position: 'relative',
-				overflow: 'hidden',
 			}}
 		>
-			{/* Background Effects */}
-			{/* Subtle geometric grid pattern background */}
-			<Box
-				sx={{
-					position: 'absolute',
-					inset: 0,
-					opacity: 0.03,
-				}}
-			>
-				<svg style={{ width: '100%', height: '100%' }} preserveAspectRatio="none">
-					<defs>
-						<pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-							<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-						</pattern>
-					</defs>
-					<rect width="100%" height="100%" fill="url(#grid)" style={{ color: 'rgb(34, 211, 238)' }} />
-				</svg>
-			</Box>
-
-			{/* Subtle blue gradient overlay */}
-			<Box
-				sx={{
-					position: 'absolute',
-					inset: 0,
-					background: 'linear-gradient(135deg, #020817 0%, #0a1628 50%, #020817 100%)',
-				}}
-			/>
-
 			{/* Main Content */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
@@ -107,20 +77,11 @@ export default function SignInPage() {
 					sx={{
 						position: 'relative',
 						borderRadius: 4,
-						background: 'rgba(10, 22, 40, 0.5)',
-						backdropFilter: 'blur(8px)',
-						border: '1px solid rgba(6, 182, 212, 0.3)',
-						boxShadow: '0 8px 32px rgba(6, 182, 212, 0.1)',
+						background: 'white',
+						border: '1px solid rgba(226, 232, 240, 0.9)',
+						boxShadow: '0 25px 60px rgba(15, 23, 42, 0.12)',
 						p: { xs: 4, sm: 5 },
 						overflow: 'hidden',
-						'&::before': {
-							content: '""',
-							position: 'absolute',
-							inset: 0,
-							borderRadius: 4,
-							background: 'linear-gradient(90deg, rgba(6, 182, 212, 0) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(6, 182, 212, 0) 100%)',
-							opacity: 0.5,
-						},
 					}}
 				>
 					<Box sx={{ position: 'relative', zIndex: 1 }}>
@@ -131,7 +92,7 @@ export default function SignInPage() {
 								sx={{
 									fontSize: { xs: '1.875rem', sm: '2.25rem' },
 									fontWeight: 700,
-									color: 'white',
+									color: '#0f172a',
 									mb: 1,
 								}}
 							>
@@ -140,7 +101,7 @@ export default function SignInPage() {
 							<Typography
 								variant="body1"
 								sx={{
-									color: 'rgba(255, 255, 255, 0.7)',
+									color: '#475569',
 								}}
 							>
 								{t('auth.signInSubtitle')}
@@ -153,11 +114,11 @@ export default function SignInPage() {
 								severity="error"
 								sx={{
 									mb: 2,
-									bgcolor: 'rgba(239, 68, 68, 0.1)',
-									border: '1px solid rgba(239, 68, 68, 0.3)',
-									color: 'rgb(248, 113, 113)',
+									bgcolor: 'rgba(248, 113, 113, 0.15)',
+									border: '1px solid rgba(248, 113, 113, 0.4)',
+									color: '#b91c1c',
 									'& .MuiAlert-icon': {
-										color: 'rgb(248, 113, 113)',
+										color: '#b91c1c',
 									},
 								}}
 							>
@@ -176,7 +137,7 @@ export default function SignInPage() {
 										display: 'block',
 										fontSize: '0.875rem',
 										fontWeight: 500,
-										color: 'rgba(255, 255, 255, 0.9)',
+										color: '#0f172a',
 										mb: 1,
 									}}
 								>
@@ -194,34 +155,34 @@ export default function SignInPage() {
 									InputProps={{
 										startAdornment: (
 											<InputAdornment position="start">
-												<Email sx={{ fontSize: 20, color: 'rgba(255, 255, 255, 0.5)' }} />
+												<Email sx={{ fontSize: 20, color: '#94a3b8' }} />
 											</InputAdornment>
 										),
 									}}
 									sx={{
 										'& .MuiOutlinedInput-root': {
-											bgcolor: 'rgba(255, 255, 255, 0.05)',
+											bgcolor: '#f8fafc',
 											borderRadius: 2,
-											color: 'white',
+											color: '#0f172a',
 											'& fieldset': {
-												borderColor: 'rgba(255, 255, 255, 0.2)',
+												borderColor: 'rgba(226, 232, 240, 0.9)',
 											},
 											'&:hover fieldset': {
-												borderColor: 'rgba(255, 255, 255, 0.3)',
+												borderColor: '#cbd5f5',
 											},
 											'&.Mui-focused fieldset': {
-												borderColor: 'rgb(34, 211, 238)',
+												borderColor: '#0f62fe',
 												borderWidth: 2,
 											},
 											'& input': {
-												color: 'white',
+												color: '#0f172a',
 												'&::placeholder': {
-													color: 'rgba(255, 255, 255, 0.5)',
+													color: '#94a3b8',
 													opacity: 1,
 												},
 												'&:-webkit-autofill': {
-													WebkitBoxShadow: '0 0 0 100px rgba(10, 22, 40, 0.8) inset',
-													WebkitTextFillColor: 'white',
+													WebkitBoxShadow: '0 0 0 100px #f8fafc inset',
+													WebkitTextFillColor: '#0f172a',
 												},
 											},
 										},
@@ -238,7 +199,7 @@ export default function SignInPage() {
 										display: 'block',
 										fontSize: '0.875rem',
 										fontWeight: 500,
-										color: 'rgba(255, 255, 255, 0.9)',
+										color: '#0f172a',
 										mb: 1,
 									}}
 								>
@@ -256,7 +217,7 @@ export default function SignInPage() {
 									InputProps={{
 										startAdornment: (
 											<InputAdornment position="start">
-												<Lock sx={{ fontSize: 20, color: 'rgba(255, 255, 255, 0.5)' }} />
+												<Lock sx={{ fontSize: 20, color: '#94a3b8' }} />
 											</InputAdornment>
 										),
 										endAdornment: (
@@ -265,9 +226,9 @@ export default function SignInPage() {
 													onClick={() => setShowPassword(!showPassword)}
 													edge="end"
 													sx={{
-														color: 'rgba(34, 211, 238, 0.7)',
+														color: '#0f62fe',
 														'&:hover': {
-															color: 'rgb(34, 211, 238)',
+															color: '#1d4ed8',
 														},
 													}}
 												>
@@ -282,28 +243,28 @@ export default function SignInPage() {
 									}}
 									sx={{
 										'& .MuiOutlinedInput-root': {
-											bgcolor: 'rgba(255, 255, 255, 0.05)',
+											bgcolor: '#f8fafc',
 											borderRadius: 2,
-											color: 'white',
+											color: '#0f172a',
 											'& fieldset': {
-												borderColor: 'rgba(255, 255, 255, 0.2)',
+												borderColor: 'rgba(226, 232, 240, 0.9)',
 											},
 											'&:hover fieldset': {
-												borderColor: 'rgba(255, 255, 255, 0.3)',
+												borderColor: '#cbd5f5',
 											},
 											'&.Mui-focused fieldset': {
-												borderColor: 'rgb(34, 211, 238)',
+												borderColor: '#0f62fe',
 												borderWidth: 2,
 											},
 											'& input': {
-												color: 'white',
+												color: '#0f172a',
 												'&::placeholder': {
-													color: 'rgba(255, 255, 255, 0.5)',
+													color: '#94a3b8',
 													opacity: 1,
 												},
 												'&:-webkit-autofill': {
-													WebkitBoxShadow: '0 0 0 100px rgba(10, 22, 40, 0.8) inset',
-													WebkitTextFillColor: 'white',
+													WebkitBoxShadow: '0 0 0 100px #f8fafc inset',
+													WebkitTextFillColor: '#0f172a',
 												},
 											},
 										},
@@ -320,17 +281,17 @@ export default function SignInPage() {
 								endIcon={!isLoading && <ArrowForward />}
 								sx={{
 									width: '100%',
-									bgcolor: '#00bfff',
-									color: 'white',
+								bgcolor: '#0f62fe',
+								color: 'white',
 									fontWeight: 600,
 									py: 1.5,
 									fontSize: '1rem',
 									'&:hover': {
-										bgcolor: '#00a8e6',
+									bgcolor: '#0b4ed8',
 									},
 									'&:disabled': {
-										bgcolor: 'rgba(0, 191, 255, 0.5)',
-										color: 'rgba(255, 255, 255, 0.7)',
+									bgcolor: 'rgba(15, 98, 254, 0.5)',
+									color: 'rgba(255, 255, 255, 0.85)',
 									},
 								}}
 							>
@@ -347,7 +308,7 @@ export default function SignInPage() {
 
 						{/* Sign Up Link */}
 						<Box sx={{ textAlign: 'center', pt: 2 }}>
-							<Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+							<Typography variant="body2" sx={{ fontSize: '0.875rem', color: '#475569' }}>
 								{t('auth.dontHaveAccount')}{' '}
 								<Typography
 									component="button"
@@ -355,12 +316,12 @@ export default function SignInPage() {
 									sx={{
 										background: 'none',
 										border: 'none',
-										color: 'rgb(34, 211, 238)',
+										color: '#0f62fe',
 										fontWeight: 500,
 										cursor: 'pointer',
 										transition: 'color 0.2s ease',
 										'&:hover': {
-											color: 'rgb(6, 182, 212)',
+											color: '#1d4ed8',
 										},
 									}}
 								>

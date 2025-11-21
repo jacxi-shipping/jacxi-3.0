@@ -72,13 +72,13 @@ export default function ShipmentCard({
 				component="article"
 				sx={{
 					borderRadius: 2,
-					border: '1px solid rgba(148, 163, 184, 0.18)',
-					background: 'rgba(4, 10, 22, 0.85)',
-					boxShadow: '0 18px 35px rgba(1, 6, 17, 0.45)',
+					border: '1px solid rgba(226, 232, 240, 0.9)',
+					background: 'white',
+					boxShadow: '0 16px 32px rgba(15,23,42,0.08)',
 					padding: 1.25,
 					display: 'flex',
 					flexDirection: 'column',
-					gap: 1.25,
+					gap: 1.1,
 				}}
 			>
 				<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
@@ -87,7 +87,7 @@ export default function ShipmentCard({
 							sx={{
 								fontSize: '0.8rem',
 								fontWeight: 600,
-								color: 'white',
+								color: '#0f172a',
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -133,7 +133,7 @@ export default function ShipmentCard({
 								fontSize: '0.65rem',
 								textTransform: 'uppercase',
 								letterSpacing: '0.18em',
-								color: 'rgba(255,255,255,0.45)',
+								color: '#94a3b8',
 								marginBottom: 0.35,
 							}}
 						>
@@ -143,7 +143,7 @@ export default function ShipmentCard({
 							sx={{
 								fontSize: '0.78rem',
 								fontWeight: 500,
-								color: 'white',
+								color: '#0f172a',
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -158,7 +158,7 @@ export default function ShipmentCard({
 								fontSize: '0.65rem',
 								textTransform: 'uppercase',
 								letterSpacing: '0.18em',
-								color: 'rgba(255,255,255,0.45)',
+								color: '#94a3b8',
 								marginBottom: 0.35,
 							}}
 						>
@@ -168,7 +168,7 @@ export default function ShipmentCard({
 							sx={{
 								fontSize: '0.78rem',
 								fontWeight: 500,
-								color: 'white',
+								color: '#0f172a',
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -181,7 +181,7 @@ export default function ShipmentCard({
 
 				<Box>
 					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-						<Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)' }}>Progress</Typography>
+						<Typography sx={{ fontSize: '0.65rem', color: '#94a3b8' }}>Progress</Typography>
 						<Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: colors.text }}>{progress}%</Typography>
 					</Box>
 					<LinearProgress
@@ -190,7 +190,7 @@ export default function ShipmentCard({
 						sx={{
 							height: 4,
 							borderRadius: 2,
-							backgroundColor: 'rgba(255,255,255,0.08)',
+							backgroundColor: 'rgba(226, 232, 240, 0.8)',
 							'& .MuiLinearProgress-bar': {
 								backgroundColor: colors.text,
 								borderRadius: 2,
@@ -200,7 +200,7 @@ export default function ShipmentCard({
 				</Box>
 
 				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-					<Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)' }}>
+					<Typography sx={{ fontSize: '0.65rem', color: '#94a3b8' }}>
 						{estimatedDelivery ? `ETA ${new Date(estimatedDelivery).toLocaleDateString()}` : 'ETA pending'}
 					</Typography>
 					<Link href={`/dashboard/tracking/${id}`} style={{ textDecoration: 'none' }}>
@@ -212,7 +212,7 @@ export default function ShipmentCard({
 								fontSize: '0.7rem',
 								fontWeight: 600,
 								textTransform: 'none',
-								color: 'rgb(94, 234, 212)',
+								color: '#0f62fe',
 								minWidth: 0,
 								padding: 0,
 							}}

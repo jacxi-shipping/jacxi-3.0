@@ -704,6 +704,21 @@ button[class*="bg-"] {
   height: 0;
 }
 
+.dashboard-theme-light {
+  background-color: #f5f7fb;
+  color: #0f172a;
+}
+
+.dashboard-theme-light [class*="bg-[#020817]"] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.dashboard-theme-light [class*="bg-[#0a1628]"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;

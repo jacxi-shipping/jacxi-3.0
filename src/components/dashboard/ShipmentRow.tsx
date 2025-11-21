@@ -96,10 +96,10 @@ export default function ShipmentRow({
 			<Box
 				component="article"
 				sx={{
-					background: 'rgba(3, 7, 18, 0.85)',
-					border: '1px solid rgba(148, 163, 184, 0.24)',
+					background: 'white',
+					border: '1px solid rgba(226, 232, 240, 0.9)',
 					borderRadius: 2,
-					boxShadow: '0 18px 36px rgba(0, 0, 0, 0.4)',
+					boxShadow: '0 18px 32px rgba(15,23,42,0.08)',
 					padding: { xs: 1.5, md: 1.75 },
 					display: 'grid',
 					gridTemplateColumns: {
@@ -115,7 +115,7 @@ export default function ShipmentRow({
 						sx={{
 							fontSize: '0.9rem',
 							fontWeight: 600,
-							color: 'white',
+							color: '#0f172a',
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
 							whiteSpace: 'nowrap',
@@ -123,8 +123,8 @@ export default function ShipmentRow({
 					>
 						{trackingNumber}
 					</Typography>
-					<Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)' }}>
-						Created {new Date(createdAt).toLocaleDateString()}
+					<Typography sx={{ fontSize: '0.68rem', color: '#94a3b8' }}>
+						Created: {new Date(createdAt).toLocaleDateString()}
 					</Typography>
 					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
 						<Chip
@@ -160,42 +160,42 @@ export default function ShipmentRow({
 				</Box>
 
 				<Box sx={{ minWidth: 0 }}>
-					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', mb: 0.3 }}>
+					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: '#94a3b8', mb: 0.3 }}>
 						Vehicle
 					</Typography>
-					<Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: 'white' }}>{vehicleType}</Typography>
+					<Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>{vehicleType}</Typography>
 					{(vehicleMake || vehicleModel) && (
-						<Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>
+						<Typography sx={{ fontSize: '0.7rem', color: '#64748b' }}>
 							{vehicleMake || ''} {vehicleModel || ''}
 						</Typography>
 					)}
 					{showCustomer && user && (
-						<Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.5)', mt: 0.3 }}>
+						<Typography sx={{ fontSize: '0.68rem', color: '#94a3b8', mt: 0.3 }}>
 							{user.name || user.email}
 						</Typography>
 					)}
 				</Box>
 
 				<Box sx={{ minWidth: 0 }}>
-					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', mb: 0.3 }}>
+					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: '#94a3b8', mb: 0.3 }}>
 						Route
 					</Typography>
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.78rem', fontWeight: 600, color: 'white', overflow: 'hidden' }}>
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.78rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden' }}>
 						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{origin}</Typography>
-						<ArrowForward sx={{ fontSize: 14, color: 'rgb(94,234,212)' }} />
+						<ArrowForward sx={{ fontSize: 14, color: '#0ea5e9' }} />
 						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{destination}</Typography>
 					</Box>
-					<Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)', mt: 0.2 }}>
+					<Typography sx={{ fontSize: '0.68rem', color: '#94a3b8', mt: 0.2 }}>
 						ETA {estimatedDelivery ? new Date(estimatedDelivery).toLocaleDateString() : 'Pending'}
 					</Typography>
 				</Box>
 
 				<Box sx={{ minWidth: 0 }}>
-					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.45)', mb: 0.3 }}>
+					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: '#94a3b8', mb: 0.3 }}>
 						Progress
 					</Typography>
 					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
-						<Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>Pipeline</Typography>
+						<Typography sx={{ fontSize: '0.7rem', color: '#94a3b8' }}>Pipeline</Typography>
 						<Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: statusConfig.text }}>{progress}%</Typography>
 					</Box>
 					<LinearProgress
@@ -204,7 +204,7 @@ export default function ShipmentRow({
 						sx={{
 							height: 4,
 							borderRadius: 2,
-							bgcolor: 'rgba(255,255,255,0.08)',
+							bgcolor: 'rgba(226, 232, 240, 0.8)',
 							'& .MuiLinearProgress-bar': {
 								background: statusConfig.text,
 								borderRadius: 2,
@@ -231,7 +231,7 @@ export default function ShipmentRow({
 								fontSize: '0.7rem',
 								fontWeight: 600,
 								borderColor: 'rgba(59, 130, 246, 0.4)',
-								color: 'rgb(144, 205, 244)',
+								color: '#0f62fe',
 								paddingX: 1.2,
 								textTransform: 'none',
 							}}
@@ -247,7 +247,7 @@ export default function ShipmentRow({
 							sx={{
 								fontSize: '0.7rem',
 								fontWeight: 600,
-								color: 'rgba(255,255,255,0.8)',
+								color: '#475569',
 								textTransform: 'none',
 								paddingX: 0.5,
 							}}

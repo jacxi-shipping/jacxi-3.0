@@ -16,9 +16,10 @@ export default function DashboardLayout({
 	return (
 		<ProtectedRoute>
 			<Box
+				className="dashboard-theme-light"
 				sx={{
 					minHeight: '100vh',
-					bgcolor: '#020817',
+					bgcolor: '#f5f7fb',
 					display: 'flex',
 					flexDirection: 'column',
 				}}
@@ -44,8 +45,9 @@ export default function DashboardLayout({
 							flexGrow: 1,
 							minWidth: 0,
 							height: 'calc(100vh - 48px)',
-							bgcolor: '#01060f',
-							backgroundImage: 'radial-gradient(circle at top, rgba(15, 118, 255, 0.08), transparent 40%)',
+							bgcolor: '#f0f4fb',
+							backgroundImage:
+								'radial-gradient(circle at top, rgba(14,165,233,0.15), transparent 45%), radial-gradient(circle at 120% 20%, rgba(199,210,254,0.25), transparent 35%)',
 						}}
 					>
 						<Box
