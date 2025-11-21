@@ -7,7 +7,6 @@ import { Add, Inventory2, TrendingUp, LocalShipping, LocationOn } from '@mui/ico
 import { Button, Box, CircularProgress, Typography } from '@mui/material';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ShipmentCard from '@/components/dashboard/ShipmentCard';
-import QuickActions from '@/components/dashboard/QuickActions';
 import { DashboardSurface, DashboardHeader, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
 interface Shipment {
@@ -105,8 +104,8 @@ export default function DashboardPage() {
 	return (
 		<DashboardSurface>
 			<DashboardHeader
-				title="Mission control"
-				description="Live overview of shipment health and the next actions that need your attention."
+				title="Dashboard"
+				description="Track shipment health, volume, and performance at a glance."
 				meta={[
 					{ label: 'Active', value: stats.active, helper: 'moving now', intent: 'positive' },
 					{ label: 'In transit', value: stats.inTransit },
@@ -144,7 +143,7 @@ export default function DashboardPage() {
 				<StatsCard icon={TrendingUp} title="Delivered" value={stats.delivered} subtitle="Completed" />
 			</DashboardGrid>
 
-			<DashboardGrid className="lg:grid-cols-[minmax(0,2.2fr)_minmax(0,0.8fr)]">
+			<DashboardGrid className="grid-cols-1">
 				<DashboardPanel
 					title="Recent shipments"
 					description="The latest files updated in the last sync."
@@ -213,15 +212,6 @@ export default function DashboardPage() {
 					)}
 				</DashboardPanel>
 
-				<DashboardPanel
-					title="Quick actions"
-					description="Launch routine workflows in one click."
-					noBodyPadding
-				>
-					<Box sx={{ px: 1.5, pb: 1.5, pt: 1.5 }}>
-						<QuickActions />
-					</Box>
-				</DashboardPanel>
 			</DashboardGrid>
 		</DashboardSurface>
 	);
