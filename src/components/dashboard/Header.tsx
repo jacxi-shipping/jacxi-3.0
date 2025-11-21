@@ -53,16 +53,16 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 			elevation={0}
 			color="inherit"
 			sx={{
-				bgcolor: '#ffffff',
-				borderBottom: '1px solid #e2e8f0',
-				boxShadow: '0 8px 16px rgba(15,23,42,0.06)',
+				bgcolor: 'var(--panel)',
+				borderBottom: '1px solid var(--border)',
+				boxShadow: '0 8px 16px rgba(var(--text-primary-rgb),0.06)',
 			}}
 		>
 			<Toolbar
 				sx={{
 					minHeight: 48,
 					px: 2,
-					color: '#0f172a',
+					color: 'var(--text-primary)',
 				}}
 			>
 				{/* Mobile Menu Button */}
@@ -73,7 +73,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					sx={{
 						mr: 2,
 						display: { xs: 'flex', lg: 'none' },
-						color: 'white',
+						color: 'var(--text-primary)',
 					}}
 				>
 					<MenuIcon />
@@ -87,13 +87,13 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							width: 28,
 							height: 28,
 							borderRadius: 1.5,
-							background: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
+							backgroundColor: 'var(--accent-gold)',
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
 							fontWeight: 800,
 							fontSize: '0.9375rem',
-							color: '#ffffff',
+							color: 'var(--background)',
 						}}
 					>
 						J
@@ -103,7 +103,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							display: { xs: 'none', sm: 'block' },
 							fontWeight: 700,
 							fontSize: '0.95rem',
-							color: '#0f172a',
+							color: 'var(--text-primary)',
 						}}
 					>
 						JACXI
@@ -118,7 +118,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 								flexItem
 								sx={{
 									mx: 2,
-									borderColor: 'rgba(255, 255, 255, 0.1)',
+									borderColor: 'var(--border)',
 									display: { xs: 'none', md: 'block' },
 								}}
 							/>
@@ -126,7 +126,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 								sx={{
 									display: { xs: 'none', md: 'block' },
 									fontSize: '0.75rem',
-									color: 'rgba(255, 255, 255, 0.6)',
+									color: 'var(--text-secondary)',
 									fontWeight: 500,
 								}}
 							>
@@ -143,10 +143,10 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						<IconButton
 							size="small"
 							sx={{
-								color: 'rgba(255, 255, 255, 0.7)',
+								color: 'var(--text-secondary)',
 								'&:hover': {
-									bgcolor: 'rgba(6, 182, 212, 0.1)',
-									color: 'white',
+									bgcolor: 'rgba(224,224,224,0.4)',
+									color: 'var(--text-primary)',
 								},
 							}}
 						>
@@ -162,10 +162,10 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							<IconButton
 								size="small"
 								sx={{
-									color: 'rgba(255, 255, 255, 0.7)',
+									color: 'var(--text-secondary)',
 									'&:hover': {
-										bgcolor: 'rgba(6, 182, 212, 0.1)',
-										color: 'white',
+										bgcolor: 'rgba(224,224,224,0.4)',
+										color: 'var(--text-primary)',
 									},
 								}}
 							>
@@ -187,9 +187,10 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							sx={{
 								width: 28,
 								height: 28,
-								bgcolor: 'rgb(34, 211, 238)',
+								bgcolor: 'var(--accent-gold)',
 								fontSize: '0.75rem',
 								fontWeight: 600,
+								color: 'var(--background)',
 							}}
 						>
 								{session?.user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -207,11 +208,11 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						sx: {
 							mt: 1.5,
 							minWidth: 200,
-							bgcolor: 'rgba(10, 22, 40, 0.95)',
-							backdropFilter: 'blur(20px)',
-							border: '1px solid rgba(6, 182, 212, 0.2)',
+							bgcolor: 'var(--panel)',
+							backdropFilter: 'blur(10px)',
+							border: '1px solid var(--border)',
 							borderRadius: 2,
-							boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+							boxShadow: '0 8px 32px rgba(var(--text-primary-rgb),0.12)',
 						},
 					}}
 					transformOrigin={{ horizontal: 'right', vertical: 'top' }}
@@ -223,7 +224,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							sx={{
 								fontSize: '0.875rem',
 								fontWeight: 600,
-								color: 'white',
+								color: 'var(--text-primary)',
 								mb: 0.25,
 							}}
 						>
@@ -232,7 +233,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						<Typography
 							sx={{
 								fontSize: '0.75rem',
-								color: 'rgba(255, 255, 255, 0.6)',
+								color: 'var(--text-secondary)',
 							}}
 						>
 							{session?.user?.email}
@@ -240,7 +241,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						<Typography
 							sx={{
 								fontSize: '0.6875rem',
-								color: 'rgb(34, 211, 238)',
+								color: 'var(--accent-gold)',
 								mt: 0.5,
 								textTransform: 'uppercase',
 								fontWeight: 600,
@@ -250,19 +251,18 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						</Typography>
 					</Box>
 
-					<Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+					<Divider sx={{ borderColor: 'var(--border)' }} />
 
 					{/* Menu Items */}
 					<Link href="/dashboard/profile" style={{ textDecoration: 'none' }}>
 						<MenuItem
 							onClick={handleMenuClose}
 							sx={{
-								color: 'rgba(255, 255, 255, 0.8)',
+								color: 'var(--text-primary)',
 								fontSize: '0.875rem',
 								py: 1.25,
 								'&:hover': {
-									bgcolor: 'rgba(6, 182, 212, 0.1)',
-									color: 'white',
+									bgcolor: 'rgba(224,224,224,0.4)',
 								},
 							}}
 						>
@@ -275,12 +275,11 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						<MenuItem
 							onClick={handleMenuClose}
 							sx={{
-								color: 'rgba(255, 255, 255, 0.8)',
+								color: 'var(--text-primary)',
 								fontSize: '0.875rem',
 								py: 1.25,
 								'&:hover': {
-									bgcolor: 'rgba(6, 182, 212, 0.1)',
-									color: 'white',
+									bgcolor: 'rgba(224,224,224,0.4)',
 								},
 							}}
 						>
@@ -289,17 +288,17 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						</MenuItem>
 					</Link>
 
-					<Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+					<Divider sx={{ borderColor: 'var(--border)' }} />
 
 					<MenuItem
 						onClick={handleSignOut}
 						sx={{
-							color: 'rgba(239, 68, 68, 0.9)',
+							color: 'var(--error)',
 							fontSize: '0.875rem',
 							py: 1.25,
 							'&:hover': {
 								bgcolor: 'rgba(239, 68, 68, 0.1)',
-								color: 'rgb(248, 113, 113)',
+								color: 'var(--error)',
 							},
 						}}
 					>

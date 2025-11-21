@@ -126,8 +126,8 @@ export default function DashboardPage() {
 									size="small"
 									sx={{
 										textTransform: 'none',
-										borderColor: 'rgba(59,130,246,0.4)',
-										color: 'rgba(191,219,254,0.9)',
+										borderColor: 'var(--border)',
+										color: 'var(--text-secondary)',
 									}}
 								>
 									Open board
@@ -146,7 +146,7 @@ export default function DashboardPage() {
 								justifyContent: 'center',
 							}}
 						>
-							<CircularProgress size={28} sx={{ color: 'rgb(94,234,212)' }} />
+							<CircularProgress size={28} sx={{ color: 'var(--accent-gold)' }} />
 						</Box>
 					) : recentShipments.length === 0 ? (
 						<Box
@@ -162,8 +162,8 @@ export default function DashboardPage() {
 								py: 3,
 							}}
 						>
-							<Inventory2 sx={{ fontSize: 36, color: '#cbd5f5' }} />
-							<Typography sx={{ fontSize: '0.85rem', color: '#475569' }}>
+							<Inventory2 sx={{ fontSize: 36, color: 'var(--text-secondary)' }} />
+							<Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
 								No shipments yet
 							</Typography>
 							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
@@ -173,10 +173,12 @@ export default function DashboardPage() {
 									startIcon={<Add fontSize="small" />}
 									sx={{
 										textTransform: 'none',
-										backgroundColor: '#00bcd4',
+										backgroundColor: 'var(--accent-gold)',
 										fontSize: '0.78rem',
 										fontWeight: 600,
 										mt: 0.5,
+										color: 'var(--background)',
+										'&:hover': { backgroundColor: '#bd9430' },
 									}}
 								>
 									Create shipment

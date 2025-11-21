@@ -93,10 +93,10 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 					'& .MuiDrawer-paper': {
 						width: drawerWidth,
 						boxSizing: 'border-box',
-						backgroundColor: '#ffffff',
-						color: '#0f172a',
-						borderRight: '1px solid #e2e8f0',
-						boxShadow: '0 10px 30px rgba(15,23,42,0.15)',
+						backgroundColor: 'var(--panel)',
+						color: 'var(--text-primary)',
+						borderRight: '1px solid var(--border)',
+						boxShadow: '0 10px 30px rgba(var(--text-primary-rgb),0.12)',
 						mt: '48px',
 					},
 				}}
@@ -118,10 +118,10 @@ export default function Sidebar({ mobileOpen = false, onMobileClose }: SidebarPr
 					'& .MuiDrawer-paper': {
 						width: drawerWidth,
 						boxSizing: 'border-box',
-						backgroundColor: '#ffffff',
-						color: '#0f172a',
-						borderRight: '1px solid #e2e8f0',
-						boxShadow: 'inset -1px 0 0 #e2e8f0',
+						backgroundColor: 'var(--panel)',
+						color: 'var(--text-primary)',
+						borderRight: '1px solid var(--border)',
+						boxShadow: 'inset -1px 0 0 var(--border)',
 						position: 'relative',
 					},
 				}}
@@ -159,11 +159,11 @@ function NavItem({ item, isActive, onNavClick }: NavItemProps) {
 				py: 0.75,
 				minHeight: 0,
 				transition: 'all 0.2s ease',
-				color: active ? '#0f62fe' : '#475569',
-				bgcolor: active ? 'rgba(15,98,233,0.08)' : 'transparent',
+				color: active ? 'var(--accent-gold)' : 'var(--text-secondary)',
+				bgcolor: active ? 'rgba(212,175,55,0.12)' : 'transparent',
 				'&:hover': {
-					bgcolor: 'rgba(148,163,184,0.2)',
-					color: '#0f172a',
+					bgcolor: 'rgba(224,224,224,0.4)',
+					color: 'var(--text-primary)',
 				},
 				'&::before': active
 					? {
@@ -174,7 +174,7 @@ function NavItem({ item, isActive, onNavClick }: NavItemProps) {
 							bottom: 4,
 							width: 3,
 							borderRadius: '0 2px 2px 0',
-							backgroundColor: '#0f62fe',
+							backgroundColor: 'var(--accent-gold)',
 					  }
 					: {},
 			}}
@@ -182,7 +182,7 @@ function NavItem({ item, isActive, onNavClick }: NavItemProps) {
 			<ListItemIcon
 				sx={{
 					minWidth: 32,
-					color: active ? '#0f62fe' : '#94a3b8',
+					color: active ? 'var(--accent-gold)' : 'var(--text-secondary)',
 				}}
 			>
 				<Icon sx={{ fontSize: 18 }} />

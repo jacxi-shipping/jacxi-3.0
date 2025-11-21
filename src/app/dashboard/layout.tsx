@@ -19,9 +19,10 @@ export default function DashboardLayout({
 				className="dashboard-theme-light"
 				sx={{
 					minHeight: '100vh',
-					bgcolor: '#f5f7fb',
+					bgcolor: 'var(--background)',
 					display: 'flex',
 					flexDirection: 'column',
+					color: 'var(--text-primary)',
 				}}
 			>
 				{/* Header */}
@@ -45,9 +46,8 @@ export default function DashboardLayout({
 							flexGrow: 1,
 							minWidth: 0,
 							height: 'calc(100vh - 48px)',
-							bgcolor: '#f0f4fb',
-							backgroundImage:
-								'radial-gradient(circle at top, rgba(14,165,233,0.15), transparent 45%), radial-gradient(circle at 120% 20%, rgba(199,210,254,0.25), transparent 35%)',
+							bgcolor: 'var(--background)',
+							backgroundImage: 'none',
 						}}
 					>
 						<Box

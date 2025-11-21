@@ -23,30 +23,32 @@ type StatusColors = {
 	glow: string;
 };
 
-const statusColors: Record<string, StatusColors> = {
-	'IN_TRANSIT': { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },
-	'IN_TRANSIT_OCEAN': { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },
-	'AT_PORT': { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
-	'DELIVERED': { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(74, 222, 128)', border: 'rgba(34, 197, 94, 0.4)', glow: 'rgba(34, 197, 94, 0.3)' },
-	'PICKUP_SCHEDULED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
-	'PICKUP_COMPLETED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
-	'PENDING': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
-	'QUOTE_REQUESTED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
-	'QUOTE_APPROVED': { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.35)', glow: 'rgba(14, 165, 233, 0.25)' },
-	'LOADED_ON_VESSEL': { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.4)', glow: 'rgba(59, 130, 246, 0.3)' },
-	'ARRIVED_AT_DESTINATION': { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
-	'CUSTOMS_CLEARANCE': { bg: 'rgba(139, 92, 246, 0.15)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.4)', glow: 'rgba(139, 92, 246, 0.3)' },
-	'OUT_FOR_DELIVERY': { bg: 'rgba(6, 182, 212, 0.15)', text: 'rgb(34, 211, 238)', border: 'rgba(6, 182, 212, 0.4)', glow: 'rgba(6, 182, 212, 0.3)' },
-	'DELAYED': { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.4)', glow: 'rgba(239, 68, 68, 0.3)' },
-	'CANCELLED': { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.4)', glow: 'rgba(239, 68, 68, 0.3)' },
+const neutralStatus: StatusColors = {
+	bg: 'rgba(228, 233, 240, 0.35)',
+	text: 'var(--text-primary)',
+	border: 'var(--border)',
+	glow: 'rgba(212, 175, 55, 0.2)',
 };
 
-const defaultColors: StatusColors = {
-	bg: 'rgba(14, 165, 233, 0.15)',
-	text: 'rgb(14, 165, 233)',
-	border: 'rgba(14, 165, 233, 0.35)',
-	glow: 'rgba(14, 165, 233, 0.25)',
+const statusColors: Record<string, StatusColors> = {
+	'IN_TRANSIT': neutralStatus,
+	'IN_TRANSIT_OCEAN': neutralStatus,
+	'AT_PORT': neutralStatus,
+	'DELIVERED': neutralStatus,
+	'PICKUP_SCHEDULED': neutralStatus,
+	'PICKUP_COMPLETED': neutralStatus,
+	'PENDING': neutralStatus,
+	'QUOTE_REQUESTED': neutralStatus,
+	'QUOTE_APPROVED': neutralStatus,
+	'LOADED_ON_VESSEL': neutralStatus,
+	'ARRIVED_AT_DESTINATION': neutralStatus,
+	'CUSTOMS_CLEARANCE': neutralStatus,
+	'OUT_FOR_DELIVERY': neutralStatus,
+	'DELAYED': { bg: 'rgba(239, 68, 68, 0.15)', text: '#B91C1C', border: '#EF4444', glow: 'rgba(239,68,68,0.3)' },
+	'CANCELLED': { bg: 'rgba(239, 68, 68, 0.15)', text: '#B91C1C', border: '#EF4444', glow: 'rgba(239,68,68,0.3)' },
 };
+
+const defaultColors: StatusColors = neutralStatus;
 
 export default function ShipmentCard({
 	id,
@@ -72,13 +74,14 @@ export default function ShipmentCard({
 				component="article"
 				sx={{
 					borderRadius: 2,
-					border: '1px solid rgba(226, 232, 240, 0.9)',
-					background: 'white',
-					boxShadow: '0 16px 32px rgba(15,23,42,0.08)',
+					border: '1px solid var(--border)',
+					background: 'var(--panel)',
+					boxShadow: '0 16px 32px rgba(var(--text-primary-rgb),0.08)',
 					padding: 1.25,
 					display: 'flex',
 					flexDirection: 'column',
 					gap: 1.1,
+					color: 'var(--text-primary)',
 				}}
 			>
 				<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
@@ -87,7 +90,7 @@ export default function ShipmentCard({
 							sx={{
 								fontSize: '0.8rem',
 								fontWeight: 600,
-								color: '#0f172a',
+								color: 'var(--text-primary)',
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -133,7 +136,7 @@ export default function ShipmentCard({
 								fontSize: '0.65rem',
 								textTransform: 'uppercase',
 								letterSpacing: '0.18em',
-								color: '#94a3b8',
+								color: 'var(--text-secondary)',
 								marginBottom: 0.35,
 							}}
 						>
@@ -143,7 +146,7 @@ export default function ShipmentCard({
 							sx={{
 								fontSize: '0.78rem',
 								fontWeight: 500,
-								color: '#0f172a',
+								color: 'var(--text-primary)',
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -158,7 +161,7 @@ export default function ShipmentCard({
 								fontSize: '0.65rem',
 								textTransform: 'uppercase',
 								letterSpacing: '0.18em',
-								color: '#94a3b8',
+								color: 'var(--text-secondary)',
 								marginBottom: 0.35,
 							}}
 						>
@@ -168,7 +171,7 @@ export default function ShipmentCard({
 							sx={{
 								fontSize: '0.78rem',
 								fontWeight: 500,
-								color: '#0f172a',
+								color: 'var(--text-primary)',
 								overflow: 'hidden',
 								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
@@ -181,7 +184,7 @@ export default function ShipmentCard({
 
 				<Box>
 					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-						<Typography sx={{ fontSize: '0.65rem', color: '#94a3b8' }}>Progress</Typography>
+						<Typography sx={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Progress</Typography>
 						<Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: colors.text }}>{progress}%</Typography>
 					</Box>
 					<LinearProgress
@@ -201,7 +204,7 @@ export default function ShipmentCard({
 				</Box>
 
 				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-					<Typography sx={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+					<Typography sx={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
 						{estimatedDelivery ? `ETA ${new Date(estimatedDelivery).toLocaleDateString()}` : 'ETA pending'}
 					</Typography>
 					<Link href={`/dashboard/tracking/${id}`} style={{ textDecoration: 'none' }}>
@@ -213,7 +216,7 @@ export default function ShipmentCard({
 								fontSize: '0.7rem',
 								fontWeight: 600,
 								textTransform: 'none',
-								color: '#0f62fe',
+								color: 'var(--accent-gold)',
 								minWidth: 0,
 								padding: 0,
 							}}

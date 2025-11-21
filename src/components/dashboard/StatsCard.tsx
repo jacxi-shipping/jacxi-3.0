@@ -38,9 +38,9 @@ export default function StatsCard({
 				sx={{
 					height: '100%',
 					borderRadius: 2,
-					border: '1px solid rgba(226, 232, 240, 0.8)',
-					background: 'white',
-					boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
+					border: '1px solid var(--border)',
+					background: 'var(--panel)',
+					boxShadow: '0 12px 30px rgba(var(--text-primary-rgb), 0.08)',
 					padding: 1.5,
 					display: 'flex',
 					alignItems: 'center',
@@ -54,15 +54,15 @@ export default function StatsCard({
 						width: 38,
 						height: 38,
 						borderRadius: 2,
-						border: '1px solid rgba(148, 163, 184, 0.35)',
-						background: 'rgba(148, 191, 255, 0.15)',
+						border: '1px solid var(--border)',
+						background: 'rgba(212, 175, 55, 0.15)',
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
 						flexShrink: 0,
 					}}
 				>
-					<Icon sx={{ fontSize: 18, color: 'rgb(37, 99, 235)' }} />
+					<Icon sx={{ fontSize: 18, color: 'var(--accent-gold)' }} />
 				</Box>
 				<Box sx={{ flex: 1, minWidth: 0 }}>
 					<Typography
@@ -70,27 +70,27 @@ export default function StatsCard({
 							fontSize: '0.65rem',
 							textTransform: 'uppercase',
 							letterSpacing: '0.22em',
-							color: 'rgba(100, 116, 139, 0.9)',
+							color: 'var(--text-secondary)',
 							marginBottom: 0.5,
 						}}
 					>
 						{title}
 					</Typography>
-					<Typography
-						sx={{
-							fontSize: '1.25rem',
-							fontWeight: 700,
-							color: '#0f172a',
-							lineHeight: 1.15,
-						}}
-					>
+						<Typography
+							sx={{
+								fontSize: '1.25rem',
+								fontWeight: 700,
+								color: 'var(--text-primary)',
+								lineHeight: 1.15,
+							}}
+						>
 						{value}
 					</Typography>
 					{subtitle && (
 						<Typography
 							sx={{
 								fontSize: '0.72rem',
-								color: '#64748b',
+								color: 'var(--text-secondary)',
 								marginTop: 0.25,
 							}}
 						>
@@ -107,13 +107,9 @@ export default function StatsCard({
 							fontWeight: 600,
 							height: 20,
 							px: 0.75,
-							color: trend.isPositive ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)',
-							borderColor: trend.isPositive
-								? 'rgba(34, 197, 94, 0.4)'
-								: 'rgba(239, 68, 68, 0.4)',
-							background: trend.isPositive
-								? 'rgba(34, 197, 94, 0.12)'
-								: 'rgba(239, 68, 68, 0.12)',
+							color: trend.isPositive ? 'var(--text-primary)' : 'var(--error)',
+							borderColor: trend.isPositive ? 'var(--border)' : 'var(--error)',
+							background: trend.isPositive ? 'var(--background)' : 'rgba(239, 68, 68, 0.12)',
 						}}
 						variant="outlined"
 					/>

@@ -22,8 +22,8 @@ html {
 	position: absolute;
 	top: -40px;
 	left: 0;
-	background: #0056D2;
-	color: white;
+	background: var(--accent-gold);
+	color: var(--background);
 	padding: 8px 16px;
 	text-decoration: none;
 	border-radius: 0 0 4px 0;
@@ -62,92 +62,35 @@ html {
 
 /* Focus Visible Styles for Keyboard Navigation */
 *:focus-visible {
-	outline: 2px solid rgb(0, 86, 210);
+	outline: 2px solid var(--accent-gold);
 	outline-offset: 2px;
 }
 
-/* JACXI Design System - Tailwind v4 Configuration */
+:root {
+	--accent-gold: #D4AF37;
+	--background: #F9FAFB;
+	--panel: #E4E9F0;
+	--text-primary: #1C1C1E;
+	--text-secondary: #5F6368;
+	--border: #E0E0E0;
+	--error: #EF4444;
+	--text-primary-rgb: 28, 28, 30;
+}
+
+body {
+	background-color: var(--background);
+	color: var(--text-primary);
+}
+
 @theme {
-  /* JACXI Brand Colors */
-  --color-brand-navy: hsl(218 73% 15%);          /* #0A1F44 */
-  --color-brand-navy-light: hsl(218 58% 25%);    /* #1E3A5F */
-  --color-brand-navy-lighter: hsl(218 48% 35%);  /* #2E4A6F */
-  --color-brand-navy-dark: hsl(218 85% 12%);     /* #07152F */
-  --color-brand-navy-darker: hsl(218 90% 8%);    /* #050F1F */
-
-  --color-brand-cyan: hsl(195 100% 50%);         /* #00BFFF */
-  --color-brand-cyan-light: hsl(180 85% 65%);    /* #4DD0E1 */
-  --color-brand-cyan-lighter: hsl(175 75% 75%);  /* #87E4F0 */
-  --color-brand-cyan-dark: hsl(195 100% 40%);    /* #0099CC */
-  --color-brand-cyan-darker: hsl(195 100% 30%);  /* #007399 */
-
-  --color-brand-gold: hsl(43 74% 52%);           /* #D4AF37 */
-  --color-brand-gold-light: hsl(43 82% 58%);     /* #E5C158 */
-  --color-brand-gold-lighter: hsl(45 70% 80%);   /* #F0D890 */
-  --color-brand-gold-dark: hsl(43 78% 42%);      /* #B8942A */
-  --color-brand-gold-darker: hsl(43 82% 35%);    /* #9C7A1F */
-
-  --color-brand-charcoal: hsl(220 8% 19%);       /* #2B2E34 */
-  --color-brand-charcoal-light: hsl(220 12% 25%); /* #404040 */
-  --color-brand-charcoal-lighter: hsl(220 15% 32%); /* #5A5A5A */
-
-  --color-brand-white: hsl(210 20% 98%);         /* #F8F9FA */
-  --color-brand-white-off: hsl(210 17% 93%);     /* #E9ECEF */
-  --color-brand-white-pure: hsl(0 0% 100%);      /* #FFFFFF */
-
-  /* JACXI Semantic Colors */
-  --color-success-50: hsl(142 76% 95%);
-  --color-success-100: hsl(142 76% 90%);
-  --color-success-500: hsl(142 71% 45%);
-  --color-success-600: hsl(142 76% 36%);
-  --color-success-700: hsl(142 76% 29%);
-  --color-success-900: hsl(142 76% 20%);
-
-  --color-warning-50: hsl(48 96% 95%);
-  --color-warning-100: hsl(48 96% 90%);
-  --color-warning-500: hsl(38 92% 50%);
-  --color-warning-600: hsl(38 92% 42%);
-  --color-warning-700: hsl(38 92% 35%);
-  --color-warning-900: hsl(38 92% 25%);
-
-  --color-error-50: hsl(0 84% 95%);
-  --color-error-100: hsl(0 84% 90%);
-  --color-error-500: hsl(0 84% 60%);
-  --color-error-600: hsl(0 72% 51%);
-  --color-error-700: hsl(0 72% 44%);
-  --color-error-900: hsl(0 72% 34%);
-
-  --color-info-50: hsl(217 91% 95%);
-  --color-info-100: hsl(217 91% 90%);
-  --color-info-500: hsl(217 91% 60%);
-  --color-info-600: hsl(217 91% 51%);
-  --color-info-700: hsl(217 91% 44%);
-  --color-info-900: hsl(217 91% 34%);
-
-  /* JACXI Shipping Status Colors */
-  --color-status-quote-requested: hsl(217 91% 95%);
-  --color-status-quote-approved: hsl(142 76% 95%);
-  --color-status-pickup-scheduled: hsl(220 13% 96%);
-  --color-status-picked-up: hsl(48 96% 95%);
-  --color-status-in-transit: hsl(217 91% 95%);
-  --color-status-at-port: hsl(271 91% 96%);
-  --color-status-customs-clearance: hsl(25 95% 96%);
-  --color-status-out-for-delivery: hsl(142 76% 95%);
-  --color-status-delivered: hsl(142 76% 90%);
-  --color-status-delayed: hsl(0 84% 95%);
-  --color-status-cancelled: hsl(220 13% 97%);
-
-  /* Neutral Gray Scale */
-  --color-neutral-50: hsl(210 20% 98%);
-  --color-neutral-100: hsl(210 16% 96%);
-  --color-neutral-200: hsl(214 16% 92%);
-  --color-neutral-300: hsl(216 16% 87%);
-  --color-neutral-400: hsl(218 14% 68%);
-  --color-neutral-500: hsl(220 13% 59%);
-  --color-neutral-600: hsl(215 14% 47%);
-  --color-neutral-700: hsl(217 11% 40%);
-  --color-neutral-800: hsl(215 16% 31%);
-  --color-neutral-900: hsl(215 25% 20%);
+	--color-brand-primary: var(--accent-gold);
+	--color-brand-background: var(--background);
+	--color-brand-panel: var(--panel);
+	--color-brand-text: var(--text-primary);
+	--color-brand-text-secondary: var(--text-secondary);
+	--color-border-default: var(--border);
+	--color-error-500: var(--error);
+	--color-error-600: var(--error);
 
   /* Typography Scale */
   --font-size-display-xs: 2.5rem;    /* 40px */
