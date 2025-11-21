@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileText, ShieldCheck, Download, Upload, Search, AlertCircle } from 'lucide-react';
-import { Box, Typography, Button as MuiButton } from '@mui/material';
+import { FileText, ShieldCheck, Download, Upload, Search, AlertCircle } from 'lucide-react';
+import { Box } from '@mui/material';
 
-import { DashboardSurface, DashboardHeader, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 import Section from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 
@@ -178,14 +177,6 @@ export default function DocumentsPage() {
 
 	return (
 		<DashboardSurface>
-			<DashboardHeader
-				title="Documents"
-				description="Templates, uploads, and compliance artifacts managed centrally."
-				meta={[
-					{ label: 'Categories', value: categories.length },
-					{ label: 'Required', value: pendingDocumentsCount },
-				]}
-			/>
 			<DashboardPanel title="Snapshot" description="Quick glance at activity" noBodyPadding>
 				<Box sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
 					<motion.div

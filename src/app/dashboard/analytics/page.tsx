@@ -3,12 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Link from 'next/link';
 import {
 	Activity,
-	BarChart3,
 	TrendingUp,
-	CreditCard,
 	AlertTriangle,
 	Package,
 	User as UserIcon,
@@ -25,14 +22,10 @@ import {
 	Tooltip,
 	BarChart,
 	Bar,
-	PieChart,
-	Pie,
-	Cell,
-	Legend,
 } from 'recharts';
-import { Box, Button, Typography, Fade, Slide, Zoom, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Zoom, CircularProgress } from '@mui/material';
 
-import { DashboardSurface, DashboardHeader, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
 interface SummaryRow {
 	totalShipments: number;
@@ -88,19 +81,10 @@ interface AnalyticsPayload {
 	lastUpdated: string;
 }
 
-const COLORS = ['var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)'];
-
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(
 		Number.isFinite(value) ? value : 0,
 	);
-
-const formatDate = (value: string | null) => {
-	if (!value) return '—';
-	const date = new Date(value);
-	if (Number.isNaN(date.getTime())) return '—';
-	return date.toLocaleDateString();
-};
 
 export default function AnalyticsPage() {
 	const { data: session, status } = useSession();
@@ -237,17 +221,50 @@ export default function AnalyticsPage() {
 		return null;
 	}
 
+	const headerMeta = [
+		{ label: 'Shipments', value: data.summary.totalShipments },
+		{ label: 'Revenue', value: formatCurrency(data.summary.totalRevenue) },
+		{ label: 'Admins', value: data.summary.adminUsers },
+	];
+
 	return (
 		<DashboardSurface>
-			<DashboardHeader
-				title="Analytics"
-				description="Financial and operational intelligence updated in real time."
-				meta={[
-					{ label: 'Shipments', value: data.summary.totalShipments },
-					{ label: 'Revenue', value: formatCurrency(data.summary.totalRevenue), intent: 'positive' },
-					{ label: 'Admins', value: data.summary.adminUsers },
-				]}
-				actions={
+			<Box
+				sx={{
+					display: 'flex',
+					flexDirection: { xs: 'column', md: 'row' },
+					justifyContent: 'space-between',
+					alignItems: { xs: 'flex-start', md: 'center' },
+					gap: 2.5,
+				}}
+			>
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+					<Typography component="h1" sx={{ fontSize: '1.25rem', fontWeight: 600 }}>
+						Analytics
+					</Typography>
+					<Typography sx={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+						Financial and operational intelligence updated in real time.
+					</Typography>
+				</Box>
+				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+					{headerMeta.map((item) => (
+						<Box
+							key={item.label}
+							sx={{
+								minWidth: 110,
+								border: '1px solid var(--border)',
+								borderRadius: 2,
+								padding: '6px 12px',
+								backgroundColor: 'var(--panel)',
+								boxShadow: '0 8px 20px rgba(var(--text-primary-rgb), 0.04)',
+							}}
+						>
+							<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-secondary)' }}>
+								{item.label}
+							</Typography>
+							<Typography sx={{ fontSize: '1rem', fontWeight: 600 }}>{item.value}</Typography>
+						</Box>
+					))}
 					<Button
 						variant="outlined"
 						size="small"
@@ -258,8 +275,8 @@ export default function AnalyticsPage() {
 					>
 						Refresh
 					</Button>
-				}
-			/>
+				</Box>
+			</Box>
 
 			{error && (
 				<Box

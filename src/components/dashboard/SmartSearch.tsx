@@ -144,30 +144,30 @@ export default function SmartSearch({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  {isSearching ? (
-                    <CircularProgress size={20} sx={{ color: 'var(--accent-gold)' }} />
-                  ) : (
-                    <Search sx={{ fontSize: 20, color: 'rgba(var(--background-rgb), 0.4)' }} />
-                  )}
+                    {isSearching ? (
+                      <CircularProgress size={20} sx={{ color: 'var(--accent-gold)' }} />
+                    ) : (
+                      <Search sx={{ fontSize: 20, color: 'rgba(var(--text-secondary-rgb), 0.5)' }} />
+                    )}
                 </InputAdornment>
               ),
               sx: {
-                bgcolor: 'rgba(var(--background-rgb), 0.05)',
+                  bgcolor: 'rgba(var(--panel-rgb), 0.6)',
                 borderRadius: 3,
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(var(--background-rgb), 0.1)',
+                    borderColor: 'rgba(var(--text-primary-rgb), 0.08)',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(var(--background-rgb), 0.2)',
+                    borderColor: 'rgba(var(--text-primary-rgb), 0.16)',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                   borderWidth: 2,
                 },
                 '& input': {
-                  color: 'var(--background)',
+                    color: 'var(--text-primary)',
                   '&::placeholder': {
-                    color: 'rgba(var(--background-rgb), 0.4)',
+                      color: 'rgba(var(--text-secondary-rgb), 0.6)',
                     opacity: 1,
                   },
                 },
@@ -181,10 +181,10 @@ export default function SmartSearch({
                 startIcon={<Close sx={{ fontSize: 16 }} />}
                 onClick={clearFilters}
                 sx={{
-                  color: 'rgba(var(--background-rgb), 0.6)',
+                    color: 'var(--text-secondary)',
                   '&:hover': {
-                    color: 'var(--background)',
-                    bgcolor: 'rgba(var(--background-rgb), 0.1)',
+                      color: 'var(--text-primary)',
+                      bgcolor: 'rgba(var(--text-secondary-rgb), 0.08)',
                   },
                 }}
               >
@@ -198,12 +198,12 @@ export default function SmartSearch({
               endIcon={showFilters ? <ExpandLess sx={{ fontSize: 16 }} /> : <ExpandMore sx={{ fontSize: 16 }} />}
               onClick={() => setShowFilters(!showFilters)}
               sx={{
-                borderColor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.4)' : 'rgba(var(--background-rgb), 0.2)',
-                bgcolor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.2)' : 'transparent',
-                color: 'var(--background)',
+                  borderColor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.4)' : 'var(--border)',
+                  bgcolor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.15)' : 'transparent',
+                  color: 'var(--text-primary)',
                 '&:hover': {
-                  bgcolor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.3)' : 'rgba(var(--background-rgb), 0.1)',
-                  borderColor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.6)' : 'rgba(var(--background-rgb), 0.3)',
+                    bgcolor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.25)' : 'rgba(var(--panel-rgb), 0.5)',
+                    borderColor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.6)' : 'var(--border)',
                 },
               }}
             >
@@ -217,7 +217,7 @@ export default function SmartSearch({
                     height: 20,
                     fontSize: '0.75rem',
                     bgcolor: 'var(--accent-gold)',
-                    color: 'var(--background)',
+                      color: 'var(--background)',
                   }}
                 />
               )}
@@ -228,7 +228,7 @@ export default function SmartSearch({
         {/* Quick Type Filter */}
         {showTypeFilter && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
-            <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'rgba(var(--background-rgb), 0.6)' }}>
+            <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               Search in:
             </Typography>
             {[
@@ -246,12 +246,12 @@ export default function SmartSearch({
                 sx={{
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  borderColor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.4)' : 'rgba(var(--background-rgb), 0.1)',
-                  bgcolor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.2)' : 'rgba(var(--background-rgb), 0.05)',
-                  color: filters.type === value ? 'var(--accent-gold)' : 'rgba(var(--background-rgb), 0.6)',
+                  borderColor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.4)' : 'var(--border)',
+                  bgcolor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.15)' : 'rgba(var(--panel-rgb), 0.5)',
+                  color: filters.type === value ? 'var(--accent-gold)' : 'var(--text-secondary)',
                   '&:hover': {
-                    bgcolor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.3)' : 'rgba(var(--background-rgb), 0.1)',
-                    color: 'var(--background)',
+                    bgcolor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.25)' : 'rgba(var(--panel-rgb), 0.7)',
+                    color: 'var(--text-primary)',
                   },
                 }}
               >
@@ -267,8 +267,8 @@ export default function SmartSearch({
         <Box
           sx={{
             p: { xs: 2, sm: 3 },
-            bgcolor: 'rgba(var(--background-rgb), 0.05)',
-            border: '1px solid rgba(var(--background-rgb), 0.1)',
+              bgcolor: 'var(--panel)',
+              border: '1px solid var(--border)',
             borderRadius: 3,
           }}
         >
@@ -278,7 +278,7 @@ export default function SmartSearch({
               sx={{
                 fontSize: { xs: '1rem', sm: '1.125rem' },
                 fontWeight: 600,
-                color: 'var(--background)',
+                  color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
@@ -316,7 +316,7 @@ export default function SmartSearch({
               <FormControl fullWidth>
                 <InputLabel
                   sx={{
-                    color: 'rgba(var(--background-rgb), 0.7)',
+                      color: 'var(--text-secondary)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
                       color: 'var(--accent-gold)',
@@ -330,19 +330,19 @@ export default function SmartSearch({
                   onChange={(e) => updateFilter('status', e.target.value)}
                   label="Status"
                   sx={{
-                    bgcolor: 'rgba(var(--background-rgb), 0.05)',
-                    color: 'var(--background)',
+                      bgcolor: 'var(--panel)',
+                      color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.1)',
+                        borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.2)',
+                        borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                     '& .MuiSvgIcon-root': {
-                      color: 'rgba(var(--background-rgb), 0.7)',
+                        color: 'var(--text-secondary)',
                     },
                   }}
                 >
@@ -366,7 +366,7 @@ export default function SmartSearch({
                 InputLabelProps={{
                   shrink: true,
                   sx: {
-                    color: 'rgba(var(--background-rgb), 0.7)',
+                      color: 'var(--text-secondary)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
                       color: 'var(--accent-gold)',
@@ -380,13 +380,13 @@ export default function SmartSearch({
                     </InputAdornment>
                   ),
                   sx: {
-                    bgcolor: 'rgba(var(--background-rgb), 0.05)',
-                    color: 'var(--background)',
+                      bgcolor: 'var(--panel)',
+                      color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.1)',
+                        borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.2)',
+                        borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
@@ -406,7 +406,7 @@ export default function SmartSearch({
                 InputLabelProps={{
                   shrink: true,
                   sx: {
-                    color: 'rgba(var(--background-rgb), 0.7)',
+                    color: 'rgba(var(--text-secondary-rgb), 0.7)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
                       color: 'var(--accent-gold)',
@@ -420,13 +420,13 @@ export default function SmartSearch({
                     </InputAdornment>
                   ),
                   sx: {
-                    bgcolor: 'rgba(var(--background-rgb), 0.05)',
-                    color: 'var(--background)',
+                    bgcolor: 'rgba(var(--text-secondary-rgb), 0.05)',
+                    color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.1)',
+                      borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.2)',
+                      borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
@@ -446,7 +446,7 @@ export default function SmartSearch({
                 placeholder="0"
                 InputLabelProps={{
                   sx: {
-                    color: 'rgba(var(--background-rgb), 0.7)',
+                    color: 'rgba(var(--text-secondary-rgb), 0.7)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
                       color: 'var(--accent-gold)',
@@ -461,19 +461,19 @@ export default function SmartSearch({
                   ),
                   inputProps: { min: 0 },
                   sx: {
-                    bgcolor: 'rgba(var(--background-rgb), 0.05)',
-                    color: 'var(--background)',
+                    bgcolor: 'rgba(var(--text-secondary-rgb), 0.05)',
+                    color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.1)',
+                      borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.2)',
+                      borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                     '& input::placeholder': {
-                      color: 'rgba(var(--background-rgb), 0.4)',
+                      color: 'rgba(var(--text-secondary-rgb), 0.4)',
                       opacity: 1,
                     },
                   },
@@ -491,7 +491,7 @@ export default function SmartSearch({
                 placeholder="10000"
                 InputLabelProps={{
                   sx: {
-                    color: 'rgba(var(--background-rgb), 0.7)',
+                    color: 'rgba(var(--text-secondary-rgb), 0.7)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
                       color: 'var(--accent-gold)',
@@ -506,19 +506,19 @@ export default function SmartSearch({
                   ),
                   inputProps: { min: 0 },
                   sx: {
-                    bgcolor: 'rgba(var(--background-rgb), 0.05)',
-                    color: 'var(--background)',
+                    bgcolor: 'rgba(var(--text-secondary-rgb), 0.05)',
+                    color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.1)',
+                      borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(var(--background-rgb), 0.2)',
+                      borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                     '& input::placeholder': {
-                      color: 'rgba(var(--background-rgb), 0.4)',
+                      color: 'rgba(var(--text-secondary-rgb), 0.4)',
                       opacity: 1,
                     },
                   },

@@ -101,7 +101,7 @@ export default function ShipmentCard({
 						<Typography
 							sx={{
 								fontSize: '0.65rem',
-								color: 'rgba(var(--background-rgb), 0.55)',
+								color: 'var(--text-secondary)',
 								marginTop: 0.2,
 							}}
 						>

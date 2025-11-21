@@ -7,7 +7,7 @@ import { Add, ChevronLeft, ChevronRight, Inventory2 } from '@mui/icons-material'
 import { Button, Box, CircularProgress, Typography } from '@mui/material';
 import ShipmentRow from '@/components/dashboard/ShipmentRow';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
-import { DashboardSurface, DashboardHeader, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 
 interface Shipment {
 	id: string;
@@ -81,13 +81,10 @@ export default function ShipmentsListPage() {
 
 	return (
 		<DashboardSurface>
-			<DashboardHeader
-				title="Shipments"
-				description="Search, filter, and review every vehicle currently handled."
-				meta={[
-					{ label: 'Matches', value: shipments.length },
-					{ label: 'Page', value: `${currentPage}/${totalPages}` },
-				]}
+			<DashboardPanel
+				title="Search"
+				description="Filter shipments instantly"
+				noBodyPadding
 				actions={
 					isAdmin ? (
 						<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
@@ -102,9 +99,7 @@ export default function ShipmentsListPage() {
 						</Link>
 					) : null
 				}
-			/>
-
-			<DashboardPanel title="Search" description="Filter shipments instantly" noBodyPadding>
+			>
 				<Box sx={{ px: 1.5, py: 1.5 }}>
 					<SmartSearch
 						onSearch={handleSearch}
@@ -144,8 +139,8 @@ export default function ShipmentsListPage() {
 							textAlign: 'center',
 						}}
 					>
-						<Inventory2 sx={{ fontSize: 42, color: 'rgba(var(--background-rgb), 0.3)' }} />
-						<Typography sx={{ fontSize: '0.85rem', color: 'rgba(var(--background-rgb), 0.65)' }}>
+						<Inventory2 sx={{ fontSize: 42, color: 'rgba(var(--text-secondary-rgb), 0.35)' }} />
+						<Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
 							No shipments found
 						</Typography>
 						{isAdmin && (
@@ -195,7 +190,7 @@ export default function ShipmentsListPage() {
 								>
 									Previous
 								</Button>
-								<Typography sx={{ fontSize: '0.75rem', color: 'rgba(var(--background-rgb), 0.65)' }}>
+								<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
 									Page {currentPage} of {totalPages}
 								</Typography>
 								<Button

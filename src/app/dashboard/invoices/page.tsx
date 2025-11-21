@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Receipt, Search, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { DashboardSurface, DashboardHeader, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
 interface Invoice {
 	id: string;
@@ -111,22 +111,6 @@ export default function InvoicesPage() {
 
 	return (
 		<DashboardSurface>
-			<DashboardHeader
-				title="Invoices"
-				description="Manage billing, payment status, and overdue balances."
-				meta={[
-					{ label: 'Total', value: stats.total },
-					{ label: 'Paid', value: stats.paid, intent: 'positive' },
-					{ label: 'Overdue', value: stats.overdue, intent: 'critical' },
-				]}
-				actions={
-					<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-						<button className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-400 transition">
-							New invoice
-						</button>
-					</Link>
-				}
-			/>
 
 			<DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 				{[
@@ -156,7 +140,17 @@ export default function InvoicesPage() {
 				))}
 			</DashboardGrid>
 
-			<DashboardPanel title="Filters" description="Narrow down invoices quickly">
+			<DashboardPanel
+				title="Filters"
+				description="Narrow down invoices quickly"
+				actions={
+					<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
+						<button className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-400 transition">
+							New invoice
+						</button>
+					</Link>
+				}
+			>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div className="relative">
 						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cyan-400/70" />

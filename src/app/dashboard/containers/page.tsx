@@ -4,9 +4,9 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Package, FileText, Eye } from 'lucide-react';
-import { Button, Box, CircularProgress, Typography, Fade, Slide, Zoom, Chip } from '@mui/material';
-import { DashboardSurface, DashboardHeader, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { Plus, Package, Eye } from 'lucide-react';
+import { Button, Box, CircularProgress, Typography, Zoom, Chip } from '@mui/material';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
 
 interface ContainerItem {
@@ -39,7 +39,6 @@ export default function ContainersPage() {
 		query: '',
 		type: 'items',
 	});
-	const show = true;
 
 	useEffect(() => {
 		if (status === 'loading') return;
@@ -111,13 +110,10 @@ export default function ContainersPage() {
 
 	return (
 		<DashboardSurface>
-			<DashboardHeader
-				title="Containers"
-				description="Monitor every container, linked shipments, and billing artifacts."
-				meta={[
-					{ label: 'Visible', value: filteredContainers.length },
-					{ label: 'Total', value: containers.length },
-				]}
+			<DashboardPanel
+				title="Search"
+				description="Filter containers by tracking metadata"
+				noBodyPadding
 				actions={
 					<Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
 						<Button
@@ -130,9 +126,7 @@ export default function ContainersPage() {
 						</Button>
 					</Link>
 				}
-			/>
-
-			<DashboardPanel title="Search" description="Filter containers by tracking metadata" noBodyPadding>
+			>
 				<Box sx={{ px: 1.5, py: 1.5 }}>
 					<SmartSearch
 						onSearch={handleSearch}
@@ -160,8 +154,8 @@ export default function ContainersPage() {
 							textAlign: 'center',
 						}}
 					>
-						<Package style={{ fontSize: 40, color: 'rgba(var(--background-rgb), 0.25)' }} />
-						<Typography sx={{ fontSize: '0.85rem', color: 'rgba(var(--background-rgb), 0.65)' }}>
+						<Package style={{ fontSize: 40, color: 'rgba(var(--text-secondary-rgb), 0.35)' }} />
+						<Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
 							No containers match this filter
 						</Typography>
 					</Box>
