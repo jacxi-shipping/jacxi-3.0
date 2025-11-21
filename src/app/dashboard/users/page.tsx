@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { User, Mail, Shield, Users, UserPlus, Calendar, Eye, EyeOff, Key, Copy, Check, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import Section from '@/components/layout/Section';
 import { DashboardSurface, DashboardHeader, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
 
