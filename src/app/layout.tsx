@@ -3,6 +3,7 @@ import { Inter, Urbanist } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import { Providers } from "@/components/providers/Providers";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -34,6 +35,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${urbanist.variable}`} dir="ltr">
       <body className="min-h-screen bg-background antialiased" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
+          <Script id="ux-sniff" strategy="afterInteractive">
+            {`(function(u,x,s,n,i,f){
+  u.ux=u.ux||function(){(u.ux.q=u.ux.q||[]).push(arguments)};
+  i=x.getElementsByTagName('head')[0]; f=x.createElement('script');f.async=1; f.src=s+n;
+  i.appendChild(f);
+})(window,document,'https://api.uxsniff.com/cdn/js/uxsnf_track','.js');`}
+          </Script>
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             <ConditionalLayout>
