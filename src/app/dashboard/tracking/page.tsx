@@ -115,8 +115,8 @@ export default function DashboardTrackingPage() {
 
 	if (status === 'loading') {
 		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
+			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]" />
 			</div>
 		);
 	}
@@ -133,6 +133,7 @@ export default function DashboardTrackingPage() {
 	}));
 
 	return (
+		<div className="light-surface">
 		<Section className="bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16">
 			<div className="max-w-5xl mx-auto space-y-10">
 				<motion.div
@@ -302,5 +303,6 @@ export default function DashboardTrackingPage() {
 				)}
 			</div>
 		</Section>
+		</div>
 	);
 }

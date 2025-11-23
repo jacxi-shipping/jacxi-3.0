@@ -198,21 +198,16 @@ export default function AnalyticsPage() {
 	if (status === 'loading' || loading) {
 		return (
 			<Box
+				className="light-surface"
 				sx={{
 					minHeight: '100vh',
-					background: 'var(--text-primary)',
+					background: 'var(--background)',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
 				}}
 			>
-				<CircularProgress
-					size={60}
-					sx={{
-						color: 'var(--accent-gold)',
-						filter: 'drop-shadow(0 0 15px rgba(var(--accent-gold-rgb), 0.5))',
-					}}
-				/>
+				<CircularProgress size={60} sx={{ color: 'var(--accent-gold)' }} />
 			</Box>
 		);
 	}
@@ -228,7 +223,7 @@ export default function AnalyticsPage() {
 	];
 
 	return (
-		<DashboardSurface>
+		<DashboardSurface className="light-surface">
 			<Box
 				sx={{
 					display: 'flex',

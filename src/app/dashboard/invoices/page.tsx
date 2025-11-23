@@ -98,8 +98,8 @@ export default function InvoicesPage() {
 
 	if (status === 'loading' || loading) {
 		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
+			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]"></div>
 			</div>
 		);
 	}
@@ -110,7 +110,7 @@ export default function InvoicesPage() {
 	}
 
 	return (
-		<DashboardSurface>
+		<DashboardSurface className="light-surface">
 
 			<DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 				{[

@@ -169,14 +169,14 @@ export default function DocumentsPage() {
 	const role = session?.user?.role;
 	if (status === 'loading' || !session || role !== 'admin') {
 		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
+			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]" />
 			</div>
 		);
 	}
 
 	return (
-		<DashboardSurface>
+		<DashboardSurface className="light-surface">
 			<DashboardPanel title="Snapshot" description="Quick glance at activity" noBodyPadding>
 				<Box sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
 					<motion.div
