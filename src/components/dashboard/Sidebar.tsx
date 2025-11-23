@@ -159,7 +159,7 @@ function NavItem({ item, isActive, onNavClick }: NavItemProps) {
 				py: 0.75,
 				minHeight: 0,
 				transition: 'all 0.2s ease',
-				color: active ? 'var(--accent-gold)' : 'var(--text-secondary)',
+				color: active ? 'var(--accent-gold)' : 'var(--text-primary)',
 				bgcolor: active ? 'rgba(var(--accent-gold-rgb), 0.12)' : 'transparent',
 				'&:hover': {
 					bgcolor: 'rgba(var(--border-rgb), 0.4)',
@@ -182,7 +182,7 @@ function NavItem({ item, isActive, onNavClick }: NavItemProps) {
 			<ListItemIcon
 				sx={{
 					minWidth: 32,
-					color: active ? 'var(--accent-gold)' : 'var(--text-secondary)',
+					color: active ? 'var(--accent-gold)' : 'var(--text-primary)',
 				}}
 			>
 				<Icon sx={{ fontSize: 18 }} />
