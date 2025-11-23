@@ -450,7 +450,7 @@ export default function ShipmentDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="shipment-surface min-h-screen bg-[var(--background)]">
+      <div className="light-surface min-h-screen bg-[var(--background)]">
         <div className="relative">
           <Section className="pb-4 pt-4 sm:pt-6">
             <div className="flex flex-col gap-4 sm:gap-6">

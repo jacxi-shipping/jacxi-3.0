@@ -784,14 +784,30 @@ button[class*="bg-"] {
   color: var(--text-primary);
 }
 
-.dashboard-theme-light [class*="bg-[var(--text-primary)]"] {
-  background-color: var(--background) !important;
-  color: var(--text-primary) !important;
+.dashboard-theme-light [class*="bg-[var(--text-primary)]"],
+.dashboard-theme-light [class*="bg-white"] {
+	background-color: rgba(var(--panel-rgb), 0.93) !important;
+	color: var(--text-primary) !important;
 }
 
-.dashboard-theme-light [class*="bg-[var(--text-primary)]"] {
-  background-color: var(--background) !important;
-  color: var(--text-primary) !important;
+.dashboard-theme-light [class*="bg-[var(--text-primary)]"] :where(.text-white, .text-white\/90, .text-white\/80),
+.dashboard-theme-light [class*="bg-white"] :where(.text-white, .text-white\/90, .text-white\/80) {
+	color: var(--text-primary) !important;
+}
+
+.dashboard-theme-light [class*="bg-[var(--text-primary)]"] :where(.text-white\/70, .text-white\/60, .text-white\/50),
+.dashboard-theme-light [class*="bg-white"] :where(.text-white\/70, .text-white\/60, .text-white\/50) {
+	color: var(--text-secondary) !important;
+}
+
+.dashboard-theme-light [class*="bg-[var(--text-primary)]"] :where(.text-white\/40, .text-white\/30, .text-white\/20),
+.dashboard-theme-light [class*="bg-white"] :where(.text-white\/40, .text-white\/30, .text-white\/20) {
+	color: rgba(var(--text-secondary-rgb), 0.6) !important;
+}
+
+.dashboard-theme-light [class*="bg-[var(--text-primary)]"] :where(.border-white, .border-white\/10, .border-white\/20, .border-white\/30, .border-white\/40),
+.dashboard-theme-light [class*="bg-white"] :where(.border-white, .border-white\/10, .border-white\/20, .border-white\/30, .border-white\/40) {
+	border-color: var(--border) !important;
 }
 
 /* Smooth Scrolling */
