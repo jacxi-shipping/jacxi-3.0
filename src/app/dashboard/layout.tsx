@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/dashboard/Sidebar';
+import Header from '@/components/dashboard/Header';
 import { Box } from '@mui/material';
 
 export default function DashboardLayout({
@@ -9,28 +11,56 @@ export default function DashboardLayout({
 }: {
 	children: React.ReactNode;
 }) {
+	const [mobileOpen, setMobileOpen] = useState(false);
+
 	return (
 		<ProtectedRoute>
 			<Box
+				className="dashboard-theme-light"
 				sx={{
 					minHeight: '100vh',
-					bgcolor: '#020817',
+					bgcolor: 'var(--background)',
 					display: 'flex',
+					flexDirection: 'column',
+					color: 'var(--text-primary)',
 				}}
 			>
-				{/* Sidebar */}
-				<Sidebar />
+				{/* Header */}
+				<Header onMenuClick={() => setMobileOpen(!mobileOpen)} />
 
-				{/* Main Content */}
+				{/* Content Area with Sidebar */}
 				<Box
-					component="main"
 					sx={{
+						display: 'flex',
 						flexGrow: 1,
-						minWidth: 0,
-						overflow: 'auto',
+						overflow: 'hidden',
 					}}
 				>
-					{children}
+					{/* Sidebar */}
+					<Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
+
+					{/* Main Content */}
+					<Box
+						component="main"
+						sx={{
+							flexGrow: 1,
+							minWidth: 0,
+							height: 'calc(100vh - 48px)',
+							bgcolor: 'var(--background)',
+							backgroundImage: 'none',
+						}}
+					>
+						<Box
+							sx={{
+								height: '100%',
+								display: 'flex',
+								flexDirection: 'column',
+								overflow: 'hidden',
+							}}
+						>
+							<div className="dashboard-scroll">{children}</div>
+						</Box>
+					</Box>
 				</Box>
 			</Box>
 		</ProtectedRoute>

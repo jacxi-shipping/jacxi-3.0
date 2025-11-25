@@ -129,7 +129,7 @@ export default function NewInvoicePage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
 			</div>
 		);
@@ -137,7 +137,7 @@ export default function NewInvoicePage() {
 
 	if (!container) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="text-center">
 					<p className="text-white/70 mb-4">Container not found</p>
 					<Link href="/dashboard/containers">
@@ -150,8 +150,8 @@ export default function NewInvoicePage() {
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">
 					<svg className="w-full h-full" preserveAspectRatio="none">
 						<defs>
@@ -179,10 +179,10 @@ export default function NewInvoicePage() {
 				</div>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-4xl mx-auto space-y-6">
 					{/* Exchange Rate & Due Date */}
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8">
+					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8">
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div>
 								<label htmlFor="exchangeRate" className="block text-sm font-medium text-white/90 mb-2">
@@ -194,7 +194,7 @@ export default function NewInvoicePage() {
 									id="exchangeRate"
 									value={exchangeRate}
 									onChange={(e) => setExchangeRate(parseFloat(e.target.value))}
-									className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+									className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
 								/>
 							</div>
 							<div>
@@ -206,14 +206,14 @@ export default function NewInvoicePage() {
 									id="dueDate"
 									value={dueDate}
 									onChange={(e) => setDueDate(e.target.value)}
-									className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+									className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
 								/>
 							</div>
 						</div>
 					</motion.div>
 
 					{/* Items Selection */}
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8">
+					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8">
 						<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Select Items</h2>
 						{availableItems.length === 0 ? (
 							<p className="text-center text-white/70 py-8">No items available in this container</p>
@@ -234,7 +234,7 @@ export default function NewInvoicePage() {
 											className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-all ${
 												isSelected
 													? 'bg-cyan-500/10 border-cyan-500/50'
-													: 'bg-[#020817]/50 border-cyan-500/20 hover:border-cyan-500/40'
+													: 'bg-[var(--text-primary)]/50 border-cyan-500/20 hover:border-cyan-500/40'
 											}`}
 										>
 											<input
@@ -266,7 +266,7 @@ export default function NewInvoicePage() {
 
 					{/* Summary */}
 					{selectedItems.length > 0 && (
-						<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
+						<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
 							<h3 className="text-lg font-bold text-white mb-4">Summary</h3>
 							<div className="space-y-2">
 								<div className="flex justify-between text-sm text-white/70">
@@ -288,7 +288,7 @@ export default function NewInvoicePage() {
 								Cancel
 							</Button>
 						</Link>
-						<Button onClick={handleCreateInvoice} disabled={isCreating || selectedItems.length === 0} className="w-full sm:w-auto bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-lg shadow-cyan-500/30">
+						<Button onClick={handleCreateInvoice} disabled={isCreating || selectedItems.length === 0} className="w-full sm:w-auto bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-lg shadow-cyan-500/30">
 							{isCreating ? 'Creating...' : 'Create Invoice'}
 						</Button>
 					</motion.div>

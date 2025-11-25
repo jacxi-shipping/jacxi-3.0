@@ -16,7 +16,6 @@ import {
 import { 
   TextField,
   InputAdornment,
-  IconButton,
   Button,
   Chip,
   Select,
@@ -130,7 +129,7 @@ export default function SmartSearch({
     handleSearch(clearedFilters);
   };
 
-  const hasActiveFilters = query || activeFiltersCount > 0;
+  const hasActiveFilters = Boolean(query) || activeFiltersCount > 0;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -145,30 +144,30 @@ export default function SmartSearch({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  {isSearching ? (
-                    <CircularProgress size={20} sx={{ color: 'rgb(34, 211, 238)' }} />
-                  ) : (
-                    <Search sx={{ fontSize: 20, color: 'rgba(255, 255, 255, 0.4)' }} />
-                  )}
+                    {isSearching ? (
+                      <CircularProgress size={20} sx={{ color: 'var(--accent-gold)' }} />
+                    ) : (
+                      <Search sx={{ fontSize: 20, color: 'rgba(var(--text-secondary-rgb), 0.5)' }} />
+                    )}
                 </InputAdornment>
               ),
               sx: {
-                bgcolor: 'rgba(255, 255, 255, 0.05)',
+                  bgcolor: 'rgba(var(--panel-rgb), 0.6)',
                 borderRadius: 3,
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderColor: 'rgba(var(--text-primary-rgb), 0.08)',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderColor: 'rgba(var(--text-primary-rgb), 0.16)',
                 },
                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(6, 182, 212, 0.5)',
+                  borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                   borderWidth: 2,
                 },
                 '& input': {
-                  color: 'white',
+                    color: 'var(--text-primary)',
                   '&::placeholder': {
-                    color: 'rgba(255, 255, 255, 0.4)',
+                      color: 'rgba(var(--text-secondary-rgb), 0.6)',
                     opacity: 1,
                   },
                 },
@@ -182,10 +181,10 @@ export default function SmartSearch({
                 startIcon={<Close sx={{ fontSize: 16 }} />}
                 onClick={clearFilters}
                 sx={{
-                  color: 'rgba(255, 255, 255, 0.6)',
+                    color: 'var(--text-secondary)',
                   '&:hover': {
-                    color: 'white',
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      color: 'var(--text-primary)',
+                      bgcolor: 'rgba(var(--text-secondary-rgb), 0.08)',
                   },
                 }}
               >
@@ -199,12 +198,12 @@ export default function SmartSearch({
               endIcon={showFilters ? <ExpandLess sx={{ fontSize: 16 }} /> : <ExpandMore sx={{ fontSize: 16 }} />}
               onClick={() => setShowFilters(!showFilters)}
               sx={{
-                borderColor: showFilters ? 'rgba(6, 182, 212, 0.4)' : 'rgba(255, 255, 255, 0.2)',
-                bgcolor: showFilters ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
-                color: 'white',
+                  borderColor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.4)' : 'var(--border)',
+                  bgcolor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.15)' : 'transparent',
+                  color: 'var(--text-primary)',
                 '&:hover': {
-                  bgcolor: showFilters ? 'rgba(6, 182, 212, 0.3)' : 'rgba(255, 255, 255, 0.1)',
-                  borderColor: showFilters ? 'rgba(6, 182, 212, 0.6)' : 'rgba(255, 255, 255, 0.3)',
+                    bgcolor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.25)' : 'rgba(var(--panel-rgb), 0.5)',
+                    borderColor: showFilters ? 'rgba(var(--accent-gold-rgb), 0.6)' : 'var(--border)',
                 },
               }}
             >
@@ -217,8 +216,8 @@ export default function SmartSearch({
                     ml: 1,
                     height: 20,
                     fontSize: '0.75rem',
-                    bgcolor: 'rgb(6, 182, 212)',
-                    color: 'white',
+                    bgcolor: 'var(--accent-gold)',
+                      color: 'var(--background)',
                   }}
                 />
               )}
@@ -229,7 +228,7 @@ export default function SmartSearch({
         {/* Quick Type Filter */}
         {showTypeFilter && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
-            <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.6)' }}>
+            <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               Search in:
             </Typography>
             {[
@@ -247,12 +246,12 @@ export default function SmartSearch({
                 sx={{
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  borderColor: filters.type === value ? 'rgba(6, 182, 212, 0.4)' : 'rgba(255, 255, 255, 0.1)',
-                  bgcolor: filters.type === value ? 'rgba(6, 182, 212, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  color: filters.type === value ? 'rgb(34, 211, 238)' : 'rgba(255, 255, 255, 0.6)',
+                  borderColor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.4)' : 'var(--border)',
+                  bgcolor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.15)' : 'rgba(var(--panel-rgb), 0.5)',
+                  color: filters.type === value ? 'var(--accent-gold)' : 'var(--text-secondary)',
                   '&:hover': {
-                    bgcolor: filters.type === value ? 'rgba(6, 182, 212, 0.3)' : 'rgba(255, 255, 255, 0.1)',
-                    color: 'white',
+                    bgcolor: filters.type === value ? 'rgba(var(--accent-gold-rgb), 0.25)' : 'rgba(var(--panel-rgb), 0.7)',
+                    color: 'var(--text-primary)',
                   },
                 }}
               >
@@ -268,8 +267,8 @@ export default function SmartSearch({
         <Box
           sx={{
             p: { xs: 2, sm: 3 },
-            bgcolor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+              bgcolor: 'var(--panel)',
+              border: '1px solid var(--border)',
             borderRadius: 3,
           }}
         >
@@ -279,13 +278,13 @@ export default function SmartSearch({
               sx={{
                 fontSize: { xs: '1rem', sm: '1.125rem' },
                 fontWeight: 600,
-                color: 'white',
+                  color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
               }}
             >
-              <FilterAlt sx={{ fontSize: 20, color: 'rgb(34, 211, 238)' }} />
+              <FilterAlt sx={{ fontSize: 20, color: 'var(--accent-gold)' }} />
               Advanced Filters
             </Typography>
             {activeFiltersCount > 0 && (
@@ -294,9 +293,9 @@ export default function SmartSearch({
                 onClick={clearFilters}
                 sx={{
                   fontSize: '0.875rem',
-                  color: 'rgb(34, 211, 238)',
+                  color: 'var(--accent-gold)',
                   '&:hover': {
-                    color: 'rgb(6, 182, 212)',
+                    color: 'var(--accent-gold)',
                   },
                 }}
               >
@@ -317,10 +316,10 @@ export default function SmartSearch({
               <FormControl fullWidth>
                 <InputLabel
                   sx={{
-                    color: 'rgba(255, 255, 255, 0.7)',
+                      color: 'var(--text-secondary)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
-                      color: 'rgb(34, 211, 238)',
+                      color: 'var(--accent-gold)',
                     },
                   }}
                 >
@@ -331,19 +330,19 @@ export default function SmartSearch({
                   onChange={(e) => updateFilter('status', e.target.value)}
                   label="Status"
                   sx={{
-                    bgcolor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
+                      bgcolor: 'var(--panel)',
+                      color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                      borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                     '& .MuiSvgIcon-root': {
-                      color: 'rgba(255, 255, 255, 0.7)',
+                        color: 'var(--text-secondary)',
                     },
                   }}
                 >
@@ -367,30 +366,30 @@ export default function SmartSearch({
                 InputLabelProps={{
                   shrink: true,
                   sx: {
-                    color: 'rgba(255, 255, 255, 0.7)',
+                      color: 'var(--text-secondary)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
-                      color: 'rgb(34, 211, 238)',
+                      color: 'var(--accent-gold)',
                     },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <CalendarMonth sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                      <CalendarMonth sx={{ fontSize: 16, color: 'var(--accent-gold)' }} />
                     </InputAdornment>
                   ),
                   sx: {
-                    bgcolor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
+                      bgcolor: 'var(--panel)',
+                      color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                      borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                   },
                 }}
@@ -407,30 +406,30 @@ export default function SmartSearch({
                 InputLabelProps={{
                   shrink: true,
                   sx: {
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'rgba(var(--text-secondary-rgb), 0.7)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
-                      color: 'rgb(34, 211, 238)',
+                      color: 'var(--accent-gold)',
                     },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <CalendarMonth sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                      <CalendarMonth sx={{ fontSize: 16, color: 'var(--accent-gold)' }} />
                     </InputAdornment>
                   ),
                   sx: {
-                    bgcolor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
+                    bgcolor: 'rgba(var(--text-secondary-rgb), 0.05)',
+                    color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                      borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                   },
                 }}
@@ -447,34 +446,34 @@ export default function SmartSearch({
                 placeholder="0"
                 InputLabelProps={{
                   sx: {
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'rgba(var(--text-secondary-rgb), 0.7)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
-                      color: 'rgb(34, 211, 238)',
+                      color: 'var(--accent-gold)',
                     },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AttachMoney sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                      <AttachMoney sx={{ fontSize: 16, color: 'var(--accent-gold)' }} />
                     </InputAdornment>
                   ),
                   inputProps: { min: 0 },
                   sx: {
-                    bgcolor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
+                    bgcolor: 'rgba(var(--text-secondary-rgb), 0.05)',
+                    color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                      borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                     '& input::placeholder': {
-                      color: 'rgba(255, 255, 255, 0.4)',
+                      color: 'rgba(var(--text-secondary-rgb), 0.4)',
                       opacity: 1,
                     },
                   },
@@ -492,34 +491,34 @@ export default function SmartSearch({
                 placeholder="10000"
                 InputLabelProps={{
                   sx: {
-                    color: 'rgba(255, 255, 255, 0.7)',
+                    color: 'rgba(var(--text-secondary-rgb), 0.7)',
                     fontSize: '0.875rem',
                     '&.Mui-focused': {
-                      color: 'rgb(34, 211, 238)',
+                      color: 'var(--accent-gold)',
                     },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <AttachMoney sx={{ fontSize: 16, color: 'rgb(34, 211, 238)' }} />
+                      <AttachMoney sx={{ fontSize: 16, color: 'var(--accent-gold)' }} />
                     </InputAdornment>
                   ),
                   inputProps: { min: 0 },
                   sx: {
-                    bgcolor: 'rgba(255, 255, 255, 0.05)',
-                    color: 'white',
+                    bgcolor: 'rgba(var(--text-secondary-rgb), 0.05)',
+                    color: 'var(--text-primary)',
                     '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      borderColor: 'var(--border)',
                     },
                     '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      borderColor: 'var(--border)',
                     },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(6, 182, 212, 0.5)',
+                      borderColor: 'rgba(var(--accent-gold-rgb), 0.5)',
                     },
                     '& input::placeholder': {
-                      color: 'rgba(255, 255, 255, 0.4)',
+                      color: 'rgba(var(--text-secondary-rgb), 0.4)',
                       opacity: 1,
                     },
                   },
@@ -534,15 +533,15 @@ export default function SmartSearch({
                 sx={{
                   mt: 2,
                   p: 1.5,
-                  bgcolor: 'rgba(6, 182, 212, 0.1)',
-                  border: '1px solid rgba(6, 182, 212, 0.3)',
+                  bgcolor: 'rgba(var(--accent-gold-rgb), 0.1)',
+                  border: '1px solid rgba(var(--accent-gold-rgb), 0.3)',
                   borderRadius: 2,
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'start', gap: 1 }}>
-                  <FilterAlt sx={{ fontSize: 16, color: 'rgb(34, 211, 238)', mt: 0.25, flexShrink: 0 }} />
+                  <FilterAlt sx={{ fontSize: 16, color: 'var(--accent-gold)', mt: 0.25, flexShrink: 0 }} />
                   <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'rgb(34, 211, 238)', mb: 1 }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--accent-gold)', mb: 1 }}>
                       Active Filters:
                     </Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -551,8 +550,8 @@ export default function SmartSearch({
                           label={`Query: "${query}"`}
                           size="small"
                           sx={{
-                            bgcolor: 'rgba(6, 182, 212, 0.2)',
-                            color: 'rgb(34, 211, 238)',
+                            bgcolor: 'rgba(var(--accent-gold-rgb), 0.2)',
+                            color: 'var(--accent-gold)',
                             fontSize: '0.75rem',
                           }}
                         />
@@ -562,8 +561,8 @@ export default function SmartSearch({
                           label={`Status: ${filters.status}`}
                           size="small"
                           sx={{
-                            bgcolor: 'rgba(6, 182, 212, 0.2)',
-                            color: 'rgb(34, 211, 238)',
+                            bgcolor: 'rgba(var(--accent-gold-rgb), 0.2)',
+                            color: 'var(--accent-gold)',
                             fontSize: '0.75rem',
                           }}
                         />
@@ -573,8 +572,8 @@ export default function SmartSearch({
                           label="Date Range"
                           size="small"
                           sx={{
-                            bgcolor: 'rgba(6, 182, 212, 0.2)',
-                            color: 'rgb(34, 211, 238)',
+                            bgcolor: 'rgba(var(--accent-gold-rgb), 0.2)',
+                            color: 'var(--accent-gold)',
                             fontSize: '0.75rem',
                           }}
                         />
@@ -584,8 +583,8 @@ export default function SmartSearch({
                           label="Price Range"
                           size="small"
                           sx={{
-                            bgcolor: 'rgba(6, 182, 212, 0.2)',
-                            color: 'rgb(34, 211, 238)',
+                            bgcolor: 'rgba(var(--accent-gold-rgb), 0.2)',
+                            color: 'var(--accent-gold)',
                             fontSize: '0.75rem',
                           }}
                         />

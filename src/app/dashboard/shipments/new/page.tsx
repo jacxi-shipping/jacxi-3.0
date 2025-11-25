@@ -432,7 +432,7 @@ export default function NewShipmentPage() {
 
 	if (status === 'loading' || loadingUsers) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
 			</div>
 		);
@@ -441,21 +441,21 @@ export default function NewShipmentPage() {
 	const role = session?.user?.role;
 	if (!session || role !== 'admin') {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center py-12 px-4">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center py-12 px-4">
 				<motion.div
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.5 }}
 					className="max-w-md w-full"
 				>
-					<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-red-500/30 p-8 text-center">
+					<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-red-500/30 p-8 text-center">
 						<AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
 						<h2 className="text-2xl font-bold text-white mb-2">Access Restricted</h2>
 						<p className="text-white/70 mb-6">
 							Only administrators can create and assign shipments to users.
 						</p>
 						<Link href="/dashboard">
-							<Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6]">
+							<Button className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]">
 								Go to Dashboard
 							</Button>
 						</Link>
@@ -468,9 +468,9 @@ export default function NewShipmentPage() {
 	return (
 		<>
 			{/* Header */}
-			<Section className="relative bg-[#020817] py-6 sm:py-12 lg:py-16 overflow-hidden">
+			<Section className="relative bg-[var(--text-primary)] py-6 sm:py-12 lg:py-16 overflow-hidden">
 				{/* Background gradient */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 
 				{/* Subtle geometric grid pattern */}
 				<div className="absolute inset-0 opacity-[0.03]">
@@ -509,7 +509,7 @@ export default function NewShipmentPage() {
 			</Section>
 
 			{/* Form */}
-			<Section className="bg-[#020817] py-6 sm:py-12">
+			<Section className="bg-[var(--text-primary)] py-6 sm:py-12">
 				<div className="max-w-4xl mx-auto px-4 sm:px-0">
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 md:space-y-8">
 						{/* User Assignment - Admin Only */}
@@ -517,10 +517,10 @@ export default function NewShipmentPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6 }}
-							className="relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-4 sm:p-6 md:p-8"
+							className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-4 sm:p-6 md:p-8"
 						>
 							<div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-								<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#020817] border border-cyan-500/40 flex items-center justify-center flex-shrink-0">
+								<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[var(--text-primary)] border border-cyan-500/40 flex items-center justify-center flex-shrink-0">
 									<User className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
 								</div>
 								<div className="min-w-0 flex-1">
@@ -536,13 +536,13 @@ export default function NewShipmentPage() {
 								<select
 									id="userId"
 									{...register('userId')}
-									className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all ${
+									className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all ${
 										errors.userId ? 'border-red-500/50' : 'border-cyan-500/30'
 									}`}
 								>
-									<option value="" className="bg-[#020817]">Select a user...</option>
+									<option value="" className="bg-[var(--text-primary)]">Select a user...</option>
 									{users.map((user) => (
-										<option key={user.id} value={user.id} className="bg-[#020817]">
+										<option key={user.id} value={user.id} className="bg-[var(--text-primary)]">
 											{user.name || user.email} {user.email !== user.name ? `(${user.email})` : ''}
 										</option>
 									))}
@@ -558,7 +558,7 @@ export default function NewShipmentPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.05 }}
-							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 						>
 							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Shipment Status</h2>
 							<div className="space-y-4">
@@ -612,7 +612,7 @@ export default function NewShipmentPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.1 }}
-							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 						>
 							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Vehicle Information</h2>
 							<div className="space-y-4">
@@ -623,19 +623,19 @@ export default function NewShipmentPage() {
 									<select
 										id="vehicleType"
 										{...register('vehicleType')}
-										className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all ${
+										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all ${
 											errors.vehicleType ? 'border-red-500/50' : 'border-cyan-500/30'
 										}`}
 									>
-										<option value="" className="bg-[#020817]">Select vehicle type</option>
-										<option value="sedan" className="bg-[#020817]">Sedan</option>
-										<option value="suv" className="bg-[#020817]">SUV</option>
-										<option value="truck" className="bg-[#020817]">Truck</option>
-										<option value="motorcycle" className="bg-[#020817]">Motorcycle</option>
-										<option value="van" className="bg-[#020817]">Van</option>
-										<option value="pickup" className="bg-[#020817]">Pickup Truck</option>
-										<option value="luxury" className="bg-[#020817]">Luxury Vehicle</option>
-										<option value="commercial" className="bg-[#020817]">Commercial Vehicle</option>
+										<option value="" className="bg-[var(--text-primary)]">Select vehicle type</option>
+										<option value="sedan" className="bg-[var(--text-primary)]">Sedan</option>
+										<option value="suv" className="bg-[var(--text-primary)]">SUV</option>
+										<option value="truck" className="bg-[var(--text-primary)]">Truck</option>
+										<option value="motorcycle" className="bg-[var(--text-primary)]">Motorcycle</option>
+										<option value="van" className="bg-[var(--text-primary)]">Van</option>
+										<option value="pickup" className="bg-[var(--text-primary)]">Pickup Truck</option>
+										<option value="luxury" className="bg-[var(--text-primary)]">Luxury Vehicle</option>
+										<option value="commercial" className="bg-[var(--text-primary)]">Commercial Vehicle</option>
 									</select>
 									{errors.vehicleType && (
 										<p className="mt-2 text-sm text-red-400">{errors.vehicleType.message}</p>
@@ -652,7 +652,7 @@ export default function NewShipmentPage() {
 											id="vehicleMake"
 											{...register('vehicleMake')}
 											placeholder="e.g., Toyota, Honda"
-											className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+											className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
 										/>
 									</div>
 									<div>
@@ -664,7 +664,7 @@ export default function NewShipmentPage() {
 											id="vehicleModel"
 											{...register('vehicleModel')}
 											placeholder="e.g., Camry, Accord"
-											className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+											className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
 										/>
 									</div>
 								</div>
@@ -681,7 +681,7 @@ export default function NewShipmentPage() {
 											placeholder="e.g., 2020"
 											min="1900"
 											max={new Date().getFullYear() + 1}
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+											className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 												errors.vehicleYear ? 'border-red-500/50' : 'border-cyan-500/30'
 											}`}
 										/>
@@ -700,7 +700,7 @@ export default function NewShipmentPage() {
 												{...register('vehicleVIN')}
 												placeholder="Vehicle Identification Number"
 												maxLength={17}
-												className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+												className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 													errors.vehicleVIN ? 'border-red-500/50' : 'border-cyan-500/30'
 												}`}
 											/>
@@ -744,7 +744,7 @@ export default function NewShipmentPage() {
 											id="vehicleColor"
 											{...register('vehicleColor')}
 											placeholder="e.g., Blue, Red"
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+											className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 												errors.vehicleColor ? 'border-red-500/50' : 'border-cyan-500/30'
 											}`}
 										/>
@@ -761,7 +761,7 @@ export default function NewShipmentPage() {
 											id="lotNumber"
 											{...register('lotNumber')}
 											placeholder="e.g., LOT12345"
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+											className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 												errors.lotNumber ? 'border-red-500/50' : 'border-cyan-500/30'
 											}`}
 										/>
@@ -779,7 +779,7 @@ export default function NewShipmentPage() {
 												id="auctionName"
 												{...register('auctionName')}
 												placeholder="e.g., Copart, IAA"
-												className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+												className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 													errors.auctionName ? 'border-red-500/50' : 'border-cyan-500/30'
 												}`}
 											/>
@@ -797,7 +797,7 @@ export default function NewShipmentPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.15 }}
-							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 						>
 							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Vehicle Details</h2>
 							<div className="space-y-6">
@@ -884,7 +884,7 @@ export default function NewShipmentPage() {
 										<select
 											id="titleStatus"
 											{...register('titleStatus')}
-											className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+											className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
 										>
 											<option value="">Select title status</option>
 											<option value="PENDING">Pending</option>
@@ -917,7 +917,7 @@ export default function NewShipmentPage() {
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ duration: 0.6, delay: 0.2 }}
-								className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+								className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 							>
 								<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Shipping Information <span className="text-red-400">*</span></h2>
 							<div className="space-y-4">
@@ -931,7 +931,7 @@ export default function NewShipmentPage() {
 											id="trackingNumber"
 											{...register('trackingNumber')}
 											placeholder="e.g., UETU6059142"
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+											className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 												errors.trackingNumber ? 'border-red-500/50' : 'border-cyan-500/30'
 											}`}
 										/>
@@ -965,7 +965,7 @@ export default function NewShipmentPage() {
 
 								{trackingDetails && (
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-										<div className="rounded-lg border border-cyan-500/30 bg-[#020817]/60 p-4">
+										<div className="rounded-lg border border-cyan-500/30 bg-[var(--text-primary)]/60 p-4">
 											<h3 className="text-lg font-semibold text-white mb-3">Carrier Summary</h3>
 											<dl className="space-y-2 text-sm text-white/70">
 												<div className="flex items-start justify-between gap-4">
@@ -990,11 +990,11 @@ export default function NewShipmentPage() {
 												</div>
 											</dl>
 										</div>
-										<div className="rounded-lg border border-cyan-500/30 bg-[#020817]/60 p-4">
+										<div className="rounded-lg border border-cyan-500/30 bg-[var(--text-primary)]/60 p-4">
 											<h3 className="text-lg font-semibold text-white mb-3">Latest Milestones</h3>
 											<div className="space-y-3">
 												{trackingDetails.events.slice(0, 3).map((event) => (
-													<div key={event.id} className="rounded-md border border-cyan-500/20 bg-[#020817]/70 px-3 py-2">
+													<div key={event.id} className="rounded-md border border-cyan-500/20 bg-[var(--text-primary)]/70 px-3 py-2">
 														<p className="text-sm font-semibold text-white">{event.status}</p>
 														<p className="text-xs text-white/60">{event.location || 'Unknown location'}</p>
 														{event.timestamp && (
@@ -1024,7 +1024,7 @@ export default function NewShipmentPage() {
 										id="origin"
 										{...register('origin')}
 										placeholder="e.g., Los Angeles, CA, USA"
-										className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 											errors.origin ? 'border-red-500/50' : 'border-cyan-500/30'
 										}`}
 									/>
@@ -1042,7 +1042,7 @@ export default function NewShipmentPage() {
 										id="destination"
 										{...register('destination')}
 										placeholder="e.g., Kabul, Afghanistan"
-										className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 											errors.destination ? 'border-red-500/50' : 'border-cyan-500/30'
 										}`}
 									/>
@@ -1062,7 +1062,7 @@ export default function NewShipmentPage() {
 											id="weight"
 											{...register('weight')}
 											placeholder="e.g., 3500"
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+											className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 												errors.weight ? 'border-red-500/50' : 'border-cyan-500/30'
 											}`}
 										/>
@@ -1080,7 +1080,7 @@ export default function NewShipmentPage() {
 											{...register('dimensions')}
 											placeholder="e.g., 180 x 70 x 60 inches"
 											maxLength={100}
-											className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+											className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 												errors.dimensions ? 'border-red-500/50' : 'border-cyan-500/30'
 											}`}
 										/>
@@ -1100,7 +1100,7 @@ export default function NewShipmentPage() {
 										rows={4}
 										placeholder="Any special handling or delivery instructions..."
 										maxLength={1000}
-										className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 resize-none ${
+										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 resize-none ${
 											errors.specialInstructions ? 'border-red-500/50' : 'border-cyan-500/30'
 										}`}
 									/>
@@ -1117,10 +1117,10 @@ export default function NewShipmentPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.3 }}
-							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 						>
 							<div className="flex items-center gap-3 mb-6">
-								<div className="w-10 h-10 rounded-xl bg-[#020817] border border-cyan-500/40 flex items-center justify-center">
+								<div className="w-10 h-10 rounded-xl bg-[var(--text-primary)] border border-cyan-500/40 flex items-center justify-center">
 									<ImageIcon className="w-5 h-5 text-cyan-400" />
 								</div>
 								<div>
@@ -1133,7 +1133,7 @@ export default function NewShipmentPage() {
 							<div className="space-y-4">
 								<label
 									htmlFor="container-photos"
-									className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-cyan-500/30 rounded-lg bg-[#020817]/50 hover:border-cyan-500/50 hover:bg-[#020817]/70 transition-all cursor-pointer group"
+									className="relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-cyan-500/30 rounded-lg bg-[var(--text-primary)]/50 hover:border-cyan-500/50 hover:bg-[var(--text-primary)]/70 transition-all cursor-pointer group"
 								>
 									<input
 										id="container-photos"
@@ -1170,7 +1170,7 @@ export default function NewShipmentPage() {
 												key={index}
 												initial={{ opacity: 0, scale: 0.8 }}
 												animate={{ opacity: 1, scale: 1 }}
-												className="relative group aspect-square rounded-lg overflow-hidden border border-cyan-500/30 bg-[#020817]"
+												className="relative group aspect-square rounded-lg overflow-hidden border border-cyan-500/30 bg-[var(--text-primary)]"
 											>
 												<Image
 													src={photo}
@@ -1198,7 +1198,7 @@ export default function NewShipmentPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.6, delay: 0.4 }}
-							className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+							className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 						>
 							<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Financial Information</h2>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1212,7 +1212,7 @@ export default function NewShipmentPage() {
 										id="price"
 										{...register('price')}
 										placeholder="e.g., 1500.00"
-										className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 											errors.price ? 'border-red-500/50' : 'border-cyan-500/30'
 										}`}
 									/>
@@ -1230,7 +1230,7 @@ export default function NewShipmentPage() {
 										id="insuranceValue"
 										{...register('insuranceValue')}
 										placeholder="e.g., 30000.00"
-										className={`w-full px-4 py-3 bg-[#020817] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
+										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
 											errors.insuranceValue ? 'border-red-500/50' : 'border-cyan-500/30'
 										}`}
 									/>
@@ -1275,7 +1275,7 @@ export default function NewShipmentPage() {
 							<Button
 								type="submit"
 								disabled={isSubmitting}
-								className="w-full sm:w-auto bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-lg shadow-cyan-500/30"
+								className="w-full sm:w-auto bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-lg shadow-cyan-500/30"
 							>
 								{isSubmitting ? 'Creating...' : 'Create Shipment'}
 							</Button>

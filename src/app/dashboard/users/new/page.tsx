@@ -26,7 +26,7 @@ export default function CreateUserPage() {
 
 	if (status === 'loading') {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
 			</div>
 		);
@@ -36,8 +36,8 @@ export default function CreateUserPage() {
 	if (!session || role !== 'admin') {
 		return (
 			<>
-				<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-					<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+				<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
+					<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 					<div className="relative z-10 max-w-2xl mx-auto text-center">
 						<AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
 						<h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Access Restricted</h1>
@@ -45,7 +45,7 @@ export default function CreateUserPage() {
 							Only administrators can create user accounts.
 						</p>
 						<Link href="/dashboard">
-							<Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6]">
+							<Button className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]">
 								Go to Dashboard
 							</Button>
 						</Link>
@@ -113,8 +113,8 @@ export default function CreateUserPage() {
 	if (success) {
 		return (
 			<>
-				<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden min-h-screen flex items-center">
-					<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+				<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden min-h-screen flex items-center">
+					<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 					<div className="absolute inset-0 opacity-[0.03]">
 						<svg className="w-full h-full" preserveAspectRatio="none">
 							<defs>
@@ -132,7 +132,7 @@ export default function CreateUserPage() {
 						transition={{ duration: 0.5 }}
 						className="relative z-10 max-w-md w-full mx-auto"
 					>
-						<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-green-500/30 p-8 sm:p-10 text-center">
+						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-green-500/30 p-8 sm:p-10 text-center">
 							<motion.div
 								initial={{ scale: 0 }}
 								animate={{ scale: 1 }}
@@ -156,9 +156,9 @@ export default function CreateUserPage() {
 	return (
 		<>
 			{/* Header */}
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
+			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
 				{/* Background gradient */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 
 				{/* Subtle geometric grid pattern */}
 				<div className="absolute inset-0 opacity-[0.03]">
@@ -197,14 +197,14 @@ export default function CreateUserPage() {
 			</Section>
 
 			{/* Form */}
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-2xl mx-auto">
 					{/* Main Card */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6 }}
-						className="relative rounded-2xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-10 shadow-lg shadow-cyan-500/10"
+						className="relative rounded-2xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-10 shadow-lg shadow-cyan-500/10"
 					>
 						{/* Glowing border effect */}
 						<div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 opacity-50" />
@@ -216,7 +216,7 @@ export default function CreateUserPage() {
 									initial={{ scale: 0 }}
 									animate={{ scale: 1 }}
 									transition={{ duration: 0.5, delay: 0.2 }}
-									className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[#020817] border border-cyan-500/40 mb-4"
+									className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[var(--text-primary)] border border-cyan-500/40 mb-4"
 								>
 									<div className="absolute inset-0 rounded-xl bg-cyan-500/10 blur-md" />
 									<UserPlus className="relative w-8 h-8 text-cyan-400" />
@@ -255,7 +255,7 @@ export default function CreateUserPage() {
 											value={formData.name}
 											onChange={handleChange}
 											required
-											className="w-full pl-12 pr-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+											className="w-full pl-12 pr-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
 											placeholder="Enter full name"
 										/>
 									</div>
@@ -279,7 +279,7 @@ export default function CreateUserPage() {
 											value={formData.email}
 											onChange={handleChange}
 											required
-											className="w-full pl-12 pr-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+											className="w-full pl-12 pr-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
 											placeholder="Enter email address"
 										/>
 									</div>
@@ -303,7 +303,7 @@ export default function CreateUserPage() {
 											value={formData.password}
 											onChange={handleChange}
 											required
-											className="w-full pl-12 pr-12 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+											className="w-full pl-12 pr-12 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
 											placeholder="Enter password (min. 6 characters)"
 										/>
 										<button
@@ -334,7 +334,7 @@ export default function CreateUserPage() {
 											value={formData.confirmPassword}
 											onChange={handleChange}
 											required
-											className="w-full pl-12 pr-12 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+											className="w-full pl-12 pr-12 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
 											placeholder="Confirm password"
 										/>
 										<button
@@ -367,7 +367,7 @@ export default function CreateUserPage() {
 									<Button
 										type="submit"
 										disabled={isLoading}
-										className="w-full sm:w-auto group relative overflow-hidden bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 py-3 text-base font-semibold"
+										className="w-full sm:w-auto group relative overflow-hidden bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 py-3 text-base font-semibold"
 									>
 										<span className="relative z-10 flex items-center justify-center gap-2">
 											{isLoading ? (

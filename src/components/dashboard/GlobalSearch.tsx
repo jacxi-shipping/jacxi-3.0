@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { 
@@ -42,11 +42,11 @@ export default function GlobalSearch() {
   }, []);
 
   // Save to recent searches
-  const saveToRecent = (search: string) => {
+  const saveToRecent = useCallback((search: string) => {
     const updated = [search, ...recentSearches.filter(s => s !== search)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem('recentSearches', JSON.stringify(updated));
-  };
+  }, [recentSearches]);
 
   // Clear recent searches
   const clearRecent = () => {
@@ -154,12 +154,12 @@ export default function GlobalSearch() {
     }
   };
 
-  const handleSelect = (result: SearchResult) => {
+  const handleSelect = useCallback((result: SearchResult) => {
     saveToRecent(result.title);
     setIsOpen(false);
     setQuery('');
     router.push(result.link);
-  };
+  }, [router, saveToRecent]);
 
   const handleRecentClick = (search: string) => {
     setQuery(search);
@@ -184,7 +184,7 @@ export default function GlobalSearch() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, results, selectedIndex]);
+  }, [isOpen, results, selectedIndex, handleSelect]);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -232,7 +232,7 @@ export default function GlobalSearch() {
                 initial={{ opacity: 0, scale: 0.95, y: -20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                className="w-full max-w-2xl bg-[#0a1628] border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden"
+                className="w-full max-w-2xl bg-[var(--text-primary)] border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden"
               >
                 {/* Search Input */}
                 <div className="flex items-center gap-3 p-4 border-b border-white/10">

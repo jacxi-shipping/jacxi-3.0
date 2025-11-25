@@ -298,7 +298,7 @@ export default function InvoiceDetailPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
 			</div>
 		);
@@ -306,7 +306,7 @@ export default function InvoiceDetailPage() {
 
 	if (!invoice) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="text-center">
 					<p className="text-white/70 mb-4">Invoice not found</p>
 					<Link href="/dashboard/invoices">
@@ -320,7 +320,7 @@ export default function InvoiceDetailPage() {
 	const getStatusColor = (status: string, overdue: boolean) => {
 		if (status === 'PAID') return 'bg-green-500/20 text-green-400 border-green-500/30';
 		if (overdue || status === 'OVERDUE') return 'bg-red-500/20 text-red-400 border-red-500/30';
-		if (status === 'SENT') return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+		if (status === 'SENT') return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
 		return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
 	};
 
@@ -329,8 +329,8 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">
 					<svg className="w-full h-full" preserveAspectRatio="none">
 						<defs>
@@ -380,22 +380,22 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 				</div>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-7xl mx-auto space-y-8">
 					{/* Invoice Details */}
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
+						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
 							<p className="text-sm text-white/70 mb-2">Exchange Rate</p>
 							<p className="text-2xl font-bold text-cyan-400">{invoice.exchangeRate.toFixed(4)}</p>
 							<p className="text-xs text-white/50 mt-1">USD to AED</p>
 						</div>
-						<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
+						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
 							<p className="text-sm text-white/70 mb-2">Due Date</p>
 							<p className="text-lg font-semibold text-white">
 								{invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'Not set'}
 							</p>
 						</div>
-						<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
+						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
 							<p className="text-sm text-white/70 mb-2">Paid Date</p>
 							<p className="text-lg font-semibold text-white">
 								{invoice.paidDate ? new Date(invoice.paidDate).toLocaleDateString() : 'Not paid'}
@@ -404,11 +404,11 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 					</motion.div>
 
 					{/* Items Table */}
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8">
+					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8">
 						<h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Itemized Breakdown</h2>
 
 						{/* Desktop table */}
-						<div className="hidden lg:block overflow-hidden rounded-xl border border-cyan-500/20 bg-[#020817]/60 shadow-inner shadow-cyan-500/10">
+						<div className="hidden lg:block overflow-hidden rounded-xl border border-cyan-500/20 bg-[var(--text-primary)]/60 shadow-inner shadow-cyan-500/10">
 							<table className="min-w-full table-fixed">
 								<thead className="bg-gradient-to-r from-cyan-500/20 via-cyan-500/10 to-transparent">
 									<tr className="text-left text-xs font-semibold uppercase tracking-wider text-white/70">
@@ -457,7 +457,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 						{/* Mobile cards */}
 						<div className="space-y-4 lg:hidden">
 							{invoice.items.map((item) => (
-								<div key={item.id} className="rounded-xl border border-cyan-500/20 bg-[#020817]/80 p-4 shadow-lg shadow-cyan-500/10">
+								<div key={item.id} className="rounded-xl border border-cyan-500/20 bg-[var(--text-primary)]/80 p-4 shadow-lg shadow-cyan-500/10">
 									<div className="flex items-center justify-between gap-4">
 										<div>
 											<p className="font-semibold text-white">{item.vin}</p>
@@ -506,7 +506,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 
 					{/* Totals */}
 					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
+						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
 							<div className="flex items-center justify-between mb-4">
 								<span className="text-sm font-medium text-white/70">Subtotal (USD)</span>
 								<span className="text-xl font-bold text-white">${invoice.subtotalUSD.toFixed(2)}</span>
@@ -528,7 +528,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 						</div>
 
 						{/* Payment Details */}
-						<div className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
+						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6">
 							<div className="flex items-center justify-between mb-4">
 								<h3 className="text-lg font-bold text-white">Payment Information</h3>
 								{!showWireDetailsForm && (
@@ -549,13 +549,13 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 										onChange={(e) => setWireDetails(e.target.value)}
 										placeholder="Enter wire transfer details (bank name, account number, routing number, etc.)"
 										rows={6}
-										className="w-full px-4 py-3 bg-[#020817] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
+										className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
 									/>
 									<div className="flex gap-2">
 										<Button
 											onClick={handleUpdateWireDetails}
 											disabled={isUpdating}
-											className="bg-[#00bfff] text-white hover:bg-[#00a8e6]"
+											className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]"
 										>
 											Save
 										</Button>
@@ -574,7 +574,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 								</div>
 							) : invoice.wireTransferDetails ? (
 								<div className="space-y-3">
-									<div className="p-4 rounded-lg bg-[#020817]/50 border border-cyan-500/20">
+									<div className="p-4 rounded-lg bg-[var(--text-primary)]/50 border border-cyan-500/20">
 										<p className="text-sm text-white/70 mb-2">Wire Transfer Details</p>
 										<p className="text-sm text-white whitespace-pre-wrap">{invoice.wireTransferDetails}</p>
 									</div>

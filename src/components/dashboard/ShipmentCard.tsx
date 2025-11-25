@@ -1,8 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { Visibility, ArrowForward } from '@mui/icons-material';
-import { Card, CardContent, Box, Typography, Chip, LinearProgress, Button, Fade } from '@mui/material';
+import { ArrowForward } from '@mui/icons-material';
+import { Box, Typography, Chip, LinearProgress, Button, Slide } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 type ShipmentCardProps = {
@@ -20,31 +20,35 @@ type StatusColors = {
 	bg: string;
 	text: string;
 	border: string;
+	glow: string;
+};
+
+const neutralStatus: StatusColors = {
+	bg: 'rgba(var(--panel-rgb), 0.35)',
+	text: 'var(--text-primary)',
+	border: 'var(--border)',
+	glow: 'rgba(var(--accent-gold-rgb), 0.2)',
 };
 
 const statusColors: Record<string, StatusColors> = {
-	'IN_TRANSIT': { bg: 'rgba(59, 130, 246, 0.1)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.3)' },
-	'IN_TRANSIT_OCEAN': { bg: 'rgba(59, 130, 246, 0.1)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.3)' },
-	'AT_PORT': { bg: 'rgba(139, 92, 246, 0.1)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.3)' },
-	'DELIVERED': { bg: 'rgba(34, 197, 94, 0.1)', text: 'rgb(74, 222, 128)', border: 'rgba(34, 197, 94, 0.3)' },
-	'PICKUP_SCHEDULED': { bg: 'rgba(245, 158, 11, 0.1)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.3)' },
-	'PICKUP_COMPLETED': { bg: 'rgba(245, 158, 11, 0.1)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.3)' },
-	'PENDING': { bg: 'rgba(245, 158, 11, 0.1)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.3)' },
-	'QUOTE_REQUESTED': { bg: 'rgba(245, 158, 11, 0.1)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.3)' },
-	'QUOTE_APPROVED': { bg: 'rgba(245, 158, 11, 0.1)', text: 'rgb(251, 191, 36)', border: 'rgba(245, 158, 11, 0.3)' },
-	'LOADED_ON_VESSEL': { bg: 'rgba(59, 130, 246, 0.1)', text: 'rgb(96, 165, 250)', border: 'rgba(59, 130, 246, 0.3)' },
-	'ARRIVED_AT_DESTINATION': { bg: 'rgba(139, 92, 246, 0.1)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.3)' },
-	'CUSTOMS_CLEARANCE': { bg: 'rgba(139, 92, 246, 0.1)', text: 'rgb(167, 139, 250)', border: 'rgba(139, 92, 246, 0.3)' },
-	'OUT_FOR_DELIVERY': { bg: 'rgba(6, 182, 212, 0.1)', text: 'rgb(34, 211, 238)', border: 'rgba(6, 182, 212, 0.3)' },
-	'DELAYED': { bg: 'rgba(239, 68, 68, 0.1)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.3)' },
-	'CANCELLED': { bg: 'rgba(239, 68, 68, 0.1)', text: 'rgb(248, 113, 113)', border: 'rgba(239, 68, 68, 0.3)' },
+	'IN_TRANSIT': neutralStatus,
+	'IN_TRANSIT_OCEAN': neutralStatus,
+	'AT_PORT': neutralStatus,
+	'DELIVERED': neutralStatus,
+	'PICKUP_SCHEDULED': neutralStatus,
+	'PICKUP_COMPLETED': neutralStatus,
+	'PENDING': neutralStatus,
+	'QUOTE_REQUESTED': neutralStatus,
+	'QUOTE_APPROVED': neutralStatus,
+	'LOADED_ON_VESSEL': neutralStatus,
+	'ARRIVED_AT_DESTINATION': neutralStatus,
+	'CUSTOMS_CLEARANCE': neutralStatus,
+	'OUT_FOR_DELIVERY': neutralStatus,
+	'DELAYED': { bg: 'rgba(var(--error-rgb), 0.15)', text: 'var(--error)', border: 'var(--error)', glow: 'rgba(var(--error-rgb), 0.3)' },
+	'CANCELLED': { bg: 'rgba(var(--error-rgb), 0.15)', text: 'var(--error)', border: 'var(--error)', glow: 'rgba(var(--error-rgb), 0.3)' },
 };
 
-const defaultColors: StatusColors = { 
-	bg: 'rgba(245, 158, 11, 0.1)', 
-	text: 'rgb(251, 191, 36)', 
-	border: 'rgba(245, 158, 11, 0.3)' 
-};
+const defaultColors: StatusColors = neutralStatus;
 
 export default function ShipmentCard({
 	id,
@@ -65,185 +69,163 @@ export default function ShipmentCard({
 	}, [delay]);
 
 	return (
-		<Fade in={isVisible} timeout={500}>
-			<Card
+		<Slide in={isVisible} direction="up" timeout={400}>
+			<Box
+				component="article"
 				sx={{
-					background: 'rgba(10, 22, 40, 0.5)',
-					backdropFilter: 'blur(8px)',
-					border: '1px solid rgba(6, 182, 212, 0.3)',
-					borderRadius: { xs: 2, sm: 3 },
-					p: { xs: 2, sm: 3, md: 4 },
-					position: 'relative',
-					overflow: 'hidden',
-					transition: 'all 0.3s ease',
-					transform: 'translateY(0)',
-					'&:hover': {
-						borderColor: 'rgba(6, 182, 212, 0.6)',
-						boxShadow: '0 8px 16px rgba(6, 182, 212, 0.2)',
-						transform: 'translateY(-2px)',
-						'&::before': {
-							opacity: 1,
-						},
-					},
-					'&::before': {
-						content: '""',
-						position: 'absolute',
-						inset: 0,
-						background: 'linear-gradient(90deg, rgba(6, 182, 212, 0) 0%, rgba(6, 182, 212, 0.1) 50%, rgba(6, 182, 212, 0) 100%)',
-						opacity: 0,
-						transition: 'opacity 0.3s ease',
-					},
+					borderRadius: 2,
+					border: '1px solid var(--border)',
+					background: 'var(--panel)',
+					boxShadow: '0 16px 32px rgba(var(--text-primary-rgb),0.08)',
+					padding: 1.25,
+					display: 'flex',
+					flexDirection: 'column',
+					gap: 1.1,
+					color: 'var(--text-primary)',
 				}}
 			>
-				<CardContent sx={{ p: 0, '&:last-child': { pb: 0 }, position: 'relative', zIndex: 1 }}>
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 2 } }}>
-						{/* Header */}
-						<Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: { xs: 1, sm: 1.5 } }}>
-							<Box sx={{ flex: 1, minWidth: 0 }}>
-								<Typography
-									variant="h6"
-									sx={{
-										fontSize: { xs: '1rem', sm: '1.125rem', md: '1.25rem' },
-										fontWeight: 700,
-										color: 'white',
-										mb: { xs: 0.25, sm: 0.5 },
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{trackingNumber}
-								</Typography>
-								<Typography
-									variant="body2"
-									sx={{
-										fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-										color: 'rgba(255, 255, 255, 0.7)',
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{origin} → {destination}
-								</Typography>
-							</Box>
-							<Chip
-								label={status.replace(/_/g, ' ')}
-								size="small"
-								sx={{
-									fontSize: { xs: '0.625rem', sm: '0.75rem' },
-									fontWeight: 500,
-									height: 'auto',
-									py: 0.5,
-									bgcolor: colors.bg,
-									color: colors.text,
-									border: `1px solid ${colors.border}`,
-									flexShrink: 0,
-								}}
-							/>
-						</Box>
-
-						{/* Progress */}
-						<Box sx={{ mt: { xs: 0.5, sm: 1 } }}>
-							<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-								<Typography
-									variant="caption"
-									sx={{
-										fontSize: { xs: '0.625rem', sm: '0.75rem' },
-										color: 'rgba(255, 255, 255, 0.6)',
-										fontWeight: 500,
-									}}
-								>
-									Progress
-								</Typography>
-								<Typography
-									variant="caption"
-									sx={{
-										fontSize: { xs: '0.625rem', sm: '0.75rem' },
-										color: 'rgb(34, 211, 238)',
-										fontWeight: 600,
-									}}
-								>
-									{progress}%
-								</Typography>
-							</Box>
-							<LinearProgress
-								variant="determinate"
-								value={progress}
-								sx={{
-									height: { xs: 6, sm: 8 },
-									borderRadius: 1,
-									bgcolor: 'rgba(6, 182, 212, 0.1)',
-									'& .MuiLinearProgress-bar': {
-										bgcolor: 'rgb(34, 211, 238)',
-										borderRadius: 1,
-									},
-								}}
-							/>
-						</Box>
-
-						{/* Footer */}
-						<Box
+				<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+					<Box sx={{ minWidth: 0 }}>
+						<Typography
 							sx={{
-								display: 'flex',
-								flexDirection: { xs: 'column', sm: 'row' },
-								alignItems: { xs: 'flex-start', sm: 'center' },
-								justifyContent: 'space-between',
-								gap: { xs: 1, sm: 1.5 },
-								pt: { xs: 1.5, sm: 2 },
-								borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+								fontSize: '0.8rem',
+								fontWeight: 600,
+								color: 'var(--text-primary)',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
 							}}
 						>
-							<Typography
-								variant="caption"
-								sx={{
-									fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
-									color: 'rgba(255, 255, 255, 0.6)',
-								}}
-							>
-								{estimatedDelivery ? (
-									<>ETA: {new Date(estimatedDelivery).toLocaleDateString()}</>
-								) : (
-									<>ETA: TBD</>
-								)}
-							</Typography>
-							<Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
-								<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none' }}>
-									<Button
-										variant="outlined"
-										size="small"
-										endIcon={<ArrowForward sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} />}
-										startIcon={<Visibility sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} />}
-										sx={{
-											fontSize: { xs: '0.75rem', sm: '0.875rem' },
-											borderColor: 'rgba(6, 182, 212, 0.3)',
-											color: 'rgb(34, 211, 238)',
-											width: { xs: '100%', sm: 'auto' },
-											'&:hover': {
-												bgcolor: 'rgba(6, 182, 212, 0.1)',
-												borderColor: 'rgba(6, 182, 212, 0.5)',
-											},
-											'& .MuiButton-endIcon': {
-												transition: 'transform 0.2s ease',
-											},
-											'&:hover .MuiButton-endIcon': {
-												transform: 'translateX(4px)',
-											},
-										}}
-									>
-										<Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-											View Details
-										</Box>
-										<Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
-											Details
-										</Box>
-									</Button>
-								</Link>
-							</Box>
-						</Box>
+							{trackingNumber}
+						</Typography>
+						<Typography
+							sx={{
+								fontSize: '0.65rem',
+								color: 'var(--text-secondary)',
+								marginTop: 0.2,
+							}}
+						>
+							ID: {id.slice(0, 8)}
+						</Typography>
 					</Box>
-				</CardContent>
-			</Card>
-		</Fade>
+					<Chip
+						label={status.replace(/_/g, ' ')}
+						size="small"
+						sx={{
+							height: 20,
+							fontSize: '0.65rem',
+							fontWeight: 600,
+							borderColor: colors.border,
+							color: colors.text,
+							backgroundColor: colors.bg,
+						}}
+						variant="outlined"
+					/>
+				</Box>
+
+				<Box
+					sx={{
+						display: 'grid',
+						gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+						gap: 1,
+					}}
+				>
+					<Box>
+						<Typography
+							sx={{
+								fontSize: '0.65rem',
+								textTransform: 'uppercase',
+								letterSpacing: '0.18em',
+								color: 'var(--text-secondary)',
+								marginBottom: 0.35,
+							}}
+						>
+							Origin
+						</Typography>
+						<Typography
+							sx={{
+								fontSize: '0.78rem',
+								fontWeight: 500,
+								color: 'var(--text-primary)',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{origin}
+						</Typography>
+					</Box>
+					<Box>
+						<Typography
+							sx={{
+								fontSize: '0.65rem',
+								textTransform: 'uppercase',
+								letterSpacing: '0.18em',
+								color: 'var(--text-secondary)',
+								marginBottom: 0.35,
+							}}
+						>
+							Destination
+						</Typography>
+						<Typography
+							sx={{
+								fontSize: '0.78rem',
+								fontWeight: 500,
+								color: 'var(--text-primary)',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
+							}}
+						>
+							{destination}
+						</Typography>
+					</Box>
+				</Box>
+
+				<Box>
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+						<Typography sx={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>Progress</Typography>
+						<Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: colors.text }}>{progress}%</Typography>
+					</Box>
+					<LinearProgress
+						variant="determinate"
+						value={progress}
+						aria-label={`Shipment ${trackingNumber} progress`}
+						sx={{
+							height: 4,
+							borderRadius: 2,
+							backgroundColor: 'rgba(var(--panel-rgb), 0.8)',
+							'& .MuiLinearProgress-bar': {
+								backgroundColor: colors.text,
+								borderRadius: 2,
+							},
+						}}
+					/>
+				</Box>
+
+				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+					<Typography sx={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>
+						{estimatedDelivery ? `ETA ${new Date(estimatedDelivery).toLocaleDateString()}` : 'ETA pending'}
+					</Typography>
+					<Link href={`/dashboard/tracking/${id}`} style={{ textDecoration: 'none' }}>
+						<Button
+							variant="text"
+							size="small"
+							endIcon={<ArrowForward sx={{ fontSize: 14 }} />}
+							sx={{
+								fontSize: '0.7rem',
+								fontWeight: 600,
+								textTransform: 'none',
+								color: 'var(--accent-gold)',
+								minWidth: 0,
+								padding: 0,
+							}}
+						>
+							Track
+						</Button>
+					</Link>
+				</Box>
+			</Box>
+		</Slide>
 	);
 }

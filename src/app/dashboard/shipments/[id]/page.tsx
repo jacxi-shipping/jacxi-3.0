@@ -76,7 +76,7 @@ interface Shipment {
 }
 
 const statusColors: Record<string, { text: string; bg: string; ring: string }> = {
-  PENDING: { text: 'text-yellow-300', bg: 'bg-yellow-500/10', ring: 'ring-yellow-500/30' },
+  PENDING: { text: 'text-sky-300', bg: 'bg-sky-500/10', ring: 'ring-sky-500/30' },
   QUOTE_REQUESTED: { text: 'text-sky-300', bg: 'bg-sky-500/10', ring: 'ring-sky-500/30' },
   QUOTE_APPROVED: { text: 'text-green-300', bg: 'bg-green-500/10', ring: 'ring-green-500/30' },
   PICKUP_SCHEDULED: { text: 'text-blue-300', bg: 'bg-blue-500/10', ring: 'ring-blue-500/30' },
@@ -416,9 +416,9 @@ export default function ShipmentDetailPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[#020817] flex items-center justify-center">
-          <div className="text-center space-y-4 text-white/70">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
+        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
+          <div className="text-center space-y-4 text-[var(--text-secondary)]">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]" />
             <p>Loading shipment details...</p>
           </div>
         </div>
@@ -429,12 +429,12 @@ export default function ShipmentDetailPage() {
   if (error || !shipment) {
     return (
       <ProtectedRoute>
-        <Section className="bg-[#020817] min-h-screen flex items-center justify-center">
+        <Section className="bg-[var(--background)] min-h-screen flex items-center justify-center">
           <div className="max-w-md text-center space-y-4">
-            <h2 className="text-xl font-semibold text-white">Shipment unavailable</h2>
-            <p className="text-white/70">{error || 'We could not find this shipment. It may have been removed or does not exist.'}</p>
+            <h2 className="text-xl font-semibold text-[var(--text-primary)]">Shipment unavailable</h2>
+            <p className="text-[var(--text-secondary)]">{error || 'We could not find this shipment. It may have been removed or does not exist.'}</p>
             <Link href="/dashboard/shipments">
-              <Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6]">Back to Shipments</Button>
+              <Button className="bg-[var(--accent-gold)] text-[var(--background)] hover:bg-[var(--accent-gold)]">Back to Shipments</Button>
             </Link>
           </div>
         </Section>
@@ -443,24 +443,14 @@ export default function ShipmentDetailPage() {
   }
 
   const statusStyle = statusStyles[shipment.status] || {
-    text: 'text-white',
-    bg: 'bg-white/10',
+    text: 'text-[var(--text-primary)]',
+    bg: 'bg-[rgba(var(--panel-rgb),0.55)]',
     ring: 'ring-white/20',
   };
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#020817]">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-        <div className="absolute inset-0 -z-10 opacity-[0.04]">
-          <svg className="h-full w-full" preserveAspectRatio="none">
-            <pattern id="shipment-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="0.5" />
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#shipment-grid)" />
-          </svg>
-        </div>
-
+      <div className="light-surface min-h-screen bg-[var(--background)]">
         <div className="relative">
           <Section className="pb-4 pt-4 sm:pt-6">
             <div className="flex flex-col gap-4 sm:gap-6">
@@ -473,8 +463,8 @@ export default function ShipmentDetailPage() {
                     </Button>
                   </Link>
                   <div className="min-w-0 flex-1">
-                    <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold text-white truncate">Shipment {shipment.trackingNumber}</h1>
-                    <p className="text-white/60 text-xs sm:text-sm line-clamp-1">
+                    <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold text-[var(--text-primary)] truncate">Shipment {shipment.trackingNumber}</h1>
+                    <p className="text-[var(--text-secondary)] text-xs sm:text-sm line-clamp-1">
                       Detailed view of the shipment lifecycle, financials, and media.
                     </p>
                   </div>
@@ -491,7 +481,7 @@ export default function ShipmentDetailPage() {
                         Delete
                       </Button>
                       <Link href={`/dashboard/shipments/${shipment.id}/edit`} className="flex-1 sm:flex-initial">
-                        <Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6] w-full text-xs sm:text-sm">
+                        <Button className="bg-[var(--accent-gold)] text-[var(--background)] hover:bg-[var(--accent-gold)] w-full text-xs sm:text-sm">
                           <PenLine className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                           Edit Shipment
                         </Button>
@@ -508,7 +498,7 @@ export default function ShipmentDetailPage() {
                   transition={{ duration: 0.4 }}
                   className="lg:col-span-2 space-y-4 sm:space-y-6"
                 >
-                  <Card className="relative border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="relative border-cyan-500/10 bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader className="space-y-2 sm:space-y-3 p-4 sm:p-6">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <span
@@ -522,75 +512,75 @@ export default function ShipmentDetailPage() {
                           {formatStatus(shipment.status)}
                         </span>
                         {shipment.progress > 0 && (
-                          <span className="text-xs sm:text-sm font-medium text-white/70">
-                            Progress <span className="text-white font-semibold">{shipment.progress}%</span>
+                          <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+                            Progress <span className="text-[var(--text-primary)] font-semibold">{shipment.progress}%</span>
                           </span>
                         )}
                       </div>
-                      <CardTitle className="text-white text-base sm:text-lg md:text-xl">Current Status</CardTitle>
-                      <p className="text-xs sm:text-sm text-white/60 line-clamp-2">
+                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg md:text-xl">Current Status</CardTitle>
+                      <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2">
                         Monitor the latest milestone and location updates for this shipment.
                       </p>
                     </CardHeader>
                     <CardContent className="space-y-3 sm:space-y-5 p-4 sm:p-6">
-                      <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-white/10">
+                      <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-[rgba(var(--panel-rgb),0.55)]">
                         <div
-                          className="h-full bg-gradient-to-r from-cyan-500 to-[#00bfff] transition-all duration-500"
+                          className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)] transition-all duration-500"
                           style={{ width: `${Math.max(Math.min(shipment.progress || 0, 100), 0)}%` }}
                         />
                       </div>
                       {shipment.currentLocation && (
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-white/70">
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-secondary)]">
                           <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300 flex-shrink-0" />
-                          <span className="min-w-0">Currently located at <span className="text-white truncate inline-block max-w-[150px] sm:max-w-none align-bottom">{shipment.currentLocation}</span></span>
+                          <span className="min-w-0">Currently located at <span className="text-[var(--text-primary)] truncate inline-block max-w-[150px] sm:max-w-none align-bottom">{shipment.currentLocation}</span></span>
                         </div>
                       )}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-white/70">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
                         <div className="min-w-0">
-                          <p className="uppercase text-[10px] sm:text-xs tracking-wide text-white/40">Origin</p>
-                          <p className="text-white truncate">{shipment.origin}</p>
+                          <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Origin</p>
+                          <p className="text-[var(--text-primary)] truncate">{shipment.origin}</p>
                         </div>
                         <div className="min-w-0">
-                          <p className="uppercase text-[10px] sm:text-xs tracking-wide text-white/40">Destination</p>
-                          <p className="text-white truncate">{shipment.destination}</p>
+                          <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Destination</p>
+                          <p className="text-[var(--text-primary)] truncate">{shipment.destination}</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Vehicle Details */}
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader className="p-4 sm:p-6">
-                      <CardTitle className="text-white text-base sm:text-lg">Vehicle Details</CardTitle>
+                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg">Vehicle Details</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 sm:p-6">
                       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="min-w-0">
-                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-white/50">Vehicle Type</dt>
-                          <dd className="mt-1 text-xs sm:text-sm text-white capitalize truncate">{shipment.vehicleType}</dd>
+                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Vehicle Type</dt>
+                          <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] capitalize truncate">{shipment.vehicleType}</dd>
                         </div>
                         {shipment.vehicleMake && (
                           <div className="min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-white/50">Make</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-white truncate">{shipment.vehicleMake}</dd>
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Make</dt>
+                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] truncate">{shipment.vehicleMake}</dd>
                           </div>
                         )}
                         {shipment.vehicleModel && (
                           <div className="min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-white/50">Model</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-white truncate">{shipment.vehicleModel}</dd>
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Model</dt>
+                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] truncate">{shipment.vehicleModel}</dd>
                           </div>
                         )}
                         {shipment.vehicleYear && (
                           <div className="min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-white/50">Year</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-white">{shipment.vehicleYear}</dd>
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Year</dt>
+                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)]">{shipment.vehicleYear}</dd>
                           </div>
                         )}
                         {shipment.vehicleVIN && (
                           <div className="sm:col-span-2 min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-white/50">VIN Number</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-white/80 font-mono break-all">{shipment.vehicleVIN}</dd>
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">VIN Number</dt>
+                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] font-mono break-all">{shipment.vehicleVIN}</dd>
                           </div>
                         )}
                       </dl>
@@ -598,15 +588,15 @@ export default function ShipmentDetailPage() {
                   </Card>
 
                   {/* Vehicle Details */}
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader className="p-4 sm:p-6">
-                      <CardTitle className="text-white text-base sm:text-lg">Vehicle Details</CardTitle>
+                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg">Vehicle Details</CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 sm:p-6">
-                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm text-white/70">
+                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm text-[var(--text-secondary)]">
                         <div className="min-w-0">
-                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-white/50">Has Key</dt>
-                          <dd className="mt-1 text-white">
+                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Has Key</dt>
+                          <dd className="mt-1 text-[var(--text-primary)]">
                             {shipment.hasKey === true ? (
                               <span className="inline-flex items-center gap-1 text-green-400">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -622,13 +612,13 @@ export default function ShipmentDetailPage() {
                                 No
                               </span>
                             ) : (
-                              <span className="text-white/50">Not specified</span>
+                              <span className="text-[var(--text-secondary)]">Not specified</span>
                             )}
                           </dd>
                         </div>
                         <div>
-                          <dt className="text-xs uppercase tracking-wide text-white/50">Has Title</dt>
-                          <dd className="mt-1 text-white">
+                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Has Title</dt>
+                          <dd className="mt-1 text-[var(--text-primary)]">
                             {shipment.hasTitle === true ? (
                               <span className="inline-flex items-center gap-1 text-green-400">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -644,19 +634,19 @@ export default function ShipmentDetailPage() {
                                 No
                               </span>
                             ) : (
-                              <span className="text-white/50">Not specified</span>
+                              <span className="text-[var(--text-secondary)]">Not specified</span>
                             )}
                           </dd>
                         </div>
                         {shipment.hasTitle && shipment.titleStatus && (
                           <div>
-                            <dt className="text-xs uppercase tracking-wide text-white/50">Title Status</dt>
+                            <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Title Status</dt>
                             <dd className="mt-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                shipment.titleStatus === 'DELIVERED' 
-                                  ? 'bg-green-500/20 text-green-400' 
-                                  : 'bg-yellow-500/20 text-yellow-400'
-                              }`}>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  shipment.titleStatus === 'DELIVERED' 
+                                    ? 'bg-green-500/20 text-green-400' 
+                                    : 'bg-sky-500/20 text-sky-300'
+                                }`}>
                                 {shipment.titleStatus === 'DELIVERED' ? 'Delivered' : 'Pending'}
                               </span>
                             </dd>
@@ -664,8 +654,8 @@ export default function ShipmentDetailPage() {
                         )}
                         {shipment.vehicleAge !== null && shipment.vehicleAge !== undefined && (
                           <div>
-                            <dt className="text-xs uppercase tracking-wide text-white/50">Vehicle Age</dt>
-                            <dd className="mt-1 text-white">
+                            <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Vehicle Age</dt>
+                            <dd className="mt-1 text-[var(--text-primary)]">
                               <span className="text-cyan-400 font-semibold">{shipment.vehicleAge}</span> {shipment.vehicleAge === 1 ? 'year' : 'years'}
                             </dd>
                           </div>
@@ -675,45 +665,45 @@ export default function ShipmentDetailPage() {
                   </Card>
 
                   {/* Shipping Route */}
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader>
-                      <CardTitle className="text-white text-lg">Shipping Route</CardTitle>
+                      <CardTitle className="text-[var(--text-primary)] text-lg">Shipping Route</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-white/70">
+                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-[var(--text-secondary)]">
                         <div>
-                          <dt className="text-xs uppercase tracking-wide text-white/50">Origin</dt>
-                          <dd className="mt-1 text-white">{shipment.origin}</dd>
+                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Origin</dt>
+                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.origin}</dd>
                         </div>
                         <div>
-                          <dt className="text-xs uppercase tracking-wide text-white/50">Destination</dt>
-                          <dd className="mt-1 text-white">{shipment.destination}</dd>
+                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Destination</dt>
+                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.destination}</dd>
                         </div>
                         <div>
-                          <dt className="text-xs uppercase tracking-wide text-white/50">Weight</dt>
-                          <dd className="mt-1 text-white">{shipment.weight ? `${shipment.weight} lbs` : '-'}</dd>
+                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Weight</dt>
+                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.weight ? `${shipment.weight} lbs` : '-'}</dd>
                         </div>
                         <div>
-                          <dt className="text-xs uppercase tracking-wide text-white/50">Dimensions</dt>
-                          <dd className="mt-1 text-white">{shipment.dimensions || '-'}</dd>
+                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Dimensions</dt>
+                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.dimensions || '-'}</dd>
                         </div>
                       </dl>
                       {shipment.specialInstructions && (
-                        <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-white/80">
-                          <p className="text-xs uppercase tracking-wide text-white/50 mb-2">Special Instructions</p>
+                        <div className="mt-4 rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4 text-sm text-[var(--text-primary)]">
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)] mb-2">Special Instructions</p>
                           <p>{shipment.specialInstructions}</p>
                         </div>
                       )}
                     </CardContent>
                   </Card>
 
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader>
-                      <CardTitle className="text-white text-lg">Tracking Timeline</CardTitle>
+                      <CardTitle className="text-[var(--text-primary)] text-lg">Tracking Timeline</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       {shipment.events.length === 0 ? (
-                        <p className="rounded-lg border border-white/10 bg-white/5 py-8 text-center text-sm text-white/60">
+                        <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
                           No tracking events yet.
                         </p>
                       ) : (
@@ -731,25 +721,25 @@ export default function ShipmentDetailPage() {
                                 <div className="absolute -left-6 top-1 flex h-8 w-8 items-center justify-center">
                                   <span
                                     className={cn(
-                                      'flex h-3 w-3 items-center justify-center rounded-full border-2 text-xs font-bold text-white',
-                                      event.completed ? 'border-cyan-400 bg-cyan-400' : 'border-white/30 bg-white/10',
+                                      'flex h-3 w-3 items-center justify-center rounded-full border-2 text-xs font-bold text-[var(--text-primary)]',
+                                      event.completed ? 'border-cyan-400 bg-cyan-400' : 'border-[var(--border)] bg-[rgba(var(--panel-rgb),0.55)]',
                                     )}
                                   >
                                     {shipment.events.length - index}
                                   </span>
                                 </div>
-                                <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
                                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                                    <p className={cn('text-sm font-semibold text-white', event.completed ? 'text-white' : 'text-white/70')}>
+                                    <p className={cn('text-sm font-semibold text-[var(--text-primary)]', event.completed ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}>
                                       {formatStatus(event.status)}
                                     </p>
-                                    <p className="text-xs text-white/50">
+                                    <p className="text-xs text-[var(--text-secondary)]">
                                       {new Date(event.timestamp).toLocaleString()}
                                     </p>
                                   </div>
-                                  <p className="text-sm text-white/70">{event.location}</p>
+                                  <p className="text-sm text-[var(--text-secondary)]">{event.location}</p>
                                   {event.description && (
-                                    <p className="mt-2 text-sm text-white/60">{event.description}</p>
+                                    <p className="mt-2 text-sm text-[var(--text-secondary)]">{event.description}</p>
                                   )}
                                 </div>
                               </motion.li>
@@ -761,9 +751,9 @@ export default function ShipmentDetailPage() {
                   </Card>
 
                   {shipment.containerPhotos?.length > 0 && (
-                    <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                    <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-white text-lg">
+                        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
                           <PackageCheck className="h-5 w-5 text-cyan-300" />
                           Container Photos
                         </CardTitle>
@@ -775,7 +765,7 @@ export default function ShipmentDetailPage() {
                               key={index}
                               type="button"
                               onClick={() => openLightbox(shipment.containerPhotos, index, 'Container Photos')}
-                              className="relative aspect-square overflow-hidden rounded-lg border border-white/10 bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                              className="relative aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
                             >
                               <Image
                                 src={photo}
@@ -791,10 +781,10 @@ export default function ShipmentDetailPage() {
                     </Card>
                   )}
 
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader>
                       <div className="flex items-center justify-between gap-3">
-                        <CardTitle className="flex items-center gap-2 text-white text-lg">
+                        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
                           <ImageIcon className="h-5 w-5 text-cyan-300" />
                           Arrival Photos
                         </CardTitle>
@@ -815,7 +805,7 @@ export default function ShipmentDetailPage() {
                       {showArrivalUpload && canUploadArrivalPhotos && (
                         <label
                           htmlFor="arrival-photos"
-                          className="relative flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-cyan-500/40 bg-white/5 hover:border-cyan-500/60 hover:bg-white/10 transition-all"
+                          className="relative flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-cyan-500/40 bg-[rgba(var(--panel-rgb),0.4)] hover:border-cyan-500/60 hover:bg-[rgba(var(--panel-rgb),0.55)] transition-all"
                         >
                           <input
                             id="arrival-photos"
@@ -832,10 +822,10 @@ export default function ShipmentDetailPage() {
                             ) : (
                               <Upload className="h-8 w-8 text-cyan-300" />
                             )}
-                            <p className="text-sm text-white/70">
+                            <p className="text-sm text-[var(--text-secondary)]">
                               <span className="text-cyan-300 font-semibold">Click to upload</span> or drag and drop
                             </p>
-                            <p className="text-xs text-white/40">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
+                            <p className="text-xs text-[var(--text-secondary)]">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
                           </div>
                         </label>
                       )}
@@ -849,7 +839,7 @@ export default function ShipmentDetailPage() {
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ duration: 0.2, delay: index * 0.05 }}
                               type="button"
-                              className="relative group aspect-square overflow-hidden rounded-lg border border-white/10 bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                              className="relative group aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
                               onClick={() => openLightbox(arrivalPhotos, index, 'Arrival Photos')}
                             >
                               <Image
@@ -866,7 +856,7 @@ export default function ShipmentDetailPage() {
                                     event.stopPropagation();
                                     removeArrivalPhoto(index);
                                   }}
-                                  className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500/80 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                  className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500/80 text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100"
                                 >
                                   <X className="h-4 w-4" />
                                 </button>
@@ -875,7 +865,7 @@ export default function ShipmentDetailPage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="rounded-lg border border-white/10 bg-white/5 py-8 text-center text-sm text-white/60">
+                        <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
                           {canUploadArrivalPhotos
                             ? 'No arrival photos uploaded yet. Upload photos when the container arrives.'
                             : 'No arrival photos available.'}
@@ -891,74 +881,74 @@ export default function ShipmentDetailPage() {
                   transition={{ duration: 0.4, delay: 0.1 }}
                   className="space-y-6"
                 >
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-white text-lg">
+                      <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
                         <Wallet className="h-5 w-5 text-cyan-300" />
                         Financial Snapshot
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-sm text-white/70">
+                    <CardContent className="space-y-4 text-sm text-[var(--text-secondary)]">
                       {shipment.price && (
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-wide text-white/50">Total Price</p>
-                          <p className="text-2xl font-semibold text-white">${shipment.price.toFixed(2)}</p>
+                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Total Price</p>
+                          <p className="text-2xl font-semibold text-[var(--text-primary)]">${shipment.price.toFixed(2)}</p>
                         </div>
                       )}
                       {shipment.insuranceValue && (
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-wide text-white/50">Insurance Value</p>
-                          <p className="text-lg font-semibold text-white">${shipment.insuranceValue.toFixed(2)}</p>
+                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Insurance Value</p>
+                          <p className="text-lg font-semibold text-[var(--text-primary)]">${shipment.insuranceValue.toFixed(2)}</p>
                         </div>
                       )}
-                      <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                        <p className="text-xs uppercase tracking-wide text-white/50">Created On</p>
-                        <p className="text-sm text-white">{new Date(shipment.createdAt).toLocaleDateString()}</p>
+                      <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
+                        <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Created On</p>
+                        <p className="text-sm text-[var(--text-primary)]">{new Date(shipment.createdAt).toLocaleDateString()}</p>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-white text-lg">
+                      <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
                         <CalendarCheck className="h-5 w-5 text-cyan-300" />
                         Delivery Timeline
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4 text-sm text-white/70">
+                    <CardContent className="space-y-4 text-sm text-[var(--text-secondary)]">
                       {shipment.estimatedDelivery && (
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-wide text-white/50">Estimated Delivery</p>
-                          <p className="text-sm text-white">{new Date(shipment.estimatedDelivery).toLocaleDateString()}</p>
+                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Estimated Delivery</p>
+                          <p className="text-sm text-[var(--text-primary)]">{new Date(shipment.estimatedDelivery).toLocaleDateString()}</p>
                         </div>
                       )}
                       {shipment.actualDelivery && (
-                        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-                          <p className="text-xs uppercase tracking-wide text-white/50">Actual Delivery</p>
-                          <p className="text-sm text-white">{new Date(shipment.actualDelivery).toLocaleDateString()}</p>
+                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Actual Delivery</p>
+                          <p className="text-sm text-[var(--text-primary)]">{new Date(shipment.actualDelivery).toLocaleDateString()}</p>
                         </div>
                       )}
                     </CardContent>
                   </Card>
 
                   {isAdmin && (
-                    <Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
+                    <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
                       <CardHeader>
-                        <CardTitle className="text-white text-lg">Customer Information</CardTitle>
+                        <CardTitle className="text-[var(--text-primary)] text-lg">Customer Information</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3 text-sm text-white/70">
+                      <CardContent className="space-y-3 text-sm text-[var(--text-secondary)]">
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-white/50">Name</p>
-                          <p className="text-sm text-white">{shipment.user.name || 'N/A'}</p>
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Name</p>
+                          <p className="text-sm text-[var(--text-primary)]">{shipment.user.name || 'N/A'}</p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-white/50">Email</p>
-                          <p className="text-sm text-white">{shipment.user.email}</p>
+                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Email</p>
+                          <p className="text-sm text-[var(--text-primary)]">{shipment.user.email}</p>
                         </div>
                         {shipment.user.phone && (
                           <div>
-                            <p className="text-xs uppercase tracking-wide text-white/50">Phone</p>
-                            <p className="text-sm text-white">{shipment.user.phone}</p>
+                            <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Phone</p>
+                            <p className="text-sm text-[var(--text-primary)]">{shipment.user.phone}</p>
                           </div>
                         )}
                       </CardContent>
@@ -970,7 +960,6 @@ export default function ShipmentDetailPage() {
           </Section>
         </div>
       </div>
-
         {lightbox && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -987,15 +976,15 @@ export default function ShipmentDetailPage() {
             <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent">
               <div className="flex items-center justify-between p-4 sm:p-6">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-white/70 uppercase tracking-wider">{lightbox.title}</p>
-                  <p className="text-lg font-bold text-white mt-1">
-                    Photo {lightbox.index + 1} <span className="text-white/50">of {lightbox.images.length}</span>
+                  <p className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">{lightbox.title}</p>
+                  <p className="text-lg font-bold text-[var(--text-primary)] mt-1">
+                    Photo {lightbox.index + 1} <span className="text-[var(--text-secondary)]">of {lightbox.images.length}</span>
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setLightbox(null)}
-                  className="rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-2.5 transition-all duration-200 hover:scale-110"
+                  className="rounded-full bg-[rgba(var(--panel-rgb),0.55)] hover:bg-[rgba(var(--panel-rgb),0.65)] backdrop-blur-sm text-[var(--text-primary)] p-2.5 transition-all duration-200 hover:scale-110"
                   aria-label="Close gallery"
                 >
                   <X className="w-6 h-6" />
@@ -1012,19 +1001,19 @@ export default function ShipmentDetailPage() {
                     type="button"
                     onClick={zoomOut}
                     disabled={zoomLevel <= 0.5}
-                    className="rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm text-white p-2 transition-all duration-200"
+                    className="rounded-lg bg-[rgba(var(--panel-rgb),0.55)] hover:bg-[rgba(var(--panel-rgb),0.65)] disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm text-[var(--text-primary)] p-2 transition-all duration-200"
                     aria-label="Zoom out"
                   >
                     <ZoomOut className="w-5 h-5" />
                   </button>
-                  <span className="text-sm font-medium text-white min-w-[60px] text-center">
+                  <span className="text-sm font-medium text-[var(--text-primary)] min-w-[60px] text-center">
                     {Math.round(zoomLevel * 100)}%
                   </span>
                   <button
                     type="button"
                     onClick={zoomIn}
                     disabled={zoomLevel >= 3}
-                    className="rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm text-white p-2 transition-all duration-200"
+                    className="rounded-lg bg-[rgba(var(--panel-rgb),0.55)] hover:bg-[rgba(var(--panel-rgb),0.65)] disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm text-[var(--text-primary)] p-2 transition-all duration-200"
                     aria-label="Zoom in"
                   >
                     <ZoomIn className="w-5 h-5" />
@@ -1077,7 +1066,7 @@ export default function ShipmentDetailPage() {
                           'relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-200',
                           idx === lightbox.index
                             ? 'border-cyan-500 ring-2 ring-cyan-500/50 scale-110'
-                            : 'border-white/20 hover:border-white/40 opacity-60 hover:opacity-100'
+                            : 'border-[var(--border)] hover:border-[var(--border)] opacity-60 hover:opacity-100'
                         )}
                       >
                         <Image
@@ -1103,7 +1092,7 @@ export default function ShipmentDetailPage() {
                     <button
                       type="button"
                       onClick={goPrevious}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-6 z-20 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border-2 border-white/30 hover:border-cyan-400/70 text-white p-2.5 sm:p-4 transition-all duration-300 hover:scale-110 shadow-2xl sm:opacity-0 sm:group-hover:opacity-100"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-6 z-20 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border-2 border-[var(--border)] hover:border-cyan-400/70 text-[var(--text-primary)] p-2.5 sm:p-4 transition-all duration-300 hover:scale-110 shadow-2xl sm:opacity-0 sm:group-hover:opacity-100"
                       aria-label="Previous photo"
                     >
                       <ChevronLeft className="w-5 h-5 sm:w-8 sm:h-8" />
@@ -1111,7 +1100,7 @@ export default function ShipmentDetailPage() {
                     <button
                       type="button"
                       onClick={goNext}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-6 z-20 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border-2 border-white/30 hover:border-cyan-400/70 text-white p-2.5 sm:p-4 transition-all duration-300 hover:scale-110 shadow-2xl sm:opacity-0 sm:group-hover:opacity-100"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-6 z-20 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md border-2 border-[var(--border)] hover:border-cyan-400/70 text-[var(--text-primary)] p-2.5 sm:p-4 transition-all duration-300 hover:scale-110 shadow-2xl sm:opacity-0 sm:group-hover:opacity-100"
                       aria-label="Next photo"
                     >
                       <ChevronRight className="w-5 h-5 sm:w-8 sm:h-8" />

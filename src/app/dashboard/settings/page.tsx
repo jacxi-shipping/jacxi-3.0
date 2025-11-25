@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/Input';
 
 const DEFAULT_SETTINGS = {
 	theme: 'futuristic',
-	accentColor: '#00BFFF',
+	accentColor: 'var(--accent-gold)',
 	sidebarDensity: 'comfortable',
 	animationsEnabled: true,
 	notifyShipmentEmail: true,
@@ -69,7 +69,7 @@ type BackupState = {
 	info: BackupInfo | null;
 };
 
-const accentOptions = ['#00BFFF', '#38BDF8', '#22D3EE', '#818CF8', '#A855F7', '#F97316'];
+const accentOptions = ['var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)', 'var(--accent-gold)'];
 const themeOptions: Array<{ value: string; label: string; icon: React.ReactNode }> = [
 	{ value: 'futuristic', label: 'Futuristic Dark', icon: <Palette className="w-3.5 h-3.5" /> },
 	{ value: 'dark', label: 'Classic Dark', icon: <Moon className="w-3.5 h-3.5" /> },
@@ -77,9 +77,9 @@ const themeOptions: Array<{ value: string; label: string; icon: React.ReactNode 
 ];
 
 const inputStyle =
-	'w-full rounded-lg border border-cyan-500/30 bg-[#020817] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent';
+	'w-full rounded-lg border border-cyan-500/30 bg-[var(--text-primary)] px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent';
 const selectStyle =
-	'w-full rounded-lg border border-cyan-500/30 bg-[#020817] px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent';
+	'w-full rounded-lg border border-cyan-500/30 bg-[var(--text-primary)] px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent';
 
 const formatRelativeTime = (value?: string | null) => {
 	if (!value) return 'Just now';
@@ -495,8 +495,8 @@ export default function SettingsPage() {
 					: 'Enable MFA to protect privileged access.',
 				timestamp: formatRelativeTime(settings.updatedAt),
 				icon: Shield,
-				color: settings.twoFactorEnabled ? 'text-emerald-300' : 'text-amber-300',
-				border: settings.twoFactorEnabled ? 'border-emerald-500/30' : 'border-amber-500/30',
+				color: settings.twoFactorEnabled ? 'text-emerald-300' : 'text-sky-300',
+				border: settings.twoFactorEnabled ? 'border-emerald-500/30' : 'border-sky-500/30',
 			});
 			items.push({
 				id: 'notifications',
@@ -535,7 +535,7 @@ export default function SettingsPage() {
 
 	if (!mounted) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
 			</div>
 		);
@@ -543,8 +543,8 @@ export default function SettingsPage() {
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">
 					<svg className="w-full h-full" preserveAspectRatio="none">
 						<defs>
@@ -622,7 +622,7 @@ export default function SettingsPage() {
 						{quickStats.map((stat) => (
 							<div
 								key={stat.label}
-								className={`rounded-xl border bg-[#0a1628]/70 backdrop-blur-md p-5 shadow-lg ${
+								className={`rounded-xl border bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg ${
 									stat.accent === 'cyber'
 										? 'border-cyan-500/40 shadow-cyan-500/20'
 										: stat.accent === 'blue'
@@ -639,7 +639,7 @@ export default function SettingsPage() {
 				</div>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-7xl mx-auto space-y-10">
 					<motion.div
 						initial={{ opacity: 0, y: 18 }}
@@ -648,9 +648,9 @@ export default function SettingsPage() {
 						transition={{ duration: 0.5, delay: 0.1 }}
 						className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6"
 					>
-						<div className="rounded-xl border border-cyan-500/30 bg-[#0a1628]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10">
+						<div className="rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10">
 							<div className="flex items-center gap-4">
-								<div className="w-14 h-14 rounded-2xl border border-cyan-500/30 bg-[#020817]/60 flex items-center justify-center">
+								<div className="w-14 h-14 rounded-2xl border border-cyan-500/30 bg-[var(--text-primary)]/60 flex items-center justify-center">
 									<Activity className="w-7 h-7 text-cyan-300" strokeWidth={1.6} />
 								</div>
 								<div>
@@ -679,7 +679,7 @@ export default function SettingsPage() {
 							</div>
 
 							<div className="mt-6 flex flex-wrap gap-3">
-								<Button className="bg-[#00bfff] hover:bg-[#00a8e6] text-white" onClick={() => scrollToSection(profileSectionRef)}>
+								<Button className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white" onClick={() => scrollToSection(profileSectionRef)}>
 									Edit profile details
 								</Button>
 								<Button
@@ -692,7 +692,7 @@ export default function SettingsPage() {
 							</div>
 						</div>
 
-						<div className="rounded-xl border border-purple-500/30 bg-[#0a1628]/60 backdrop-blur-md p-6 shadow-lg shadow-purple-500/10">
+						<div className="rounded-xl border border-purple-500/30 bg-[var(--text-primary)]/60 backdrop-blur-md p-6 shadow-lg shadow-purple-500/10">
 							<h3 className="text-lg font-semibold text-white">Recent security activity</h3>
 							<p className="text-xs text-white/50 mb-4">Snapshots derived from your latest settings and profile updates.</p>
 							<div className="space-y-4">
@@ -726,7 +726,7 @@ export default function SettingsPage() {
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.5, delay: 0.1 }}
-						className="rounded-2xl border bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-cyan-500/10 border-cyan-500/20"
+						className="rounded-2xl border bg-[var(--text-primary)]/70 backdrop-blur-lg p-6 shadow-xl shadow-cyan-500/10 border-cyan-500/20"
 					>
 						<div className="flex items-start gap-4 mb-6">
 							<div className="w-12 h-12 rounded-xl border border-cyan-500/40 bg-cyan-500/10 flex items-center justify-center">
@@ -792,7 +792,7 @@ export default function SettingsPage() {
 							</div>
 
 							<div className="flex flex-wrap gap-3">
-								<Button type="submit" disabled={savingProfile || profileLoading} className="bg-[#00bfff] hover:bg-[#00a8e6] text-white">
+								<Button type="submit" disabled={savingProfile || profileLoading} className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white">
 									{savingProfile ? 'Saving…' : 'Save profile'}
 								</Button>
 								<Button
@@ -816,7 +816,7 @@ export default function SettingsPage() {
 						transition={{ duration: 0.5, delay: 0.15 }}
 						className="grid grid-cols-1 xl:grid-cols-2 gap-6"
 					>
-						<div className="rounded-2xl border bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-blue-500/10 border-blue-500/20">
+						<div className="rounded-2xl border bg-[var(--text-primary)]/70 backdrop-blur-lg p-6 shadow-xl shadow-blue-500/10 border-blue-500/20">
 							<div className="flex items-start gap-4 mb-6">
 								<div className="w-12 h-12 rounded-xl border border-blue-500/40 bg-blue-500/10 flex items-center justify-center">
 									<Palette className="w-6 h-6 text-blue-200" strokeWidth={1.6} />
@@ -836,7 +836,7 @@ export default function SettingsPage() {
 										className={selectStyle}
 									>
 										{themeOptions.map((option) => (
-											<option key={option.value} value={option.value} className="bg-[#020817]">
+											<option key={option.value} value={option.value} className="bg-[var(--text-primary)]">
 												{option.label}
 											</option>
 										))}
@@ -861,7 +861,7 @@ export default function SettingsPage() {
 											type="color"
 											value={settingsForm.accentColor}
 											onChange={(event) => setSettingsForm((prev) => ({ ...prev, accentColor: event.target.value }))}
-											className="h-9 w-16 cursor-pointer rounded-lg border border-white/20 bg-[#020817]"
+											className="h-9 w-16 cursor-pointer rounded-lg border border-white/20 bg-[var(--text-primary)]"
 											title="Pick custom accent"
 										/>
 									</div>
@@ -875,10 +875,10 @@ export default function SettingsPage() {
 											onChange={(event) => setSettingsForm((prev) => ({ ...prev, sidebarDensity: event.target.value }))}
 											className={selectStyle}
 										>
-											<option value="comfortable" className="bg-[#020817]">
+											<option value="comfortable" className="bg-[var(--text-primary)]">
 												Comfortable (default)
 											</option>
-											<option value="compact" className="bg-[#020817]">
+											<option value="compact" className="bg-[var(--text-primary)]">
 												Compact (ops teams)
 											</option>
 										</select>
@@ -890,13 +890,13 @@ export default function SettingsPage() {
 											onChange={(event) => setSettingsForm((prev) => ({ ...prev, language: event.target.value }))}
 											className={selectStyle}
 										>
-											<option value="en" className="bg-[#020817]">
+											<option value="en" className="bg-[var(--text-primary)]">
 												English
 											</option>
-											<option value="ar" className="bg-[#020817]">
+											<option value="ar" className="bg-[var(--text-primary)]">
 												Arabic
 											</option>
-											<option value="fr" className="bg-[#020817]">
+											<option value="fr" className="bg-[var(--text-primary)]">
 												French
 											</option>
 										</select>
@@ -926,7 +926,7 @@ export default function SettingsPage() {
 								</div>
 
 								<div className="flex flex-wrap gap-3 pt-2">
-									<Button type="submit" disabled={savingPreferences || settingsLoading} className="bg-[#00bfff] hover:bg-[#00a8e6] text-white">
+									<Button type="submit" disabled={savingPreferences || settingsLoading} className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white">
 										{savingPreferences ? 'Saving…' : 'Save preferences'}
 									</Button>
 									<Button
@@ -942,10 +942,10 @@ export default function SettingsPage() {
 							</form>
 						</div>
 
-						<div className="rounded-2xl border bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-amber-500/10 border-amber-500/20">
+						<div className="rounded-2xl border bg-[var(--text-primary)]/70 backdrop-blur-lg p-6 shadow-xl shadow-sky-500/10 border-sky-500/20">
 							<div className="flex items-start gap-4 mb-6">
-								<div className="w-12 h-12 rounded-xl border border-amber-500/40 bg-amber-500/10 flex items-center justify-center">
-									<Bell className="w-6 h-6 text-amber-200" strokeWidth={1.6} />
+								<div className="w-12 h-12 rounded-xl border border-sky-500/30 bg-sky-500/10 flex items-center justify-center">
+									<Bell className="w-6 h-6 text-sky-200" strokeWidth={1.6} />
 								</div>
 								<div>
 									<h2 className="text-2xl font-semibold text-white">Notification rules</h2>
@@ -982,7 +982,7 @@ export default function SettingsPage() {
 										onClick={() => handleToggle(item.key)}
 										className={`w-full rounded-xl border px-4 py-3 text-left transition ${
 											settingsForm[item.key]
-												? 'border-amber-500/40 bg-amber-500/10'
+												? 'border-sky-500/30 bg-sky-500/10'
 												: 'border-white/10 bg-white/5 hover:border-white/20'
 										}`}
 									>
@@ -991,7 +991,7 @@ export default function SettingsPage() {
 												<p className="text-sm font-medium text-white">{item.label}</p>
 												<p className="text-xs text-white/60">{item.description}</p>
 											</div>
-											<span className={`text-xs font-semibold uppercase tracking-wide ${settingsForm[item.key] ? 'text-amber-200' : 'text-white/40'}`}>
+											<span className={`text-xs font-semibold uppercase tracking-wide ${settingsForm[item.key] ? 'text-sky-200' : 'text-white/40'}`}>
 												{settingsForm[item.key] ? 'Enabled' : 'Disabled'}
 											</span>
 										</div>
@@ -999,7 +999,7 @@ export default function SettingsPage() {
 								))}
 
 								<div className="flex flex-wrap gap-3 pt-2">
-									<Button type="submit" disabled={savingNotifications || settingsLoading} className="bg-[#00bfff] hover:bg-[#00a8e6] text-white">
+									<Button type="submit" disabled={savingNotifications || settingsLoading} className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white">
 										{savingNotifications ? 'Saving…' : 'Save notification rules'}
 									</Button>
 								</div>
@@ -1012,7 +1012,7 @@ export default function SettingsPage() {
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.5, delay: 0.2 }}
-						className="rounded-2xl border bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-purple-500/10 border-purple-500/20"
+						className="rounded-2xl border bg-[var(--text-primary)]/70 backdrop-blur-lg p-6 shadow-xl shadow-purple-500/10 border-purple-500/20"
 					>
 						<div className="flex items-start gap-4 mb-6">
 							<div className="w-12 h-12 rounded-xl border border-purple-500/40 bg-purple-500/10 flex items-center justify-center">
@@ -1030,7 +1030,7 @@ export default function SettingsPage() {
 									<p className="text-sm font-medium text-white">Two-factor authentication</p>
 									<p className="text-xs text-white/60">Require authenticator verification for admin dashboard sign-in.</p>
 								</div>
-								<Button onClick={handleToggleTwoFactor} disabled={savingSecurity || settingsLoading} className="bg-[#00bfff] hover:bg-[#00a8e6] text-white">
+								<Button onClick={handleToggleTwoFactor} disabled={savingSecurity || settingsLoading} className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white">
 									{savingSecurity ? 'Updating…' : settingsForm.twoFactorEnabled ? 'Disable MFA' : 'Enable MFA'}
 								</Button>
 							</div>
@@ -1054,7 +1054,7 @@ export default function SettingsPage() {
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.6, delay: 0.2 }}
-						className="rounded-2xl border border-cyan-500/30 bg-[#0a1628]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+						className="rounded-2xl border border-cyan-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
 					>
 						<div>
 							<h3 className="text-xl font-semibold text-white">Need to onboard a new admin?</h3>
@@ -1063,7 +1063,7 @@ export default function SettingsPage() {
 							</p>
 						</div>
 						<div className="flex flex-wrap gap-3">
-							<Button className="bg-[#00bfff] hover:bg-[#00a8e6] text-white" onClick={() => router.push('/dashboard/users/new?role=admin')}>
+							<Button className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white" onClick={() => router.push('/dashboard/users/new?role=admin')}>
 								Invite admin
 							</Button>
 							<Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10" onClick={() => router.push('/dashboard/documents')}>
@@ -1081,7 +1081,7 @@ export default function SettingsPage() {
 				transition={{ duration: 0.6, delay: 0.25 }}
 				className="mx-auto max-w-7xl pb-20"
 			>
-				<div className="rounded-2xl border border-cyan-500/20 bg-[#0a1628]/70 backdrop-blur-lg p-6 shadow-xl shadow-cyan-500/15">
+				<div className="rounded-2xl border border-cyan-500/20 bg-[var(--text-primary)]/70 backdrop-blur-lg p-6 shadow-xl shadow-cyan-500/15">
 					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 						<div className="flex items-center gap-4">
 							<div className="w-12 h-12 rounded-xl border border-cyan-500/40 bg-cyan-500/10 flex items-center justify-center">
@@ -1116,7 +1116,7 @@ export default function SettingsPage() {
 							<Button
 								onClick={handleCreateBackup}
 								disabled={backupState.running || backupState.loading}
-								className="bg-[#00bfff] hover:bg-[#00a8e6] text-white"
+								className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white"
 							>
 								{backupState.running ? 'Working…' : 'Create backup'}
 							</Button>

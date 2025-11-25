@@ -3,11 +3,10 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Plus, Package, FileText, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import Section from '@/components/layout/Section';
+import { Plus, Package, Eye } from 'lucide-react';
+import { Button, Box, CircularProgress, Typography, Zoom, Chip } from '@mui/material';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
 
 interface ContainerItem {
@@ -84,9 +83,18 @@ export default function ContainersPage() {
 
 	if (status === 'loading' || loading) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
-			</div>
+			<Box
+				className="light-surface"
+				sx={{
+					minHeight: '100vh',
+					background: 'var(--background)',
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+				}}
+			>
+				<CircularProgress size={60} sx={{ color: 'var(--accent-gold)' }} />
+			</Box>
 		);
 	}
 
@@ -96,164 +104,135 @@ export default function ContainersPage() {
 	}
 
 	return (
-		<>
-			{/* Header */}
-			<Section className="relative bg-[#020817] py-6 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-containers" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-containers)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6 }}
-							className="space-y-1 sm:space-y-2 max-w-full"
+		<DashboardSurface className="light-surface">
+			<DashboardPanel
+				title="Search"
+				description="Filter containers by tracking metadata"
+				noBodyPadding
+				actions={
+					<Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
+						<Button
+							variant="contained"
+							size="small"
+							startIcon={<Plus fontSize="small" />}
+							sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
 						>
-							<h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight break-words">Containers</h1>
-							<p className="text-sm sm:text-lg md:text-xl text-white/70">Manage containers and items</p>
-						</motion.div>
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.2 }}
-							className="w-full sm:w-auto"
-						>
-							<Link href="/dashboard/containers/new" className="block">
-								<Button
-									size="lg"
-									className="group relative overflow-hidden bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base md:text-lg font-semibold w-full sm:w-auto"
-								>
-									<Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-									New Container
-								</Button>
-							</Link>
-						</motion.div>
-					</div>
-				</div>
-			</Section>
-
-			{/* Main Content */}
-			<Section className="bg-[#020817] py-6 sm:py-12 lg:py-16">
-				{/* Smart Search */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6, delay: 0.3 }}
-					className="mb-6 sm:mb-8"
-				>
+							New container
+						</Button>
+					</Link>
+				}
+			>
+				<Box sx={{ px: 1.5, py: 1.5 }}>
 					<SmartSearch
 						onSearch={handleSearch}
 						placeholder="Search containers by number or tracking number..."
 						showTypeFilter={false}
 						showStatusFilter={false}
-						showDateFilter={true}
+						showDateFilter
 						showPriceFilter={false}
 						showUserFilter={false}
 						defaultType="items"
 					/>
-				</motion.div>
+				</Box>
+			</DashboardPanel>
 
-				{/* Containers List */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6, delay: 0.4 }}
-				>
-					<div className="flex items-center justify-between mb-4 sm:mb-6">
-						<h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white">
-							All Containers ({filteredContainers.length})
-						</h2>
-					</div>
-
-					{filteredContainers.length === 0 ? (
-						<div className="relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-12 text-center">
-							<Package className="w-12 h-12 sm:w-16 sm:h-16 text-white/30 mx-auto mb-4" />
-							<p className="text-sm sm:text-base text-white/70 mb-4 sm:mb-6">No containers found</p>
-							<Link href="/dashboard/containers/new" className="inline-block">
-								<Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6] text-sm sm:text-base">
-									<Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-									Create Your First Container
-								</Button>
-							</Link>
-						</div>
-					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-							{filteredContainers.map((container, index) => (
-								<motion.div
-									key={container.id}
-									initial={{ opacity: 0, y: 20 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ duration: 0.4, delay: index * 0.05 }}
-									className="relative rounded-lg sm:rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-4 sm:p-6 hover:border-cyan-500/50 transition-all duration-300 shadow-lg shadow-cyan-500/5 hover:shadow-cyan-500/10"
+			<DashboardPanel title="Container library" description="Tap a card to view manifest and invoices" fullHeight>
+				{filteredContainers.length === 0 ? (
+					<Box
+						sx={{
+							minHeight: 240,
+							display: 'flex',
+							flexDirection: 'column',
+							alignItems: 'center',
+							justifyContent: 'center',
+							gap: 1,
+							textAlign: 'center',
+						}}
+					>
+						<Package style={{ fontSize: 40, color: 'rgba(var(--text-secondary-rgb), 0.35)' }} />
+						<Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+							No containers match this filter
+						</Typography>
+					</Box>
+				) : (
+					<Box
+						sx={{
+							display: 'grid',
+							gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', xl: 'repeat(3, 1fr)' },
+							gap: 1.5,
+						}}
+					>
+						{filteredContainers.map((container, index) => (
+							<Zoom key={container.id} in timeout={400} style={{ transitionDelay: `${index * 80}ms` }}>
+								<Box
+									sx={{
+										borderRadius: 2,
+										border: '1px solid var(--border)',
+										background: 'var(--panel)',
+										boxShadow: '0 18px 30px rgba(var(--text-primary-rgb), 0.08)',
+										padding: 1.5,
+										display: 'flex',
+										flexDirection: 'column',
+										gap: 1.5,
+										color: 'var(--text-primary)',
+									}}
 								>
-									<div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
-										<div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-											<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-400/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-												<Package className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
-											</div>
-											<div className="min-w-0 flex-1">
-												<h3 className="text-base sm:text-lg font-semibold text-white truncate">{container.containerNumber}</h3>
-												<p className="text-xs sm:text-sm text-white/60">
-													{container.items.length} {container.items.length === 1 ? 'item' : 'items'}
-												</p>
-											</div>
-										</div>
-										<span
-											className={`px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-medium rounded-full flex-shrink-0 ${
-												container.status === 'ACTIVE'
-													? 'bg-green-500/20 text-green-400 border border-green-500/30'
-													: 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-											}`}
-										>
-											{container.status}
-										</span>
-									</div>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+										<Box sx={{ minWidth: 0 }}>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+												{container.containerNumber}
+											</Typography>
+											<Typography sx={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+												{container.items.length} {container.items.length === 1 ? 'item' : 'items'}
+											</Typography>
+										</Box>
+										<Chip
+											label={container.status}
+											size="small"
+											sx={{
+												height: 20,
+												fontSize: '0.65rem',
+												fontWeight: 600,
+												bgcolor: container.status === 'ACTIVE' ? 'rgba(var(--accent-gold-rgb), 0.12)' : 'rgba(var(--panel-rgb), 0.5)',
+												color: container.status === 'ACTIVE' ? 'var(--accent-gold)' : 'var(--text-secondary)',
+												borderColor: container.status === 'ACTIVE' ? 'rgba(var(--accent-gold-rgb), 0.35)' : 'var(--border)',
+											}}
+											variant="outlined"
+										/>
+									</Box>
 
-									{container.shipment && container.shipment.trackingNumber && (
-										<div className="mb-3 sm:mb-4 p-2 sm:p-3 rounded-lg bg-[#020817]/50 border border-cyan-500/20">
-											<p className="text-[10px] sm:text-xs text-white/60 mb-1">Shipment</p>
-											<p className="text-xs sm:text-sm font-medium text-cyan-400 truncate">{container.shipment.trackingNumber}</p>
-										</div>
+									{container.shipment?.trackingNumber && (
+										<Box sx={{ borderRadius: 2, border: '1px solid rgba(var(--accent-gold-rgb), 0.25)', background: 'rgba(var(--accent-gold-rgb), 0.06)', px: 1.2, py: 0.8 }}>
+											<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
+												Linked shipment
+											</Typography>
+											<Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent-gold)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+												{container.shipment.trackingNumber}
+											</Typography>
+										</Box>
 									)}
 
-									<div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-cyan-500/10 gap-2">
-										<div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-white/60 min-w-0 flex-1">
-											<span className="flex items-center gap-1 truncate">
-												<FileText className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-												<span className="truncate">{container.invoices.length} {container.invoices.length === 1 ? 'invoice' : 'invoices'}</span>
-											</span>
-										</div>
-										<Link href={`/dashboard/containers/${container.id}`} className="flex-shrink-0">
+									<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
+										<Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+											{container.invoices.length} invoice{container.invoices.length === 1 ? '' : 's'}
+										</Typography>
+										<Link href={`/dashboard/containers/${container.id}`} style={{ textDecoration: 'none' }}>
 											<Button
-												variant="outline"
-												size="sm"
-												className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 text-xs sm:text-sm"
+												variant="outlined"
+												size="small"
+												startIcon={<Eye style={{ fontSize: 14 }} />}
+												sx={{ textTransform: 'none', fontSize: '0.72rem' }}
 											>
-												<Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
 												View
 											</Button>
 										</Link>
-									</div>
-								</motion.div>
-							))}
-						</div>
-					)}
-				</motion.div>
-			</Section>
-		</>
+									</Box>
+								</Box>
+							</Zoom>
+						))}
+					</Box>
+				)}
+			</DashboardPanel>
+		</DashboardSurface>
 	);
 }
-

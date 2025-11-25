@@ -130,7 +130,7 @@ export default function ContainerDetailPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
 			</div>
 		);
@@ -138,7 +138,7 @@ export default function ContainerDetailPage() {
 
 	if (!container) {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="text-center">
 					<p className="text-white/70 mb-4">Container not found</p>
 					<Link href="/dashboard/containers">
@@ -151,8 +151,8 @@ export default function ContainerDetailPage() {
 
 	return (
 		<>
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
+				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">
 					<svg className="w-full h-full" preserveAspectRatio="none">
 						<defs>
@@ -193,19 +193,19 @@ export default function ContainerDetailPage() {
 				</div>
 			</Section>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-7xl mx-auto space-y-8">
 					{/* Items Section */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+						className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 					>
 						<div className="flex items-center justify-between mb-6">
 							<h2 className="text-xl sm:text-2xl font-bold text-white">Items ({items.length})</h2>
 							<Button
 								onClick={() => router.push(`/dashboard/containers/${container?.id}/items/new`)}
-								className="bg-[#00bfff] text-white hover:bg-[#00a8e6]"
+								className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]"
 							>
 								<Plus className="w-4 h-4 mr-2" />
 								Add Item
@@ -233,7 +233,7 @@ export default function ContainerDetailPage() {
 												(item.customsCost ?? 0) +
 												(item.otherCost ?? 0);
 											return (
-												<tr key={item.id} className="border-b border-cyan-500/10 hover:bg-[#020817]/50">
+												<tr key={item.id} className="border-b border-cyan-500/10 hover:bg-[var(--text-primary)]/50">
 													<td className="py-3 px-4 text-sm text-white font-mono">{item.vin}</td>
 													<td className="py-3 px-4 text-sm text-white">{item.lotNumber}</td>
 													<td className="py-3 px-4 text-sm text-white">{item.auctionCity}</td>
@@ -254,7 +254,7 @@ export default function ContainerDetailPage() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.1 }}
-						className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+						className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 					>
 						<div className="flex items-center justify-between mb-6">
 							<div>
@@ -269,7 +269,7 @@ export default function ContainerDetailPage() {
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{shipments.map((shipment) => (
 									<Link key={shipment.id} href={`/dashboard/shipments/${shipment.id}`}>
-										<div className="p-5 rounded-lg bg-[#020817]/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group">
+										<div className="p-5 rounded-lg bg-[var(--text-primary)]/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group">
 											<div className="flex items-start justify-between mb-3">
 												<div>
 													<span className="text-sm font-medium text-white/70">Tracking Number</span>
@@ -281,9 +281,9 @@ export default function ContainerDetailPage() {
 															? 'bg-green-500/20 text-green-400'
 															: shipment.status === 'IN_TRANSIT'
 															? 'bg-blue-500/20 text-blue-400'
-															: shipment.status === 'PENDING'
-															? 'bg-yellow-500/20 text-yellow-400'
-															: 'bg-gray-500/20 text-gray-400'
+														: shipment.status === 'PENDING'
+														? 'bg-sky-500/20 text-sky-300'
+														: 'bg-gray-500/20 text-gray-400'
 													}`}
 												>
 													{shipment.status.replace(/_/g, ' ')}
@@ -347,14 +347,14 @@ export default function ContainerDetailPage() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.2 }}
-						className="relative rounded-xl bg-[#0a1628]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
+						className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
 					>
 						<div className="flex items-center justify-between mb-6">
 							<h2 className="text-xl sm:text-2xl font-bold text-white">Invoices ({invoices.length})</h2>
 							{items.length > 0 && (
 								<Button
 									onClick={() => router.push(`/dashboard/invoices/new?containerId=${container?.id}`)}
-									className="bg-[#00bfff] text-white hover:bg-[#00a8e6]"
+									className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]"
 								>
 									<Plus className="w-4 h-4 mr-2" />
 									Create Invoice
@@ -366,7 +366,7 @@ export default function ContainerDetailPage() {
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								{invoices.map((invoice) => (
 									<Link key={invoice.id} href={`/dashboard/invoices/${invoice.id}`}>
-										<div className="p-4 rounded-lg bg-[#020817]/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+										<div className="p-4 rounded-lg bg-[var(--text-primary)]/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
 											<div className="flex items-center justify-between mb-2">
 												<span className="text-sm font-medium text-white">{invoice.invoiceNumber}</span>
 												<span
@@ -375,7 +375,7 @@ export default function ContainerDetailPage() {
 															? 'bg-green-500/20 text-green-400'
 															: invoice.status === 'OVERDUE'
 															? 'bg-red-500/20 text-red-400'
-															: 'bg-yellow-500/20 text-yellow-400'
+															: 'bg-sky-500/20 text-sky-300'
 													}`}
 												>
 													{invoice.status}
@@ -418,7 +418,7 @@ export default function ContainerDetailPage() {
 							exit={{ opacity: 0, scale: 0.95, y: 20 }}
 							className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50"
 						>
-							<div className="bg-[#0a1628] border border-red-500/30 rounded-2xl p-6 shadow-2xl">
+							<div className="bg-[var(--text-primary)] border border-red-500/30 rounded-2xl p-6 shadow-2xl">
 								<div className="flex items-center gap-4 mb-4">
 									<div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
 										<AlertTriangle className="w-6 h-6 text-red-400" />

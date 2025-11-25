@@ -158,7 +158,7 @@ export default function ProfilePage() {
 
 	if (status === 'loading' || loading) {
 		return (
-			<Section className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<Section className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="text-center space-y-4 text-white/70">
 					<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
 					<p>Loading your profile...</p>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
 
 	if (!profile) {
 		return (
-			<Section className="min-h-screen bg-[#020817] flex items-center justify-center">
+			<Section className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
 				<div className="max-w-md space-y-4 text-center">
 					<h2 className="text-xl font-semibold text-white">Profile unavailable</h2>
 					<p className="text-white/70">{serverError || 'We could not load your profile details at the moment.'}</p>
@@ -182,8 +182,8 @@ export default function ProfilePage() {
 	const personalFields = personalInfoFields(form);
 
 	return (
-		<div className="min-h-screen bg-[#020817]">
-			<div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+		<div className="min-h-screen bg-[var(--text-primary)]">
+			<div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 			<div className="absolute inset-0 -z-10 opacity-[0.04]">
 				<svg className="h-full w-full" preserveAspectRatio="none">
 					<pattern id="profile-grid" width="32" height="32" patternUnits="userSpaceOnUse">
@@ -314,7 +314,7 @@ export default function ProfilePage() {
 										<Button
 											type="submit"
 											disabled={saving}
-											className="bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-cyan-500/30"
+											className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
 										>
 											{saving ? (
 												<>

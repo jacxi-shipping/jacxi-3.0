@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileText, ShieldCheck, Download, Upload, Search, AlertCircle } from 'lucide-react';
+import { FileText, ShieldCheck, Download, Upload, Search, AlertCircle } from 'lucide-react';
+import { Box } from '@mui/material';
 
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 import Section from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 
@@ -168,87 +169,49 @@ export default function DocumentsPage() {
 	const role = session?.user?.role;
 	if (status === 'loading' || !session || role !== 'admin') {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
+			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]" />
 			</div>
 		);
 	}
 
 	return (
-		<>
-			<Section className="relative bg-[#020817] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-documents" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-documents)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10 space-y-6">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-						<div>
-							<motion.h1
-								initial={{ opacity: 0, y: 16 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5 }}
-								className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight"
-							>
-								Document Center
-							</motion.h1>
-							<motion.p
-								initial={{ opacity: 0, y: 16 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.5, delay: 0.1 }}
-								className="text-lg sm:text-xl text-white/70 max-w-2xl"
-							>
-								Manage templates, uploads, and compliance documents in one unified workspace.
-							</motion.p>
-						</div>
-						<Link href="/dashboard">
-							<Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Back to Overview
-							</Button>
-						</Link>
-					</div>
-
+		<DashboardSurface className="light-surface">
+			<DashboardPanel title="Snapshot" description="Quick glance at activity" noBodyPadding>
+				<Box sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.15 }}
 						className="grid grid-cols-1 md:grid-cols-3 gap-4"
 					>
-						<div className="rounded-xl border border-cyan-500/30 bg-[#0a1628]/70 backdrop-blur-md p-5 shadow-lg shadow-cyan-500/10">
+						<div className="rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg shadow-cyan-500/10">
 							<p className="text-sm text-white/60">Active Categories</p>
 							<p className="text-3xl font-semibold text-white mt-1">{categories.length}</p>
 							<p className="text-xs text-white/40 mt-2">Templates, uploads, compliance.</p>
 						</div>
-						<div className="rounded-xl border border-blue-500/30 bg-[#0a1628]/70 backdrop-blur-md p-5 shadow-lg shadow-blue-500/10">
+						<div className="rounded-xl border border-blue-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg shadow-blue-500/10">
 							<p className="text-sm text-white/60">Required Documents</p>
 							<p className="text-3xl font-semibold text-white mt-1">{pendingDocumentsCount}</p>
 							<p className="text-xs text-white/40 mt-2">Ensure these remain up to date.</p>
 						</div>
-						<div className="rounded-xl border border-purple-500/30 bg-[#0a1628]/70 backdrop-blur-md p-5 shadow-lg shadow-purple-500/10">
+						<div className="rounded-xl border border-purple-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg shadow-purple-500/10">
 							<p className="text-sm text-white/60">Storage Usage</p>
 							<p className="text-3xl font-semibold text-white mt-1">3.1 GB</p>
 							<p className="text-xs text-white/40 mt-2">Includes uploaded manifests and certificates.</p>
 						</div>
 					</motion.div>
-				</div>
-			</Section>
+				</Box>
+			</DashboardPanel>
 
-			<Section className="bg-[#020817] py-8 sm:py-12">
+			<DashboardPanel title="Document library" description="Search and manage every document">
+			<Section className="bg-[var(--text-primary)] py-4 sm:py-6">
 				<div className="max-w-6xl mx-auto space-y-10">
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.5, delay: 0.2 }}
-						className="relative rounded-xl border border-cyan-500/30 bg-[#0a1628]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10"
+						className="relative rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10"
 					>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div className="relative">
@@ -257,11 +220,11 @@ export default function DocumentsPage() {
 									value={search}
 									onChange={(event) => setSearch(event.target.value)}
 									placeholder="Search documents by name..."
-									className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[#020817] border border-cyan-500/30 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+									className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[var(--text-primary)] border border-cyan-500/30 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
 								/>
 							</div>
 							<div className="flex flex-wrap gap-3 md:justify-end">
-								<Button className="bg-[#00bfff] hover:bg-[#00a8e6] text-white">
+								<Button className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white">
 									<Download className="w-4 h-4 mr-2" />
 									Download All Templates
 								</Button>
@@ -277,7 +240,7 @@ export default function DocumentsPage() {
 						<motion.div
 							initial={{ opacity: 0, y: 16 }}
 							animate={{ opacity: 1, y: 0 }}
-							className="rounded-xl border border-cyan-500/30 bg-[#0a1628]/50 backdrop-blur-sm p-16 text-center"
+							className="rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/50 backdrop-blur-sm p-16 text-center"
 						>
 							<AlertCircle className="w-14 h-14 text-white/30 mx-auto mb-4" />
 							<p className="text-white/70 text-lg">No documents match “{search}”. Try a different search term.</p>
@@ -319,7 +282,7 @@ export default function DocumentsPage() {
 												whileInView={{ opacity: 1, y: 0 }}
 												viewport={{ once: true }}
 												transition={{ duration: 0.4, delay: docIdx * 0.05 }}
-												className="relative rounded-xl border border-cyan-500/20 bg-[#0a1628]/60 backdrop-blur-md p-5 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all"
+												className="relative rounded-xl border border-cyan-500/20 bg-[var(--text-primary)]/60 backdrop-blur-md p-5 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all"
 											>
 												<div className="flex items-start justify-between gap-3">
 													<div className="space-y-2">
@@ -366,7 +329,8 @@ export default function DocumentsPage() {
 					)}
 				</div>
 			</Section>
-		</>
+			</DashboardPanel>
+		</DashboardSurface>
 	);
 }
 

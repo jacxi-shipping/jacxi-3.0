@@ -22,8 +22,8 @@ html {
 	position: absolute;
 	top: -40px;
 	left: 0;
-	background: #0056D2;
-	color: white;
+	background: var(--accent-gold);
+	color: var(--background);
 	padding: 8px 16px;
 	text-decoration: none;
 	border-radius: 0 0 4px 0;
@@ -56,98 +56,211 @@ html {
 	/* Better tap highlighting */
 	button, 
 	a {
-		-webkit-tap-highlight-color: rgba(0, 86, 210, 0.2);
+		-webkit-tap-highlight-color: rgba(var(--accent-gold-rgb), 0.2);
 	}
 }
 
 /* Focus Visible Styles for Keyboard Navigation */
 *:focus-visible {
-	outline: 2px solid rgb(0, 86, 210);
+	outline: 2px solid var(--accent-gold);
 	outline-offset: 2px;
 }
 
-/* JACXI Design System - Tailwind v4 Configuration */
+:root {
+	--accent-gold: #D4AF37;
+	--background: #F9FAFB;
+	--panel: #E4E9F0;
+	--text-primary: #1C1C1E;
+	--text-secondary: #5F6368;
+	--border: #E0E0E0;
+	--error: #EF4444;
+	--radius: 0.75rem;
+	--text-primary-rgb: 28, 28, 30;
+	--text-secondary-rgb: 95, 99, 104;
+	--accent-gold-rgb: 212, 175, 55;
+	--background-rgb: 249, 250, 251;
+	--panel-rgb: 228, 233, 240;
+	--border-rgb: 224, 224, 224;
+	--error-rgb: 239, 68, 68;
+}
+
+body {
+	background-color: var(--background);
+	color: var(--text-primary);
+}
+
+/* Palette overrides for legacy Tailwind utility classes */
+:where(.text-gray-900, .text-gray-800, .text-gray-700, .text-neutral-900, .text-neutral-800, .text-neutral-700) {
+	color: var(--text-primary) !important;
+}
+
+:where(.text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100, .text-neutral-600, .text-neutral-500, .text-neutral-400, .text-neutral-300, .text-neutral-200, .text-neutral-100) {
+	color: var(--text-secondary) !important;
+}
+
+:where(
+	.text-blue-50,
+	.text-blue-100,
+	.text-blue-200,
+	.text-blue-300,
+	.text-blue-400,
+	.text-blue-500,
+	.text-blue-600,
+	.text-blue-700,
+	.text-cyan-200,
+	.text-cyan-300,
+	.text-cyan-400,
+	.text-cyan-500,
+	.text-sky-200,
+	.text-sky-300,
+	.text-sky-700,
+	.text-emerald-200,
+	.text-emerald-300,
+	.text-emerald-700,
+	.text-green-300,
+	.text-green-400,
+	.text-green-500,
+	.text-green-600,
+	.text-green-700,
+	.text-indigo-300,
+	.text-lime-300,
+	.text-teal-300,
+	.text-fuchsia-200,
+	.text-purple-200,
+	.text-purple-300,
+	.text-purple-400,
+	.text-purple-700,
+	.text-orange-300,
+	.text-orange-700,
+	.text-amber-300,
+	.text-info-600,
+	.text-info-700,
+	.text-info-800,
+	.text-success-600,
+	.text-success-700,
+	.text-success-800,
+	.text-warning-600,
+	.text-warning-700,
+	.text-warning-800,
+	.text-neutral-400,
+	.text-neutral-500,
+	.text-neutral-800
+) {
+	color: var(--accent-gold) !important;
+}
+
+:where(
+	.text-red-200,
+	.text-red-300,
+	.text-red-400,
+	.text-red-500,
+	.text-red-600,
+	.text-red-700,
+	.text-error-600,
+	.text-error-700,
+	.text-error-800
+) {
+	color: var(--error) !important;
+}
+
+:where(
+	.bg-gray-50,
+	.bg-gray-100,
+	.bg-gray-200,
+	.bg-gray-300,
+	.bg-gray-500,
+	.bg-gray-100,
+	.bg-blue-50,
+	.bg-blue-100,
+	.bg-blue-500,
+	.bg-blue-600,
+	.bg-sky-50,
+	.bg-sky-500,
+	.bg-cyan-400,
+	.bg-cyan-500,
+	.bg-emerald-50,
+	.bg-emerald-500,
+	.bg-green-50,
+	.bg-green-500,
+	.bg-green-600,
+	.bg-purple-50,
+	.bg-purple-500,
+	.bg-orange-50,
+	.bg-orange-500,
+	.bg-lime-500,
+	.bg-indigo-500,
+	.bg-teal-500,
+	.bg-amber-500,
+	.bg-red-50,
+	.bg-red-500,
+	.bg-red-600,
+	.bg-red-700,
+	.bg-neutral-50,
+	.bg-neutral-100,
+	.bg-neutral-200,
+	.bg-info-50,
+	.bg-info-100,
+	.bg-info-200,
+	.bg-success-50,
+	.bg-success-100,
+	.bg-success-200,
+	.bg-success-500,
+	.bg-warning-50,
+	.bg-warning-100,
+	.bg-warning-200,
+	.bg-warning-500,
+	.bg-error-50,
+	.bg-error-100,
+	.bg-error-200,
+	.bg-error-500
+) {
+	background-color: var(--panel) !important;
+	color: var(--text-primary) !important;
+}
+
+:where(.bg-gray-800, .bg-gray-900) {
+	background-color: var(--text-primary) !important;
+	color: var(--background) !important;
+}
+
+:where(
+	.border-gray-200,
+	.border-gray-300,
+	.border-gray-500,
+	.border-gray-700,
+	.border-blue-200,
+	.border-blue-300,
+	.border-blue-400,
+	.border-blue-500,
+	.border-blue-600,
+	.border-cyan-400,
+	.border-cyan-500,
+	.border-green-200,
+	.border-green-500,
+	.border-emerald-200,
+	.border-emerald-500,
+	.border-info-500,
+	.border-purple-200,
+	.border-purple-500,
+	.border-sky-200,
+	.border-sky-500,
+	.border-neutral-300,
+	.border-orange-200,
+	.border-fuchsia-500,
+	.border-warning-500,
+	.border-success-500
+) {
+	border-color: var(--border) !important;
+}
+
+:where(.border-red-200, .border-red-500, .border-error-500) {
+	border-color: var(--error) !important;
+}
 @theme {
-  /* JACXI Brand Colors */
-  --color-brand-navy: hsl(218 73% 15%);          /* #0A1F44 */
-  --color-brand-navy-light: hsl(218 58% 25%);    /* #1E3A5F */
-  --color-brand-navy-lighter: hsl(218 48% 35%);  /* #2E4A6F */
-  --color-brand-navy-dark: hsl(218 85% 12%);     /* #07152F */
-  --color-brand-navy-darker: hsl(218 90% 8%);    /* #050F1F */
 
-  --color-brand-cyan: hsl(195 100% 50%);         /* #00BFFF */
-  --color-brand-cyan-light: hsl(180 85% 65%);    /* #4DD0E1 */
-  --color-brand-cyan-lighter: hsl(175 75% 75%);  /* #87E4F0 */
-  --color-brand-cyan-dark: hsl(195 100% 40%);    /* #0099CC */
-  --color-brand-cyan-darker: hsl(195 100% 30%);  /* #007399 */
+  /* Neutral palette */
 
-  --color-brand-gold: hsl(43 74% 52%);           /* #D4AF37 */
-  --color-brand-gold-light: hsl(43 82% 58%);     /* #E5C158 */
-  --color-brand-gold-lighter: hsl(45 70% 80%);   /* #F0D890 */
-  --color-brand-gold-dark: hsl(43 78% 42%);      /* #B8942A */
-  --color-brand-gold-darker: hsl(43 82% 35%);    /* #9C7A1F */
-
-  --color-brand-charcoal: hsl(220 8% 19%);       /* #2B2E34 */
-  --color-brand-charcoal-light: hsl(220 12% 25%); /* #404040 */
-  --color-brand-charcoal-lighter: hsl(220 15% 32%); /* #5A5A5A */
-
-  --color-brand-white: hsl(210 20% 98%);         /* #F8F9FA */
-  --color-brand-white-off: hsl(210 17% 93%);     /* #E9ECEF */
-  --color-brand-white-pure: hsl(0 0% 100%);      /* #FFFFFF */
-
-  /* JACXI Semantic Colors */
-  --color-success-50: hsl(142 76% 95%);
-  --color-success-100: hsl(142 76% 90%);
-  --color-success-500: hsl(142 71% 45%);
-  --color-success-600: hsl(142 76% 36%);
-  --color-success-700: hsl(142 76% 29%);
-  --color-success-900: hsl(142 76% 20%);
-
-  --color-warning-50: hsl(48 96% 95%);
-  --color-warning-100: hsl(48 96% 90%);
-  --color-warning-500: hsl(38 92% 50%);
-  --color-warning-600: hsl(38 92% 42%);
-  --color-warning-700: hsl(38 92% 35%);
-  --color-warning-900: hsl(38 92% 25%);
-
-  --color-error-50: hsl(0 84% 95%);
-  --color-error-100: hsl(0 84% 90%);
-  --color-error-500: hsl(0 84% 60%);
-  --color-error-600: hsl(0 72% 51%);
-  --color-error-700: hsl(0 72% 44%);
-  --color-error-900: hsl(0 72% 34%);
-
-  --color-info-50: hsl(217 91% 95%);
-  --color-info-100: hsl(217 91% 90%);
-  --color-info-500: hsl(217 91% 60%);
-  --color-info-600: hsl(217 91% 51%);
-  --color-info-700: hsl(217 91% 44%);
-  --color-info-900: hsl(217 91% 34%);
-
-  /* JACXI Shipping Status Colors */
-  --color-status-quote-requested: hsl(217 91% 95%);
-  --color-status-quote-approved: hsl(142 76% 95%);
-  --color-status-pickup-scheduled: hsl(220 13% 96%);
-  --color-status-picked-up: hsl(48 96% 95%);
-  --color-status-in-transit: hsl(217 91% 95%);
-  --color-status-at-port: hsl(271 91% 96%);
-  --color-status-customs-clearance: hsl(25 95% 96%);
-  --color-status-out-for-delivery: hsl(142 76% 95%);
-  --color-status-delivered: hsl(142 76% 90%);
-  --color-status-delayed: hsl(0 84% 95%);
-  --color-status-cancelled: hsl(220 13% 97%);
-
-  /* Neutral Gray Scale */
-  --color-neutral-50: hsl(210 20% 98%);
-  --color-neutral-100: hsl(210 16% 96%);
-  --color-neutral-200: hsl(214 16% 92%);
-  --color-neutral-300: hsl(216 16% 87%);
-  --color-neutral-400: hsl(218 14% 68%);
-  --color-neutral-500: hsl(220 13% 59%);
-  --color-neutral-600: hsl(215 14% 47%);
-  --color-neutral-700: hsl(217 11% 40%);
-  --color-neutral-800: hsl(215 16% 31%);
-  --color-neutral-900: hsl(215 25% 20%);
+  /* Accent families */
 
   /* Typography Scale */
   --font-size-display-xs: 2.5rem;    /* 40px */
@@ -193,17 +306,17 @@ html {
   --radius-full: 9999px;             /* Fully rounded */
 
   /* Shadow Scale */
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-xs: 0 1px 2px 0 rgb(var(--text-primary-rgb) / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(var(--text-primary-rgb) / 0.1), 0 1px 2px -1px rgb(var(--text-primary-rgb) / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(var(--text-primary-rgb) / 0.1), 0 2px 4px -2px rgb(var(--text-primary-rgb) / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(var(--text-primary-rgb) / 0.1), 0 4px 6px -4px rgb(var(--text-primary-rgb) / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(var(--text-primary-rgb) / 0.1), 0 8px 10px -6px rgb(var(--text-primary-rgb) / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(var(--text-primary-rgb) / 0.25);
 
   /* Brand Shadows */
-  --shadow-brand-cyan: 0 4px 14px 0 rgb(0 191 255 / 0.25);
-  --shadow-brand-gold: 0 4px 14px 0 rgb(212 175 55 / 0.25);
-  --shadow-brand-navy: 0 4px 14px 0 rgb(10 31 68 / 0.25);
+  --shadow-brand-cyan: 0 4px 14px 0 rgb(var(--accent-gold-rgb) / 0.25);
+  --shadow-brand-gold: 0 4px 14px 0 rgb(var(--accent-gold-rgb) / 0.25);
+  --shadow-brand-navy: 0 4px 14px 0 rgb(var(--text-primary-rgb) / 0.25);
 
   /* Animation Durations */
   --duration-instant: 0ms;
@@ -229,75 +342,37 @@ html {
 
 :root {
   /* Premium Light Theme - Jacxi Shipping */
-  --jacxi-blue: 0 86 210; /* #0056D2 */
-  --uae-gold: 212 175 55; /* #D4AF37 */
-  --soft-white: 249 250 251; /* #F9FAFB */
-  --frosted-glass: 228 233 240; /* #E4E9F0 */
-  --royal-navy: 10 31 68; /* #0A1F44 */
-  --platinum-white: 248 249 250; /* #F8F9FA */
-  --platinum-gray: 206 212 218; /* #CED4DA */
-  --subtle-gold: 212 175 55; /* #D4AF37 */
-  --charcoal: 43 46 52; /* #2B2E34 */
-  --light-gray: 233 236 239; /* #E9ECEF */
+  --jacxi-blue: var(--accent-gold-rgb);
+  --uae-gold: var(--accent-gold-rgb);
+  --soft-white: var(--background-rgb);
+  --frosted-glass: var(--panel-rgb);
+  --royal-navy: 240 4% 11%;
+  --platinum-white: var(--background-rgb);
+  --platinum-gray: var(--panel-rgb);
+  --subtle-gold: var(--accent-gold-rgb);
+  --charcoal: 240 4% 11%;
+  --light-gray: var(--panel-rgb);
 
-  /* Futuristic Accent Colors */
-  --cyber-blue: 0 191 255; /* #00BFFF - Neon cyan blue */
-  --neon-purple: 138 43 226; /* #8A2BE2 - Electric purple */
-  --electric-green: 0 255 127; /* #00FF7F - Neon green */
-  --metallic-silver: 192 192 192; /* #C0C0C0 - Silver */
-  --glow-gold: 255 215 0; /* #FFD700 - Bright gold */
+  /* Accent Families */
+  --cyber-blue: 45 63% 52%;
+  --neon-purple: 45 63% 52%;
+  --electric-green: 45 63% 52%;
+  --metallic-silver: 0 0% 88%;
+  --glow-gold: 45 63% 52%;
 
-  /* System Colors - shadcn/ui compatible - Premium Light Theme */
-  --background: 249 250 251; /* Soft White */
-  --foreground: 43 46 52; /* Charcoal */
-  --card: 255 255 255; /* Pure White with glass effect */
-  --card-foreground: 43 46 52; /* Charcoal */
-  --popover: 255 255 255;
-  --popover-foreground: 43 46 52;
-  --primary: 0 86 210; /* Jacxi Blue */
-  --primary-foreground: 255 255 255; /* White */
-  --secondary: 228 233 240; /* Frosted Glass */
-  --secondary-foreground: 43 46 52; /* Charcoal */
-  --muted: 233 236 239; /* Light Gray */
-  --muted-foreground: 107 114 128; /* Gray 500 */
-  --accent: 212 175 55; /* UAE Gold */
-  --accent-foreground: 255 255 255; /* White */
-  --destructive: 220 38 38; /* Red 600 */
-  --destructive-foreground: 255 255 255;
-  --border: 228 233 240; /* Frosted Glass */
-  --input: 228 233 240;
-  --ring: 0 86 210; /* Jacxi Blue for focus rings */
-  --radius: 0.75rem; /* 12px - modern rounded corners */
+  /* System Colors - Jacxi Palette */
 }
 
 .dark {
-  --foreground: 240 240 240; /* Almost white */
-  --card: 20 25 35; /* Dark card with slight blue tint */
-  --card-foreground: 240 240 240;
-  --popover: 20 25 35;
-  --popover-foreground: 240 240 240;
-  --primary: 0 191 255; /* Cyber Blue */
-  --primary-foreground: 15 20 30;
-  --secondary: 30 35 45; /* Dark gray-blue */
-  --secondary-foreground: 240 240 240;
-  --muted: 30 35 45;
-  --muted-foreground: 180 180 180;
-  --accent: 138 43 226; /* Neon Purple */
-  --accent-foreground: 240 240 240;
-  --destructive: 230 57 70;
-  --destructive-foreground: 240 240 240;
-  --border: 40 45 55;
-  --input: 40 45 55;
-  --ring: 0 191 255; /* Cyber Blue glow */
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--background);
+  color: var(--text-primary);
   font-family: var(--font-cairo), 'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -355,17 +430,17 @@ h3 {
 
 /* Glass Morphism Effect */
 .glass {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--background-rgb), 0.1);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--background-rgb), 0.2);
 }
 
 .glass-dark {
-  background: rgba(15, 20, 30, 0.7);
+  background: rgba(var(--text-primary-rgb), 0.7);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--background-rgb), 0.1);
 }
 
 /* Glow Effects */
@@ -414,8 +489,8 @@ h3 {
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-  border-radius: 10px;
+	background: var(--panel);
+	border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -424,7 +499,7 @@ h3 {
     hsl(var(--neon-purple)) 100%
   );
   border-radius: 10px;
-  border: 2px solid hsl(var(--muted));
+		border: 2px solid var(--panel);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -438,11 +513,11 @@ h3 {
 /* Enhanced Focus styles with glow */
 .focus-visible,
 *:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2),
-              0 0 20px hsl(var(--ring) / 0.3);
-  transition: all 0.2s ease-in-out;
+	outline: 2px solid var(--accent-gold);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(var(--accent-gold-rgb), 0.2),
+	              0 0 20px rgba(var(--accent-gold-rgb), 0.3);
+	transition: all 0.2s ease-in-out;
 }
 
 /* Advanced Animation Utilities */
@@ -475,7 +550,7 @@ h3 {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
+    rgba(var(--background-rgb), 0.1) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -573,14 +648,14 @@ h3 {
 }
 
 @keyframes hologram-flicker {
-  0%, 100% { opacity: 1; filter: drop-shadow(0 0 40px rgba(0, 191, 255, 0.6)) drop-shadow(0 0 80px rgba(0, 191, 255, 0.3)); }
-  98% { opacity: 1; filter: drop-shadow(0 0 40px rgba(0, 191, 255, 0.6)) drop-shadow(0 0 80px rgba(0, 191, 255, 0.3)); }
-  99% { opacity: 0.95; filter: drop-shadow(0 0 30px rgba(0, 191, 255, 0.4)) drop-shadow(0 0 60px rgba(0, 191, 255, 0.2)); }
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 40px rgba(var(--accent-gold-rgb), 0.6)) drop-shadow(0 0 80px rgba(var(--accent-gold-rgb), 0.3)); }
+  98% { opacity: 1; filter: drop-shadow(0 0 40px rgba(var(--accent-gold-rgb), 0.6)) drop-shadow(0 0 80px rgba(var(--accent-gold-rgb), 0.3)); }
+  99% { opacity: 0.95; filter: drop-shadow(0 0 30px rgba(var(--accent-gold-rgb), 0.4)) drop-shadow(0 0 60px rgba(var(--accent-gold-rgb), 0.2)); }
 }
 
 @keyframes neon-pulse {
-  0%, 100% { opacity: 0.6; box-shadow: 0 0 10px rgba(0, 191, 255, 0.5), inset 0 0 10px rgba(0, 191, 255, 0.2); }
-  50% { opacity: 1; box-shadow: 0 0 20px rgba(0, 191, 255, 0.8), inset 0 0 20px rgba(0, 191, 255, 0.4); }
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 10px rgba(var(--accent-gold-rgb), 0.5), inset 0 0 10px rgba(var(--accent-gold-rgb), 0.2); }
+  50% { opacity: 1; box-shadow: 0 0 20px rgba(var(--accent-gold-rgb), 0.8), inset 0 0 20px rgba(var(--accent-gold-rgb), 0.4); }
 }
 
 /* Smooth Transitions */
@@ -595,11 +670,11 @@ h3 {
 /* Accessibility - High Contrast Compliance */
 /* All text/background combinations meet WCAG AA/AAA standards */
 
-/* Royal Navy (#0A1F44) on Platinum White (#F8F9FA) - Ratio: 14.5:1 (AAA) */
-/* Platinum White (#F8F9FA) on Royal Navy (#0A1F44) - Ratio: 14.5:1 (AAA) */
-/* Charcoal (#2B2E34) on Platinum White (#F8F9FA) - Ratio: 15.8:1 (AAA) */
-/* Royal Navy (#0A1F44) on Subtle Gold (#D4AF37) - Ratio: 6.8:1 (AAA) */
-/* Subtle Gold (#D4AF37) on Royal Navy (#0A1F44) - Ratio: 6.8:1 (AAA) */
+/* Royal Navy (var(--text-primary)) on Platinum White (var(--background)) - Ratio: 14.5:1 (AAA) */
+/* Platinum White (var(--background)) on Royal Navy (var(--text-primary)) - Ratio: 14.5:1 (AAA) */
+/* Charcoal (var(--text-primary)) on Platinum White (var(--background)) - Ratio: 15.8:1 (AAA) */
+/* Royal Navy (var(--text-primary)) on Subtle Gold (var(--accent-gold)) - Ratio: 6.8:1 (AAA) */
+/* Subtle Gold (var(--accent-gold)) on Royal Navy (var(--text-primary)) - Ratio: 6.8:1 (AAA) */
 
 /* Enhanced Interactive Element Styles */
 button:focus-visible,
@@ -607,10 +682,10 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid hsl(var(--ring));
+	outline: 2px solid var(--accent-gold);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2),
-              0 0 20px hsl(var(--ring) / 0.3);
+	box-shadow: 0 0 0 4px rgba(var(--accent-gold-rgb), 0.2),
+	              0 0 20px rgba(var(--accent-gold-rgb), 0.3);
 }
 
 /* Hover effects for interactive elements */
@@ -621,7 +696,7 @@ a:hover {
 
 button:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(var(--text-primary-rgb), 0.15);
 }
 
 /* Links - no underline by default */
@@ -643,20 +718,20 @@ button[class*="bg-"] {
 
 /* Premium Shadow Utilities */
 .shadow-futuristic {
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 10px 40px rgba(var(--text-primary-rgb), 0.1),
               0 0 20px hsl(var(--cyber-blue) / 0.1);
 }
 
 .shadow-glow {
-  box-shadow: 0 0 20px hsl(var(--accent) / 0.3),
-              0 0 40px hsl(var(--accent) / 0.2);
+	box-shadow: 0 0 20px rgba(var(--accent-gold-rgb), 0.3),
+	            0 0 40px rgba(var(--accent-gold-rgb), 0.2);
 }
 
 /* Border Gradient Effect */
 .border-gradient {
-  position: relative;
-  background: hsl(var(--background));
-  border-radius: var(--radius);
+	position: relative;
+	background: var(--background);
+	border-radius: var(--radius);
 }
 
 .border-gradient::before {
@@ -669,8 +744,8 @@ button[class*="bg-"] {
     hsl(var(--cyber-blue)), 
     hsl(var(--neon-purple))
   );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, 
-                linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(var(--background) 0 0) content-box, 
+               linear-gradient(var(--background) 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -692,6 +767,57 @@ button[class*="bg-"] {
   background-clip: text;
 }
 
+/* Dashboard Layout Helpers */
+.dashboard-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.dashboard-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.dashboard-theme-light {
+	background-color: var(--background);
+	color: var(--text-primary);
+}
+
+.light-surface {
+	background-color: var(--background);
+	color: var(--text-primary);
+}
+
+.light-surface :where(.text-white) {
+	color: var(--text-primary) !important;
+}
+
+.light-surface :where([class*="text-white/90"]) {
+	color: rgba(var(--text-primary-rgb), 0.94) !important;
+}
+
+.light-surface :where([class*="text-white/80"]) {
+	color: rgba(var(--text-primary-rgb), 0.88) !important;
+}
+
+.light-surface :where([class*="text-white/70"], [class*="text-white/60"]) {
+	color: var(--text-secondary) !important;
+}
+
+.light-surface :where([class*="text-white/50"], [class*="text-white/40"], [class*="text-white/30"], [class*="text-white/20"]) {
+	color: rgba(var(--text-secondary-rgb), 0.65) !important;
+}
+
+.light-surface :where(.bg-white, .bg-white/5, .bg-white/10, .bg-white/20, .bg-white/30, .bg-[var(--text-primary)], .bg-[var(--text-primary)]/50, .bg-[var(--text-primary)]/60, .bg-[var(--text-primary)]/70) {
+	background-color: rgba(var(--panel-rgb), 0.95) !important;
+	color: var(--text-primary) !important;
+}
+
+.light-surface :where(.border-white, .border-white/5, .border-white/10, .border-white/20, .border-white/30, .border-white/40) {
+	border-color: var(--border) !important;
+}
+
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
@@ -699,13 +825,13 @@ html {
 
 /* Selection Colors */
 ::selection {
-  background-color: hsl(var(--accent) / 0.3);
-  color: hsl(var(--foreground));
+	background-color: rgba(var(--accent-gold-rgb), 0.3);
+	color: var(--text-primary);
 }
 
 ::-moz-selection {
-  background-color: hsl(var(--accent) / 0.3);
-  color: hsl(var(--foreground));
+	background-color: rgba(var(--accent-gold-rgb), 0.3);
+	color: var(--text-primary);
 }
 
 /* =============================================================================
@@ -777,169 +903,138 @@ html {
 /* Glass Morphism Utilities */
 .glass-subtle {
   backdrop-filter: blur(4px);
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(var(--background-rgb), 0.05);
+  border: 1px solid rgba(var(--background-rgb), 0.1);
 }
 
 .glass-medium {
   backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(var(--background-rgb), 0.1);
+  border: 1px solid rgba(var(--background-rgb), 0.2);
 }
 
 .glass-strong {
   backdrop-filter: blur(20px);
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(var(--background-rgb), 0.2);
+  border: 1px solid rgba(var(--background-rgb), 0.3);
 }
 
 .glass-premium {
   backdrop-filter: blur(24px);
-  background-color: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background-color: rgba(var(--background-rgb), 0.3);
+  border: 1px solid rgba(var(--background-rgb), 0.4);
 }
 
 .glass-dark-subtle {
   backdrop-filter: blur(4px);
-  background-color: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(var(--text-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--background-rgb), 0.05);
 }
 
 .glass-dark-medium {
   backdrop-filter: blur(12px);
-  background-color: rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(var(--text-primary-rgb), 0.1);
+  border: 1px solid rgba(var(--background-rgb), 0.1);
 }
 
 .glass-dark-strong {
   backdrop-filter: blur(20px);
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(var(--text-primary-rgb), 0.2);
+  border: 1px solid rgba(var(--background-rgb), 0.2);
 }
 
 .glass-dark-premium {
   backdrop-filter: blur(24px);
-  background-color: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(var(--text-primary-rgb), 0.3);
+  border: 1px solid rgba(var(--background-rgb), 0.3);
 }
 
 /* Brand Glass Variants */
 .glass-brand-cyan {
   backdrop-filter: blur(12px);
-  background-color: rgba(0, 191, 255, 0.05);
-  border: 1px solid rgba(0, 191, 255, 0.2);
+  background-color: rgba(var(--accent-gold-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-gold-rgb), 0.2);
 }
 
 .glass-brand-gold {
   backdrop-filter: blur(12px);
-  background-color: rgba(212, 175, 55, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  background-color: rgba(var(--accent-gold-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-gold-rgb), 0.2);
 }
 
 .glass-brand-navy {
   backdrop-filter: blur(12px);
-  background-color: rgba(10, 31, 68, 0.05);
-  border: 1px solid rgba(10, 31, 68, 0.2);
+  background-color: rgba(var(--text-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--text-primary-rgb), 0.2);
 }
 
 /* Status Badge Utilities */
-.status-quote-requested {
-  background-color: var(--color-status-quote-requested);
-  color: hsl(217 91% 34%);
-  border-color: hsl(217 91% 60%);
+.status-quote-requested,
+.status-quote-approved,
+.status-pickup-scheduled,
+.status-picked-up,
+.status-in-transit,
+.status-at-port,
+.status-customs-clearance,
+.status-out-for-delivery,
+.status-delivered,
+.status-cancelled {
+	background-color: var(--panel);
+	color: var(--text-primary);
+	border-color: var(--border);
 }
 
-.status-quote-approved {
-  background-color: var(--color-status-quote-approved);
-  color: hsl(142 76% 29%);
-  border-color: hsl(142 71% 45%);
-}
-
-.status-pickup-scheduled {
-  background-color: var(--color-status-pickup-scheduled);
-  color: hsl(220 13% 34%);
-  border-color: hsl(220 13% 59%);
-}
-
-.status-picked-up {
-  background-color: var(--color-status-picked-up);
-  color: hsl(38 92% 25%);
-  border-color: hsl(38 92% 50%);
-}
-
-.status-in-transit {
-  background-color: var(--color-status-in-transit);
-  color: hsl(217 91% 34%);
-  border-color: hsl(217 91% 60%);
-}
-
-.status-at-port {
-  background-color: var(--color-status-at-port);
-  color: hsl(271 91% 34%);
-  border-color: hsl(271 91% 60%);
-}
-
-.status-customs-clearance {
-  background-color: var(--color-status-customs-clearance);
-  color: hsl(25 95% 34%);
-  border-color: hsl(25 95% 50%);
-}
-
-.status-out-for-delivery {
-  background-color: var(--color-status-out-for-delivery);
-  color: hsl(142 76% 29%);
-  border-color: hsl(142 71% 45%);
-}
-
-.status-delivered {
-  background-color: var(--color-status-delivered);
-  color: hsl(142 76% 29%);
-  border-color: hsl(142 76% 36%);
-}
 
 .status-delayed {
-  background-color: var(--color-status-delayed);
-  color: hsl(0 72% 34%);
-  border-color: hsl(0 84% 60%);
-}
-
-.status-cancelled {
-  background-color: var(--color-status-cancelled);
-  color: hsl(220 13% 34%);
-  border-color: hsl(220 13% 59%);
+	background-color: rgba(var(--error-rgb), 0.12);
+	color: var(--error);
+	border-color: var(--error);
 }
 
 /* Gradient Utilities */
 .bg-brand-gradient {
-  background: linear-gradient(135deg,
-    var(--color-brand-navy) 0%,
-    var(--color-brand-navy-light) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--accent-gold-rgb), 0.95) 0%,
+    rgba(var(--accent-gold-rgb), 0.7) 45%,
+    rgba(var(--text-primary-rgb), 0.08) 100%
+  );
 }
 
 .bg-brand-cyan-gradient {
-  background: linear-gradient(135deg,
-    var(--color-brand-cyan) 0%,
-    var(--color-brand-cyan-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--panel-rgb), 0.95) 0%,
+    rgba(var(--accent-gold-rgb), 0.4) 60%,
+    rgba(var(--text-primary-rgb), 0.05) 100%
+  );
 }
 
 .bg-brand-gold-gradient {
-  background: linear-gradient(135deg,
-    var(--color-brand-gold) 0%,
-    var(--color-brand-gold-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--accent-gold-rgb), 1) 0%,
+    rgba(var(--accent-gold-rgb), 0.85) 50%,
+    rgba(var(--accent-gold-rgb), 0.65) 100%
+  );
 }
 
 .bg-brand-premium-gradient {
-  background: linear-gradient(135deg,
-    var(--color-brand-navy) 0%,
-    var(--color-brand-cyan) 50%,
-    var(--color-brand-gold) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--panel-rgb), 0.9) 0%,
+    rgba(var(--accent-gold-rgb), 0.55) 55%,
+    rgba(var(--text-primary-rgb), 0.12) 100%
+  );
 }
 
 /* Text Gradient */
 .text-brand-gradient {
-  background: linear-gradient(135deg,
-    var(--color-brand-cyan),
-    var(--color-brand-gold));
+  background: linear-gradient(
+    135deg,
+    var(--text-primary) 0%,
+    var(--accent-gold) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -971,7 +1066,7 @@ html {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
+    rgba(var(--background-rgb), 0.1) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
@@ -1006,11 +1101,6 @@ html {
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
-}
-
-/* Focus Enhancement */
-.focus-visible-enhanced {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-white;
 }
 
 /* Text Utilities */

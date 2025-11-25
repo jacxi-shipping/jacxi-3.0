@@ -8,152 +8,117 @@
 // =============================================================================
 
 export const colors = {
-  // JACXI Brand Colors - Luxury Corporate Theme
-  brand: {
-    // Primary Navy - Trust, Stability, Professionalism
-    navy: '#0A1F44',      // Royal Navy - Primary brand color
-    'navy-light': '#1E3A5F', // Lighter navy for hover states
-    'navy-lighter': '#2E4A6F', // Even lighter for backgrounds
-    'navy-dark': '#07152F',  // Darker navy for accents
-    'navy-darker': '#050F1F', // Darkest navy for deep backgrounds
-
-    // Secondary Cyan - Technology, Speed, Reliability
-    cyan: '#00BFFF',       // Electric Cyan - Tech accent
-    'cyan-light': '#4DD0E1', // Light cyan for highlights
-    'cyan-lighter': '#87E4F0', // Very light cyan for backgrounds
-    'cyan-dark': '#0099CC',  // Dark cyan for hover states
-    'cyan-darker': '#007399', // Very dark cyan for text
-
-    // Tertiary Gold - Premium, Luxury, Success
-    gold: '#D4AF37',       // Antique Gold - Premium accent
-    'gold-light': '#E5C158', // Light gold for highlights
-    'gold-lighter': '#F0D890', // Very light gold for backgrounds
-    'gold-dark': '#B8942A',  // Dark gold for hover states
-    'gold-darker': '#9C7A1F', // Very dark gold for text
-
-    // Neutral Charcoal - Sophistication, Balance
-    charcoal: '#2B2E34',   // Charcoal Gray - Secondary dark
-    'charcoal-light': '#404040', // Light charcoal
-    'charcoal-lighter': '#5A5A5A', // Very light charcoal
-
-    // Clean White - Purity, Trust
-    white: '#F8F9FA',      // Platinum White
-    'white-off': '#E9ECEF', // Off-white for backgrounds
-    'white-pure': '#FFFFFF', // Pure white for accents
-  },
-
-  // Semantic Colors - Status & States (Shipping-Specific)
-  semantic: {
-    success: {
-      50: '#ECFDF5',
-      100: '#D1FAE5',
-      200: '#A7F3D0',
-      500: '#10B981',
-      600: '#059669',
-      700: '#047857',
-      900: '#064E3B',
-    },
-    warning: {
-      50: '#FFFBEB',
-      100: '#FEF3C7',
-      200: '#FDE68A',
-      500: '#F59E0B',
-      600: '#D97706',
-      700: '#B45309',
-      900: '#78350F',
-    },
-    error: {
-      50: '#FEF2F2',
-      100: '#FEE2E2',
-      200: '#FECACA',
-      500: '#EF4444',
-      600: '#DC2626',
-      700: '#B91C1C',
-      900: '#7F1D1D',
-    },
-    info: {
-      50: '#EFF6FF',
-      100: '#DBEAFE',
-      200: '#BFDBFE',
-      500: '#3B82F6',
-      600: '#2563EB',
-      700: '#1D4ED8',
-      900: '#1E3A8A',
-    },
-  },
-
-  // Shipping Status Colors - Custom for JACXI
-  shipping: {
-    'quote-requested': { bg: '#EFF6FF', text: '#1E40AF', border: '#3B82F6' },
-    'quote-approved': { bg: '#ECFDF5', text: '#065F46', border: '#10B981' },
-    'pickup-scheduled': { bg: '#F3F4F6', text: '#374151', border: '#6B7280' },
-    'picked-up': { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B' },
-    'in-transit': { bg: '#EFF6FF', text: '#1E40AF', border: '#3B82F6' },
-    'at-port': { bg: '#F3E8FF', text: '#7C2D92', border: '#C084FC' },
-    'customs-clearance': { bg: '#FFF7ED', text: '#9A3412', border: '#FB923C' },
-    'out-for-delivery': { bg: '#ECFDF5', text: '#065F46', border: '#10B981' },
-    'delivered': { bg: '#D1FAE5', text: '#047857', border: '#059669' },
-    'delayed': { bg: '#FEF2F2', text: '#991B1B', border: '#EF4444' },
-    'cancelled': { bg: '#F9FAFB', text: '#6B7280', border: '#9CA3AF' },
-  },
-
-  // Neutral Grays - Professional Scale
-  neutral: {
-    50: '#FAFAFA',
-    100: '#F5F5F5',
-    200: '#E5E5E5',
-    300: '#D4D4D4',
-    400: '#A3A3A3',
-    500: '#737373',
-    600: '#525252',
-    700: '#404040',
-    800: '#262626',
-    900: '#171717',
-  },
-
-  // Light Theme Specific - JACXI Light Mode
-  light: {
-    background: {
-      primary: '#FFFFFF',
-      secondary: '#F8F9FA',
-      tertiary: '#E9ECEF',
-      card: '#FFFFFF',
-      overlay: '#F8F9FA',
-    },
-    surface: {
-      elevated: '#FFFFFF',
-      card: '#FFFFFF',
-      overlay: '#F8F9FA',
-    },
-    text: {
-      primary: '#0A1F44',
-      secondary: '#2B2E34',
-      tertiary: '#404040',
-      muted: '#6B7280',
-    },
-  },
-
-  // Dark Theme Specific - JACXI Dark Mode
-  dark: {
-    background: {
-      primary: '#0A0A0A',
-      secondary: '#1A1A1A',
-      tertiary: '#2A2A2A',
-      card: '#1F1F1F',
-      overlay: '#333333',
-    },
-    surface: {
-      elevated: '#262626',
-      card: '#2A2A2A',
-      overlay: '#404040',
-    },
-    text: {
-      primary: '#F8F9FA',
-      secondary: '#E9ECEF',
-      tertiary: '#CED4DA',
-      muted: '#6C757D',
-    },
-  },
+	brand: {
+		accent: 'var(--accent-gold)',
+		background: '#F9FAFB',
+		panel: 'var(--panel)',
+		textPrimary: 'var(--text-primary)',
+		textSecondary: 'var(--text-secondary)',
+		border: 'var(--border)',
+	},
+	semantic: {
+		success: {
+			50: '#F9FAFB',
+			100: 'var(--panel)',
+			200: 'var(--panel)',
+			500: 'var(--accent-gold)',
+			600: 'var(--accent-gold)',
+			700: 'var(--accent-gold)',
+			900: 'var(--text-primary)',
+		},
+		warning: {
+			50: '#F9FAFB',
+			100: 'var(--panel)',
+			200: 'var(--panel)',
+			500: 'var(--accent-gold)',
+			600: 'var(--accent-gold)',
+			700: 'var(--accent-gold)',
+			900: 'var(--text-primary)',
+		},
+		error: {
+			50: 'var(--error)',
+			100: 'var(--error)',
+			200: 'var(--error)',
+			500: 'var(--error)',
+			600: 'var(--error)',
+			700: 'var(--error)',
+			900: 'var(--error)',
+		},
+		info: {
+			50: '#F9FAFB',
+			100: 'var(--panel)',
+			200: 'var(--border)',
+			500: 'var(--text-secondary)',
+			600: 'var(--text-primary)',
+			700: 'var(--text-primary)',
+			900: 'var(--text-primary)',
+		},
+	},
+	shipping: {
+		'quote-requested': { bg: '#F9FAFB', text: 'var(--text-primary)', border: 'var(--border)' },
+		'quote-approved': { bg: 'var(--panel)', text: 'var(--text-primary)', border: 'var(--border)' },
+		'pickup-scheduled': { bg: '#F9FAFB', text: 'var(--text-secondary)', border: 'var(--border)' },
+		'picked-up': { bg: '#F9FAFB', text: 'var(--text-primary)', border: 'var(--border)' },
+		'in-transit': { bg: 'var(--panel)', text: 'var(--text-primary)', border: 'var(--border)' },
+		'at-port': { bg: '#F9FAFB', text: 'var(--text-primary)', border: 'var(--border)' },
+		'customs-clearance': { bg: 'var(--panel)', text: 'var(--text-secondary)', border: 'var(--border)' },
+		'out-for-delivery': { bg: '#F9FAFB', text: 'var(--text-primary)', border: 'var(--border)' },
+		'delivered': { bg: 'var(--panel)', text: 'var(--text-primary)', border: 'var(--border)' },
+		'delayed': { bg: 'var(--error)', text: 'var(--error)', border: 'var(--error)' },
+		'cancelled': { bg: '#F9FAFB', text: 'var(--text-secondary)', border: 'var(--border)' },
+	},
+	neutral: {
+		50: '#F9FAFB',
+		100: 'var(--panel)',
+		200: 'var(--panel)',
+		300: 'var(--border)',
+		400: 'var(--border)',
+		500: 'var(--text-secondary)',
+		600: 'var(--text-secondary)',
+		700: 'var(--text-secondary)',
+		800: 'var(--text-primary)',
+		900: 'var(--text-primary)',
+	},
+	light: {
+		background: {
+			primary: '#F9FAFB',
+			secondary: '#F9FAFB',
+			tertiary: 'var(--panel)',
+			card: 'var(--background)',
+			overlay: '#F9FAFB',
+		},
+		surface: {
+			elevated: 'var(--background)',
+			card: 'var(--background)',
+			overlay: '#F9FAFB',
+		},
+		text: {
+			primary: 'var(--text-primary)',
+			secondary: 'var(--text-secondary)',
+			tertiary: 'var(--text-secondary)',
+			muted: 'var(--text-secondary)',
+		},
+	},
+	dark: {
+		background: {
+			primary: 'var(--text-primary)',
+			secondary: 'var(--text-primary)',
+			tertiary: 'var(--text-primary)',
+			card: 'var(--text-primary)',
+			overlay: 'var(--text-primary)',
+		},
+		surface: {
+			elevated: 'var(--text-primary)',
+			card: 'var(--text-primary)',
+			overlay: 'var(--text-primary)',
+		},
+		text: {
+			primary: '#F9FAFB',
+			secondary: 'var(--panel)',
+			tertiary: 'var(--panel)',
+			muted: 'var(--panel)',
+		},
+	},
 } as const;
 
 // =============================================================================
@@ -282,34 +247,34 @@ export const borderRadius = {
 
 export const shadows = {
   none: 'none',
-  xs: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-  sm: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-  md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-  '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+  xs: '0 1px 2px 0 rgb(var(--text-primary-rgb) / 0.05)',
+  sm: '0 1px 3px 0 rgb(var(--text-primary-rgb) / 0.1), 0 1px 2px -1px rgb(var(--text-primary-rgb) / 0.1)',
+  md: '0 4px 6px -1px rgb(var(--text-primary-rgb) / 0.1), 0 2px 4px -2px rgb(var(--text-primary-rgb) / 0.1)',
+  lg: '0 10px 15px -3px rgb(var(--text-primary-rgb) / 0.1), 0 4px 6px -4px rgb(var(--text-primary-rgb) / 0.1)',
+  xl: '0 20px 25px -5px rgb(var(--text-primary-rgb) / 0.1), 0 8px 10px -6px rgb(var(--text-primary-rgb) / 0.1)',
+  '2xl': '0 25px 50px -12px rgb(var(--text-primary-rgb) / 0.25)',
 
   // Brand-colored shadows - JACXI signature
   brand: {
-    cyan: '0 4px 14px 0 rgb(0 191 255 / 0.25)',
-    cyanSoft: '0 2px 8px 0 rgb(0 191 255 / 0.15)',
-    gold: '0 4px 14px 0 rgb(212 175 55 / 0.25)',
-    goldSoft: '0 2px 8px 0 rgb(212 175 55 / 0.15)',
-    navy: '0 4px 14px 0 rgb(10 31 68 / 0.25)',
-    navySoft: '0 2px 8px 0 rgb(10 31 68 / 0.15)',
+    cyan: '0 4px 14px 0 rgb(var(--accent-gold-rgb) / 0.25)',
+    cyanSoft: '0 2px 8px 0 rgb(var(--accent-gold-rgb) / 0.15)',
+    gold: '0 4px 14px 0 rgb(var(--accent-gold-rgb) / 0.25)',
+    goldSoft: '0 2px 8px 0 rgb(var(--accent-gold-rgb) / 0.15)',
+    navy: '0 4px 14px 0 rgb(var(--text-primary-rgb) / 0.25)',
+    navySoft: '0 2px 8px 0 rgb(var(--text-primary-rgb) / 0.15)',
   },
 
   // Inner shadows for depth
   inner: {
-    sm: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
-    lg: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.1)',
+    sm: 'inset 0 2px 4px 0 rgb(var(--text-primary-rgb) / 0.05)',
+    lg: 'inset 0 2px 4px 0 rgb(var(--text-primary-rgb) / 0.1)',
   },
 
   // Glowing effects - Tech premium
   glow: {
-    cyan: '0 0 20px rgb(0 191 255 / 0.3)',
-    gold: '0 0 20px rgb(212 175 55 / 0.3)',
-    navy: '0 0 20px rgb(10 31 68 / 0.3)',
+    cyan: '0 0 20px rgb(var(--accent-gold-rgb) / 0.3)',
+    gold: '0 0 20px rgb(var(--accent-gold-rgb) / 0.3)',
+    navy: '0 0 20px rgb(var(--text-primary-rgb) / 0.3)',
   },
 } as const;
 

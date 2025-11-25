@@ -4,18 +4,8 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Temporary enum until migration
-enum TempDocumentCategory {
-  INVOICE = 'INVOICE',
-  BILL_OF_LADING = 'BILL_OF_LADING',
-  CUSTOMS = 'CUSTOMS',
-  INSURANCE = 'INSURANCE',
-  TITLE = 'TITLE',
-  INSPECTION_REPORT = 'INSPECTION_REPORT',
-  PHOTO = 'PHOTO',
-  CONTRACT = 'CONTRACT',
-  OTHER = 'OTHER',
-}
+// Temporary type until migration
+type TempDocumentCategory = 'INVOICE' | 'BILL_OF_LADING' | 'CUSTOMS' | 'INSURANCE' | 'TITLE' | 'INSPECTION_REPORT' | 'PHOTO' | 'CONTRACT' | 'OTHER';
 
 // GET: Fetch documents
 export async function GET(request: NextRequest) {
@@ -35,7 +25,7 @@ export async function GET(request: NextRequest) {
       OR?: Array<{ userId: string | undefined } | { isPublic: boolean }>;
       shipmentId?: string;
       userId?: string;
-      category?: typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
+      category?: TempDocumentCategory;
       isPublic?: boolean;
     };
     const where: WhereType = {};
@@ -50,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     if (shipmentId) where.shipmentId = shipmentId;
     if (userId && session.user?.role === 'admin') where.userId = userId;
-    if (category) where.category = category as typeof TempDocumentCategory[keyof typeof TempDocumentCategory];
+    if (category) where.category = category as TempDocumentCategory;
     if (isPublic !== null) where.isPublic = isPublic === 'true';
 
     const documents = await prisma.document.findMany({
@@ -120,7 +110,7 @@ export async function POST(request: NextRequest) {
         fileUrl,
         fileType,
         fileSize: fileSize || 0,
-        category: category as typeof TempDocumentCategory[keyof typeof TempDocumentCategory],
+        category: category as TempDocumentCategory,
         shipmentId: shipmentId || null,
         userId: userId || session.user?.id,
         uploadedBy: session.user?.name || session.user?.email || 'Unknown',

@@ -115,8 +115,8 @@ export default function DashboardTrackingPage() {
 
 	if (status === 'loading') {
 		return (
-			<div className="min-h-screen bg-[#020817] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
+			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]" />
 			</div>
 		);
 	}
@@ -133,14 +133,15 @@ export default function DashboardTrackingPage() {
 	}));
 
 	return (
-		<Section className="bg-[#020817] py-8 sm:py-12 lg:py-16">
+		<div className="light-surface">
+		<Section className="bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16">
 			<div className="max-w-5xl mx-auto space-y-10">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
 					className={cn(
-						'relative overflow-hidden rounded-xl border border-cyan-500/30 bg-[#0a1628]/60 backdrop-blur-sm',
+						'relative overflow-hidden rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/60 backdrop-blur-sm',
 						'p-6 sm:p-8'
 					)}
 				>
@@ -159,13 +160,13 @@ export default function DashboardTrackingPage() {
 								value={trackingNumber}
 								onChange={(event) => setTrackingNumber(event.target.value)}
 								placeholder="Container or tracking number (e.g., UETU6059142)"
-								className="flex-1 px-4 py-3 rounded-lg bg-[#020817]/70 border border-cyan-500/30 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+								className="flex-1 px-4 py-3 rounded-lg bg-[var(--text-primary)]/70 border border-cyan-500/30 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
 							/>
 							<Button
 								type="button"
 								onClick={handleTrack}
 								disabled={isLoading}
-								className="sm:w-auto w-full bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-cyan-500/30"
+								className="sm:w-auto w-full bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
 							>
 								{isLoading ? (
 									<>
@@ -196,7 +197,7 @@ export default function DashboardTrackingPage() {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.4, delay: 0.1 }}
-							className="relative overflow-hidden rounded-xl border border-cyan-500/30 bg-[#0a1628]/60 backdrop-blur-sm p-6 sm:p-8"
+							className="relative overflow-hidden rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/60 backdrop-blur-sm p-6 sm:p-8"
 						>
 							<div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 opacity-30" />
 							<div className="relative z-10 space-y-6">
@@ -249,9 +250,9 @@ export default function DashboardTrackingPage() {
 											<span>Progress</span>
 											<span>{progressValue}%</span>
 										</div>
-										<div className="h-2 overflow-hidden rounded-full border border-cyan-500/20 bg-[#020817]">
+										<div className="h-2 overflow-hidden rounded-full border border-cyan-500/20 bg-[var(--text-primary)]">
 											<div
-												className="h-full bg-gradient-to-r from-cyan-500 to-[#00bfff]"
+												className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)]"
 												style={{ width: `${progressValue}%` }}
 											/>
 										</div>
@@ -269,14 +270,14 @@ export default function DashboardTrackingPage() {
 							<h2 className="text-xl font-semibold text-white">Carrier Milestones</h2>
 							<div className="space-y-3">
 								{timelineEvents.length === 0 && (
-									<div className="rounded-lg border border-cyan-500/20 bg-[#0a1628]/40 px-4 py-3 text-sm text-white/60">
+									<div className="rounded-lg border border-cyan-500/20 bg-[var(--text-primary)]/40 px-4 py-3 text-sm text-white/60">
 										No milestone history available for this container yet.
 									</div>
 								)}
 								{timelineEvents.map((event) => {
 									const Icon = event.icon;
 									return (
-										<div key={event.id} className="relative overflow-hidden rounded-lg border border-cyan-500/20 bg-[#0a1628]/50 px-4 py-3">
+										<div key={event.id} className="relative overflow-hidden rounded-lg border border-cyan-500/20 bg-[var(--text-primary)]/50 px-4 py-3">
 											<div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 opacity-10" />
 											<div className="relative z-10 flex flex-col gap-1">
 												<div className="flex items-center gap-2 text-sm font-medium text-white">
@@ -302,5 +303,6 @@ export default function DashboardTrackingPage() {
 				)}
 			</div>
 		</Section>
+		</div>
 	);
 }

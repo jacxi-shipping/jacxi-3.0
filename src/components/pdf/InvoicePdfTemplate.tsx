@@ -64,11 +64,11 @@ export interface InvoicePdfTemplateProps {
 
 const styles = StyleSheet.create({
 	page: {
-		backgroundColor: '#ffffff',
+		backgroundColor: 'var(--background)',
 		padding: 32,
 		fontFamily: 'Helvetica',
 		fontSize: 11,
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 	},
 	header: {
 		display: 'flex',
@@ -84,12 +84,12 @@ const styles = StyleSheet.create({
 	companyName: {
 		fontSize: 18,
 		fontWeight: 'bold',
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 		marginBottom: 6,
 	},
 	companyLine: {
 		marginBottom: 3,
-		color: '#334155',
+		color: 'var(--text-primary)',
 	},
 	companyLogo: {
 		width: 96,
@@ -99,13 +99,13 @@ const styles = StyleSheet.create({
 	},
 	invoiceMeta: {
 		minWidth: 180,
-		backgroundColor: '#f1f5f9',
+		backgroundColor: 'var(--background)',
 		padding: 12,
 		borderRadius: 6,
 	},
 	invoiceMetaLabel: {
 		fontSize: 9,
-		color: '#64748b',
+		color: 'var(--text-secondary)',
 		textTransform: 'uppercase',
 		letterSpacing: 0.8,
 		marginBottom: 4,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
 	invoiceMetaValue: {
 		fontSize: 12,
 		fontWeight: 'bold',
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 		marginBottom: 8,
 	},
 	section: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
 	sectionTitle: {
 		fontSize: 13,
 		fontWeight: 'bold',
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 		marginBottom: 10,
 		textTransform: 'uppercase',
 		letterSpacing: 0.6,
@@ -139,14 +139,14 @@ const styles = StyleSheet.create({
 	},
 	infoLabel: {
 		fontSize: 9,
-		color: '#64748b',
+		color: 'var(--text-secondary)',
 		textTransform: 'uppercase',
 		letterSpacing: 0.8,
 		marginBottom: 4,
 	},
 	infoValue: {
 		fontSize: 11,
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 		marginBottom: 4,
 	},
 	itemsWrapper: {
@@ -154,12 +154,12 @@ const styles = StyleSheet.create({
 	},
 	itemCard: {
 		borderWidth: 1,
-		borderColor: '#cbd5f5',
+		borderColor: 'var(--panel)',
 		borderRadius: 8,
 		padding: 12,
 		marginBottom: 12,
-		backgroundColor: '#ffffff',
-		shadowColor: '#e2e8f0',
+		backgroundColor: 'var(--background)',
+		shadowColor: 'var(--panel)',
 		shadowOpacity: 0.3,
 		shadowRadius: 3,
 		shadowOffset: { width: 0, height: 2 },
@@ -174,19 +174,19 @@ const styles = StyleSheet.create({
 	itemTitle: {
 		fontSize: 12,
 		fontWeight: 'bold',
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 	},
 	itemSubtitle: {
 		fontSize: 9,
-		color: '#64748b',
+		color: 'var(--text-secondary)',
 		marginTop: 2,
 	},
 	itemTag: {
 		fontSize: 8,
 		textTransform: 'uppercase',
 		letterSpacing: 0.8,
-		color: '#1e293b',
-		backgroundColor: '#e2e8f0',
+		color: 'var(--text-primary)',
+		backgroundColor: 'var(--panel)',
 		paddingVertical: 3,
 		paddingHorizontal: 6,
 		borderRadius: 6,
@@ -199,13 +199,13 @@ const styles = StyleSheet.create({
 	},
 	itemMeta: {
 		fontSize: 9,
-		color: '#475569',
+		color: 'var(--text-secondary)',
 	},
 	itemMetaLabel: {
 		fontSize: 8,
 		textTransform: 'uppercase',
 		letterSpacing: 0.7,
-		color: '#94a3b8',
+		color: 'var(--text-secondary)',
 		marginBottom: 2,
 	},
 	itemTotals: {
@@ -216,11 +216,11 @@ const styles = StyleSheet.create({
 	itemTotalUsd: {
 		fontSize: 11,
 		fontWeight: 'bold',
-		color: '#0284c7',
+		color: 'var(--accent-gold)',
 	},
 	itemTotalAed: {
 		fontSize: 9,
-		color: '#475569',
+		color: 'var(--text-secondary)',
 		marginTop: 2,
 	},
 	costGrid: {
@@ -236,23 +236,23 @@ const styles = StyleSheet.create({
 	},
 	costLabel: {
 		fontSize: 8,
-		color: '#94a3b8',
+		color: 'var(--text-secondary)',
 		textTransform: 'uppercase',
 		letterSpacing: 0.6,
 		marginBottom: 2,
 	},
 	costValue: {
 		fontSize: 10,
-		color: '#0f172a',
+		color: 'var(--text-primary)',
 		fontWeight: 'bold',
 	},
 	totalsWrapper: {
 		marginTop: 16,
 		padding: 14,
 		borderWidth: 1,
-		borderColor: '#cbd5f5',
+		borderColor: 'var(--panel)',
 		borderRadius: 6,
-		backgroundColor: '#f8fafc',
+		backgroundColor: 'var(--background)',
 		alignSelf: 'flex-end',
 		minWidth: 220,
 	},
@@ -264,33 +264,33 @@ const styles = StyleSheet.create({
 	},
 	totalLabel: {
 		fontSize: 11,
-		color: '#64748b',
+		color: 'var(--text-secondary)',
 	},
 	totalValue: {
 		fontSize: 12,
 		fontWeight: 'bold',
-		color: '#0b1626',
+		color: 'var(--text-primary)',
 	},
 	totalValueAccent: {
-		color: '#0284c7',
+		color: 'var(--accent-gold)',
 	},
 	notesBox: {
 		borderWidth: 1,
-		borderColor: '#cbd5f5',
+		borderColor: 'var(--panel)',
 		borderRadius: 6,
 		padding: 12,
-		backgroundColor: '#ffffff',
+		backgroundColor: 'var(--background)',
 	},
 	notesText: {
 		fontSize: 10,
-		color: '#475569',
+		color: 'var(--text-secondary)',
 		lineHeight: 1.5,
 	},
 	footer: {
 		marginTop: 'auto',
 		paddingTop: 16,
 		borderTopWidth: 1,
-		borderTopColor: '#e2e8f0',
+		borderTopColor: 'var(--panel)',
 	},
 	socialLinks: {
 		display: 'flex',
@@ -301,12 +301,12 @@ const styles = StyleSheet.create({
 	},
 	socialLink: {
 		fontSize: 10,
-		color: '#0284c7',
+		color: 'var(--accent-gold)',
 		textDecoration: 'none',
 	},
 	footerText: {
 		fontSize: 9,
-		color: '#94a3b8',
+		color: 'var(--text-secondary)',
 	},
 });
 

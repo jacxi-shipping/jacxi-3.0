@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 const DEFAULT_SETTINGS = {
 	theme: 'futuristic',
-	accentColor: '#00BFFF',
+	accentColor: 'var(--accent-gold)',
 	sidebarDensity: 'comfortable',
 	animationsEnabled: true,
 	notifyShipmentEmail: true,

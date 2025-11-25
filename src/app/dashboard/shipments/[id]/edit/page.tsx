@@ -188,12 +188,12 @@ export default function EditShipmentPage() {
   if (!isAdmin && status !== 'loading') {
     return (
       <ProtectedRoute>
-        <Section className="min-h-screen bg-[#020817] flex items-center justify-center">
+        <Section className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
           <div className="max-w-md text-center space-y-4">
             <h2 className="text-xl font-semibold text-white">Access Restricted</h2>
             <p className="text-white/70">Only administrators can modify shipment details.</p>
             <Link href={`/dashboard/shipments/${params.id}`}>
-              <Button className="bg-[#00bfff] text-white hover:bg-[#00a8e6]">Back to Shipment</Button>
+              <Button className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]">Back to Shipment</Button>
             </Link>
           </div>
         </Section>
@@ -204,7 +204,7 @@ export default function EditShipmentPage() {
   if (loadingData) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[#020817] flex items-center justify-center">
+        <div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
           <div className="text-center space-y-4 text-white/70">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
             <p>Loading shipment data...</p>
@@ -334,8 +334,8 @@ export default function EditShipmentPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#020817]">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#020817] via-[#0a1628] to-[#020817]" />
+      <div className="min-h-screen bg-[var(--text-primary)]">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
         <div className="absolute inset-0 -z-10 opacity-[0.04]">
           <svg className="h-full w-full" preserveAspectRatio="none">
             <pattern id="edit-grid" width="32" height="32" patternUnits="userSpaceOnUse">
@@ -348,7 +348,7 @@ export default function EditShipmentPage() {
         <Section className="pt-6 pb-10">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-white">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#020817] border border-cyan-500/40">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--text-primary)] border border-cyan-500/40">
                 <TruckIcon className="h-4 w-4 text-cyan-300" />
               </span>
               <div>
@@ -633,7 +633,7 @@ export default function EditShipmentPage() {
                           name="titleStatus"
                           value={formData.titleStatus}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 bg-[#020817] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                          className="w-full px-4 py-2 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
                         >
                           <option value="">Select title status</option>
                           <option value="PENDING">Pending</option>
@@ -1062,7 +1062,7 @@ export default function EditShipmentPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-[#00bfff] text-white hover:bg-[#00a8e6] shadow-cyan-500/30"
+                className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
               >
                 {loading ? 'Updating...' : 'Update Shipment'}
               </Button>
