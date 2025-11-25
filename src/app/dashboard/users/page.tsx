@@ -2,14 +2,15 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { User, Mail, Shield, Users, UserPlus, Calendar, Eye, EyeOff, Key, Copy, Check, Search } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import Section from '@/components/layout/Section';
-import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { User, UserPlus, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Button, Box, CircularProgress, Typography, IconButton, Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Snackbar, Alert } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 
 interface UserData {
 	id: string;
@@ -24,12 +25,22 @@ export default function UsersPage() {
 	const router = useRouter();
 	const [users, setUsers] = useState<UserData[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [totalUsers, setTotalUsers] = useState<number>(0);
+	const [adminsCount, setAdminsCount] = useState<number>(0);
+	const [regularUsersCount, setRegularUsersCount] = useState<number>(0);
+	const [currentPage, setCurrentPage] = useState<number>(1);
+
+	// Confirmation modal state
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 	const [searchFilters, setSearchFilters] = useState<SearchFilters>({
 		query: '',
 		type: 'users',
 	});
+	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 	const [showEmailsFor, setShowEmailsFor] = useState<Set<string>>(new Set());
 	const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
+	const [highlightedUserId, setHighlightedUserId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (status === 'loading') return;
@@ -39,61 +50,113 @@ export default function UsersPage() {
 			router.replace('/dashboard');
 			return;
 		}
-
-		fetchUsers();
 	}, [session, status, router]);
 
-	const fetchUsers = async () => {
+	const PAGE_SIZE = 9;
+
+	const fetchUsers = useCallback(async (page: number = 1, query: string = searchFilters.query) => {
 		try {
 			setLoading(true);
-			const response = await fetch('/api/users');
+			const url = `/api/users?page=${page}&pageSize=${PAGE_SIZE}${query ? `&query=${encodeURIComponent(query)}` : ''}`;
+			const response = await fetch(url);
 			if (response.ok) {
 				const data = await response.json();
-				setUsers(data.users || []);
+
+				// Merge any optimistically created user stored in sessionStorage
+				let serverUsers = data.users || [];
+				let createdJson: string | null = null;
+				let createdUser: UserData | null = null;
+				try {
+					createdJson = sessionStorage.getItem('jacxi.createdUser');
+					if (createdJson) {
+						createdUser = JSON.parse(createdJson) as UserData;
+						// If not already present in server results, prepend it
+						if (createdUser && !serverUsers.some((u: UserData) => u.id === createdUser!.id)) {
+							serverUsers = [createdUser, ...serverUsers];
+							// adjust counts
+							if (createdUser.role === 'admin') {
+								data.admins = (data.admins ?? 0) + 1;
+							} else {
+								data.regularUsers = (data.regularUsers ?? 0) + 1;
+							}
+							data.total = (data.total ?? 0) + 1;
+							// clear the saved created user so we don't reuse it again
+							sessionStorage.removeItem('jacxi.createdUser');
+						}
+					}
+				} catch {
+					// ignore parse/storage errors
+				}
+
+				setUsers(serverUsers);
+				setTotalUsers(data.total ?? 0);
+				setAdminsCount(data.admins ?? 0);
+				setRegularUsersCount(data.regularUsers ?? 0);
+				setCurrentPage(data.page ?? page);
 			} else {
-				console.error('Failed to fetch users');
+				console.error('Failed to fetch users (response not ok)', response.status);
+				setSnackbar({ open: true, message: 'Failed to fetch users', severity: 'error' });
 			}
 		} catch (error) {
 			console.error('Error fetching users:', error);
+			setSnackbar({ open: true, message: 'Error fetching users', severity: 'error' });
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [searchFilters.query]);
+
+	// Listen for created users from BroadcastChannel and insert them optimistically
+	useEffect(() => {
+		if (typeof BroadcastChannel === 'undefined') return;
+		const bc = new BroadcastChannel('jacxi-users');
+		const handler = (ev: MessageEvent) => {
+			try {
+				const msg = ev.data as { action: string; user?: UserData };
+				if (msg?.action === 'created' && msg.user) {
+					setUsers((prev) => {
+						if (prev.some((u) => u.id === msg.user!.id)) return prev;
+						return [msg.user!, ...prev];
+					});
+					setTotalUsers((t) => t + 1);
+					if (msg.user.role === 'admin') setAdminsCount((a) => a + 1);
+					else setRegularUsersCount((r) => r + 1);
+					setHighlightedUserId(msg.user.id);
+					setTimeout(() => setHighlightedUserId(null), 4000);
+				}
+			} catch {
+				// ignore
+			}
+		};
+		bc.addEventListener('message', handler as EventListener);
+		return () => {
+			bc.removeEventListener('message', handler as EventListener);
+			bc.close();
+		};
+	}, []);
+
+	useEffect(() => {
+		if (status === 'loading') return;
+		const role = session?.user?.role;
+		if (!session || role !== 'admin') return;
+		fetchUsers(currentPage);
+	}, [session, status, router, currentPage, fetchUsers]);
 
 	const handleSearch = (filters: SearchFilters) => {
 		setSearchFilters(filters);
+		setCurrentPage(1);
+		fetchUsers(1, filters.query);
 	};
 
-	const filteredUsers = users.filter((user) => {
-		const query = searchFilters.query.toLowerCase();
-		if (!query) return true;
-		
-		return (
-			user.name?.toLowerCase().includes(query) ||
-			user.email.toLowerCase().includes(query)
-		);
-	});
+	// paginatedUsers is just users; server already paginates and filters
 
-	const stats = {
-		total: users.length,
-		admins: users.filter((u) => u.role === 'admin').length,
-		regularUsers: users.filter((u) => u.role === 'user').length,
-	};
+	// stats come from server-side counts
+	const statsTotal = totalUsers;
+	const statsAdmins = adminsCount;
+	const statsRegularUsers = regularUsersCount;
 
-	const getRoleBadgeColor = (role: string) => {
-		switch (role) {
-			case 'admin':
-				return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-			case 'user':
-				return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
-			default:
-				return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-		}
-	};
-
-	const formatRole = (role: string) => {
-		return role.charAt(0).toUpperCase() + role.slice(1);
-	};
+  const formatRole = (role: string) => {
+	return role.charAt(0).toUpperCase() + role.slice(1);
+  };
 
 	const toggleEmailVisibility = (userId: string) => {
 		setShowEmailsFor((prev) => {
@@ -125,6 +188,138 @@ export default function UsersPage() {
 		return `${username.substring(0, 3)}***@${domain}`;
 	};
 
+
+		// Pagination helpers
+		const totalPages = Math.max(1, Math.ceil(totalUsers / PAGE_SIZE));
+		const paginatedUsers = users; // server already paginates
+
+		const handleDeleteClick = (id: string) => {
+			setDeletingUserId(id);
+			setConfirmOpen(true);
+		};
+
+		const handleConfirmDelete = async () => {
+			if (!deletingUserId) return;
+			try {
+				setLoading(true);
+				const resp = await fetch(`/api/users/${deletingUserId}`, { method: 'DELETE' });
+				if (resp.ok) {
+					setSnackbar({ open: true, message: 'User deleted successfully', severity: 'success' });
+					setConfirmOpen(false);
+					setDeletingUserId(null);
+					// refresh current page (ensure we don't end up on an empty page)
+					const nextPage = currentPage > 1 && users.length === 1 ? currentPage - 1 : currentPage;
+					setCurrentPage(nextPage);
+					await fetchUsers(nextPage, searchFilters.query);
+				} else {
+					setSnackbar({ open: true, message: 'Failed to delete user', severity: 'error' });
+				}
+			} catch (err) {
+				console.error('Error deleting user:', err);
+				setSnackbar({ open: true, message: 'Error deleting user', severity: 'error' });
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		const handleCancelDelete = () => {
+			setConfirmOpen(false);
+			setDeletingUserId(null);
+		};
+
+		function UserCard({ user, index, highlighted = false }: { user: UserData; index: number; highlighted?: boolean }) {
+			const [visible, setVisible] = useState(false);
+			useEffect(() => {
+				const t = setTimeout(() => setVisible(true), index * 60);
+				return () => clearTimeout(t);
+			}, [index]);
+
+			return (
+				<Slide in={visible} direction="up" timeout={600}>
+					<Box
+						sx={{
+							p: { xs: 1.5, md: 2 },
+							borderRadius: 2,
+							background: 'var(--panel)',
+							boxShadow: highlighted ? '0 36px 48px rgba(56,189,248,0.12)' : '0 18px 32px rgba(var(--text-primary-rgb), 0.08)',
+							border: highlighted ? '1px solid rgba(56,189,248,0.14)' : 'none',
+							transition: 'transform 200ms ease, box-shadow 200ms ease, border 200ms ease',
+							'&:hover': {
+								transform: 'translateY(-6px)',
+								boxShadow: highlighted ? '0 46px 58px rgba(56,189,248,0.16)' : '0 28px 48px rgba(var(--text-primary-rgb), 0.12)'
+							}
+						}}
+					>
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+							<Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: 'rgba(6,182,212,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+								<User style={{ width: 20, height: 20, color: 'var(--accent-gold)' }} />
+							</Box>
+							<Box sx={{ flex: 1, minWidth: 0 }}>
+								<Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }} noWrap>
+								</Typography>
+								<Typography variant="caption" color="text.secondary" noWrap>
+									{formatRole(user.role)}
+								</Typography>
+							</Box>
+							<Box>
+								<IconButton size="small" onClick={() => toggleEmailVisibility(user.id)} title="Toggle email visibility">
+									{showEmailsFor.has(user.id) ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
+								</IconButton>
+							</Box>
+						</Box>
+
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+							<Typography variant="caption" color="text.secondary" sx={{ minWidth: 90 }}>
+								Email
+							</Typography>
+							<Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+								<Typography sx={{ fontFamily: 'ui-monospace,SFMono-Regular,Menlo,monospace' }} noWrap>
+									{showEmailsFor.has(user.id) ? user.email : maskEmail(user.email)}
+								</Typography>
+								{showEmailsFor.has(user.id) && (
+									<IconButton size="small" onClick={() => copyToClipboard(user.email, user.id)} title="Copy email">
+										{copiedEmail === user.id ? <Check style={{ color: 'green', width: 16, height: 16 }} /> : <Copy style={{ color: 'var(--accent-gold)', width: 16, height: 16 }} />}
+									</IconButton>
+								)}
+							</Box>
+						</Box>
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+							<Typography variant="caption" color="text.secondary" sx={{ minWidth: 90 }}>
+								Password
+							</Typography>
+							<Typography variant="body2" color="text.secondary">
+								••••••••••
+							</Typography>
+						</Box>
+
+						{user.createdAt && (
+							<Box sx={{ mt: 1, pt: 1, borderTop: '1px solid rgba(255,255,255,0.03)' }}>
+								<Typography variant="caption" color="text.secondary">
+									Joined {new Date(user.createdAt).toLocaleDateString()}
+								</Typography>
+							</Box>
+						)}
+
+						<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1 }}>
+							<Link href={`/dashboard/users/${user.id}`} style={{ textDecoration: 'none' }}>
+								<Button variant="outlined" size="small" startIcon={<VisibilityIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
+									View
+								</Button>
+							</Link>
+							<Link href={`/dashboard/users/${user.id}/edit`} style={{ textDecoration: 'none' }}>
+								<Button variant="text" size="small" startIcon={<EditIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
+									Edit
+								</Button>
+							</Link>
+								<Button variant="text" size="small" startIcon={<DeleteIcon />} onClick={() => handleDeleteClick(user.id)} sx={{ color: 'var(--error)' }}>
+									Delete
+								</Button>
+						</Box>
+					</Box>
+				</Slide>
+			);
+		}
+
 	if (status === 'loading' || loading) {
 		return (
 			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
@@ -139,294 +334,133 @@ export default function UsersPage() {
 	}
 
 	return (
-		<DashboardSurface className="light-surface">
-			<DashboardPanel title="Team directory" description="All users in one view" fullHeight>
-			<Section className="relative bg-[var(--text-primary)] py-6 sm:py-12 lg:py-16 overflow-hidden">
-				{/* Background gradient */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-
-				{/* Subtle geometric grid pattern */}
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-users" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-users)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6 }}
-							className="space-y-1 sm:space-y-2 max-w-full"
-						>
-							<h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white leading-tight break-words">Users</h1>
-							<p className="text-sm sm:text-lg md:text-xl text-white/70">Manage all platform users</p>
-						</motion.div>
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.2 }}
-							className="w-full sm:w-auto"
-						>
-							<Link href="/dashboard/users/new" className="block">
-								<Button
-									size="lg"
-									className="group relative overflow-hidden bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base md:text-lg font-semibold w-full sm:w-auto"
-								>
-									<UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-									Create User
-								</Button>
-							</Link>
-						</motion.div>
-					</div>
-				</div>
-			</Section>
-
-			{/* Main Content */}
-			<Section className="bg-[var(--text-primary)] py-6 sm:py-12 lg:py-16">
-				{/* Stats Cards */}
-				<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 md:gap-8 mb-6 sm:mb-8 md:mb-12">
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.6, delay: 0 }}
-						className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-3 sm:p-6 shadow-lg shadow-cyan-500/10"
-					>
-						<div className="flex items-center justify-between gap-2">
-							<div className="min-w-0 flex-1">
-								<p className="text-[10px] sm:text-sm text-white/70 mb-1 truncate">Total Users</p>
-								<p className="text-xl sm:text-3xl font-bold text-white">{stats.total}</p>
-							</div>
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-								<Users className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
-							</div>
-						</div>
-					</motion.div>
-
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.6, delay: 0.1 }}
-						className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-purple-500/30 p-3 sm:p-6 shadow-lg shadow-purple-500/10"
-					>
-						<div className="flex items-center justify-between gap-2">
-							<div className="min-w-0 flex-1">
-								<p className="text-[10px] sm:text-sm text-white/70 mb-1 truncate">Admins</p>
-								<p className="text-xl sm:text-3xl font-bold text-white">{stats.admins}</p>
-							</div>
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
-								<Shield className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-							</div>
-						</div>
-					</motion.div>
-
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.6, delay: 0.2 }}
-						className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-green-500/30 p-3 sm:p-6 shadow-lg shadow-green-500/10"
-					>
-						<div className="flex items-center justify-between gap-2">
-							<div className="min-w-0 flex-1">
-								<p className="text-[10px] sm:text-sm text-white/70 mb-1 truncate">Regular Users</p>
-								<p className="text-xl sm:text-3xl font-bold text-white">{stats.regularUsers}</p>
-							</div>
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center flex-shrink-0">
-								<User className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-							</div>
-						</div>
-					</motion.div>
-
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.6, delay: 0.3 }}
-						className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-3 sm:p-6 shadow-lg shadow-cyan-500/10"
-					>
-						<div className="flex items-center justify-between gap-2">
-							<div className="min-w-0 flex-1">
-								<p className="text-[10px] sm:text-sm text-white/70 mb-1 truncate">Filtered Results</p>
-								<p className="text-xl sm:text-3xl font-bold text-white">{filteredUsers.length}</p>
-							</div>
-							<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-								<Search className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
-							</div>
-						</div>
-					</motion.div>
-				</div>
-
-				{/* Smart Search */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6, delay: 0.4 }}
-					className="mb-6 sm:mb-8"
-				>
+		<DashboardSurface>
+			{/* Search Panel */}
+			<DashboardPanel
+				title="Team directory"
+				description="All users in one view"
+				noBodyPadding
+				actions={
+					<Link href="/dashboard/users/new" style={{ textDecoration: 'none' }}>
+						<Button variant="contained" size="small" sx={{ textTransform: 'none', fontWeight: 600 }}>
+							<UserPlus style={{ width: 16, height: 16, marginRight: 8 }} />
+							Create User
+						</Button>
+					</Link>
+				}
+			>
+				<Box sx={{ px: 1.5, py: 1.5 }}>
 					<SmartSearch
 						onSearch={handleSearch}
 						placeholder="Search users by name or email..."
 						showTypeFilter={false}
 						showStatusFilter={false}
-						showDateFilter={true}
+						showDateFilter
 						showPriceFilter={false}
 						showUserFilter={false}
 						defaultType="users"
 					/>
-				</motion.div>
-
-				{/* Users List */}
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					viewport={{ once: true }}
-					transition={{ duration: 0.6, delay: 0.5 }}
-				>
-					<div className="flex items-center justify-between mb-4 sm:mb-6">
-						<h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white">
-							All Users ({filteredUsers.length})
-						</h2>
-					</div>
-
-					{loading ? (
-						<div className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-12 text-center">
-							<div className="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
-							<p className="mt-4 text-sm sm:text-base text-white/70">Loading users...</p>
-						</div>
-					) : filteredUsers.length === 0 ? (
-						<div className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-12 text-center">
-							<User className="w-12 h-12 sm:w-16 sm:h-16 text-white/30 mx-auto mb-4" />
-							<p className="text-sm sm:text-base text-white/70 mb-4 sm:mb-6">No users found</p>
-							<Link href="/dashboard/users/new" className="inline-block">
-								<Button className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] text-sm sm:text-base">
-									<UserPlus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-									Create Your First User
-								</Button>
-							</Link>
-						</div>
-					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-							{filteredUsers.map((user, index) => (
-								<motion.div
-									key={user.id}
-									initial={{ opacity: 0, y: 20 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ duration: 0.4, delay: index * 0.05 }}
-									className="relative rounded-lg sm:rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-4 sm:p-6 hover:border-cyan-500/50 transition-all duration-300 shadow-lg shadow-cyan-500/5 hover:shadow-cyan-500/10"
-								>
-									{/* Header with User Info */}
-									<div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
-										<div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-											<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-400/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-												<User className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
-											</div>
-											<div className="flex-1 min-w-0">
-												<h3 className="text-base sm:text-lg font-semibold text-white truncate">
-													{user.name || 'No Name'}
-												</h3>
-												<span
-													className={`inline-block px-2 py-0.5 mt-1 text-[10px] sm:text-xs font-medium rounded-full border ${getRoleBadgeColor(
-														user.role
-													)}`}
-												>
-													{formatRole(user.role)}
-												</span>
-											</div>
-										</div>
-									</div>
-
-									{/* Email Section with Show/Hide */}
-									<div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-										<div className="flex items-center justify-between">
-											<span className="text-[10px] sm:text-xs text-white/50 flex items-center gap-1">
-												<Mail className="w-3 h-3" />
-												Email Address
-											</span>
-											<button
-												onClick={() => toggleEmailVisibility(user.id)}
-												className="text-[10px] sm:text-xs text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
-											>
-												{showEmailsFor.has(user.id) ? (
-													<>
-														<EyeOff className="w-3 h-3" />
-														Hide
-													</>
-												) : (
-													<>
-														<Eye className="w-3 h-3" />
-														Show
-													</>
-												)}
-											</button>
-										</div>
-										<div className="flex items-center gap-2 bg-[var(--text-primary)]/50 border border-cyan-500/20 rounded-lg p-2">
-											<span className="text-xs sm:text-sm text-white/80 font-mono flex-1 truncate">
-												{showEmailsFor.has(user.id) ? user.email : maskEmail(user.email)}
-											</span>
-											{showEmailsFor.has(user.id) && (
-												<button
-													onClick={() => copyToClipboard(user.email, user.id)}
-													className="p-1 hover:bg-cyan-500/10 rounded transition-colors flex-shrink-0"
-													title="Copy email"
-												>
-													{copiedEmail === user.id ? (
-														<Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
-													) : (
-														<Copy className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-400" />
-													)}
-												</button>
-											)}
-										</div>
-									</div>
-
-									{/* Password Info */}
-									<div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-										<div className="flex items-center justify-between">
-											<span className="text-[10px] sm:text-xs text-white/50 flex items-center gap-1">
-												<Key className="w-3 h-3" />
-												Password
-											</span>
-										</div>
-										<div className="flex items-center gap-2 bg-[var(--text-primary)]/50 border border-cyan-500/20 rounded-lg p-2">
-											<span className="text-xs sm:text-sm text-white/60 flex-1">
-												••••••••••
-											</span>
-											<span className="text-[10px] sm:text-xs text-sky-200 bg-sky-500/10 border border-sky-500/30 px-1.5 sm:px-2 py-0.5 rounded flex-shrink-0">
-												Encrypted
-											</span>
-										</div>
-										<p className="text-[10px] sm:text-xs text-white/40 italic">
-											Passwords are securely hashed and cannot be viewed
-										</p>
-									</div>
-
-									{/* Footer with Date */}
-									<div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-cyan-500/10">
-										{user.createdAt && (
-											<span className="text-[10px] sm:text-xs text-white/50 flex items-center gap-1">
-												<Calendar className="w-3 h-3" />
-												Joined {new Date(user.createdAt).toLocaleDateString()}
-											</span>
-										)}
-									</div>
-								</motion.div>
-							))}
-						</div>
-					)}
-				</motion.div>
-			</Section>
+				</Box>
 			</DashboardPanel>
+
+			{/* Results Panel */}
+			<DashboardPanel title={`All Users (${totalUsers})`} fullHeight>
+				{/* Stats */}
+				<Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, mb: 2 }}>
+					<Box sx={{ p: 2, bgcolor: 'var(--text-primary)/0.04', borderRadius: 1, border: '1px solid rgba(6,182,212,0.12)' }}>
+						<Typography variant="caption" color="text.secondary">
+							Total Users
+						</Typography>
+						<Typography variant="h5" sx={{ fontWeight: 700 }}>
+							{statsTotal}
+						</Typography>
+					</Box>
+
+					<Box sx={{ p: 2, bgcolor: 'var(--text-primary)/0.04', borderRadius: 1, border: '1px solid rgba(124,58,237,0.08)' }}>
+						<Typography variant="caption" color="text.secondary">
+							Admins
+						</Typography>
+						<Typography variant="h5" sx={{ fontWeight: 700 }}>
+							{statsAdmins}
+						</Typography>
+					</Box>
+
+					<Box sx={{ p: 2, bgcolor: 'var(--text-primary)/0.04', borderRadius: 1, border: '1px solid rgba(16,185,129,0.08)' }}>
+						<Typography variant="caption" color="text.secondary">
+							Regular Users
+						</Typography>
+						<Typography variant="h5" sx={{ fontWeight: 700 }}>
+							{statsRegularUsers}
+						</Typography>
+					</Box>
+
+					<Box sx={{ p: 2, bgcolor: 'var(--text-primary)/0.04', borderRadius: 1, border: '1px solid rgba(6,182,212,0.12)' }}>
+						<Typography variant="caption" color="text.secondary">
+							Filtered Results
+						</Typography>
+						<Typography variant="h5" sx={{ fontWeight: 700 }}>
+							{totalUsers}
+						</Typography>
+					</Box>
+				</Box>
+
+				{/* Content */}
+				{loading ? (
+					<Box sx={{ minHeight: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+						<CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
+					</Box>
+				) : paginatedUsers.length === 0 ? (
+					<Box sx={{ minHeight: 240, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+						<User style={{ width: 48, height: 48, color: 'rgba(255,255,255,0.25)' }} />
+						<Typography sx={{ color: 'var(--text-secondary)' }}>No users found</Typography>
+						<Link href="/dashboard/users/new" style={{ textDecoration: 'none' }}>
+							<Button variant="contained" size="small" sx={{ mt: 1, textTransform: 'none' }}>
+								<UserPlus style={{ width: 16, height: 16, marginRight: 8 }} /> Create User
+							</Button>
+						</Link>
+					</Box>
+				) : (
+					<>
+						<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+							{paginatedUsers.map((user, index) => (
+								<UserCard key={user.id} user={user} index={index} highlighted={highlightedUserId === user.id} />
+							))}
+						</Box>
+
+						{/* Pagination Controls */}
+						<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+							<Button variant="outlined" size="small" onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); fetchUsers(currentPage - 1, searchFilters.query); }} disabled={currentPage === 1} sx={{ textTransform: 'none' }}>
+								Previous
+							</Button>
+							<Typography sx={{ color: 'var(--text-secondary)' }}>Page {currentPage} of {totalPages}</Typography>
+							<Button variant="outlined" size="small" onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); fetchUsers(currentPage + 1, searchFilters.query); }} disabled={currentPage === totalPages} sx={{ textTransform: 'none' }}>
+								Next
+							</Button>
+						</Box>
+					</>
+				)}
+			</DashboardPanel>
+
+			{/* Delete confirmation dialog */}
+			<Dialog open={confirmOpen} onClose={handleCancelDelete} aria-labelledby="confirm-delete-title">
+				<DialogTitle id="confirm-delete-title">Confirm delete</DialogTitle>
+				<DialogContent>
+					<DialogContentText>
+						Are you sure you want to delete this user? This action cannot be undone.
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={handleCancelDelete} variant="text">Cancel</Button>
+					<Button onClick={handleConfirmDelete} variant="contained" color="error">Delete</Button>
+				</DialogActions>
+			</Dialog>
+
+			{/* Snackbar for feedback */}
+			<Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+				<Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
 		</DashboardSurface>
 	);
 }

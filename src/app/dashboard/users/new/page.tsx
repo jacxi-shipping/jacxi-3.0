@@ -4,10 +4,26 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, AlertTriangle, CheckCircle, UserPlus, Mail, Lock, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 import Link from 'next/link';
-import Section from '@/components/layout/Section';
+
+import {
+	Box,
+	Paper,
+	Typography,
+	TextField,
+	InputAdornment,
+	IconButton,
+	Alert,
+	CircularProgress,
+	Snackbar,
+	Button as MuiButton,
+} from '@mui/material';
 
 export default function CreateUserPage() {
 	const router = useRouter();
@@ -21,37 +37,30 @@ export default function CreateUserPage() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState('');
-	const [success, setSuccess] = useState(false);
+	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
 	if (status === 'loading') {
 		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
-			</div>
+			<Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+				<CircularProgress />
+			</Box>
 		);
 	}
 
 	const role = session?.user?.role;
 	if (!session || role !== 'admin') {
 		return (
-			<>
-				<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
-					<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-					<div className="relative z-10 max-w-2xl mx-auto text-center">
-						<AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-						<h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Access Restricted</h1>
-						<p className="text-white/70 mb-6">
-							Only administrators can create user accounts.
-						</p>
-						<Link href="/dashboard">
-							<Button className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]">
-								Go to Dashboard
-							</Button>
-						</Link>
-					</div>
-				</Section>
-			</>
+			<Box sx={{ py: 12 }}>
+				<Paper elevation={0} sx={{ maxWidth: 960, mx: 'auto', p: 6, textAlign: 'center', bgcolor: 'var(--text-primary)', color: 'white' }}>
+					<Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Access Restricted</Typography>
+					<Typography sx={{ mb: 3 }}>Only administrators can create user accounts.</Typography>
+					<Link href="/dashboard" style={{ textDecoration: 'none' }}>
+						<MuiButton variant="contained" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
+							Go to Dashboard
+						</MuiButton>
+					</Link>
+				</Paper>
+			</Box>
 		);
 	}
 
@@ -60,22 +69,20 @@ export default function CreateUserPage() {
 			...formData,
 			[e.target.name]: e.target.value,
 		});
-		setError('');
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
-		setError('');
 
 		if (formData.password !== formData.confirmPassword) {
-			setError('Passwords do not match');
+			setSnackbar({ open: true, message: 'Passwords do not match', severity: 'error' });
 			setIsLoading(false);
 			return;
 		}
 
 		if (formData.password.length < 6) {
-			setError('Password must be at least 6 characters');
+			setSnackbar({ open: true, message: 'Password must be at least 6 characters', severity: 'error' });
 			setIsLoading(false);
 			return;
 		}
@@ -83,315 +90,372 @@ export default function CreateUserPage() {
 		try {
 			const response = await fetch('/api/auth/register', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					name: formData.name,
-					email: formData.email,
-					password: formData.password,
-				}),
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password }),
 			});
 
+			const data = await response.json().catch(() => ({}));
+
 			if (response.ok) {
-				setSuccess(true);
-				setTimeout(() => {
-					router.push('/dashboard');
-				}, 2000);
+				if (data?.user) {
+					try {
+						sessionStorage.setItem('jacxi.createdUser', JSON.stringify(data.user));
+					} catch {}
+
+					if (typeof BroadcastChannel !== 'undefined') {
+						try {
+							const bc = new BroadcastChannel('jacxi-users');
+							bc.postMessage({ action: 'created', user: data.user });
+							bc.close();
+						} catch {}
+					}
+				}
+
+				setSnackbar({ open: true, message: 'User created successfully', severity: 'success' });
+				setTimeout(() => router.push('/dashboard/users'), 800);
 			} else {
-				const data = await response.json();
-				setError(data.message || 'Registration failed');
+				const msg = data?.message || 'Registration failed';
+				setSnackbar({ open: true, message: msg, severity: 'error' });
 			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'An error occurred. Please try again.';
-			setError(message);
+			setSnackbar({ open: true, message, severity: 'error' });
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	if (success) {
-		return (
-			<>
-				<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden min-h-screen flex items-center">
-					<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-					<div className="absolute inset-0 opacity-[0.03]">
-						<svg className="w-full h-full" preserveAspectRatio="none">
-							<defs>
-								<pattern id="grid-success-user" width="40" height="40" patternUnits="userSpaceOnUse">
-									<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-								</pattern>
-							</defs>
-							<rect width="100%" height="100%" fill="url(#grid-success-user)" className="text-cyan-400" />
-						</svg>
-					</div>
-
-					<motion.div
-						initial={{ opacity: 0, scale: 0.9 }}
-						animate={{ opacity: 1, scale: 1 }}
-						transition={{ duration: 0.5 }}
-						className="relative z-10 max-w-md w-full mx-auto"
-					>
-						<div className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-green-500/30 p-8 sm:p-10 text-center">
-							<motion.div
-								initial={{ scale: 0 }}
-								animate={{ scale: 1 }}
-								transition={{ duration: 0.5, delay: 0.2 }}
-							>
-								<CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-							</motion.div>
-							<h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-								User Created Successfully
-							</h2>
-							<p className="text-white/70">
-								The user account has been created successfully!
-							</p>
-						</div>
-					</motion.div>
-				</Section>
-			</>
-		);
-	}
-
 	return (
-		<>
-			{/* Header */}
-			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				{/* Background gradient */}
-				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-
-				{/* Subtle geometric grid pattern */}
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-create-user" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-create-user)" className="text-cyan-400" />
-					</svg>
-				</div>
-
-				<div className="relative z-10">
-					<div className="flex items-center gap-6">
-						<Link href="/dashboard">
-							<Button
-								variant="outline"
-								size="sm"
-								className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
+		<Box
+			sx={{
+				minHeight: '100vh',
+				bgcolor: 'var(--background)',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				py: { xs: 1, sm: 2 },
+				px: { xs: 2, sm: 3, lg: 4 },
+			}}
+		>
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.6 }}
+				style={{ maxWidth: 640, width: '100%', position: 'relative', zIndex: 10, marginTop: -56 }}
+			>
+				<Paper
+					elevation={0}
+					sx={{
+						position: 'relative',
+						borderRadius: 4,
+						background: 'var(--panel)',
+						border: '1px solid rgba(var(--panel-rgb), 0.9)',
+						boxShadow: '0 25px 60px rgba(var(--text-primary-rgb), 0.12)',
+						p: { xs: 4, sm: 5 },
+						overflow: 'hidden',
+					}}
+				>
+					<Box sx={{ position: 'relative', zIndex: 1 }}>
+						{/* Header */}
+						<Box sx={{ textAlign: 'center', mb: 3 }}>
+							<Typography
+								variant="h3"
+								sx={{
+									fontSize: { xs: '1.875rem', sm: '2.25rem' },
+									fontWeight: 700,
+									color: 'var(--text-primary)',
+									mb: 1,
+								}}
 							>
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Back
-							</Button>
-						</Link>
-						<div>
-							<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-								Create User Account
-							</h1>
-							<p className="text-lg sm:text-xl text-white/70 mt-2">
-								Create a new user account for the platform
-							</p>
-						</div>
-					</div>
-				</div>
-			</Section>
+								Create User
+							</Typography>
+							<Typography
+								variant="body1"
+								sx={{
+									color: 'var(--text-secondary)',
+								}}
+							>
+								Create a new user account
+							</Typography>
+						</Box>
 
-			{/* Form */}
-			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
-				<div className="max-w-2xl mx-auto">
-					{/* Main Card */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.6 }}
-						className="relative rounded-2xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-8 sm:p-10 shadow-lg shadow-cyan-500/10"
-					>
-						{/* Glowing border effect */}
-						<div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 opacity-50" />
-
-						<div className="relative z-10 space-y-6 sm:space-y-8">
-							{/* Header Icon */}
-							<div className="text-center">
-								<motion.div
-									initial={{ scale: 0 }}
-									animate={{ scale: 1 }}
-									transition={{ duration: 0.5, delay: 0.2 }}
-									className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-[var(--text-primary)] border border-cyan-500/40 mb-4"
+						{/* Form - responsive two-column */}
+						<Box
+							component="form"
+							onSubmit={handleSubmit}
+							sx={{
+								display: 'grid',
+								gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+								gap: 2.5,
+								alignItems: 'start',
+							}}
+						>
+							{/* Name */}
+							<Box sx={{ gridColumn: { xs: '1 / -1', sm: '1 / 2' } }}>
+								<Typography
+									component="label"
+									htmlFor="name"
+									sx={{
+										display: 'block',
+										fontSize: '0.875rem',
+										fontWeight: 500,
+										color: 'var(--text-primary)',
+										mb: 1,
+									}}
 								>
-									<div className="absolute inset-0 rounded-xl bg-cyan-500/10 blur-md" />
-									<UserPlus className="relative w-8 h-8 text-cyan-400" />
-								</motion.div>
-							</div>
+									Full Name
+								</Typography>
+								<TextField
+									id="name"
+									name="name"
+									type="text"
+									fullWidth
+									value={formData.name}
+									onChange={handleChange}
+									required
+									disabled={isLoading}
+									placeholder="Enter full name"
+									autoComplete="name"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<PersonIcon sx={{ fontSize: 20, color: 'var(--text-secondary)' }} />
+											</InputAdornment>
+										),
+									}}
+									sx={{
+										'& .MuiOutlinedInput-root': {
+											bgcolor: 'var(--background)',
+											borderRadius: 2,
+											color: 'var(--text-primary)',
+										},
+									}}
+								/>
+							</Box>
 
-							{/* Error Message */}
-							{error && (
-								<motion.div
-									initial={{ opacity: 0, y: -10 }}
-									animate={{ opacity: 1, y: 0 }}
-									className="relative rounded-lg bg-red-500/10 border border-red-500/30 p-4 flex items-start gap-3"
+							{/* Email */}
+							<Box sx={{ gridColumn: { xs: '1 / -1', sm: '2 / 3' } }}>
+								<Typography
+									component="label"
+									htmlFor="email"
+									sx={{
+										display: 'block',
+										fontSize: '0.875rem',
+										fontWeight: 500,
+										color: 'var(--text-primary)',
+										mb: 1,
+									}}
 								>
-									<AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-									<span className="text-red-400 text-sm">{error}</span>
-								</motion.div>
-							)}
+									Email
+								</Typography>
+								<TextField
+									id="email"
+									name="email"
+									type="email"
+									fullWidth
+									value={formData.email}
+									onChange={handleChange}
+									required
+									disabled={isLoading}
+									placeholder="Enter email address"
+									autoComplete="email"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<EmailIcon sx={{ fontSize: 20, color: 'var(--text-secondary)' }} />
+											</InputAdornment>
+										),
+									}}
+									sx={{
+										'& .MuiOutlinedInput-root': {
+											bgcolor: 'var(--background)',
+											borderRadius: 2,
+											color: 'var(--text-primary)',
+										},
+									}}
+								/>
+							</Box>
 
-							{/* Form */}
-							<form onSubmit={handleSubmit} className="space-y-5">
-								{/* Name Field */}
-								<motion.div
-									initial={{ opacity: 0, y: 10 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: 0.3 }}
+							{/* Password */}
+							<Box sx={{ gridColumn: { xs: '1 / -1', sm: '1 / 2' } }}>
+								<Typography
+									component="label"
+									htmlFor="password"
+									sx={{
+										display: 'block',
+										fontSize: '0.875rem',
+										fontWeight: 500,
+										color: 'var(--text-primary)',
+										mb: 1,
+									}}
 								>
-									<label htmlFor="name" className="block text-sm font-medium text-white/90 mb-2">
-										Full Name <span className="text-red-400">*</span>
-									</label>
-									<div className="relative">
-										<UserPlus className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-										<input
-											id="name"
-											name="name"
-											type="text"
-											value={formData.name}
-											onChange={handleChange}
-											required
-											className="w-full pl-12 pr-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
-											placeholder="Enter full name"
-										/>
-									</div>
-								</motion.div>
+									Password
+								</Typography>
+								<TextField
+									id="password"
+									name="password"
+									type={showPassword ? 'text' : 'password'}
+									fullWidth
+									value={formData.password}
+									onChange={handleChange}
+									required
+									disabled={isLoading}
+									placeholder="Enter password (min. 6 characters)"
+									autoComplete="new-password"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<LockIcon sx={{ fontSize: 20, color: 'var(--text-secondary)' }} />
+											</InputAdornment>
+										),
+										endAdornment: (
+											<InputAdornment position="end">
+												<IconButton
+													onClick={() => setShowPassword(!showPassword)}
+													edge="end"
+													sx={{
+														color: 'var(--accent-gold)',
+													}}
+												>
+													{showPassword ? <VisibilityOff sx={{ fontSize: 20 }} /> : <Visibility sx={{ fontSize: 20 }} />}
+												</IconButton>
+											</InputAdornment>
+										),
+									}}
+									sx={{
+										'& .MuiOutlinedInput-root': {
+											bgcolor: 'var(--background)',
+											borderRadius: 2,
+											color: 'var(--text-primary)',
+										},
+									}}
+								/>
+							</Box>
 
-								{/* Email Field */}
-								<motion.div
-									initial={{ opacity: 0, y: 10 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: 0.4 }}
+							{/* Confirm Password */}
+							<Box sx={{ gridColumn: { xs: '1 / -1', sm: '2 / 3' } }}>
+								<Typography
+									component="label"
+									htmlFor="confirmPassword"
+									sx={{
+										display: 'block',
+										fontSize: '0.875rem',
+										fontWeight: 500,
+										color: 'var(--text-primary)',
+										mb: 1,
+									}}
 								>
-									<label htmlFor="email" className="block text-sm font-medium text-white/90 mb-2">
-										Email <span className="text-red-400">*</span>
-									</label>
-									<div className="relative">
-										<Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-										<input
-											id="email"
-											name="email"
-											type="email"
-											value={formData.email}
-											onChange={handleChange}
-											required
-											className="w-full pl-12 pr-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
-											placeholder="Enter email address"
-										/>
-									</div>
-								</motion.div>
+									Confirm Password
+								</Typography>
+								<TextField
+									id="confirmPassword"
+									name="confirmPassword"
+									type={showConfirmPassword ? 'text' : 'password'}
+									fullWidth
+									value={formData.confirmPassword}
+									onChange={handleChange}
+									required
+									disabled={isLoading}
+									placeholder="Confirm password"
+									autoComplete="new-password"
+									InputProps={{
+										startAdornment: (
+											<InputAdornment position="start">
+												<LockIcon sx={{ fontSize: 20, color: 'var(--text-secondary)' }} />
+											</InputAdornment>
+										),
+										endAdornment: (
+											<InputAdornment position="end">
+												<IconButton
+													onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+													edge="end"
+													sx={{
+														color: 'var(--accent-gold)',
+													}}
+												>
+													{showConfirmPassword ? <VisibilityOff sx={{ fontSize: 20 }} /> : <Visibility sx={{ fontSize: 20 }} />}
+												</IconButton>
+											</InputAdornment>
+										),
+									}}
+									sx={{
+										'& .MuiOutlinedInput-root': {
+											bgcolor: 'var(--background)',
+											borderRadius: 2,
+											color: 'var(--text-primary)',
+										},
+									}}
+								/>
+							</Box>
 
-								{/* Password Field */}
-								<motion.div
-									initial={{ opacity: 0, y: 10 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: 0.5 }}
+							{/* Submit Button - span full width */}
+							<Box sx={{ gridColumn: '1 / -1' }}>
+								<MuiButton
+									type="submit"
+									disabled={isLoading}
+									variant="contained"
+									size="large"
+									endIcon={!isLoading && <ArrowForward />}
+									sx={{
+										width: '100%',
+										bgcolor: 'var(--accent-gold)',
+										color: 'var(--background)',
+										fontWeight: 600,
+										py: 1.5,
+										fontSize: '1rem',
+										'&:hover': {
+											bgcolor: 'var(--accent-gold)',
+										},
+										'&:disabled': {
+											bgcolor: 'rgba(var(--accent-gold-rgb), 0.5)',
+											color: 'rgba(var(--background-rgb), 0.85)',
+										},
+									}}
 								>
-									<label htmlFor="password" className="block text-sm font-medium text-white/90 mb-2">
-										Password <span className="text-red-400">*</span>
-									</label>
-									<div className="relative">
-										<Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-										<input
-											id="password"
-											name="password"
-											type={showPassword ? 'text' : 'password'}
-											value={formData.password}
-											onChange={handleChange}
-											required
-											className="w-full pl-12 pr-12 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
-											placeholder="Enter password (min. 6 characters)"
-										/>
-										<button
-											type="button"
-											onClick={() => setShowPassword(!showPassword)}
-											className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
-										>
-											{showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-										</button>
-									</div>
-								</motion.div>
+									{isLoading ? (
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+											<CircularProgress size={20} sx={{ color: 'var(--background)' }} />
+											<Typography component="span">Creating...</Typography>
+										</Box>
+									) : (
+										<Typography component="span">Create Account</Typography>
+									)}
+								</MuiButton>
+							</Box>
+						</Box>
 
-								{/* Confirm Password Field */}
-								<motion.div
-									initial={{ opacity: 0, y: 10 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: 0.6 }}
+						{/* Back Link */}
+						<Box sx={{ textAlign: 'center', pt: 2 }}>
+							<Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+								<Typography
+									component="button"
+									onClick={() => router.push('/dashboard')}
+									sx={{
+										background: 'none',
+										border: 'none',
+										color: 'var(--accent-gold)',
+										fontWeight: 500,
+										cursor: 'pointer',
+										transition: 'color 0.2s ease',
+										'&:hover': {
+											color: 'var(--accent-gold)',
+										},
+									}}
 								>
-									<label htmlFor="confirmPassword" className="block text-sm font-medium text-white/90 mb-2">
-										Confirm Password <span className="text-red-400">*</span>
-									</label>
-									<div className="relative">
-										<Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
-										<input
-											id="confirmPassword"
-											name="confirmPassword"
-											type={showConfirmPassword ? 'text' : 'password'}
-											value={formData.confirmPassword}
-											onChange={handleChange}
-											required
-											className="w-full pl-12 pr-12 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
-											placeholder="Confirm password"
-										/>
-										<button
-											type="button"
-											onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-											className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
-										>
-											{showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-										</button>
-									</div>
-								</motion.div>
+									Back to Dashboard
+								</Typography>
+							</Typography>
+						</Box>
+					</Box>
+				</Paper>
+			</motion.div>
 
-								{/* Submit Button */}
-								<motion.div
-									initial={{ opacity: 0, y: 10 }}
-									animate={{ opacity: 1, y: 0 }}
-									transition={{ duration: 0.5, delay: 0.7 }}
-									className="flex flex-col sm:flex-row gap-4 pt-4"
-								>
-									<Link href="/dashboard" className="sm:w-auto w-full">
-										<Button
-											type="button"
-											variant="outline"
-											disabled={isLoading}
-											className="w-full sm:w-auto border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
-										>
-											Cancel
-										</Button>
-									</Link>
-									<Button
-										type="submit"
-										disabled={isLoading}
-										className="w-full sm:w-auto group relative overflow-hidden bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all duration-300 py-3 text-base font-semibold"
-									>
-										<span className="relative z-10 flex items-center justify-center gap-2">
-											{isLoading ? (
-												<>
-													<div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white" />
-													Creating Account...
-												</>
-											) : (
-												<>
-													Create Account
-													<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-												</>
-											)}
-										</span>
-										{/* Shimmer effect */}
-										<div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-									</Button>
-								</motion.div>
-							</form>
-						</div>
-					</motion.div>
-				</div>
-			</Section>
-		</>
+			{/* Snackbar */}
+			<Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+				<Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
+		</Box>
 	);
 }
-
