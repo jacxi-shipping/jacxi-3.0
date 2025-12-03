@@ -133,7 +133,7 @@ export default function CreateUserPage() {
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'center',
-				py: { xs: 1, sm: 2 },
+				py: { xs: 3, sm: 4 },
 				px: { xs: 2, sm: 3, lg: 4 },
 			}}
 		>
@@ -141,7 +141,7 @@ export default function CreateUserPage() {
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6 }}
-				style={{ maxWidth: 640, width: '100%', position: 'relative', zIndex: 10, marginTop: -56 }}
+				style={{ maxWidth: 640, width: '100%', position: 'relative', zIndex: 10, marginTop: -24 }}
 			>
 				<Paper
 					elevation={0}
@@ -151,7 +151,7 @@ export default function CreateUserPage() {
 						background: 'var(--panel)',
 						border: '1px solid rgba(var(--panel-rgb), 0.9)',
 						boxShadow: '0 25px 60px rgba(var(--text-primary-rgb), 0.12)',
-						p: { xs: 4, sm: 5 },
+						p: { xs: 3, sm: 4 },
 						overflow: 'hidden',
 					}}
 				>

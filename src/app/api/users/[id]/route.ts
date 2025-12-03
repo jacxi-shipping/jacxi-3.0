@@ -4,7 +4,7 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth();
     if (!session) {
@@ -14,7 +14,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (session.user?.role !== 'admin') {
       return NextResponse.json({ message: 'Forbidden: Only admins can delete users' }, { status: 403 });
     }
-    const userId = params.id;
+    const { id } = await params;
+    const userId = id;
     if (!userId) {
       return NextResponse.json({ message: 'User ID required' }, { status: 400 });
     }

@@ -191,7 +191,7 @@ export default function EditShipmentPage() {
         <Section className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
           <div className="max-w-md text-center space-y-4">
             <h2 className="text-xl font-semibold text-white">Access Restricted</h2>
-            <p className="text-white/70">Only administrators can modify shipment details.</p>
+            <p className="text-[var(--text-secondary)]">Only administrators can modify shipment details.</p>
             <Link href={`/dashboard/shipments/${params.id}`}>
               <Button className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]">Back to Shipment</Button>
             </Link>
@@ -205,7 +205,7 @@ export default function EditShipmentPage() {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-          <div className="text-center space-y-4 text-white/70">
+          <div className="text-center space-y-4 text-[var(--text-secondary)]">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
             <p>Loading shipment data...</p>
           </div>
@@ -334,47 +334,34 @@ export default function EditShipmentPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--text-primary)]">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-        <div className="absolute inset-0 -z-10 opacity-[0.04]">
-          <svg className="h-full w-full" preserveAspectRatio="none">
-            <pattern id="edit-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="0.5" />
-            </pattern>
-            <rect width="100%" height="100%" fill="url(#edit-grid)" />
-          </svg>
-        </div>
-
-        <Section className="pt-6 pb-10">
+      <div className="light-surface min-h-screen bg-[var(--background)]">
+        <Section className="pt-6 pb-6">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-white">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--text-primary)] border border-cyan-500/40">
-                <TruckIcon className="h-4 w-4 text-cyan-300" />
-              </span>
-              <div>
-                <h1 className="text-2xl font-semibold text-white">Edit Shipment</h1>
-                <p className="text-sm text-white/60">Update shipment information, media, and status.</p>
-              </div>
-            </div>
-            <Link href={`/dashboard/shipments/${params.id}`}>
-              <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
-                <ArrowLeft className="w-4 h-4 mr-2" />
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <Link href={`/dashboard/shipments/${params.id}`}>
+                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 flex-shrink-0 text-xs sm:text-sm">
+                  <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Back
                 </Button>
               </Link>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)] truncate">Edit Shipment</h1>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-1">Update shipment information, media, and status.</p>
+              </div>
+            </div>
           </div>
         </Section>
 
         <Section className="pb-16">
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* User Assignment */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">User Assignment</CardTitle>
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">User Assignment</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
-                  <label htmlFor="userId" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="userId" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Assign to User <span className="text-red-400">*</span>
                   </label>
                   <select
@@ -383,7 +370,7 @@ export default function EditShipmentPage() {
                     value={formData.userId}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   >
                     <option value="">Select a user...</option>
                     {users.map((user) => (
@@ -392,19 +379,19 @@ export default function EditShipmentPage() {
                       </option>
                     ))}
                   </select>
-                  {errors.userId && <p className="mt-1 text-sm text-red-400">{errors.userId}</p>}
+                  {errors.userId && <p className="mt-1 text-xs sm:text-sm text-red-400">{errors.userId}</p>}
                 </div>
               </CardContent>
             </Card>
 
             {/* Vehicle Information */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">Vehicle Information</CardTitle>
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Vehicle Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
-                  <label htmlFor="vehicleType" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="vehicleType" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Vehicle Type
                   </label>
                   <select
@@ -412,7 +399,7 @@ export default function EditShipmentPage() {
                     name="vehicleType"
                     value={formData.vehicleType}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   >
                     <option value="sedan">Sedan</option>
                     <option value="suv">SUV</option>
@@ -427,7 +414,7 @@ export default function EditShipmentPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="vehicleMake" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="vehicleMake" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Make
                     </label>
                     <input
@@ -436,11 +423,11 @@ export default function EditShipmentPage() {
                       name="vehicleMake"
                       value={formData.vehicleMake}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="vehicleModel" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="vehicleModel" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Model
                     </label>
                     <input
@@ -449,14 +436,14 @@ export default function EditShipmentPage() {
                       name="vehicleModel"
                       value={formData.vehicleModel}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="vehicleYear" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="vehicleYear" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Year
                     </label>
                     <input
@@ -467,11 +454,11 @@ export default function EditShipmentPage() {
                       onChange={handleChange}
                       min="1900"
                       max={new Date().getFullYear() + 1}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="vehicleVIN" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="vehicleVIN" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       VIN Number
                     </label>
                     <input
@@ -480,7 +467,7 @@ export default function EditShipmentPage() {
                       name="vehicleVIN"
                       value={formData.vehicleVIN}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -488,7 +475,7 @@ export default function EditShipmentPage() {
                 {/* Color, Lot Number, Auction Name */}
                 <div className={`grid grid-cols-1 gap-4 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                   <div>
-                    <label htmlFor="vehicleColor" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="vehicleColor" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Color
                     </label>
                     <input
@@ -498,11 +485,11 @@ export default function EditShipmentPage() {
                       value={formData.vehicleColor}
                       onChange={handleChange}
                       placeholder="e.g., Blue, Red"
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="lotNumber" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="lotNumber" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Lot Number
                     </label>
                     <input
@@ -512,12 +499,12 @@ export default function EditShipmentPage() {
                       value={formData.lotNumber}
                       onChange={handleChange}
                       placeholder="e.g., LOT12345"
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   {isAdmin && (
                     <div>
-                      <label htmlFor="auctionName" className="block text-sm font-medium text-white/70 mb-2">
+                      <label htmlFor="auctionName" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                         Auction
                       </label>
                       <input
@@ -527,20 +514,20 @@ export default function EditShipmentPage() {
                         value={formData.auctionName}
                         onChange={handleChange}
                         placeholder="e.g., Copart, IAA"
-                        className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                        className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                       />
                     </div>
                   )}
                 </div>
 
                 {/* Vehicle Details */}
-                <div className="pt-4 border-t border-cyan-500/10">
-                  <h3 className="text-white font-medium mb-4">Additional Vehicle Details</h3>
+                <div className="pt-4 border-t border-white/5">
+                  <h3 className="text-[var(--text-primary)] font-bold mb-4">Additional Vehicle Details</h3>
                   
                   <div className="space-y-4">
                     {/* Has Key */}
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-3">
+                      <label className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
                         Does the vehicle have a key?
                       </label>
                       <div className="flex items-center gap-6">
@@ -553,7 +540,7 @@ export default function EditShipmentPage() {
                             onChange={() => setFormData(prev => ({ ...prev, hasKey: true }))}
                             className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
                           />
-                          <span className="text-white">Yes</span>
+                          <span className="text-[var(--text-primary)]">Yes</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -564,7 +551,7 @@ export default function EditShipmentPage() {
                             onChange={() => setFormData(prev => ({ ...prev, hasKey: false }))}
                             className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
                           />
-                          <span className="text-white">No</span>
+                          <span className="text-[var(--text-primary)]">No</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -575,14 +562,14 @@ export default function EditShipmentPage() {
                             onChange={() => setFormData(prev => ({ ...prev, hasKey: null }))}
                             className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
                           />
-                          <span className="text-white/60">Not Specified</span>
+                          <span className="text-[var(--text-secondary)]">Not Specified</span>
                         </label>
                       </div>
                     </div>
 
                     {/* Has Title */}
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-3">
+                      <label className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
                         Does the vehicle have a title?
                       </label>
                       <div className="flex items-center gap-6">
@@ -595,7 +582,7 @@ export default function EditShipmentPage() {
                             onChange={() => setFormData(prev => ({ ...prev, hasTitle: true }))}
                             className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
                           />
-                          <span className="text-white">Yes</span>
+                          <span className="text-[var(--text-primary)]">Yes</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -606,7 +593,7 @@ export default function EditShipmentPage() {
                             onChange={() => setFormData(prev => ({ ...prev, hasTitle: false, titleStatus: '' }))}
                             className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
                           />
-                          <span className="text-white">No</span>
+                          <span className="text-[var(--text-primary)]">No</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -617,7 +604,7 @@ export default function EditShipmentPage() {
                             onChange={() => setFormData(prev => ({ ...prev, hasTitle: null, titleStatus: '' }))}
                             className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
                           />
-                          <span className="text-white/60">Not Specified</span>
+                          <span className="text-[var(--text-secondary)]">Not Specified</span>
                         </label>
                       </div>
                     </div>
@@ -625,7 +612,7 @@ export default function EditShipmentPage() {
                     {/* Title Status - Only show if hasTitle is true */}
                     {formData.hasTitle === true && (
                       <div>
-                        <label htmlFor="titleStatus" className="block text-sm font-medium text-white/70 mb-2">
+                        <label htmlFor="titleStatus" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                           Title Status
                         </label>
                         <select
@@ -633,7 +620,7 @@ export default function EditShipmentPage() {
                           name="titleStatus"
                           value={formData.titleStatus}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                          className="w-full px-4 py-2 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
                         >
                           <option value="">Select title status</option>
                           <option value="PENDING">Pending</option>
@@ -646,7 +633,7 @@ export default function EditShipmentPage() {
                     {formData.vehicleYear && (
                       <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-white/90">Vehicle Age:</span>
+                          <span className="text-xs sm:text-sm font-semibold text-[var(--text-secondary)]">Vehicle Age:</span>
                           <span className="text-lg font-bold text-cyan-400">
                             {new Date().getFullYear() - parseInt(formData.vehicleYear || '0')} years
                           </span>
@@ -659,14 +646,14 @@ export default function EditShipmentPage() {
             </Card>
 
             {/* Shipping Information */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">Shipping Information</CardTitle>
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Shipping Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 {/* Tracking Number with Fetch Button */}
                 <div>
-                  <label htmlFor="trackingNumber" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="trackingNumber" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Tracking / Container Number
                   </label>
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -676,7 +663,7 @@ export default function EditShipmentPage() {
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
                       placeholder="e.g., UETU6059142"
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white placeholder-white/40 focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                     <Button
                       type="button"
@@ -704,7 +691,7 @@ export default function EditShipmentPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="origin" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="origin" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Origin
                   </label>
                   <input
@@ -713,12 +700,12 @@ export default function EditShipmentPage() {
                     name="origin"
                     value={formData.origin}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="destination" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="destination" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Destination
                   </label>
                   <input
@@ -727,13 +714,13 @@ export default function EditShipmentPage() {
                     name="destination"
                     value={formData.destination}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="weight" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="weight" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Weight (lbs)
                     </label>
                     <input
@@ -742,11 +729,11 @@ export default function EditShipmentPage() {
                       name="weight"
                       value={formData.weight}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="dimensions" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="dimensions" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Dimensions (L x W x H)
                     </label>
                     <input
@@ -755,13 +742,13 @@ export default function EditShipmentPage() {
                       name="dimensions"
                       value={formData.dimensions}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="specialInstructions" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="specialInstructions" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Special Instructions
                   </label>
                   <textarea
@@ -770,20 +757,20 @@ export default function EditShipmentPage() {
                     value={formData.specialInstructions}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   />
                 </div>
               </CardContent>
             </Card>
 
             {/* Status Information */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">Status Information</CardTitle>
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Status Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
-                  <label htmlFor="status" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="status" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Status
                   </label>
                   <select
@@ -791,7 +778,7 @@ export default function EditShipmentPage() {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   >
                     <option value="PENDING">Pending</option>
                     <option value="QUOTE_REQUESTED">Quote Requested</option>
@@ -813,7 +800,7 @@ export default function EditShipmentPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="currentLocation" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="currentLocation" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Current Location
                     </label>
                     <input
@@ -822,11 +809,11 @@ export default function EditShipmentPage() {
                       name="currentLocation"
                       value={formData.currentLocation}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="progress" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="progress" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Progress (%)
                     </label>
                     <input
@@ -837,13 +824,13 @@ export default function EditShipmentPage() {
                       onChange={handleChange}
                       min="0"
                       max="100"
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="estimatedDelivery" className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="estimatedDelivery" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Estimated Delivery
                   </label>
                   <input
@@ -852,25 +839,25 @@ export default function EditShipmentPage() {
                     name="estimatedDelivery"
                     value={formData.estimatedDelivery}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                   />
                 </div>
               </CardContent>
             </Card>
 
             {/* Container Photos */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white text-lg">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
                   <ImageIcon className="h-5 w-5 text-cyan-300" />
                   Container Photos
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
                   <label
                     htmlFor="container-photo-input"
-                    className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:border-blue-400 hover:bg-blue-100 transition-all cursor-pointer group"
+                    className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-cyan-500/40 rounded-lg bg-white/3 hover:bg-white/5 hover:border-cyan-500/60 transition-all cursor-pointer group"
                   >
                     <input
                       id="container-photo-input"
@@ -884,16 +871,16 @@ export default function EditShipmentPage() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {uploading.state && uploading.section === 'container' ? (
                         <>
-                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mb-2" />
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-500 border-t-transparent mb-2" />
                           <p className="text-sm text-gray-600">Uploading...</p>
                         </>
                       ) : (
                         <>
-                          <Upload className="w-8 h-8 text-blue-400 group-hover:text-blue-600 mb-2" />
-                          <p className="mb-1 text-sm text-gray-700">
-                            <span className="font-semibold text-blue-600">Click to upload</span> container photos
+                          <Upload className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 mb-2" />
+                          <p className="mb-1 text-sm text-[var(--text-primary)]">
+                            <span className="font-semibold text-cyan-400">Click to upload</span> container photos
                           </p>
-                          <p className="text-xs text-gray-500">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
+                          <p className="text-xs text-[var(--text-secondary)]">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
                         </>
                       )}
                     </div>
@@ -903,7 +890,7 @@ export default function EditShipmentPage() {
                 {containerPhotos.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {containerPhotos.map((photo, index) => (
-                      <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200">
+                      <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
                         <Image
                           src={photo}
                           alt={`Container photo ${index + 1}`}
@@ -914,36 +901,36 @@ export default function EditShipmentPage() {
                         <button
                           type="button"
                           onClick={() => removePhoto('container', index)}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/70 hover:bg-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           aria-label="Remove container photo"
                         >
-                          <X className="w-4 h-4 text-white" />
+                          <X className="w-4 h-4 text-[var(--text-primary)]" />
                         </button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">No container photos uploaded yet.</p>
+                  <p className="text-sm text-[var(--text-secondary)]">No container photos uploaded yet.</p>
                 )}
               </CardContent>
             </Card>
 
             {/* Arrival Photos */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between text-white text-lg">
+                <CardTitle className="flex items-center justify-between text-base sm:text-lg font-bold text-[var(--text-primary)]">
                   <span className="flex items-center gap-2">
                     <ImageIcon className="h-5 w-5 text-cyan-300" />
                     Arrival Photos
                   </span>
-                  <span className="text-xs text-white/40">Visible after delivery milestones</span>
+                  <span className="text-xs text-[var(--text-secondary)]">Visible after delivery milestones</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
                   <label
                     htmlFor="arrival-photo-input"
-                    className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:border-blue-400 hover:bg-blue-100 transition-all cursor-pointer group"
+                    className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-cyan-500/40 rounded-lg bg-white/3 hover:bg-white/5 hover:border-cyan-500/60 transition-all cursor-pointer group"
                   >
                     <input
                       id="arrival-photo-input"
@@ -957,16 +944,16 @@ export default function EditShipmentPage() {
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       {uploading.state && uploading.section === 'arrival' ? (
                         <>
-                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mb-2" />
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-500 border-t-transparent mb-2" />
                           <p className="text-sm text-gray-600">Uploading...</p>
                         </>
                       ) : (
                         <>
-                          <Upload className="w-8 h-8 text-blue-400 group-hover:text-blue-600 mb-2" />
-                          <p className="mb-1 text-sm text-gray-700">
-                            <span className="font-semibold text-blue-600">Click to upload</span> arrival photos
+                          <Upload className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 mb-2" />
+                          <p className="mb-1 text-sm text-[var(--text-primary)]">
+                            <span className="font-semibold text-cyan-400">Click to upload</span> arrival photos
                           </p>
-                          <p className="text-xs text-gray-500">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
+                          <p className="text-xs text-[var(--text-secondary)]">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
                         </>
                       )}
                     </div>
@@ -976,7 +963,7 @@ export default function EditShipmentPage() {
                 {arrivalPhotos.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {arrivalPhotos.map((photo, index) => (
-                      <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200">
+                      <div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
                         <Image
                           src={photo}
                           alt={`Arrival photo ${index + 1}`}
@@ -987,29 +974,29 @@ export default function EditShipmentPage() {
                         <button
                           type="button"
                           onClick={() => removePhoto('arrival', index)}
-                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/80 hover:bg-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/70 hover:bg-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           aria-label="Remove arrival photo"
                         >
-                          <X className="w-4 h-4 text-white" />
+                          <X className="w-4 h-4 text-[var(--text-primary)]" />
                         </button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">No arrival photos uploaded yet.</p>
+                  <p className="text-sm text-[var(--text-secondary)]">No arrival photos uploaded yet.</p>
                 )}
               </CardContent>
             </Card>
 
             {/* Financial Information */}
-            <Card className="border-cyan-500/10 bg-white/[0.03] backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white text-lg">Financial Information</CardTitle>
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Financial Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="price" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Price (USD)
                     </label>
                     <input
@@ -1019,11 +1006,11 @@ export default function EditShipmentPage() {
                       name="price"
                       value={formData.price}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="insuranceValue" className="block text-sm font-medium text-white/70 mb-2">
+                    <label htmlFor="insuranceValue" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Insurance Value (USD)
                     </label>
                     <input
@@ -1033,7 +1020,7 @@ export default function EditShipmentPage() {
                       name="insuranceValue"
                       value={formData.insuranceValue}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -1064,7 +1051,7 @@ export default function EditShipmentPage() {
                 disabled={loading}
                 className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
               >
-                {loading ? 'Updating...' : 'Update Shipment'}
+                {loading ? <span className="text-white">Updating...</span> : <span className="text-white">Update Shipment</span>}
               </Button>
             </div>
           </form>

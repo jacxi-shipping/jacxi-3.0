@@ -455,507 +455,365 @@ export default function ShipmentDetailPage() {
           <Section className="pb-4 pt-4 sm:pt-6">
             <div className="flex flex-col gap-4 sm:gap-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1">
                   <Link href="/dashboard/shipments">
                     <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 flex-shrink-0 text-xs sm:text-sm">
                       <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                       Back
                     </Button>
                   </Link>
-                  <div className="min-w-0 flex-1">
-                    <h1 className="text-lg sm:text-2xl md:text-3xl font-semibold text-[var(--text-primary)] truncate">Shipment {shipment.trackingNumber}</h1>
-                    <p className="text-[var(--text-secondary)] text-xs sm:text-sm line-clamp-1">
-                      Detailed view of the shipment lifecycle, financials, and media.
-                    </p>
-                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="min-w-0 flex-1 flex flex-col items-center justify-center">
+                  <div className="w-full flex justify-center">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-primary)] text-center truncate max-w-xs sm:max-w-md md:max-w-lg">
+                      {shipment.trackingNumber.length > 18
+                        ? `${shipment.trackingNumber.slice(0, 15)}...`
+                        : shipment.trackingNumber}
+                    </h1>
+                  </div>
+                  <p className="text-[var(--text-secondary)] text-xs sm:text-sm line-clamp-1 text-center w-full flex justify-center">
+                    Detailed view of the shipment lifecycle, financials, and media.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 sm:gap-3 justify-end">
                   {isAdmin && (
                     <>
+                      <Link href={`/dashboard/shipments/${shipment.id}/edit`}>
+                        <Button className="bg-[var(--accent-gold)] text-[var(--background)] hover:bg-[var(--accent-gold)] text-xs sm:text-sm ml-2">
+                          <PenLine className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
                       <Button
                         variant="outline"
                         onClick={handleDelete}
-                        className="border-red-500/40 text-red-300 hover:bg-red-500/10 flex-1 sm:flex-initial text-xs sm:text-sm"
+                        className="border-red-500/40 text-red-300 hover:bg-red-500/10 text-xs sm:text-sm ml-2"
                       >
                         <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         Delete
                       </Button>
-                      <Link href={`/dashboard/shipments/${shipment.id}/edit`} className="flex-1 sm:flex-initial">
-                        <Button className="bg-[var(--accent-gold)] text-[var(--background)] hover:bg-[var(--accent-gold)] w-full text-xs sm:text-sm">
-                          <PenLine className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                          Edit Shipment
-                        </Button>
-                      </Link>
                     </>
                   )}
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="lg:col-span-2 space-y-4 sm:space-y-6"
-                >
-                  <Card className="relative border-cyan-500/10 bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader className="space-y-2 sm:space-y-3 p-4 sm:p-6">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                        <span
-                          className={cn(
-                            'inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wide ring-1 flex-shrink-0',
-                            statusStyle.text,
-                            statusStyle.bg,
-                            statusStyle.ring,
-                          )}
-                        >
-                          {formatStatus(shipment.status)}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="lg:col-span-2 space-y-4 sm:space-y-6"
+              >
+                <Card className="relative border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                  <CardHeader className="space-y-2 sm:space-y-3 p-4 sm:p-6 border-b border-white/5">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wide ring-1 flex-shrink-0',
+                          statusStyle.text,
+                          statusStyle.bg,
+                          statusStyle.ring,
+                        )}
+                      >
+                        {formatStatus(shipment.status)}
+                      </span>
+                      {shipment.progress > 0 && (
+                        <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
+                          Progress <span className="text-[var(--text-primary)] font-semibold">{shipment.progress}%</span>
                         </span>
-                        {shipment.progress > 0 && (
-                          <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                            Progress <span className="text-[var(--text-primary)] font-semibold">{shipment.progress}%</span>
-                          </span>
-                        )}
+                      )}
+                    </div>
+                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg md:text-xl">Current Status</CardTitle>
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2">
+                      Monitor the latest milestone and location updates for this shipment.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-3 sm:space-y-5 p-4 sm:p-6">
+                    <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)] transition-all duration-500"
+                        style={{ width: `${Math.max(Math.min(shipment.progress || 0, 100), 0)}%` }}
+                      />
+                    </div>
+                    {shipment.currentLocation && (
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-secondary)]">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300 flex-shrink-0" />
+                        <span className="min-w-0">Currently located at <span className="text-[var(--text-primary)] truncate inline-block max-w-[150px] sm:max-w-none align-bottom">{shipment.currentLocation}</span></span>
                       </div>
-                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg md:text-xl">Current Status</CardTitle>
-                      <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2">
-                        Monitor the latest milestone and location updates for this shipment.
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
+                      <div className="min-w-0">
+                        <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Origin</p>
+                        <p className="text-[var(--text-primary)] truncate">{shipment.origin}</p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Destination</p>
+                        <p className="text-[var(--text-primary)] truncate">{shipment.destination}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                  <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Shipping Route</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6">
+                    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Origin</dt>
+                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.origin}</dd>
+                      </div>
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Destination</dt>
+                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.destination}</dd>
+                      </div>
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Weight</dt>
+                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.weight ? `${shipment.weight} lbs` : '-'}</dd>
+                      </div>
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Dimensions</dt>
+                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.dimensions || '-'}</dd>
+                      </div>
+                    </dl>
+                    {shipment.specialInstructions && (
+                      <div className="mt-4 bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-2">Special Instructions</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)]">{shipment.specialInstructions}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                  <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Tracking Timeline</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 space-y-6">
+                    {shipment.events.length === 0 ? (
+                      <p className="rounded-lg border border-white/10 bg-white/3 py-8 text-center text-sm text-[var(--text-secondary)]">
+                        No tracking events yet.
                       </p>
-                    </CardHeader>
-                    <CardContent className="space-y-3 sm:space-y-5 p-4 sm:p-6">
-                      <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-[rgba(var(--panel-rgb),0.55)]">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)] transition-all duration-500"
-                          style={{ width: `${Math.max(Math.min(shipment.progress || 0, 100), 0)}%` }}
-                        />
-                      </div>
-                      {shipment.currentLocation && (
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-secondary)]">
-                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300 flex-shrink-0" />
-                          <span className="min-w-0">Currently located at <span className="text-[var(--text-primary)] truncate inline-block max-w-[150px] sm:max-w-none align-bottom">{shipment.currentLocation}</span></span>
-                        </div>
-                      )}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
-                        <div className="min-w-0">
-                          <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Origin</p>
-                          <p className="text-[var(--text-primary)] truncate">{shipment.origin}</p>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Destination</p>
-                          <p className="text-[var(--text-primary)] truncate">{shipment.destination}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Vehicle Details */}
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader className="p-4 sm:p-6">
-                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg">Vehicle Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 sm:p-6">
-                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div className="min-w-0">
-                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Vehicle Type</dt>
-                          <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] capitalize truncate">{shipment.vehicleType}</dd>
-                        </div>
-                        {shipment.vehicleMake && (
-                          <div className="min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Make</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] truncate">{shipment.vehicleMake}</dd>
-                          </div>
-                        )}
-                        {shipment.vehicleModel && (
-                          <div className="min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Model</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] truncate">{shipment.vehicleModel}</dd>
-                          </div>
-                        )}
-                        {shipment.vehicleYear && (
-                          <div className="min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Year</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)]">{shipment.vehicleYear}</dd>
-                          </div>
-                        )}
-                        {shipment.vehicleVIN && (
-                          <div className="sm:col-span-2 min-w-0">
-                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">VIN Number</dt>
-                            <dd className="mt-1 text-xs sm:text-sm text-[var(--text-primary)] font-mono break-all">{shipment.vehicleVIN}</dd>
-                          </div>
-                        )}
-                      </dl>
-                    </CardContent>
-                  </Card>
-
-                  {/* Vehicle Details */}
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader className="p-4 sm:p-6">
-                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg">Vehicle Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 sm:p-6">
-                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm text-[var(--text-secondary)]">
-                        <div className="min-w-0">
-                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)]">Has Key</dt>
-                          <dd className="mt-1 text-[var(--text-primary)]">
-                            {shipment.hasKey === true ? (
-                              <span className="inline-flex items-center gap-1 text-green-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Yes
-                              </span>
-                            ) : shipment.hasKey === false ? (
-                              <span className="inline-flex items-center gap-1 text-red-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                No
-                              </span>
-                            ) : (
-                              <span className="text-[var(--text-secondary)]">Not specified</span>
-                            )}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Has Title</dt>
-                          <dd className="mt-1 text-[var(--text-primary)]">
-                            {shipment.hasTitle === true ? (
-                              <span className="inline-flex items-center gap-1 text-green-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Yes
-                              </span>
-                            ) : shipment.hasTitle === false ? (
-                              <span className="inline-flex items-center gap-1 text-red-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                No
-                              </span>
-                            ) : (
-                              <span className="text-[var(--text-secondary)]">Not specified</span>
-                            )}
-                          </dd>
-                        </div>
-                        {shipment.hasTitle && shipment.titleStatus && (
-                          <div>
-                            <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Title Status</dt>
-                            <dd className="mt-1">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  shipment.titleStatus === 'DELIVERED' 
-                                    ? 'bg-green-500/20 text-green-400' 
-                                    : 'bg-sky-500/20 text-sky-300'
-                                }`}>
-                                {shipment.titleStatus === 'DELIVERED' ? 'Delivered' : 'Pending'}
-                              </span>
-                            </dd>
-                          </div>
-                        )}
-                        {shipment.vehicleAge !== null && shipment.vehicleAge !== undefined && (
-                          <div>
-                            <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Vehicle Age</dt>
-                            <dd className="mt-1 text-[var(--text-primary)]">
-                              <span className="text-cyan-400 font-semibold">{shipment.vehicleAge}</span> {shipment.vehicleAge === 1 ? 'year' : 'years'}
-                            </dd>
-                          </div>
-                        )}
-                      </dl>
-                    </CardContent>
-                  </Card>
-
-                  {/* Shipping Route */}
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="text-[var(--text-primary)] text-lg">Shipping Route</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-[var(--text-secondary)]">
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Origin</dt>
-                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.origin}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Destination</dt>
-                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.destination}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Weight</dt>
-                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.weight ? `${shipment.weight} lbs` : '-'}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Dimensions</dt>
-                          <dd className="mt-1 text-[var(--text-primary)]">{shipment.dimensions || '-'}</dd>
-                        </div>
-                      </dl>
-                      {shipment.specialInstructions && (
-                        <div className="mt-4 rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4 text-sm text-[var(--text-primary)]">
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)] mb-2">Special Instructions</p>
-                          <p>{shipment.specialInstructions}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="text-[var(--text-primary)] text-lg">Tracking Timeline</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {shipment.events.length === 0 ? (
-                        <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
-                          No tracking events yet.
-                        </p>
-                      ) : (
-                        <div className="relative pl-6">
-                          <span className="absolute left-2 top-0 h-full w-0.5 bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
-                          <ul className="space-y-6">
-                            {shipment.events.map((event, index) => (
-                              <motion.li
-                                key={event.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.2, delay: index * 0.05 }}
-                                className="relative"
-                              >
-                                <div className="absolute -left-6 top-1 flex h-8 w-8 items-center justify-center">
-                                  <span
-                                    className={cn(
-                                      'flex h-3 w-3 items-center justify-center rounded-full border-2 text-xs font-bold text-[var(--text-primary)]',
-                                      event.completed ? 'border-cyan-400 bg-cyan-400' : 'border-[var(--border)] bg-[rgba(var(--panel-rgb),0.55)]',
-                                    )}
-                                  >
-                                    {shipment.events.length - index}
-                                  </span>
-                                </div>
-                                <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
-                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                                    <p className={cn('text-sm font-semibold text-[var(--text-primary)]', event.completed ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}>
-                                      {formatStatus(event.status)}
-                                    </p>
-                                    <p className="text-xs text-[var(--text-secondary)]">
-                                      {new Date(event.timestamp).toLocaleString()}
-                                    </p>
-                                  </div>
-                                  <p className="text-sm text-[var(--text-secondary)]">{event.location}</p>
-                                  {event.description && (
-                                    <p className="mt-2 text-sm text-[var(--text-secondary)]">{event.description}</p>
-                                  )}
-                                </div>
-                              </motion.li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {shipment.containerPhotos?.length > 0 && (
-                    <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
-                          <PackageCheck className="h-5 w-5 text-cyan-300" />
-                          Container Photos
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                          {shipment.containerPhotos.map((photo, index) => (
-                            <button
-                              key={index}
-                              type="button"
-                              onClick={() => openLightbox(shipment.containerPhotos, index, 'Container Photos')}
-                              className="relative aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-                            >
-                              <Image
-                                src={photo}
-                                alt={`Container photo ${index + 1}`}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader>
-                      <div className="flex items-center justify-between gap-3">
-                        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
-                          <ImageIcon className="h-5 w-5 text-cyan-300" />
-                          Arrival Photos
-                        </CardTitle>
-                        {canUploadArrivalPhotos && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowArrivalUpload((prev) => !prev)}
-                            className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-                          >
-                            <Upload className="h-4 w-4 mr-2" />
-                            {showArrivalUpload ? 'Cancel' : 'Upload Photos'}
-                          </Button>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {showArrivalUpload && canUploadArrivalPhotos && (
-                        <label
-                          htmlFor="arrival-photos"
-                          className="relative flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-cyan-500/40 bg-[rgba(var(--panel-rgb),0.4)] hover:border-cyan-500/60 hover:bg-[rgba(var(--panel-rgb),0.55)] transition-all"
-                        >
-                          <input
-                            id="arrival-photos"
-                            type="file"
-                            multiple
-                            accept="image/jpeg,image/jpg,image/png,image/webp"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                            disabled={uploading}
-                          />
-                          <div className="flex flex-col items-center justify-center gap-2">
-                            {uploading ? (
-                              <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent" />
-                            ) : (
-                              <Upload className="h-8 w-8 text-cyan-300" />
-                            )}
-                            <p className="text-sm text-[var(--text-secondary)]">
-                              <span className="text-cyan-300 font-semibold">Click to upload</span> or drag and drop
-                            </p>
-                            <p className="text-xs text-[var(--text-secondary)]">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
-                          </div>
-                        </label>
-                      )}
-
-                      {arrivalPhotos.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                          {arrivalPhotos.map((photo, index) => (
-                            <motion.button
-                              key={index}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
+                    ) : (
+                      <div className="relative pl-6">
+                        <span className="absolute left-2 top-0 h-full w-0.5 bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
+                        <ul className="space-y-6">
+                          {shipment.events.map((event, index) => (
+                            <motion.li
+                              key={event.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 0.2, delay: index * 0.05 }}
-                              type="button"
-                              className="relative group aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-                              onClick={() => openLightbox(arrivalPhotos, index, 'Arrival Photos')}
+                              className="relative"
                             >
-                              <Image
-                                src={photo}
-                                alt={`Arrival photo ${index + 1}`}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                              {canUploadArrivalPhotos && (
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    removeArrivalPhoto(index);
-                                  }}
-                                  className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500/80 text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100"
+                              <div className="absolute -left-6 top-1 flex h-8 w-8 items-center justify-center">
+                                <span
+                                  className={cn(
+                                    'flex h-3 w-3 items-center justify-center rounded-full border-2 text-xs font-bold text-[var(--text-primary)]',
+                                    event.completed ? 'border-cyan-400 bg-cyan-400' : 'border-white/20 bg-white/5',
+                                  )}
                                 >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              )}
-                            </motion.button>
+                                  {shipment.events.length - index}
+                                </span>
+                              </div>
+                              <div className="rounded-lg border border-white/10 bg-white/3 p-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                                  <p className={cn('text-sm font-semibold text-[var(--text-primary)]', event.completed ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]')}>
+                                    {formatStatus(event.status)}
+                                  </p>
+                                  <p className="text-xs text-[var(--text-secondary)]">
+                                    {new Date(event.timestamp).toLocaleString()}
+                                  </p>
+                                </div>
+                                <p className="text-sm text-[var(--text-secondary)]">{event.location}</p>
+                                {event.description && (
+                                  <p className="mt-2 text-sm text-[var(--text-secondary)]">{event.description}</p>
+                                )}
+                              </div>
+                            </motion.li>
                           ))}
-                        </div>
-                      ) : (
-                        <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
-                          {canUploadArrivalPhotos
-                            ? 'No arrival photos uploaded yet. Upload photos when the container arrives.'
-                            : 'No arrival photos available.'}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
-                  className="space-y-6"
-                >
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
-                        <Wallet className="h-5 w-5 text-cyan-300" />
-                        Financial Snapshot
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-sm text-[var(--text-secondary)]">
-                      {shipment.price && (
-                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Total Price</p>
-                          <p className="text-2xl font-semibold text-[var(--text-primary)]">${shipment.price.toFixed(2)}</p>
-                        </div>
-                      )}
-                      {shipment.insuranceValue && (
-                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Insurance Value</p>
-                          <p className="text-lg font-semibold text-[var(--text-primary)]">${shipment.insuranceValue.toFixed(2)}</p>
-                        </div>
-                      )}
-                      <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
-                        <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Created On</p>
-                        <p className="text-sm text-[var(--text-primary)]">{new Date(shipment.createdAt).toLocaleDateString()}</p>
+                        </ul>
                       </div>
-                    </CardContent>
-                  </Card>
+                      )}
+                  </CardContent>
+                </Card>
 
-                  <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                    <CardHeader>
+                <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                  <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                    <div className="flex items-center justify-between gap-3">
                       <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-lg">
-                        <CalendarCheck className="h-5 w-5 text-cyan-300" />
-                        Delivery Timeline
+                        <ImageIcon className="h-5 w-5 text-cyan-300" />
+                        Arrival Photos
                       </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-sm text-[var(--text-secondary)]">
-                      {shipment.estimatedDelivery && (
-                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Estimated Delivery</p>
-                          <p className="text-sm text-[var(--text-primary)]">{new Date(shipment.estimatedDelivery).toLocaleDateString()}</p>
-                        </div>
+                      {canUploadArrivalPhotos && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowArrivalUpload((prev) => !prev)}
+                          className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          {showArrivalUpload ? 'Cancel' : 'Upload Photos'}
+                        </Button>
                       )}
-                      {shipment.actualDelivery && (
-                        <div className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] p-4">
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Actual Delivery</p>
-                          <p className="text-sm text-[var(--text-primary)]">{new Date(shipment.actualDelivery).toLocaleDateString()}</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 space-y-4">
+                    {showArrivalUpload && canUploadArrivalPhotos && (
+                      <label
+                        htmlFor="arrival-photos"
+                        className="relative flex h-32 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-cyan-500/40 bg-[rgba(var(--panel-rgb),0.4)] hover:border-cyan-500/60 hover:bg-[rgba(var(--panel-rgb),0.55)] transition-all"
+                      >
+                        <input
+                          id="arrival-photos"
+                          type="file"
+                          multiple
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          {uploading ? (
+                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent" />
+                          ) : (
+                            <Upload className="h-8 w-8 text-cyan-300" />
+                          )}
+                          <p className="text-sm text-[var(--text-secondary)]">
+                            <span className="text-cyan-300 font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-[var(--text-secondary)]">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
+                        </div>
+                      </label>
+                    )}
+
+                    {arrivalPhotos.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {arrivalPhotos.map((photo, index) => (
+                          <motion.button
+                            key={index}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.2, delay: index * 0.05 }}
+                            type="button"
+                            className="relative group aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                            onClick={() => openLightbox(arrivalPhotos, index, 'Arrival Photos')}
+                          >
+                            <Image
+                              src={photo}
+                              alt={`Arrival photo ${index + 1}`}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            {canUploadArrivalPhotos && (
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  removeArrivalPhoto(index);
+                                }}
+                                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500/80 text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            )}
+                          </motion.button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
+                        {canUploadArrivalPhotos
+                          ? 'No arrival photos uploaded yet. Upload photos when the container arrives.'
+                          : 'No arrival photos available.'}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="space-y-6"
+              >
+                <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                  <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                    <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-base sm:text-lg font-bold">
+                      <Wallet className="h-5 w-5 text-cyan-300" />
+                      Financial Snapshot
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 space-y-4">
+                    {shipment.price && (
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Total Price</p>
+                        <p className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)]">${shipment.price.toFixed(2)}</p>
+                      </div>
+                    )}
+                    {shipment.insuranceValue && (
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Insurance Value</p>
+                        <p className="text-sm sm:text-lg font-semibold text-[var(--text-primary)]">${shipment.insuranceValue.toFixed(2)}</p>
+                      </div>
+                    )}
+                    <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Created On</p>
+                      <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                  <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                    <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-base sm:text-lg font-bold">
+                      <CalendarCheck className="h-5 w-5 text-cyan-300" />
+                      Delivery Timeline
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 space-y-4">
+                    {shipment.estimatedDelivery && (
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Estimated Delivery</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.estimatedDelivery).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                    {shipment.actualDelivery && (
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Actual Delivery</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.actualDelivery).toLocaleDateString()}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {isAdmin && (
+                  <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                    <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                      <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Customer Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 sm:p-6 space-y-4">
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Name</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.user.name || 'N/A'}</p>
+                      </div>
+                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Email</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.user.email}</p>
+                      </div>
+                      {shipment.user.phone && (
+                        <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Phone</p>
+                          <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.user.phone}</p>
                         </div>
                       )}
                     </CardContent>
                   </Card>
-
-                  {isAdmin && (
-                    <Card className="border-[var(--border)] bg-[rgba(var(--panel-rgb),0.45)] backdrop-blur-sm">
-                      <CardHeader>
-                        <CardTitle className="text-[var(--text-primary)] text-lg">Customer Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-3 text-sm text-[var(--text-secondary)]">
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Name</p>
-                          <p className="text-sm text-[var(--text-primary)]">{shipment.user.name || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Email</p>
-                          <p className="text-sm text-[var(--text-primary)]">{shipment.user.email}</p>
-                        </div>
-                        {shipment.user.phone && (
-                          <div>
-                            <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">Phone</p>
-                            <p className="text-sm text-[var(--text-primary)]">{shipment.user.phone}</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </motion.div>
-              </div>
+                )}
+              </motion.div>
             </div>
           </Section>
         </div>
