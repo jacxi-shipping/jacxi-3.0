@@ -34,26 +34,27 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String        @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  role          String        @default("user")
-  phone         String?
-  address       String?
-  city          String?
-  country       String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  accounts      Account[]
-  documents     Document[]
-  payments      Payment[]
-  quotes        Quote[]
-  sessions      Session[]
-  shipments     Shipment[]
-  settings      UserSettings?
+  id               String             @id @default(cuid())
+  name             String?
+  email            String             @unique
+  emailVerified    DateTime?
+  image            String?
+  passwordHash     String?
+  role             String             @default("user")
+  phone            String?
+  address          String?
+  city             String?
+  country          String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  accounts         Account[]
+  documents        Document[]
+  payments         Payment[]
+  quotes           Quote[]
+  sessions         Session[]
+  shipments        Shipment[]
+  settings         UserSettings?
+  ledgerEntries    LedgerEntry[]
 }
 
 model VerificationToken {
@@ -93,6 +94,7 @@ model Shipment {
   arrivalPhotos       String[]            @default([])
   containerPhotos     String[]            @default([])
   paymentStatus       PaymentStatus       @default(PENDING)
+  paymentMode         PaymentMode?
   hasKey              Boolean?
   hasTitle            Boolean?
   titleStatus         TitleStatus?
@@ -108,6 +110,7 @@ model Shipment {
   route               Route?              @relation(fields: [routeId], references: [id])
   user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   events              ShipmentEvent[]
+  ledgerEntries       LedgerEntry[]
 }
 
 model ShipmentEvent {
@@ -493,4 +496,36 @@ enum ContainerStatus {
 enum ItemStatus {
   ON_HAND
   READY_FOR_SHIPMENT
+}
+
+enum PaymentMode {
+  CASH
+  DUE
+}
+
+enum LedgerEntryType {
+  DEBIT
+  CREDIT
+}
+
+model LedgerEntry {
+  id              String           @id @default(cuid())
+  userId          String
+  shipmentId      String?
+  transactionDate DateTime         @default(now())
+  description     String
+  type            LedgerEntryType
+  amount          Float
+  balance         Float
+  createdBy       String
+  notes           String?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shipment        Shipment?        @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([shipmentId])
+  @@index([transactionDate])
 }

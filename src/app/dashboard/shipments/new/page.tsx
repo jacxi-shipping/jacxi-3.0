@@ -1217,6 +1217,65 @@ export default function NewShipmentPage() {
 										)}
 									</div>
 								</div>
+
+								{/* Payment Mode Selection */}
+								<div className="pt-4 border-t border-white/5">
+									<label className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
+										Payment Mode
+									</label>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<label 
+											className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
+												watch('paymentMode') === 'CASH' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
+											}`}
+										>
+											<input
+												type="radio"
+												{...register('paymentMode')}
+												value="CASH"
+												className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<div>
+												<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Cash Payment</div>
+												<div className="text-[var(--text-secondary)] text-xs">
+													Payment received immediately. Transaction will be marked as paid.
+												</div>
+											</div>
+										</label>
+										<label 
+											className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
+												watch('paymentMode') === 'DUE' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
+											}`}
+										>
+											<input
+												type="radio"
+												{...register('paymentMode')}
+												value="DUE"
+												className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<div>
+												<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Due Payment</div>
+												<div className="text-[var(--text-secondary)] text-xs">
+													Payment to be collected later. Amount will be added to user's ledger as due.
+												</div>
+											</div>
+										</label>
+									</div>
+									{watch('paymentMode') === 'CASH' && (
+										<div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+											<p className="text-xs text-green-400">
+												✓ Cash payment selected. A debit and credit entry will be created in the user's ledger (net zero balance).
+											</p>
+										</div>
+									)}
+									{watch('paymentMode') === 'DUE' && (
+										<div className="mt-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+											<p className="text-xs text-yellow-400">
+												⚠ Due payment selected. Only a debit entry will be created, increasing the user's outstanding balance.
+											</p>
+										</div>
+									)}
+								</div>
 							</CardContent>
 						</Card>
 

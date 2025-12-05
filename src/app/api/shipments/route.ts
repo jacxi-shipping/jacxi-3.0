@@ -126,6 +126,7 @@ type CreateShipmentPayload = {
   hasKey?: boolean | null;
   hasTitle?: boolean | null;
   titleStatus?: string | null;
+  paymentMode?: 'CASH' | 'DUE' | null;
 };
 
 const isTrackingEventPayload = (value: unknown): value is TrackingEventPayload =>
@@ -179,6 +180,7 @@ export async function POST(request: NextRequest) {
       hasKey,
       hasTitle,
       titleStatus,
+      paymentMode,
     } = data;
 
     // Validate required fields
@@ -304,6 +306,14 @@ export async function POST(request: NextRequest) {
     }
     
     const shipment = await prisma.$transaction(async (tx) => {
+      // Determine payment status based on payment mode
+      let finalPaymentStatus = 'PENDING';
+      if (paymentMode === 'CASH') {
+        finalPaymentStatus = 'COMPLETED';
+      } else if (paymentMode === 'DUE') {
+        finalPaymentStatus = 'PENDING';
+      }
+
       const createdShipment = await tx.shipment.create({
         data: {
           trackingNumber,
@@ -327,7 +337,8 @@ export async function POST(request: NextRequest) {
           insuranceValue: parsedInsuranceValue,
           price: parsedPrice,
           containerPhotos: sanitizedContainerPhotos,
-          paymentStatus: 'PENDING',
+          paymentStatus: finalPaymentStatus,
+          paymentMode: paymentMode || null,
           progress: parsedProgress !== null && !Number.isNaN(parsedProgress) ? parsedProgress : undefined,
           // New fields
           hasKey: typeof hasKey === 'boolean' ? hasKey : null,
@@ -336,6 +347,65 @@ export async function POST(request: NextRequest) {
           vehicleAge: calculatedVehicleAge,
         },
       });
+
+      // Create ledger entries based on payment mode
+      if (paymentMode && parsedPrice && parsedPrice > 0) {
+        // Get current balance for the user
+        const latestEntry = await tx.ledgerEntry.findFirst({
+          where: { userId: userId },
+          orderBy: { transactionDate: 'desc' },
+          select: { balance: true },
+        });
+
+        const currentBalance = latestEntry?.balance || 0;
+        
+        const vehicleInfo = [vehicleMake, vehicleModel].filter(Boolean).join(' ') || 'Vehicle';
+        
+        if (paymentMode === 'CASH') {
+          // Cash payment: Create both debit and credit entries (net zero)
+          const debitBalance = currentBalance + parsedPrice;
+          await tx.ledgerEntry.create({
+            data: {
+              userId: userId,
+              shipmentId: createdShipment.id,
+              description: `Shipment charge for ${vehicleInfo} (${trackingNumber}) - Cash`,
+              type: 'DEBIT',
+              amount: parsedPrice,
+              balance: debitBalance,
+              createdBy: session.user?.id as string,
+              notes: 'Shipment cost charged',
+            },
+          });
+
+          await tx.ledgerEntry.create({
+            data: {
+              userId: userId,
+              shipmentId: createdShipment.id,
+              description: `Cash payment received for ${vehicleInfo} (${trackingNumber})`,
+              type: 'CREDIT',
+              amount: parsedPrice,
+              balance: currentBalance, // Back to original balance
+              createdBy: session.user?.id as string,
+              notes: 'Cash payment settled immediately',
+            },
+          });
+        } else if (paymentMode === 'DUE') {
+          // Due payment: Create only debit entry
+          const newBalance = currentBalance + parsedPrice;
+          await tx.ledgerEntry.create({
+            data: {
+              userId: userId,
+              shipmentId: createdShipment.id,
+              description: `Shipment charge for ${vehicleInfo} (${trackingNumber}) - Due`,
+              type: 'DEBIT',
+              amount: parsedPrice,
+              balance: newBalance,
+              createdBy: session.user?.id as string,
+              notes: 'Payment due - not yet received',
+            },
+          });
+        }
+      }
 
       if (sanitizedTrackingEvents.length) {
         const eventsData: Prisma.ShipmentEventCreateManyInput[] = sanitizedTrackingEvents.map((event) => {
