@@ -1,3 +1,7 @@
+// This is the NEW schema for Container System Restructure
+// ⚠️ This will REPLACE the current schema.prisma after review
+// This implements the complete container-first architecture
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,6 +10,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ============================================
+// AUTHENTICATION MODELS (Unchanged)
+// ============================================
 
 model Account {
   id                String  @id @default(cuid())
@@ -65,66 +73,223 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ============================================
+// SHIPMENT MODEL (Simplified - Car Info Only)
+// ============================================
+
 model Shipment {
-  id                  String              @id @default(cuid())
-  trackingNumber      String              @unique
-  userId              String
+  id                  String                @id @default(cuid())
+  
+  // Vehicle Information
   vehicleType         String
   vehicleMake         String?
   vehicleModel        String?
   vehicleYear         Int?
-  vehicleVIN          String?             @unique
+  vehicleVIN          String?               @unique
   vehicleColor        String?
   lotNumber           String?
   auctionName         String?
-  origin              String
-  destination         String
-  status              ShipmentStatus      @default(PENDING)
-  currentLocation     String?
-  estimatedDelivery   DateTime?
-  actualDelivery      DateTime?
-  progress            Int                 @default(0)
-  price               Float?
-  weight              Float?
-  dimensions          String?
-  specialInstructions String?
-  insuranceValue      Float?
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  arrivalPhotos       String[]            @default([])
-  containerPhotos     String[]            @default([])
-  paymentStatus       PaymentStatus       @default(PENDING)
-  paymentMode         PaymentMode?
   hasKey              Boolean?
   hasTitle            Boolean?
   titleStatus         TitleStatus?
   vehicleAge          Int?
-  autoStatusUpdate    Boolean             @default(true)
-  deliveryAlertStatus DeliveryAlertStatus @default(ON_TIME)
-  lastStatusSync      DateTime?
-  routeId             String?
-  containers          Container[]
+  weight              Float?
+  dimensions          String?
+  insuranceValue      Float?
+  arrivalPhotos       String[]              @default([])
+  vehiclePhotos       String[]              @default([])
+  
+  // Status and Assignment
+  status              ShipmentSimpleStatus  @default(ON_HAND)
+  containerId         String?
+  userId              String                // Owner/Customer
+  internalNotes       String?
+  
+  // Financial
+  price               Float?
+  paymentStatus       PaymentStatus         @default(PENDING)
+  paymentMode         PaymentMode?
+  
+  // Metadata
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  
+  // Relations
+  container           Container?            @relation(fields: [containerId], references: [id], onDelete: SetNull)
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   documents           Document[]
   payments            Payment[]
   qualityChecks       QualityCheck[]
-  route               Route?              @relation(fields: [routeId], references: [id])
-  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events              ShipmentEvent[]
   ledgerEntries       LedgerEntry[]
+  
+  @@index([userId])
+  @@index([containerId])
+  @@index([status])
+  @@index([vehicleVIN])
 }
 
-model ShipmentEvent {
-  id          String   @id @default(cuid())
-  shipmentId  String
-  status      String
-  location    String
-  timestamp   DateTime @default(now())
-  description String?
-  completed   Boolean  @default(false)
-  latitude    Float?
-  longitude   Float?
-  shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+// ============================================
+// CONTAINER MODEL (Primary Shipping Unit)
+// ============================================
+
+model Container {
+  id                   String                      @id @default(cuid())
+  containerNumber      String                      @unique
+  
+  // Shipping Information
+  trackingNumber       String?                     @unique
+  vesselName           String?
+  voyageNumber         String?
+  shippingLine         String?
+  bookingNumber        String?
+  
+  // Ports
+  loadingPort          String?
+  destinationPort      String?
+  transshipmentPorts   String[]                    @default([])
+  
+  // Dates
+  loadingDate          DateTime?
+  departureDate        DateTime?
+  estimatedArrival     DateTime?
+  actualArrival        DateTime?
+  
+  // Status and Progress
+  status               ContainerLifecycleStatus    @default(CREATED)
+  currentLocation      String?
+  progress             Int                         @default(0)
+  
+  // Capacity
+  maxCapacity          Int                         @default(4)
+  currentCount         Int                         @default(0)
+  
+  // Notes and Documentation
+  notes                String?
+  lastLocationUpdate   DateTime?
+  autoTrackingEnabled  Boolean                     @default(true)
+  
+  // Metadata
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  
+  // Relations
+  shipments            Shipment[]
+  expenses             ContainerExpense[]
+  invoices             ContainerInvoice[]
+  documents            ContainerDocument[]
+  trackingEvents       ContainerTrackingEvent[]
+  auditLogs            ContainerAuditLog[]
+  
+  @@index([status])
+  @@index([shippingLine])
+  @@index([destinationPort])
+  @@index([estimatedArrival])
+  @@index([trackingNumber])
 }
+
+// ============================================
+// CONTAINER SUB-MODELS
+// ============================================
+
+model ContainerExpense {
+  id            String    @id @default(cuid())
+  containerId   String
+  type          String    // Shipping, Customs, Storage, Handling, etc.
+  amount        Float
+  currency      String    @default("USD")
+  date          DateTime  @default(now())
+  vendor        String?
+  invoiceNumber String?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  container     Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  
+  @@index([containerId])
+  @@index([type])
+}
+
+model ContainerInvoice {
+  id              String         @id @default(cuid())
+  containerId     String
+  invoiceNumber   String
+  amount          Float
+  currency        String         @default("USD")
+  vendor          String?
+  date            DateTime
+  dueDate         DateTime?
+  status          InvoiceStatus  @default(DRAFT)
+  fileUrl         String?
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  
+  container       Container      @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  
+  @@index([containerId])
+  @@index([status])
+}
+
+model ContainerDocument {
+  id              String    @id @default(cuid())
+  containerId     String
+  type            String    // BOL, Customs, Packing_List, Photos, Export_Docs, etc.
+  name            String
+  fileUrl         String
+  fileType        String
+  fileSize        Int
+  uploadedBy      String
+  uploadedAt      DateTime  @default(now())
+  notes           String?
+  
+  container       Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  
+  @@index([containerId])
+  @@index([type])
+}
+
+model ContainerTrackingEvent {
+  id            String    @id @default(cuid())
+  containerId   String
+  status        String
+  location      String?
+  vesselName    String?
+  description   String?
+  eventDate     DateTime
+  source        String?   // API, Manual, System
+  completed     Boolean   @default(false)
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime  @default(now())
+  
+  container     Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  
+  @@index([containerId])
+  @@index([eventDate])
+}
+
+model ContainerAuditLog {
+  id            String    @id @default(cuid())
+  containerId   String
+  action        String    // Status_Change, Shipment_Added, ETA_Updated, Expense_Added, etc.
+  description   String
+  performedBy   String
+  oldValue      String?
+  newValue      String?
+  metadata      Json?
+  timestamp     DateTime  @default(now())
+  
+  container     Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  
+  @@index([containerId])
+  @@index([timestamp])
+  @@index([action])
+}
+
+// ============================================
+// OTHER MODELS (Mostly Unchanged)
+// ============================================
 
 model Quote {
   id           String      @id @default(cuid())
@@ -235,7 +400,6 @@ model Testimonial {
 model QualityCheck {
   id         String             @id @default(cuid())
   shipmentId String
-  itemId     String?
   checkType  QualityCheckType
   status     QualityCheckStatus @default(PENDING)
   inspector  String?
@@ -244,7 +408,6 @@ model QualityCheck {
   checkedAt  DateTime?
   createdAt  DateTime           @default(now())
   updatedAt  DateTime           @updatedAt
-  item       Item?              @relation(fields: [itemId], references: [id], onDelete: Cascade)
   shipment   Shipment           @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 }
 
@@ -280,85 +443,73 @@ model Route {
   preferences   Json?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  shipments     Shipment[]
 }
 
-model Container {
-  id              String          @id @default(cuid())
-  containerNumber String          @unique
+// Note: Item model removed as per new architecture
+// Shipments are directly assigned to Containers
+
+// ============================================
+// FINANCIAL MODELS (From Accounting System)
+// ============================================
+
+model LedgerEntry {
+  id              String           @id @default(cuid())
+  userId          String
   shipmentId      String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  currentCount    Int             @default(0)
-  maxCapacity     Int             @default(4)
-  status          ContainerStatus @default(EMPTY)
-  shipment        Shipment?       @relation(fields: [shipmentId], references: [id])
-  invoices        Invoice[]
-  items           Item[]
+  transactionDate DateTime         @default(now())
+  description     String
+  type            LedgerEntryType
+  amount          Float
+  balance         Float
+  createdBy       String
+  notes           String?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shipment        Shipment?        @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  auditLogs       AuditLog[]
+
+  @@index([userId])
+  @@index([shipmentId])
+  @@index([transactionDate])
 }
 
-model Item {
-  id                  String         @id @default(cuid())
-  containerId         String?
-  vin                 String
-  lotNumber           String
-  auctionCity         String
-  freightCost         Float          @default(0)
-  towingCost          Float          @default(0)
-  clearanceCost       Float          @default(0)
-  vatCost             Float          @default(0)
-  customsCost         Float          @default(0)
-  otherCost           Float          @default(0)
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  estimatedDelivery   DateTime?
-  shippingDestination String?
-  shippingOrigin      String?
-  status              ItemStatus     @default(ON_HAND)
-  trackingNumber      String?
-  invoices            InvoiceItem[]
-  container           Container?     @relation(fields: [containerId], references: [id], onDelete: Cascade)
-  qualityChecks       QualityCheck[]
+model AuditLog {
+  id            String        @id @default(cuid())
+  entityType    String
+  entityId      String
+  action        AuditAction
+  performedBy   String
+  performedAt   DateTime      @default(now())
+  changes       Json?
+  ipAddress     String?
+  userAgent     String?
+  ledgerEntry   LedgerEntry?  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([performedBy])
+  @@index([performedAt])
 }
 
-model Invoice {
-  id                  String        @id @default(cuid())
-  containerId         String
-  invoiceNumber       String        @unique
-  status              InvoiceStatus @default(DRAFT)
-  exchangeRate        Float         @default(3.67)
-  subtotalUSD         Float         @default(0)
-  subtotalAED         Float         @default(0)
-  totalUSD            Float         @default(0)
-  totalAED            Float         @default(0)
-  dueDate             DateTime?
-  paidDate            DateTime?
-  wireTransferDetails String?
-  overdue             Boolean       @default(false)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  container           Container     @relation(fields: [containerId], references: [id], onDelete: Cascade)
-  items               InvoiceItem[]
+// ============================================
+// ENUMS
+// ============================================
+
+enum ShipmentSimpleStatus {
+  ON_HAND
+  IN_TRANSIT
 }
 
-model InvoiceItem {
-  id            String   @id @default(cuid())
-  invoiceId     String
-  itemId        String
-  vin           String
-  lotNumber     String
-  auctionCity   String
-  freightCost   Float    @default(0)
-  towingCost    Float    @default(0)
-  clearanceCost Float    @default(0)
-  vatCost       Float    @default(0)
-  customsCost   Float    @default(0)
-  otherCost     Float    @default(0)
-  subtotalUSD   Float    @default(0)
-  subtotalAED   Float    @default(0)
-  createdAt     DateTime @default(now())
-  invoice       Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  item          Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+enum ContainerLifecycleStatus {
+  CREATED
+  WAITING_FOR_LOADING
+  LOADED
+  IN_TRANSIT
+  ARRIVED_PORT
+  CUSTOMS_CLEARANCE
+  RELEASED
+  CLOSED
 }
 
 enum DeliveryAlertStatus {
@@ -373,24 +524,6 @@ enum Role {
   ADMIN
   MANAGER
   CUSTOMER_SERVICE
-}
-
-enum ShipmentStatus {
-  PENDING
-  QUOTE_REQUESTED
-  QUOTE_APPROVED
-  PICKUP_SCHEDULED
-  PICKUP_COMPLETED
-  IN_TRANSIT
-  AT_PORT
-  LOADED_ON_VESSEL
-  IN_TRANSIT_OCEAN
-  ARRIVED_AT_DESTINATION
-  CUSTOMS_CLEARANCE
-  OUT_FOR_DELIVERY
-  DELIVERED
-  CANCELLED
-  ON_HOLD
 }
 
 enum QuoteStatus {
@@ -483,19 +616,7 @@ enum InvoiceStatus {
   PAID
   OVERDUE
   CANCELLED
-}
-
-enum ContainerStatus {
-  EMPTY
-  PARTIAL
-  FULL
-  SHIPPED
-  ARCHIVED
-}
-
-enum ItemStatus {
-  ON_HAND
-  READY_FOR_SHIPMENT
+  PENDING
 }
 
 enum PaymentMode {
@@ -506,46 +627,6 @@ enum PaymentMode {
 enum LedgerEntryType {
   DEBIT
   CREDIT
-}
-
-model LedgerEntry {
-  id              String           @id @default(cuid())
-  userId          String
-  shipmentId      String?
-  transactionDate DateTime         @default(now())
-  description     String
-  type            LedgerEntryType
-  amount          Float
-  balance         Float
-  createdBy       String
-  notes           String?
-  metadata        Json?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shipment        Shipment?        @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
-  auditLogs       AuditLog[]
-
-  @@index([userId])
-  @@index([shipmentId])
-  @@index([transactionDate])
-}
-
-model AuditLog {
-  id            String        @id @default(cuid())
-  entityType    String        // Type of entity changed (e.g., 'LedgerEntry')
-  entityId      String        // ID of the changed entity
-  action        AuditAction   // CREATE, UPDATE, DELETE
-  performedBy   String        // User ID who performed the action
-  performedAt   DateTime      @default(now())
-  changes       Json?         // JSON of what changed (old vs new values)
-  ipAddress     String?
-  userAgent     String?
-  ledgerEntry   LedgerEntry?  @relation(fields: [entityId], references: [id], onDelete: Cascade)
-
-  @@index([entityType, entityId])
-  @@index([performedBy])
-  @@index([performedAt])
 }
 
 enum AuditAction {

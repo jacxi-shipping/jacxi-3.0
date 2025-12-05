@@ -1,476 +1,504 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import Section from '@/components/layout/Section';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { AdminRoute } from '@/components/auth/AdminRoute';
+import Link from 'next/link';
 
-type ContainerItem = {
-	id: string;
-	vin: string;
-	lotNumber: string;
-	auctionCity: string;
-	freightCost?: number | null;
-	towingCost?: number | null;
-	clearanceCost?: number | null;
-	vatCost?: number | null;
-	customsCost?: number | null;
-	otherCost?: number | null;
+interface Container {
+  id: string;
+  containerNumber: string;
+  trackingNumber: string | null;
+  vesselName: string | null;
+  voyageNumber: string | null;
+  shippingLine: string | null;
+  bookingNumber: string | null;
+  loadingPort: string | null;
+  destinationPort: string | null;
+  transshipmentPorts: string[];
+  loadingDate: string | null;
+  departureDate: string | null;
+  estimatedArrival: string | null;
+  actualArrival: string | null;
+  status: string;
+  currentLocation: string | null;
+  progress: number;
+  maxCapacity: number;
+  currentCount: number;
+  notes: string | null;
+  createdAt: string;
+  shipments: any[];
+  expenses: any[];
+  invoices: any[];
+  documents: any[];
+  trackingEvents: any[];
+  totals: {
+    expenses: number;
+    invoices: number;
+  };
+}
+
+const statusColors: Record<string, string> = {
+  CREATED: 'bg-gray-500',
+  WAITING_FOR_LOADING: 'bg-yellow-500',
+  LOADED: 'bg-blue-500',
+  IN_TRANSIT: 'bg-indigo-600',
+  ARRIVED_PORT: 'bg-green-500',
+  CUSTOMS_CLEARANCE: 'bg-orange-500',
+  RELEASED: 'bg-teal-500',
+  CLOSED: 'bg-gray-700',
 };
 
-type ContainerInvoice = {
-	id: string;
-	invoiceNumber: string;
-	status: string;
-	totalUSD: number;
-	totalAED: number;
-};
-
-type ContainerShipment = {
-	id: string;
-	trackingNumber: string;
-	vehicleType: string;
-	vehicleMake: string | null;
-	vehicleModel: string | null;
-	vehicleYear: number | null;
-	status: string;
-	user: {
-		id: string;
-		name: string | null;
-		email: string;
-	};
-	createdAt: string;
-};
-
-type ContainerDetail = {
-	id: string;
-	containerNumber: string;
-	items: ContainerItem[];
-	invoices: ContainerInvoice[];
+const statusLabels: Record<string, string> = {
+  CREATED: 'Created',
+  WAITING_FOR_LOADING: 'Waiting for Loading',
+  LOADED: 'Loaded',
+  IN_TRANSIT: 'In Transit',
+  ARRIVED_PORT: 'Arrived',
+  CUSTOMS_CLEARANCE: 'Customs',
+  RELEASED: 'Released',
+  CLOSED: 'Closed',
 };
 
 export default function ContainerDetailPage() {
-	const { data: session, status } = useSession();
-	const params = useParams();
-	const router = useRouter();
-	const [container, setContainer] = useState<ContainerDetail | null>(null);
-	const [shipments, setShipments] = useState<ContainerShipment[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [showDeleteModal, setShowDeleteModal] = useState(false);
-	const [isDeleting, setIsDeleting] = useState(false);
+  const params = useParams();
+  const router = useRouter();
+  const [container, setContainer] = useState<Container | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [updating, setUpdating] = useState(false);
 
-	const containerIdRaw = params?.id;
-	const containerId = Array.isArray(containerIdRaw) ? containerIdRaw[0] : containerIdRaw;
+  useEffect(() => {
+    if (params.id) {
+      fetchContainer();
+    }
+  }, [params.id]);
 
-	const isAdmin = session?.user?.role === 'admin';
+  const fetchContainer = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/containers/${params.id}`);
+      const data = await response.json();
 
-	const fetchContainer = useCallback(async () => {
-		if (!containerId) return;
+      if (response.ok) {
+        setContainer(data.container);
+      } else {
+        alert('Container not found');
+        router.push('/dashboard/containers');
+      }
+    } catch (error) {
+      console.error('Error fetching container:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-		try {
-			setLoading(true);
-			const response = await fetch(`/api/containers/${containerId}`);
-			if (!response.ok) {
-				setContainer(null);
-				setShipments([]);
-				return;
-			}
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!confirm(`Update container status to ${statusLabels[newStatus]}?`)) return;
 
-			const data = (await response.json()) as { container?: ContainerDetail; shipments?: ContainerShipment[] };
-			setContainer(data.container ?? null);
-			setShipments(data.shipments ?? []);
-		} catch (error) {
-			console.error('Error fetching container:', error);
-			setContainer(null);
-			setShipments([]);
-		} finally {
-			setLoading(false);
-		}
-	}, [containerId]);
+    try {
+      setUpdating(true);
+      const response = await fetch(`/api/containers/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
-	useEffect(() => {
-		if (status === 'loading') return;
-		if (!session || !isAdmin) {
-			router.replace('/dashboard');
-			return;
-		}
-		void fetchContainer();
-	}, [fetchContainer, isAdmin, router, session, status]);
+      if (response.ok) {
+        alert('Status updated successfully');
+        fetchContainer();
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update status');
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
-	const handleDelete = async () => {
-		if (!containerId) return;
-		
-		setIsDeleting(true);
-		try {
-			const response = await fetch(`/api/containers/${containerId}`, {
-				method: 'DELETE',
-			});
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading container...</p>
+        </div>
+      </div>
+    );
+  }
 
-			if (response.ok) {
-				router.push('/dashboard/containers');
-			} else {
-				const result = await response.json();
-				alert(result.message || 'Failed to delete container');
-			}
-		} catch (error) {
-			console.error('Error deleting container:', error);
-			alert('An error occurred while deleting the container');
-		} finally {
-			setIsDeleting(false);
-			setShowDeleteModal(false);
-		}
-	};
+  if (!container) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Card className="text-center p-8">
+          <p className="text-gray-600 dark:text-gray-400">Container not found</p>
+          <Button className="mt-4" onClick={() => router.push('/dashboard/containers')}>
+            Back to Containers
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
-	const items = container?.items ?? [];
-	const invoices = container?.invoices ?? [];
+  return (
+    <AdminRoute>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <Button onClick={() => router.push('/dashboard/containers')} className="mb-4">
+              ← Back to Containers
+            </Button>
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {container.containerNumber}
+                </h1>
+                {container.trackingNumber && (
+                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    Tracking: {container.trackingNumber}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Badge className={statusColors[container.status]}>
+                  {statusLabels[container.status]}
+                </Badge>
+              </div>
+            </div>
+          </div>
 
-	if (loading) {
-		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
-			</div>
-		);
-	}
+          {/* Progress Bar */}
+          <Card className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Shipping Progress
+              </span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">
+                {container.progress}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                className="bg-indigo-600 h-3 rounded-full transition-all"
+                style={{ width: `${container.progress}%` }}
+              />
+            </div>
+          </Card>
 
-	if (!container) {
-		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="text-center">
-					<p className="text-white/70 mb-4">Container not found</p>
-					<Link href="/dashboard/containers">
-						<Button>Back to Containers</Button>
-					</Link>
-				</div>
-			</div>
-		);
-	}
+          {/* Tabs */}
+          <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav className="flex gap-4">
+              {['overview', 'shipments', 'expenses', 'invoices', 'documents', 'tracking', 'timeline'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-4 py-2 border-b-2 font-medium capitalize ${
+                    activeTab === tab
+                      ? 'border-indigo-600 text-indigo-600'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {tab}
+                  {tab === 'shipments' && ` (${container.shipments.length})`}
+                  {tab === 'expenses' && ` (${container.expenses.length})`}
+                  {tab === 'invoices' && ` (${container.invoices.length})`}
+                  {tab === 'documents' && ` (${container.documents.length})`}
+                  {tab === 'tracking' && ` (${container.trackingEvents.length})`}
+                </button>
+              ))}
+            </nav>
+          </div>
 
-	return (
-		<>
-			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-container-detail" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-container-detail)" className="text-cyan-400" />
-					</svg>
-				</div>
+          {/* Tab Content */}
+          <div>
+            {/* Overview Tab */}
+            {activeTab === 'overview' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <h3 className="text-lg font-bold mb-4">Container Information</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Container #:</span>
+                      <span className="font-medium">{container.containerNumber}</span>
+                    </div>
+                    {container.trackingNumber && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Tracking #:</span>
+                        <span className="font-medium">{container.trackingNumber}</span>
+                      </div>
+                    )}
+                    {container.bookingNumber && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Booking #:</span>
+                        <span className="font-medium">{container.bookingNumber}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
+                      <span className="font-medium">
+                        {container.currentCount} / {container.maxCapacity} vehicles
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Created:</span>
+                      <span className="font-medium">
+                        {new Date(container.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
 
-				<div className="relative z-10">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-6">
-							<Link href="/dashboard/containers">
-								<Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-									<ArrowLeft className="w-4 h-4 mr-2" />
-									Back
-								</Button>
-							</Link>
-							<div>
-								<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-									{container.containerNumber}
-								</h1>
-								<p className="text-lg sm:text-xl text-white/70 mt-2">Container Details</p>
-							</div>
-						</div>
-						<Button 
-							variant="outline" 
-							size="sm" 
-							onClick={() => setShowDeleteModal(true)}
-							className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/50"
-						>
-							<Trash2 className="w-4 h-4 mr-2" />
-							Delete
-						</Button>
-					</div>
-				</div>
-			</Section>
+                <Card>
+                  <h3 className="text-lg font-bold mb-4">Shipping Details</h3>
+                  <div className="space-y-3 text-sm">
+                    {container.vesselName && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Vessel:</span>
+                        <span className="font-medium">{container.vesselName}</span>
+                      </div>
+                    )}
+                    {container.voyageNumber && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Voyage:</span>
+                        <span className="font-medium">{container.voyageNumber}</span>
+                      </div>
+                    )}
+                    {container.shippingLine && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Shipping Line:</span>
+                        <span className="font-medium">{container.shippingLine}</span>
+                      </div>
+                    )}
+                    {container.loadingPort && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Loading Port:</span>
+                        <span className="font-medium">{container.loadingPort}</span>
+                      </div>
+                    )}
+                    {container.destinationPort && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Destination:</span>
+                        <span className="font-medium">{container.destinationPort}</span>
+                      </div>
+                    )}
+                  </div>
+                </Card>
 
-			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
-				<div className="max-w-7xl mx-auto space-y-8">
-					{/* Items Section */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
-					>
-						<div className="flex items-center justify-between mb-6">
-							<h2 className="text-xl sm:text-2xl font-bold text-white">Items ({items.length})</h2>
-							<Button
-								onClick={() => router.push(`/dashboard/containers/${container?.id}/items/new`)}
-								className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]"
-							>
-								<Plus className="w-4 h-4 mr-2" />
-								Add Item
-							</Button>
-						</div>
+                <Card>
+                  <h3 className="text-lg font-bold mb-4">Important Dates</h3>
+                  <div className="space-y-3 text-sm">
+                    {container.loadingDate && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Loading Date:</span>
+                        <span className="font-medium">
+                          {new Date(container.loadingDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {container.departureDate && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Departure:</span>
+                        <span className="font-medium">
+                          {new Date(container.departureDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {container.estimatedArrival && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">ETA:</span>
+                        <span className="font-medium">
+                          {new Date(container.estimatedArrival).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {container.actualArrival && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Actual Arrival:</span>
+                        <span className="font-medium">
+                          {new Date(container.actualArrival).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </Card>
 
-						{items.length > 0 ? (
-							<div className="overflow-x-auto">
-								<table className="w-full">
-									<thead>
-										<tr className="border-b border-cyan-500/20">
-											<th className="text-left py-3 px-4 text-sm font-medium text-white/70">VIN</th>
-											<th className="text-left py-3 px-4 text-sm font-medium text-white/70">Lot #</th>
-											<th className="text-left py-3 px-4 text-sm font-medium text-white/70">Auction City</th>
-											<th className="text-right py-3 px-4 text-sm font-medium text-white/70">Total Cost</th>
-										</tr>
-									</thead>
-									<tbody>
-										{items.map((item) => {
-											const totalCost =
-												(item.freightCost ?? 0) +
-												(item.towingCost ?? 0) +
-												(item.clearanceCost ?? 0) +
-												(item.vatCost ?? 0) +
-												(item.customsCost ?? 0) +
-												(item.otherCost ?? 0);
-											return (
-												<tr key={item.id} className="border-b border-cyan-500/10 hover:bg-[var(--text-primary)]/50">
-													<td className="py-3 px-4 text-sm text-white font-mono">{item.vin}</td>
-													<td className="py-3 px-4 text-sm text-white">{item.lotNumber}</td>
-													<td className="py-3 px-4 text-sm text-white">{item.auctionCity}</td>
-													<td className="py-3 px-4 text-sm text-white text-right">${totalCost.toFixed(2)}</td>
-												</tr>
-											);
-										})}
-									</tbody>
-								</table>
-							</div>
-						) : (
-							<p className="text-center text-white/70 py-8">No items yet. Add items to this container.</p>
-						)}
-					</motion.div>
+                <Card>
+                  <h3 className="text-lg font-bold mb-4">Financial Summary</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Total Expenses:</span>
+                      <span className="font-bold text-red-600">
+                        ${container.totals.expenses.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Total Invoices:</span>
+                      <span className="font-bold text-blue-600">
+                        ${container.totals.invoices.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Net:</span>
+                        <span className={container.totals.invoices - container.totals.expenses >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          ${(container.totals.invoices - container.totals.expenses).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
 
-					{/* Related Shipments Section */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.1 }}
-						className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
-					>
-						<div className="flex items-center justify-between mb-6">
-							<div>
-								<h2 className="text-xl sm:text-2xl font-bold text-white">Related Shipments ({shipments.length})</h2>
-								<p className="text-sm text-white/60 mt-1">
-									Shipments with tracking number: <span className="font-mono text-cyan-400">{container?.containerNumber}</span>
-								</p>
-							</div>
-						</div>
+                {container.notes && (
+                  <Card className="md:col-span-2">
+                    <h3 className="text-lg font-bold mb-4">Notes</h3>
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                      {container.notes}
+                    </p>
+                  </Card>
+                )}
 
-						{shipments.length > 0 ? (
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								{shipments.map((shipment) => (
-									<Link key={shipment.id} href={`/dashboard/shipments/${shipment.id}`}>
-										<div className="p-5 rounded-lg bg-[var(--text-primary)]/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-all cursor-pointer group">
-											<div className="flex items-start justify-between mb-3">
-												<div>
-													<span className="text-sm font-medium text-white/70">Tracking Number</span>
-													<p className="font-mono text-white font-semibold">{shipment.trackingNumber}</p>
-												</div>
-												<span
-													className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-														shipment.status === 'DELIVERED'
-															? 'bg-green-500/20 text-green-400'
-															: shipment.status === 'IN_TRANSIT'
-															? 'bg-blue-500/20 text-blue-400'
-														: shipment.status === 'PENDING'
-														? 'bg-sky-500/20 text-sky-300'
-														: 'bg-gray-500/20 text-gray-400'
-													}`}
-												>
-													{shipment.status.replace(/_/g, ' ')}
-												</span>
-											</div>
+                {/* Status Update Actions */}
+                <Card className="md:col-span-2">
+                  <h3 className="text-lg font-bold mb-4">Update Status</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(statusLabels).map(([status, label]) => (
+                      <Button
+                        key={status}
+                        onClick={() => handleStatusUpdate(status)}
+                        disabled={updating || container.status === status}
+                        className={container.status === status ? 'opacity-50 cursor-not-allowed' : ''}
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            )}
 
-											<div className="space-y-2 text-sm">
-												<div className="flex items-center justify-between">
-													<span className="text-white/60">Vehicle</span>
-													<span className="text-white font-medium">
-														{shipment.vehicleYear ? `${shipment.vehicleYear} ` : ''}
-														{shipment.vehicleMake || 'N/A'}
-														{shipment.vehicleModel ? ` ${shipment.vehicleModel}` : ''}
-													</span>
-												</div>
-												<div className="flex items-center justify-between">
-													<span className="text-white/60">Type</span>
-													<span className="text-white capitalize">{shipment.vehicleType}</span>
-												</div>
-												<div className="flex items-center justify-between">
-													<span className="text-white/60">User</span>
-													<span className="text-white">{shipment.user.name || shipment.user.email}</span>
-												</div>
-												<div className="flex items-center justify-between">
-													<span className="text-white/60">Created</span>
-													<span className="text-white">
-														{new Date(shipment.createdAt).toLocaleDateString()}
-													</span>
-												</div>
-											</div>
+            {/* Shipments Tab */}
+            {activeTab === 'shipments' && (
+              <Card>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold">Assigned Vehicles ({container.shipments.length}/{container.maxCapacity})</h3>
+                  <Button onClick={() => router.push(`/dashboard/containers/${container.id}/assign-shipments`)}>
+                    + Assign Vehicles
+                  </Button>
+                </div>
+                {container.shipments.length === 0 ? (
+                  <p className="text-gray-600 dark:text-gray-400 text-center py-8">
+                    No vehicles assigned yet
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {container.shipments.map((shipment: any) => (
+                      <div
+                        key={shipment.id}
+                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                        onClick={() => router.push(`/dashboard/shipments/${shipment.id}`)}
+                      >
+                        <div className="flex justify-between">
+                          <div>
+                            <p className="font-medium">
+                              {shipment.vehicleMake} {shipment.vehicleModel}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              VIN: {shipment.vehicleVIN || 'N/A'}
+                            </p>
+                          </div>
+                          <Badge className={shipment.status === 'IN_TRANSIT' ? 'bg-blue-500' : 'bg-gray-500'}>
+                            {shipment.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
 
-											<div className="mt-3 pt-3 border-t border-cyan-500/10">
-												<span className="text-xs text-cyan-400 group-hover:text-cyan-300 flex items-center">
-													View Shipment Details
-													<svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-													</svg>
-												</span>
-											</div>
-										</div>
-									</Link>
-								))}
-							</div>
-						) : (
-							<div className="text-center py-12">
-								<div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/10 mb-4">
-									<svg className="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-									</svg>
-								</div>
-								<p className="text-white/70">No shipments found with tracking number matching this container.</p>
-								<p className="text-white/50 text-sm mt-2">
-									Shipments with tracking number <span className="font-mono text-cyan-400">{container?.containerNumber}</span> will appear here.
-								</p>
-							</div>
-						)}
-					</motion.div>
+            {/* Other tabs - simplified for now */}
+            {activeTab === 'expenses' && (
+              <Card>
+                <h3 className="text-lg font-bold mb-4">Expenses</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {container.expenses.length} expense(s) recorded
+                </p>
+                {/* Add expense list here */}
+              </Card>
+            )}
 
-					{/* Invoices Section */}
-					<motion.div
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.2 }}
-						className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
-					>
-						<div className="flex items-center justify-between mb-6">
-							<h2 className="text-xl sm:text-2xl font-bold text-white">Invoices ({invoices.length})</h2>
-							{items.length > 0 && (
-								<Button
-									onClick={() => router.push(`/dashboard/invoices/new?containerId=${container?.id}`)}
-									className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)]"
-								>
-									<Plus className="w-4 h-4 mr-2" />
-									Create Invoice
-								</Button>
-							)}
-						</div>
+            {activeTab === 'invoices' && (
+              <Card>
+                <h3 className="text-lg font-bold mb-4">Invoices</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {container.invoices.length} invoice(s) recorded
+                </p>
+                {/* Add invoice list here */}
+              </Card>
+            )}
 
-						{invoices.length > 0 ? (
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								{invoices.map((invoice) => (
-									<Link key={invoice.id} href={`/dashboard/invoices/${invoice.id}`}>
-										<div className="p-4 rounded-lg bg-[var(--text-primary)]/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
-											<div className="flex items-center justify-between mb-2">
-												<span className="text-sm font-medium text-white">{invoice.invoiceNumber}</span>
-												<span
-													className={`px-2 py-1 text-xs rounded-full ${
-														invoice.status === 'PAID'
-															? 'bg-green-500/20 text-green-400'
-															: invoice.status === 'OVERDUE'
-															? 'bg-red-500/20 text-red-400'
-															: 'bg-sky-500/20 text-sky-300'
-													}`}
-												>
-													{invoice.status}
-												</span>
-											</div>
-											<div className="flex items-center justify-between text-sm">
-												<span className="text-white/60">Total</span>
-												<span className="text-white font-semibold">
-													${invoice.totalUSD.toFixed(2)} / {invoice.totalAED.toFixed(2)} AED
-												</span>
-											</div>
-										</div>
-									</Link>
-								))}
-							</div>
-						) : (
-							<p className="text-center text-white/70 py-8">No invoices yet. Create an invoice from items.</p>
-						)}
-					</motion.div>
-				</div>
-			</Section>
+            {activeTab === 'documents' && (
+              <Card>
+                <h3 className="text-lg font-bold mb-4">Documents</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {container.documents.length} document(s) uploaded
+                </p>
+                {/* Add document list here */}
+              </Card>
+            )}
 
-			{/* Delete Confirmation Modal */}
-			<AnimatePresence>
-				{showDeleteModal && (
-					<>
-						{/* Backdrop */}
-						<motion.div
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
-							onClick={() => !isDeleting && setShowDeleteModal(false)}
-							className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-						/>
-						
-						{/* Modal */}
-						<motion.div
-							initial={{ opacity: 0, scale: 0.95, y: 20 }}
-							animate={{ opacity: 1, scale: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.95, y: 20 }}
-							className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50"
-						>
-							<div className="bg-[var(--text-primary)] border border-red-500/30 rounded-2xl p-6 shadow-2xl">
-								<div className="flex items-center gap-4 mb-4">
-									<div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
-										<AlertTriangle className="w-6 h-6 text-red-400" />
-									</div>
-									<div>
-										<h3 className="text-xl font-bold text-white">Delete Container</h3>
-										<p className="text-sm text-white/60">This action cannot be undone</p>
-									</div>
-								</div>
-								
-								<p className="text-white/80 mb-6">
-									Are you sure you want to delete container <span className="font-semibold text-cyan-400">{container.containerNumber}</span>?
-									{items.length > 0 && (
-										<span className="block mt-2 text-red-400 text-sm">
-											⚠️ This container has {items.length} item(s) that will also be deleted.
-										</span>
-									)}
-								</p>
+            {activeTab === 'tracking' && (
+              <Card>
+                <h3 className="text-lg font-bold mb-4">Tracking Events</h3>
+                {container.trackingEvents.length === 0 ? (
+                  <p className="text-gray-600 dark:text-gray-400">No tracking events yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {container.trackingEvents.map((event: any) => (
+                      <div key={event.id} className="border-l-4 border-indigo-600 pl-4">
+                        <div className="flex justify-between">
+                          <p className="font-medium">{event.status}</p>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {new Date(event.eventDate).toLocaleString()}
+                          </span>
+                        </div>
+                        {event.location && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            📍 {event.location}
+                          </p>
+                        )}
+                        {event.description && (
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                            {event.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
 
-								<div className="flex gap-3">
-									<Button
-										variant="outline"
-										onClick={() => setShowDeleteModal(false)}
-										disabled={isDeleting}
-										className="flex-1 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
-									>
-										Cancel
-									</Button>
-									<Button
-										onClick={handleDelete}
-										disabled={isDeleting}
-										className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-									>
-										{isDeleting ? (
-											<>
-												<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-												Deleting...
-											</>
-										) : (
-											<>
-												<Trash2 className="w-4 h-4 mr-2" />
-												Delete
-											</>
-										)}
-									</Button>
-								</div>
-							</div>
-						</motion.div>
-					</>
-				)}
-			</AnimatePresence>
-		</>
-	);
+            {activeTab === 'timeline' && (
+              <Card>
+                <h3 className="text-lg font-bold mb-4">Container Timeline</h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Visual timeline will be displayed here
+                </p>
+                {/* Add timeline visualization */}
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    </AdminRoute>
+  );
 }
-

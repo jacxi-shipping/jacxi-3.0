@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, PrismaClient, ShipmentStatus, TitleStatus } from '@prisma/client';
+import { Prisma, PrismaClient, TitleStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
@@ -14,21 +14,17 @@ type UpdateShipmentPayload = {
   vehicleColor?: string | null;
   lotNumber?: string | null;
   auctionName?: string | null;
-  origin?: string;
-  destination?: string;
-  status?: ShipmentStatus;
-  currentLocation?: string | null;
-  estimatedDelivery?: string | null;
-  actualDelivery?: string | null;
-  progress?: number | string | null;
+  status?: 'ON_HAND' | 'IN_TRANSIT';
+  containerId?: string | null;
   arrivalPhotos?: string[] | null;
-  containerPhotos?: string[] | null;
-  replaceArrivalPhotos?: boolean;
+  vehiclePhotos?: string[] | null;
+  replacePhotos?: boolean;
   weight?: number | string | null;
   dimensions?: string | null;
   specialInstructions?: string | null;
   insuranceValue?: number | string | null;
   price?: number | string | null;
+  internalNotes?: string | null;
   hasKey?: boolean | null;
   hasTitle?: boolean | null;
   titleStatus?: string | null;
@@ -54,14 +50,25 @@ export async function GET(
       include: {
         user: {
           select: {
+            id: true,
             name: true,
             email: true,
             phone: true,
           },
         },
-        events: {
+        container: {
+          include: {
+            trackingEvents: {
+              orderBy: {
+                eventDate: 'desc',
+              },
+              take: 10,
+            },
+          },
+        },
+        ledgerEntries: {
           orderBy: {
-            timestamp: 'desc',
+            transactionDate: 'desc',
           },
         },
       },
@@ -115,211 +122,155 @@ export async function PATCH(
       );
     }
 
-    const data = (await request.json()) as UpdateShipmentPayload;
-    const {
-      userId,
-      vehicleType,
-      vehicleMake,
-      vehicleModel,
-      vehicleYear,
-      vehicleVIN,
-      vehicleColor,
-      lotNumber,
-      auctionName,
-      origin,
-      destination,
-      status,
-      currentLocation,
-      estimatedDelivery,
-      actualDelivery,
-      progress,
-      arrivalPhotos,
-      containerPhotos,
-      replaceArrivalPhotos,
-      weight,
-      dimensions,
-      specialInstructions,
-      insuranceValue,
-      price,
-      hasKey,
-      hasTitle,
-      titleStatus,
-    } = data;
-
-    // Get existing shipment to merge arrival photos
     const existingShipment = await prisma.shipment.findUnique({
       where: { id },
-      select: { 
-        arrivalPhotos: true,
-        vehicleVIN: true,
-      },
+      include: { container: true },
     });
 
-    // Check for duplicate VIN if VIN is being changed
-    if (vehicleVIN !== undefined && vehicleVIN && vehicleVIN.trim()) {
-      // Only check if VIN is different from current VIN
-      if (vehicleVIN.trim() !== existingShipment?.vehicleVIN) {
-        const duplicateShipment = await prisma.shipment.findFirst({
-          where: { 
-            vehicleVIN: vehicleVIN.trim(),
-            id: { not: id }, // Exclude current shipment
-          },
-          select: {
-            id: true,
-            trackingNumber: true,
-            user: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-          },
+    if (!existingShipment) {
+      return NextResponse.json(
+        { message: 'Shipment not found' },
+        { status: 404 }
+      );
+    }
+
+    const data = (await request.json()) as UpdateShipmentPayload;
+    const updateData: Prisma.ShipmentUpdateInput = {};
+
+    // Basic vehicle info
+    if (data.userId !== undefined) updateData.userId = data.userId;
+    if (data.vehicleType !== undefined) updateData.vehicleType = data.vehicleType;
+    if (data.vehicleMake !== undefined) updateData.vehicleMake = data.vehicleMake;
+    if (data.vehicleModel !== undefined) updateData.vehicleModel = data.vehicleModel;
+    if (data.vehicleColor !== undefined) updateData.vehicleColor = data.vehicleColor;
+    if (data.vehicleVIN !== undefined) updateData.vehicleVIN = data.vehicleVIN;
+    if (data.lotNumber !== undefined) updateData.lotNumber = data.lotNumber;
+    if (data.auctionName !== undefined) updateData.auctionName = data.auctionName;
+
+    // Parse year and calculate age
+    if (data.vehicleYear !== undefined) {
+      const parsedYear =
+        typeof data.vehicleYear === 'number'
+          ? data.vehicleYear
+          : typeof data.vehicleYear === 'string'
+          ? parseInt(data.vehicleYear, 10)
+          : null;
+      updateData.vehicleYear = parsedYear;
+      if (parsedYear) {
+        updateData.vehicleAge = new Date().getFullYear() - parsedYear;
+      }
+    }
+
+    // Container and status
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+      
+      // If changing to IN_TRANSIT, container is required
+      if (data.status === 'IN_TRANSIT' && !data.containerId && !existingShipment.containerId) {
+        return NextResponse.json(
+          { message: 'Container ID is required for IN_TRANSIT status' },
+          { status: 400 }
+        );
+      }
+      
+      // If changing to ON_HAND, remove container
+      if (data.status === 'ON_HAND') {
+        updateData.containerId = null;
+      }
+    }
+
+    if (data.containerId !== undefined) {
+      if (data.containerId) {
+        // Verify container exists
+        const container = await prisma.container.findUnique({
+          where: { id: data.containerId },
+          include: { shipments: true },
         });
 
-        if (duplicateShipment) {
+        if (!container) {
           return NextResponse.json(
-            { 
-              message: `This VIN is already assigned to another shipment (Tracking: ${duplicateShipment.trackingNumber}, User: ${duplicateShipment.user.name || duplicateShipment.user.email})`,
-            },
+            { message: 'Container not found' },
+            { status: 404 }
+          );
+        }
+
+        // Check capacity
+        const currentShipments = container.shipments.filter(s => s.id !== id);
+        if (currentShipments.length >= container.maxCapacity) {
+          return NextResponse.json(
+            { message: `Container is at full capacity (${container.maxCapacity} vehicles)` },
             { status: 400 }
           );
         }
+
+        updateData.containerId = data.containerId;
+        updateData.status = 'IN_TRANSIT'; // Auto-set to IN_TRANSIT when assigning container
+      } else {
+        updateData.containerId = null;
+        updateData.status = 'ON_HAND'; // Auto-set to ON_HAND when removing container
       }
     }
 
-    const sanitizedContainerPhotos = Array.isArray(containerPhotos)
-      ? containerPhotos.filter((photo): photo is string => typeof photo === 'string')
-      : undefined;
-    const sanitizedArrivalPhotos = Array.isArray(arrivalPhotos)
-      ? arrivalPhotos.filter((photo): photo is string => typeof photo === 'string')
-      : undefined;
+    // Photos
+    if (data.vehiclePhotos !== undefined) {
+      if (data.replacePhotos) {
+        updateData.vehiclePhotos = data.vehiclePhotos;
+      } else {
+        const currentPhotos = (existingShipment.vehiclePhotos as string[]) || [];
+        updateData.vehiclePhotos = [...currentPhotos, ...data.vehiclePhotos];
+      }
+    }
 
-    const updateData: Prisma.ShipmentUncheckedUpdateInput = {};
+    if (data.arrivalPhotos !== undefined) {
+      if (data.replacePhotos) {
+        updateData.arrivalPhotos = data.arrivalPhotos;
+      } else {
+        const currentPhotos = (existingShipment.arrivalPhotos as string[]) || [];
+        updateData.arrivalPhotos = [...currentPhotos, ...data.arrivalPhotos];
+      }
+    }
 
-    // User assignment
-    if (userId) updateData.userId = userId;
+    // Numeric fields
+    if (data.weight !== undefined) {
+      updateData.weight =
+        typeof data.weight === 'number'
+          ? data.weight
+          : typeof data.weight === 'string'
+          ? parseFloat(data.weight)
+          : null;
+    }
 
-    // Vehicle information
-    if (vehicleType) updateData.vehicleType = vehicleType;
-    if (vehicleMake !== undefined) updateData.vehicleMake = vehicleMake;
-    if (vehicleModel !== undefined) updateData.vehicleModel = vehicleModel;
-    if (vehicleVIN !== undefined) updateData.vehicleVIN = vehicleVIN;
-    if (vehicleColor !== undefined) updateData.vehicleColor = vehicleColor;
-    if (lotNumber !== undefined) updateData.lotNumber = lotNumber;
-    if (auctionName !== undefined) updateData.auctionName = auctionName;
+    if (data.insuranceValue !== undefined) {
+      updateData.insuranceValue =
+        typeof data.insuranceValue === 'number'
+          ? data.insuranceValue
+          : typeof data.insuranceValue === 'string'
+          ? parseFloat(data.insuranceValue)
+          : null;
+    }
+
+    if (data.price !== undefined) {
+      updateData.price =
+        typeof data.price === 'number'
+          ? data.price
+          : typeof data.price === 'string'
+          ? parseFloat(data.price)
+          : null;
+    }
+
+    // Other fields
+    if (data.dimensions !== undefined) updateData.dimensions = data.dimensions;
+    if (data.specialInstructions !== undefined) updateData.specialInstructions = data.specialInstructions;
+    if (data.internalNotes !== undefined) updateData.internalNotes = data.internalNotes;
+    if (data.hasKey !== undefined) updateData.hasKey = data.hasKey;
+    if (data.hasTitle !== undefined) updateData.hasTitle = data.hasTitle;
     
-    if (vehicleYear !== undefined) {
-      const parsedYear = typeof vehicleYear === 'string' ? parseInt(vehicleYear, 10) : vehicleYear;
-      if (typeof parsedYear === 'number' && !Number.isNaN(parsedYear)) {
-        updateData.vehicleYear = parsedYear;
-        // Recalculate vehicle age
-        const currentYear = new Date().getFullYear();
-        updateData.vehicleAge = currentYear - parsedYear;
-      }
+    // Title status
+    if (data.titleStatus !== undefined) {
+      updateData.titleStatus = (data.hasTitle === true && data.titleStatus) ? data.titleStatus as TitleStatus : null;
     }
 
-    // Shipping information
-    if (origin !== undefined) updateData.origin = origin;
-    if (destination !== undefined) updateData.destination = destination;
-    if (status) updateData.status = status;
-    if (currentLocation !== undefined) updateData.currentLocation = currentLocation;
-    if (estimatedDelivery) updateData.estimatedDelivery = new Date(estimatedDelivery);
-    if (actualDelivery) updateData.actualDelivery = new Date(actualDelivery);
-    
-    if (progress !== undefined && progress !== null) {
-      const parsedProgress = typeof progress === 'string' ? parseInt(progress, 10) : progress;
-      if (typeof parsedProgress === 'number' && !Number.isNaN(parsedProgress)) {
-        updateData.progress = parsedProgress;
-      }
-    }
-
-    // Additional details
-    if (dimensions !== undefined) updateData.dimensions = dimensions;
-    if (specialInstructions !== undefined) updateData.specialInstructions = specialInstructions;
-
-    if (weight !== undefined) {
-      const parsedWeight = typeof weight === 'string' ? parseFloat(weight) : weight;
-      if (typeof parsedWeight === 'number' && !Number.isNaN(parsedWeight)) {
-        updateData.weight = parsedWeight;
-      }
-    }
-
-    if (insuranceValue !== undefined) {
-      const parsedInsurance = typeof insuranceValue === 'string' ? parseFloat(insuranceValue) : insuranceValue;
-      if (typeof parsedInsurance === 'number' && !Number.isNaN(parsedInsurance)) {
-        updateData.insuranceValue = parsedInsurance;
-      }
-    }
-
-    if (price !== undefined) {
-      const parsedPrice = typeof price === 'string' ? parseFloat(price) : price;
-      if (typeof parsedPrice === 'number' && !Number.isNaN(parsedPrice)) {
-        updateData.price = parsedPrice;
-      }
-    }
-
-    if (sanitizedContainerPhotos) {
-      updateData.containerPhotos = sanitizedContainerPhotos;
-    }
-
-    // Handle arrival photos - append to existing ones
-    if (sanitizedArrivalPhotos) {
-      updateData.arrivalPhotos = replaceArrivalPhotos
-        ? sanitizedArrivalPhotos
-        : [...(existingShipment?.arrivalPhotos ?? []), ...sanitizedArrivalPhotos];
-    }
-
-    // Vehicle details
-    if (hasKey !== undefined) updateData.hasKey = hasKey;
-    if (hasTitle !== undefined) {
-      updateData.hasTitle = hasTitle;
-      // If hasTitle is false or null, clear titleStatus
-      if (!hasTitle) {
-        updateData.titleStatus = null;
-      }
-    }
-    if (titleStatus !== undefined && hasTitle === true) {
-      updateData.titleStatus = titleStatus ? titleStatus as TitleStatus : null;
-    }
-
-    // Validate shipping details when changing status to IN_TRANSIT or DELIVERED
-    if (status && (status === 'IN_TRANSIT' || status === 'DELIVERED')) {
-      // Get the current shipment data to check existing values
-      const currentShipment = await prisma.shipment.findUnique({
-        where: { id },
-        select: {
-          origin: true,
-          destination: true,
-          currentLocation: true,
-        },
-      });
-
-      // Use updated value if provided, otherwise fall back to existing value
-      const finalOrigin = origin !== undefined ? origin : currentShipment?.origin;
-      const finalDestination = destination !== undefined ? destination : currentShipment?.destination;
-      const finalCurrentLocation = currentLocation !== undefined ? currentLocation : currentShipment?.currentLocation;
-
-      if (!finalOrigin || finalOrigin.trim().length < 2) {
-        return NextResponse.json(
-          { message: 'Origin is required when status is In Transit or Delivered' },
-          { status: 400 }
-        );
-      }
-      if (!finalDestination || finalDestination.trim().length < 2) {
-        return NextResponse.json(
-          { message: 'Destination is required when status is In Transit or Delivered' },
-          { status: 400 }
-        );
-      }
-      if (!finalCurrentLocation || finalCurrentLocation.trim().length < 2) {
-        return NextResponse.json(
-          { message: 'Current Location is required when status is In Transit or Delivered' },
-          { status: 400 }
-        );
-      }
-    }
-
-    const shipment = await prisma.shipment.update({
+    const updatedShipment = await prisma.shipment.update({
       where: { id },
       data: updateData,
       include: {
@@ -327,21 +278,16 @@ export async function PATCH(
           select: {
             name: true,
             email: true,
-            phone: true,
           },
         },
-        events: {
-          orderBy: {
-            timestamp: 'desc',
-          },
-        },
+        container: true,
       },
     });
 
     return NextResponse.json(
       {
         message: 'Shipment updated successfully',
-        shipment,
+        shipment: updatedShipment,
       },
       { status: 200 }
     );
@@ -374,6 +320,30 @@ export async function DELETE(
       return NextResponse.json(
         { message: 'Forbidden: Only admins can delete shipments' },
         { status: 403 }
+      );
+    }
+
+    const shipment = await prisma.shipment.findUnique({
+      where: { id },
+      include: {
+        ledgerEntries: true,
+      },
+    });
+
+    if (!shipment) {
+      return NextResponse.json(
+        { message: 'Shipment not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if shipment has ledger entries
+    if (shipment.ledgerEntries.length > 0) {
+      return NextResponse.json(
+        { 
+          message: 'Cannot delete shipment with financial records. Please delete ledger entries first or contact support.' 
+        },
+        { status: 400 }
       );
     }
 
