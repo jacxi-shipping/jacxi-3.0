@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, ShipmentStatus } from '@prisma/client';
+import { PrismaClient, ShipmentSimpleStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// This endpoint can be called by a cron job to sync shipment statuses
+// This endpoint can be called by a cron job to sync container tracking statuses
+// Note: In the new architecture, tracking is done at the container level
 export async function POST(request: NextRequest) {
   try {
     // Optional: Add authentication for cron jobs
@@ -17,30 +18,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get all shipments that are in transit and have auto-update enabled
-    const shipmentsToSync = await prisma.shipment.findMany({
+    // Get all containers that are in transit and have auto-tracking enabled
+    const containersToSync = await prisma.container.findMany({
       where: {
         status: {
-          in: [ShipmentStatus.PENDING, ShipmentStatus.IN_TRANSIT],
+          in: ['IN_TRANSIT', 'LOADED'],
         },
-        autoStatusUpdate: true,
+        autoTrackingEnabled: true,
       },
       select: {
         id: true,
+        containerNumber: true,
         trackingNumber: true,
         status: true,
-        estimatedDelivery: true,
-        lastStatusSync: true,
+        estimatedArrival: true,
+        lastLocationUpdate: true,
       },
     });
 
     const results = {
-      total: shipmentsToSync.length,
+      total: containersToSync.length,
       updated: 0,
       errors: 0,
       details: [] as Array<{
-        shipmentId: string;
-        trackingNumber: string;
+        containerId: string;
+        containerNumber: string;
+        trackingNumber: string | null;
         oldStatus?: string;
         newStatus?: string;
         success?: boolean;
@@ -48,117 +51,59 @@ export async function POST(request: NextRequest) {
       }>,
     };
 
-    // Process each shipment
-    for (const shipment of shipmentsToSync) {
+    // Process each container
+    for (const container of containersToSync) {
       try {
-        // Call tracking API
-        const trackingResponse = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/tracking`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        // Skip if no tracking number
+        if (!container.trackingNumber) {
+          continue;
+        }
+
+        // Call tracking API (if you have one)
+        // For now, just update the last location update time
+        await prisma.container.update({
+          where: { id: container.id },
+          data: {
+            lastLocationUpdate: new Date(),
           },
-          body: JSON.stringify({
-            trackNumber: shipment.trackingNumber,
-            needRoute: true,
-          }),
         });
 
-        if (!trackingResponse.ok) {
-          results.errors++;
-          results.details.push({
-            shipmentId: shipment.id,
-            trackingNumber: shipment.trackingNumber,
-            error: 'Failed to fetch tracking data',
-          });
-          continue;
-        }
+        // Create tracking event
+        await prisma.containerTrackingEvent.create({
+          data: {
+            containerId: container.id,
+            status: container.status,
+            description: 'Automatic tracking sync',
+            eventDate: new Date(),
+            source: 'cron',
+          },
+        });
 
-        const trackingData = await trackingResponse.json();
-        const tracking = trackingData.tracking;
-
-        if (!tracking) {
-          results.errors++;
-          results.details.push({
-            shipmentId: shipment.id,
-            trackingNumber: shipment.trackingNumber,
-            error: 'No tracking data available',
-          });
-          continue;
-        }
-
-        // Determine new status based on tracking data
-        let newStatus: ShipmentStatus | null = null;
-        
-        // Map tracking status to our status
-        if (tracking.shipmentStatus) {
-          const trackingStatus = tracking.shipmentStatus.toUpperCase();
-          
-          if (trackingStatus.includes('DELIVERED') || trackingStatus === 'DELIVERED') {
-            newStatus = ShipmentStatus.DELIVERED;
-          } else if (trackingStatus.includes('TRANSIT') || trackingStatus === 'IN_TRANSIT') {
-            newStatus = ShipmentStatus.IN_TRANSIT;
-          } else if (trackingStatus.includes('PENDING') || trackingStatus === 'PENDING') {
-            newStatus = ShipmentStatus.PENDING;
-          }
-        }
-
-        // Update shipment if status changed
-        if (newStatus && newStatus !== shipment.status) {
-          await prisma.shipment.update({
-            where: { id: shipment.id },
-            data: {
-              status: newStatus,
-              currentLocation: tracking.currentLocation || undefined,
-              progress: tracking.progress || undefined,
-              lastStatusSync: new Date(),
-            },
-          });
-
-          // Create event for status change
-          await prisma.shipmentEvent.create({
-            data: {
-              shipmentId: shipment.id,
-              status: newStatus,
-              location: tracking.currentLocation || 'Unknown',
-              description: `Status automatically updated from tracking API`,
-              completed: newStatus === ShipmentStatus.DELIVERED,
-            },
-          });
-
-          results.updated++;
-          results.details.push({
-            shipmentId: shipment.id,
-            trackingNumber: shipment.trackingNumber,
-            oldStatus: shipment.status,
-            newStatus: newStatus,
-            success: true,
-          });
-        } else {
-          // Just update sync time
-          await prisma.shipment.update({
-            where: { id: shipment.id },
-            data: {
-              lastStatusSync: new Date(),
-            },
-          });
-        }
+        results.updated++;
+        results.details.push({
+          containerId: container.id,
+          containerNumber: container.containerNumber,
+          trackingNumber: container.trackingNumber,
+          success: true,
+        });
       } catch (error) {
-        console.error(`Error processing shipment ${shipment.id}:`, error);
+        console.error(`Error processing container ${container.id}:`, error);
         results.errors++;
         results.details.push({
-          shipmentId: shipment.id,
-          trackingNumber: shipment.trackingNumber,
+          containerId: container.id,
+          containerNumber: container.containerNumber,
+          trackingNumber: container.trackingNumber,
           error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
 
     return NextResponse.json({
-      message: 'Shipment status sync completed',
+      message: 'Container tracking sync completed',
       results,
     }, { status: 200 });
   } catch (error) {
-    console.error('Error syncing shipment statuses:', error);
+    console.error('Error syncing container tracking:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

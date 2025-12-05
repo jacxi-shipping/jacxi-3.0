@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, PrismaClient, ShipmentStatus, TitleStatus } from '@prisma/client';
+import { Prisma, PrismaClient, TitleStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status');
+    const status = searchParams.get('status'); // ON_HAND or IN_TRANSIT
+    const containerId = searchParams.get('containerId');
+    const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
@@ -29,9 +31,24 @@ export async function GET(request: NextRequest) {
       where.userId = session.user?.id;
     }
 
-    // Add status filter if provided
-    if (status && status !== 'all' && Object.values(ShipmentStatus).includes(status as ShipmentStatus)) {
-      where.status = status as ShipmentStatus;
+    // Add status filter (ON_HAND or IN_TRANSIT)
+    if (status && (status === 'ON_HAND' || status === 'IN_TRANSIT')) {
+      where.status = status;
+    }
+
+    // Filter by container
+    if (containerId) {
+      where.containerId = containerId;
+    }
+
+    // Search by VIN, make, model
+    if (search) {
+      where.OR = [
+        { vehicleVIN: { contains: search, mode: 'insensitive' } },
+        { vehicleMake: { contains: search, mode: 'insensitive' } },
+        { vehicleModel: { contains: search, mode: 'insensitive' } },
+        { lotNumber: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
     const [shipments, total] = await Promise.all([
@@ -39,28 +56,34 @@ export async function GET(request: NextRequest) {
         where,
         select: {
           id: true,
-          trackingNumber: true,
           vehicleType: true,
           vehicleMake: true,
           vehicleModel: true,
-          origin: true,
-          destination: true,
+          vehicleYear: true,
+          vehicleVIN: true,
+          vehicleColor: true,
           status: true,
-          progress: true,
-          estimatedDelivery: true,
           createdAt: true,
           paymentStatus: true,
+          price: true,
+          containerId: true,
+          container: {
+            select: {
+              id: true,
+              containerNumber: true,
+              trackingNumber: true,
+              vesselName: true,
+              status: true,
+              estimatedArrival: true,
+              currentLocation: true,
+            },
+          },
           user: {
             select: {
+              id: true,
               name: true,
               email: true,
             },
-          },
-          events: {
-            orderBy: {
-              timestamp: 'desc',
-            },
-            take: 1,
           },
         },
         orderBy: {
@@ -90,14 +113,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-type TrackingEventPayload = {
-  status?: string;
-  location?: string;
-  description?: string;
-  actual?: boolean;
-  timestamp?: string;
-};
-
 type CreateShipmentPayload = {
   userId: string;
   vehicleType: string;
@@ -108,28 +123,20 @@ type CreateShipmentPayload = {
   vehicleColor?: string | null;
   lotNumber?: string | null;
   auctionName?: string | null;
-  origin: string;
-  destination: string;
   weight?: number | string | null;
   dimensions?: string | null;
   specialInstructions?: string | null;
   insuranceValue?: number | string | null;
   price?: number | string | null;
-  containerPhotos?: string[] | null;
-  trackingNumber?: string | null;
-  status?: ShipmentStatus | null;
-  currentLocation?: string | null;
-  estimatedDelivery?: string | null;
-  progress?: number | string | null;
-  trackingEvents?: unknown;
-  trackingCompany?: string | null;
+  vehiclePhotos?: string[] | null;
+  status?: 'ON_HAND' | 'IN_TRANSIT' | null;
+  containerId?: string | null;
+  internalNotes?: string | null;
   hasKey?: boolean | null;
   hasTitle?: boolean | null;
   titleStatus?: string | null;
+  paymentMode?: 'CASH' | 'DUE' | null;
 };
-
-const isTrackingEventPayload = (value: unknown): value is TrackingEventPayload =>
-  typeof value === 'object' && value !== null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -161,24 +168,19 @@ export async function POST(request: NextRequest) {
       vehicleColor,
       lotNumber,
       auctionName,
-      origin, 
-      destination, 
       weight,
       dimensions,
       specialInstructions,
       insuranceValue,
       price,
-      containerPhotos,
-      trackingNumber: providedTrackingNumber,
+      vehiclePhotos,
       status: providedStatus,
-      currentLocation,
-      estimatedDelivery,
-      progress,
-      trackingEvents,
-      trackingCompany,
+      containerId,
+      internalNotes,
       hasKey,
       hasTitle,
       titleStatus,
+      paymentMode,
     } = data;
 
     // Validate required fields
@@ -189,14 +191,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For shipments that are ready for shipment (not pending/on-hand), require origin and destination
-    const normalizedProvidedStatus = typeof providedStatus === 'string' ? providedStatus.toUpperCase() : providedStatus;
-    const isReadyForShipment = normalizedProvidedStatus && normalizedProvidedStatus !== 'PENDING';
-    if (isReadyForShipment && (!origin || !destination)) {
+    // If status is IN_TRANSIT, containerId is required
+    if (providedStatus === 'IN_TRANSIT' && !containerId) {
       return NextResponse.json(
-        { message: 'Origin and destination are required for shipments that are ready for shipment' },
+        { message: 'Container ID is required for IN_TRANSIT shipments' },
         { status: 400 }
       );
+    }
+
+    // If containerId is provided, verify it exists
+    if (containerId) {
+      const container = await prisma.container.findUnique({
+        where: { id: containerId },
+        include: { shipments: true },
+      });
+
+      if (!container) {
+        return NextResponse.json(
+          { message: 'Container not found' },
+          { status: 404 }
+        );
+      }
+
+      // Check capacity
+      if (container.shipments.length >= container.maxCapacity) {
+        return NextResponse.json(
+          { message: `Container is at full capacity (${container.maxCapacity} vehicles)` },
+          { status: 400 }
+        );
+      }
     }
 
     // Verify that the userId exists
@@ -219,7 +242,7 @@ export async function POST(request: NextRequest) {
         },
         select: {
           id: true,
-          trackingNumber: true,
+          vehicleVIN: true,
           user: {
             select: {
               name: true,
@@ -232,31 +255,17 @@ export async function POST(request: NextRequest) {
       if (existingShipment) {
         return NextResponse.json(
           { 
-            message: `This VIN is already assigned to another shipment (Tracking: ${existingShipment.trackingNumber}, User: ${existingShipment.user.name || existingShipment.user.email})`,
+            message: `This VIN is already assigned to another shipment (VIN: ${existingShipment.vehicleVIN}, User: ${existingShipment.user.name || existingShipment.user.email})`,
           },
           { status: 400 }
         );
       }
     }
 
-    // Generate tracking number (allow override when provided)
-    const trackingNumber = (providedTrackingNumber || '').trim()
-      ? (providedTrackingNumber || '').trim()
-      : `JACXI${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-
-    const parsedEstimatedDelivery = estimatedDelivery ? new Date(estimatedDelivery) : null;
-    const parsedProgress =
-      typeof progress === 'number'
-        ? progress
-        : typeof progress === 'string'
-        ? parseInt(progress, 10)
-        : null;
-
-    const normalizedStatus = providedStatus ?? ShipmentStatus.PENDING;
-    const sanitizedContainerPhotos = Array.isArray(containerPhotos)
-      ? containerPhotos.filter((photo): photo is string => typeof photo === 'string')
+    const normalizedStatus = providedStatus || 'ON_HAND';
+    const sanitizedVehiclePhotos = Array.isArray(vehiclePhotos)
+      ? vehiclePhotos.filter((photo): photo is string => typeof photo === 'string')
       : [];
-    const sanitizedTrackingEvents = Array.isArray(trackingEvents) ? trackingEvents.filter(isTrackingEventPayload) : [];
     const parsedVehicleYear =
       typeof vehicleYear === 'number'
         ? vehicleYear
@@ -281,32 +290,17 @@ export async function POST(request: NextRequest) {
     // Validate titleStatus - only allowed if hasTitle is true
     const finalTitleStatus = (hasTitle === true && titleStatus) ? titleStatus as TitleStatus : null;
     
-    // Validate shipping details when status is IN_TRANSIT or DELIVERED
-    if (normalizedStatus === ShipmentStatus.IN_TRANSIT || normalizedStatus === ShipmentStatus.DELIVERED) {
-      if (!origin || origin.trim().length < 2) {
-        return NextResponse.json(
-          { message: 'Origin is required when status is In Transit or Delivered' },
-          { status: 400 }
-        );
-      }
-      if (!destination || destination.trim().length < 2) {
-        return NextResponse.json(
-          { message: 'Destination is required when status is In Transit or Delivered' },
-          { status: 400 }
-        );
-      }
-      if (!currentLocation || currentLocation.trim().length < 2) {
-        return NextResponse.json(
-          { message: 'Current Location is required when status is In Transit or Delivered' },
-          { status: 400 }
-        );
-      }
-    }
-    
     const shipment = await prisma.$transaction(async (tx) => {
+      // Determine payment status based on payment mode
+      let finalPaymentStatus = 'PENDING';
+      if (paymentMode === 'CASH') {
+        finalPaymentStatus = 'COMPLETED';
+      } else if (paymentMode === 'DUE') {
+        finalPaymentStatus = 'PENDING';
+      }
+
       const createdShipment = await tx.shipment.create({
         data: {
-          trackingNumber,
           userId: userId, // Use the userId from request (assigned by admin)
           vehicleType,
           vehicleMake,
@@ -316,20 +310,18 @@ export async function POST(request: NextRequest) {
           vehicleColor,
           lotNumber,
           auctionName,
-          origin: origin || 'TBD', // Default to 'TBD' for on-hand shipments
-          destination: destination || 'TBD', // Default to 'TBD' for on-hand shipments
           status: normalizedStatus,
-          currentLocation: currentLocation || origin || 'Warehouse',
-          estimatedDelivery: parsedEstimatedDelivery,
+          containerId: containerId || null,
           weight: parsedWeight,
           dimensions,
           specialInstructions,
           insuranceValue: parsedInsuranceValue,
           price: parsedPrice,
-          containerPhotos: sanitizedContainerPhotos,
-          paymentStatus: 'PENDING',
-          progress: parsedProgress !== null && !Number.isNaN(parsedProgress) ? parsedProgress : undefined,
-          // New fields
+          vehiclePhotos: sanitizedVehiclePhotos,
+          paymentStatus: finalPaymentStatus,
+          paymentMode: paymentMode || null,
+          internalNotes: internalNotes || null,
+          // Vehicle details
           hasKey: typeof hasKey === 'boolean' ? hasKey : null,
           hasTitle: typeof hasTitle === 'boolean' ? hasTitle : null,
           titleStatus: finalTitleStatus,
@@ -337,51 +329,74 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      if (sanitizedTrackingEvents.length) {
-        const eventsData: Prisma.ShipmentEventCreateManyInput[] = sanitizedTrackingEvents.map((event) => {
-          const eventStatus = (event.status || 'Status update').toString();
-          const locationValue = (event.location || origin || 'Unknown location').toString();
-          const descriptionParts = [
-            typeof event.description === 'string' ? event.description : null,
-            trackingCompany ? `Carrier: ${trackingCompany}` : null,
-          ].filter(Boolean);
-
-          const base: Prisma.ShipmentEventCreateManyInput = {
-            shipmentId: createdShipment.id,
-            status: eventStatus,
-            location: locationValue,
-            description:
-              descriptionParts.length > 0
-                ? descriptionParts.join(' | ')
-                : event.actual
-                ? 'Carrier confirmed milestone'
-                : 'Projected milestone from carrier',
-            completed: Boolean(event.actual),
-          };
-
-          if (event.timestamp) {
-            base.timestamp = new Date(event.timestamp);
-          }
-
-          return base;
+      // Create ledger entries based on payment mode
+      if (paymentMode && parsedPrice && parsedPrice > 0) {
+        // Get current balance for the user
+        const latestEntry = await tx.ledgerEntry.findFirst({
+          where: { userId: userId },
+          orderBy: { transactionDate: 'desc' },
+          select: { balance: true },
         });
 
-        if (eventsData.length === 1) {
-          await tx.shipmentEvent.create({ data: eventsData[0] });
-        } else {
-          await tx.shipmentEvent.createMany({ data: eventsData });
+        const currentBalance = latestEntry?.balance || 0;
+        
+        const vehicleInfo = [vehicleMake, vehicleModel, vehicleYear].filter(Boolean).join(' ') || 'Vehicle';
+        const vinInfo = vehicleVIN ? ` (VIN: ${vehicleVIN})` : '';
+        
+        if (paymentMode === 'CASH') {
+          // Cash payment: Create both debit and credit entries (net zero)
+          const debitBalance = currentBalance + parsedPrice;
+          await tx.ledgerEntry.create({
+            data: {
+              userId: userId,
+              shipmentId: createdShipment.id,
+              description: `Shipment charge for ${vehicleInfo}${vinInfo} - Cash`,
+              type: 'DEBIT',
+              amount: parsedPrice,
+              balance: debitBalance,
+              createdBy: session.user?.id as string,
+              notes: 'Shipment cost charged',
+            },
+          });
+
+          await tx.ledgerEntry.create({
+            data: {
+              userId: userId,
+              shipmentId: createdShipment.id,
+              description: `Cash payment received for ${vehicleInfo}${vinInfo}`,
+              type: 'CREDIT',
+              amount: parsedPrice,
+              balance: currentBalance, // Back to original balance
+              createdBy: session.user?.id as string,
+              notes: 'Cash payment settled immediately',
+            },
+          });
+        } else if (paymentMode === 'DUE') {
+          // Due payment: Create only debit entry
+          const newBalance = currentBalance + parsedPrice;
+          await tx.ledgerEntry.create({
+            data: {
+              userId: userId,
+              shipmentId: createdShipment.id,
+              description: `Shipment charge for ${vehicleInfo}${vinInfo} - Due`,
+              type: 'DEBIT',
+              amount: parsedPrice,
+              balance: newBalance,
+              createdBy: session.user?.id as string,
+              notes: 'Payment due - not yet received',
+            },
+          });
         }
-      } else {
-        // Create initial event fallback
-        await tx.shipmentEvent.create({
+      }
+
+      // Update container count if assigned
+      if (containerId) {
+        await tx.container.update({
+          where: { id: containerId },
           data: {
-            shipmentId: createdShipment.id,
-            status: normalizedStatus,
-            location: currentLocation || origin,
-            description: trackingCompany
-              ? `Shipment created and synced with ${trackingCompany}`
-              : 'Shipment created and pending pickup',
-            completed: Boolean(providedStatus && providedStatus !== ShipmentStatus.PENDING),
+            currentCount: {
+              increment: 1,
+            },
           },
         });
       }

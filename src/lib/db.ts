@@ -1,4 +1,4 @@
-import { PrismaClient, QuoteStatus, ShipmentStatus } from '@prisma/client';
+import { PrismaClient, QuoteStatus, ShipmentSimpleStatus } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -100,35 +100,37 @@ export class DatabaseService {
   }
 
   static async updateShipmentStatus(
-    trackingNumber: string,
-    status: ShipmentStatus,
-    currentLocation?: string
+    shipmentId: string,
+    status: ShipmentSimpleStatus
   ) {
     return await prisma.shipment.update({
-      where: { trackingNumber },
+      where: { id: shipmentId },
       data: {
         status,
-        currentLocation,
         updatedAt: new Date(),
       },
     });
   }
 
-  static async addShipmentEvent(
-    shipmentId: string,
+  // Note: Tracking events are now at container level
+  static async addContainerTrackingEvent(
+    containerId: string,
     eventData: {
       status: string;
-      location: string;
+      location?: string;
       description?: string;
-      completed?: boolean;
-      latitude?: number;
-      longitude?: number;
+      eventDate: Date;
+      source?: string;
     }
   ) {
-    return await prisma.shipmentEvent.create({
+    return await prisma.containerTrackingEvent.create({
       data: {
-        shipmentId,
-        ...eventData,
+        containerId,
+        status: eventData.status,
+        location: eventData.location,
+        description: eventData.description,
+        eventDate: eventData.eventDate,
+        source: eventData.source || 'manual',
       },
     });
   }

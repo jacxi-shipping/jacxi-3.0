@@ -45,6 +45,7 @@ export const shipmentSchema = z.object({
   hasKey: z.boolean().optional(),
   hasTitle: z.boolean().optional(),
   titleStatus: z.enum(['PENDING', 'DELIVERED']).optional(),
+  paymentMode: z.enum(['CASH', 'DUE']).optional(),
 });
 
 export const shipmentUpdateSchema = z.object({

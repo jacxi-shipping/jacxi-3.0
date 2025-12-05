@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
               { trackingNumber: { contains: query, mode: 'insensitive' } },
             ]
           : undefined,
-        ...(status ? { status: status as 'ON_HAND' | 'READY_FOR_SHIPMENT' } : {}),
+        ...(status ? { status: status as 'ON_HAND' | 'IN_TRANSIT' } : {}),
         ...(dateFrom || dateTo
           ? {
               createdAt: {

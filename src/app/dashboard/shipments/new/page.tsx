@@ -103,7 +103,7 @@ export default function NewShipmentPage() {
 		},
 	});
 
-	const [shipmentStatus, setShipmentStatus] = useState<'ON_HAND' | 'READY_FOR_SHIPMENT'>('ON_HAND');
+	const [shipmentStatus, setShipmentStatus] = useState<'ON_HAND' | 'IN_TRANSIT'>('ON_HAND');
 	const vehicleVINValue = watch('vehicleVIN');
 	const trackingNumberValue = watch('trackingNumber');
 
@@ -400,8 +400,8 @@ export default function NewShipmentPage() {
 
 	const onSubmit = async (data: ShipmentFormData) => {
 		try {
-			// Validate required fields for READY_FOR_SHIPMENT
-			if (shipmentStatus === 'READY_FOR_SHIPMENT') {
+			// Validate required fields for IN_TRANSIT
+			if (shipmentStatus === 'IN_TRANSIT') {
 				if (!data.origin || data.origin.trim().length < 3) {
 					setError('origin', { type: 'manual', message: 'Origin is required for ready-to-ship items (min 3 characters)' });
 					setSnackbar({ open: true, message: 'Origin is required for ready-to-ship items (min 3 characters)', severity: 'warning' });
@@ -419,7 +419,7 @@ export default function NewShipmentPage() {
 				setSnackbar({ open: true, message: 'Warning: Vehicle make and model are recommended for better tracking', severity: 'warning' });
 			}
 
-			if (!data.vehicleVIN && shipmentStatus === 'READY_FOR_SHIPMENT') {
+			if (!data.vehicleVIN && shipmentStatus === 'IN_TRANSIT') {
 				setSnackbar({ open: true, message: 'Warning: VIN number is recommended for shipments', severity: 'warning' });
 			}
 
@@ -593,19 +593,19 @@ export default function NewShipmentPage() {
 											</div>
 										</div>
 									</label>
-									<label 
-										className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
-											shipmentStatus === 'READY_FOR_SHIPMENT' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
-										}`}
-									>
-										<input
-											type="radio"
-											name="shipmentStatus"
-											value="READY_FOR_SHIPMENT"
-											checked={shipmentStatus === 'READY_FOR_SHIPMENT'}
-											onChange={() => setShipmentStatus('READY_FOR_SHIPMENT')}
-											className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
-										/>
+								<label 
+									className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
+										shipmentStatus === 'IN_TRANSIT' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
+									}`}
+								>
+									<input
+										type="radio"
+										name="shipmentStatus"
+										value="IN_TRANSIT"
+										checked={shipmentStatus === 'IN_TRANSIT'}
+										onChange={() => setShipmentStatus('IN_TRANSIT')}
+										className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+									/>
 										<div>
 											<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Ready for Shipment</div>
 											<div className="text-[var(--text-secondary)] text-xs">
@@ -905,8 +905,8 @@ export default function NewShipmentPage() {
 							</CardContent>
 						</Card>
 
-						{/* Shipping Information - Only for READY_FOR_SHIPMENT */}
-						{shipmentStatus === 'READY_FOR_SHIPMENT' && (
+						{/* Shipping Information - Only for IN_TRANSIT */}
+						{shipmentStatus === 'IN_TRANSIT' && (
 							<Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
 								<CardHeader className="p-4 sm:p-6 border-b border-white/5">
 									<CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Shipping Information <span className="text-red-400">*</span></CardTitle>
@@ -1216,6 +1216,65 @@ export default function NewShipmentPage() {
 											<p className="mt-1 text-xs sm:text-sm text-red-400">{errors.insuranceValue.message}</p>
 										)}
 									</div>
+								</div>
+
+								{/* Payment Mode Selection */}
+								<div className="pt-4 border-t border-white/5">
+									<label className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
+										Payment Mode
+									</label>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+										<label 
+											className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
+												watch('paymentMode') === 'CASH' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
+											}`}
+										>
+											<input
+												type="radio"
+												{...register('paymentMode')}
+												value="CASH"
+												className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<div>
+												<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Cash Payment</div>
+												<div className="text-[var(--text-secondary)] text-xs">
+													Payment received immediately. Transaction will be marked as paid.
+												</div>
+											</div>
+										</label>
+										<label 
+											className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
+												watch('paymentMode') === 'DUE' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
+											}`}
+										>
+											<input
+												type="radio"
+												{...register('paymentMode')}
+												value="DUE"
+												className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+											/>
+											<div>
+												<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Due Payment</div>
+												<div className="text-[var(--text-secondary)] text-xs">
+													Payment to be collected later. Amount will be added to user's ledger as due.
+												</div>
+											</div>
+										</label>
+									</div>
+									{watch('paymentMode') === 'CASH' && (
+										<div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+											<p className="text-xs text-green-400">
+												✓ Cash payment selected. A debit and credit entry will be created in the user's ledger (net zero balance).
+											</p>
+										</div>
+									)}
+									{watch('paymentMode') === 'DUE' && (
+										<div className="mt-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+											<p className="text-xs text-yellow-400">
+												⚠ Due payment selected. Only a debit entry will be created, increasing the user's outstanding balance.
+											</p>
+										</div>
+									)}
 								</div>
 							</CardContent>
 						</Card>

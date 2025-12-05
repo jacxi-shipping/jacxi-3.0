@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, ShipmentStatus } from '@prisma/client';
+import { PrismaClient, ShipmentSimpleStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
@@ -38,22 +38,32 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
-        result = await prisma.shipment.updateMany({
-          where: { id: { in: shipmentIds } },
-          data: { status: data.status as ShipmentStatus },
-        });
-        break;
-
-      case 'updateProgress':
-        if (data?.progress === undefined) {
+        // Validate status is either ON_HAND or IN_TRANSIT
+        if (data.status !== 'ON_HAND' && data.status !== 'IN_TRANSIT') {
           return NextResponse.json(
-            { message: 'Progress is required for updateProgress action' },
+            { message: 'Status must be ON_HAND or IN_TRANSIT' },
             { status: 400 }
           );
         }
         result = await prisma.shipment.updateMany({
           where: { id: { in: shipmentIds } },
-          data: { progress: parseInt(data.progress) },
+          data: { status: data.status as ShipmentSimpleStatus },
+        });
+        break;
+
+      case 'assignContainer':
+        if (!data?.containerId) {
+          return NextResponse.json(
+            { message: 'Container ID is required for assignContainer action' },
+            { status: 400 }
+          );
+        }
+        result = await prisma.shipment.updateMany({
+          where: { id: { in: shipmentIds } },
+          data: { 
+            containerId: data.containerId,
+            status: 'IN_TRANSIT' as ShipmentSimpleStatus,
+          },
         });
         break;
 
@@ -101,9 +111,12 @@ export async function POST(request: NextRequest) {
                 phone: true,
               },
             },
-            events: {
-              orderBy: {
-                timestamp: 'desc',
+            container: {
+              select: {
+                containerNumber: true,
+                trackingNumber: true,
+                vesselName: true,
+                status: true,
               },
             },
           },
@@ -114,32 +127,6 @@ export async function POST(request: NextRequest) {
           data: shipments,
           count: shipments.length,
         });
-
-      case 'updateLocation':
-        if (!data?.currentLocation) {
-          return NextResponse.json(
-            { message: 'Current location is required for updateLocation action' },
-            { status: 400 }
-          );
-        }
-        result = await prisma.shipment.updateMany({
-          where: { id: { in: shipmentIds } },
-          data: { currentLocation: data.currentLocation },
-        });
-        break;
-
-      case 'setETA':
-        if (!data?.estimatedDelivery) {
-          return NextResponse.json(
-            { message: 'Estimated delivery is required for setETA action' },
-            { status: 400 }
-          );
-        }
-        result = await prisma.shipment.updateMany({
-          where: { id: { in: shipmentIds } },
-          data: { estimatedDelivery: new Date(data.estimatedDelivery) },
-        });
-        break;
 
       default:
         return NextResponse.json(

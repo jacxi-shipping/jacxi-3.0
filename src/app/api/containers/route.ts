@@ -1,135 +1,212 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { auth } from '@/lib/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { z } from 'zod';
 
-// Container status enum (matches Prisma schema)
-enum ContainerStatus {
-  EMPTY = 'EMPTY',
-  PARTIAL = 'PARTIAL',
-  FULL = 'FULL',
-  SHIPPED = 'SHIPPED',
-  ARCHIVED = 'ARCHIVED',
-}
+// Schema for creating a container
+const createContainerSchema = z.object({
+  containerNumber: z.string().min(1),
+  trackingNumber: z.string().optional(),
+  vesselName: z.string().optional(),
+  voyageNumber: z.string().optional(),
+  shippingLine: z.string().optional(),
+  bookingNumber: z.string().optional(),
+  loadingPort: z.string().optional(),
+  destinationPort: z.string().optional(),
+  transshipmentPorts: z.array(z.string()).optional(),
+  loadingDate: z.string().optional(),
+  departureDate: z.string().optional(),
+  estimatedArrival: z.string().optional(),
+  maxCapacity: z.number().int().positive().optional(),
+  notes: z.string().optional(),
+  autoTrackingEnabled: z.boolean().optional(),
+});
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+// GET - Fetch containers with filtering
+export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins can view containers
-    if (session.user?.role !== 'admin') {
-      return NextResponse.json(
-        { message: 'Forbidden: Only admins can view containers' },
-        { status: 403 }
-      );
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const shippingLine = searchParams.get('shippingLine');
+    const destinationPort = searchParams.get('destinationPort');
+    const search = searchParams.get('search');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+
+    // Build where clause
+    const where: any = {};
+
+    if (status) {
+      where.status = status;
     }
 
+    if (shippingLine) {
+      where.shippingLine = { contains: shippingLine, mode: 'insensitive' };
+    }
+
+    if (destinationPort) {
+      where.destinationPort = { contains: destinationPort, mode: 'insensitive' };
+    }
+
+    if (search) {
+      where.OR = [
+        { containerNumber: { contains: search, mode: 'insensitive' } },
+        { trackingNumber: { contains: search, mode: 'insensitive' } },
+        { vesselName: { contains: search, mode: 'insensitive' } },
+        { bookingNumber: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Get total count
+    const totalCount = await prisma.container.count({ where });
+
+    // Fetch containers
     const containers = await prisma.container.findMany({
+      where,
       include: {
-        items: true,
-        shipment: {
+        shipments: {
           select: {
-            trackingNumber: true,
+            id: true,
+            vehicleVIN: true,
+            vehicleMake: true,
+            vehicleModel: true,
             status: true,
           },
         },
-        invoices: {
+        _count: {
           select: {
-            id: true,
-            invoiceNumber: true,
-            status: true,
-            totalUSD: true,
-            totalAED: true,
+            shipments: true,
+            expenses: true,
+            invoices: true,
+            documents: true,
           },
         },
       },
       orderBy: {
         createdAt: 'desc',
       },
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    return NextResponse.json({ containers }, { status: 200 });
+    return NextResponse.json({
+      containers,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    });
   } catch (error) {
     console.error('Error fetching containers:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Failed to fetch containers' },
       { status: 500 }
     );
   }
 }
 
-type CreateContainerPayload = {
-  containerNumber: string;
-  shipmentId?: string | null;
-  status?: string;
-  maxCapacity?: number;
-};
-
+// POST - Create a new container
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (session.user?.role !== 'admin') {
-      return NextResponse.json(
-        { message: 'Forbidden: Only admins can create containers' },
-        { status: 403 }
-      );
+    // Only admins can create containers
+    if (session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const data = (await request.json()) as CreateContainerPayload;
-    const { containerNumber, shipmentId, status, maxCapacity } = data;
+    const body = await request.json();
+    const validatedData = createContainerSchema.parse(body);
 
-    if (!containerNumber) {
+    // Check for duplicate container number
+    const existing = await prisma.container.findUnique({
+      where: { containerNumber: validatedData.containerNumber },
+    });
+
+    if (existing) {
       return NextResponse.json(
-        { message: 'Container number is required' },
+        { error: 'Container number already exists' },
         { status: 400 }
       );
     }
 
+    // Parse dates
+    const loadingDate = validatedData.loadingDate ? new Date(validatedData.loadingDate) : null;
+    const departureDate = validatedData.departureDate ? new Date(validatedData.departureDate) : null;
+    const estimatedArrival = validatedData.estimatedArrival ? new Date(validatedData.estimatedArrival) : null;
+
+    // Create container
     const container = await prisma.container.create({
       data: {
-        containerNumber,
-        shipmentId: shipmentId || null,
-        status: (status as unknown as typeof ContainerStatus[keyof typeof ContainerStatus]) || (ContainerStatus.EMPTY as unknown as string),
-        maxCapacity: maxCapacity || 4,
-        currentCount: 0,
+        containerNumber: validatedData.containerNumber,
+        trackingNumber: validatedData.trackingNumber,
+        vesselName: validatedData.vesselName,
+        voyageNumber: validatedData.voyageNumber,
+        shippingLine: validatedData.shippingLine,
+        bookingNumber: validatedData.bookingNumber,
+        loadingPort: validatedData.loadingPort,
+        destinationPort: validatedData.destinationPort,
+        transshipmentPorts: validatedData.transshipmentPorts || [],
+        loadingDate,
+        departureDate,
+        estimatedArrival,
+        maxCapacity: validatedData.maxCapacity || 4,
+        notes: validatedData.notes,
+        autoTrackingEnabled: validatedData.autoTrackingEnabled ?? true,
+        status: 'CREATED',
       },
       include: {
-        items: true,
-        shipment: {
+        shipments: true,
+        _count: {
           select: {
-            trackingNumber: true,
-            status: true,
+            shipments: true,
+            expenses: true,
+            invoices: true,
+            documents: true,
           },
         },
       },
     });
 
-    return NextResponse.json(
-      { message: 'Container created successfully', container },
-      { status: 201 }
-    );
-  } catch (error: unknown) {
-    console.error('Error creating container:', error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    // Create audit log
+    await prisma.containerAuditLog.create({
+      data: {
+        containerId: container.id,
+        action: 'CONTAINER_CREATED',
+        description: `Container ${container.containerNumber} created`,
+        performedBy: session.user.id as string,
+        newValue: container.status,
+      },
+    });
+
+    return NextResponse.json({
+      container,
+      message: 'Container created successfully',
+    }, { status: 201 });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: 'Container number already exists' },
+        { error: 'Invalid data', details: error.errors },
         { status: 400 }
       );
     }
+    console.error('Error creating container:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Failed to create container' },
       { status: 500 }
     );
   }
 }
-

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, ShipmentStatus } from '@prisma/client';
+import { PrismaClient, ContainerLifecycleStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Delivery alert status enum (matches Prisma schema)
-enum DeliveryAlertStatus {
+// Arrival alert status
+enum ArrivalAlertStatus {
   ON_TIME = 'ON_TIME',
   WARNING = 'WARNING',
   OVERDUE = 'OVERDUE',
-  DELIVERED = 'DELIVERED',
+  ARRIVED = 'ARRIVED',
 }
 
-// This endpoint can be called by a cron job to check and update delivery alerts
+// This endpoint can be called by a cron job to check container arrival alerts
 export async function POST(request: NextRequest) {
   try {
     // Optional: Add authentication for cron jobs
@@ -28,94 +28,86 @@ export async function POST(request: NextRequest) {
     const now = new Date();
     const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
-    // Get all shipments that are not delivered and have an estimated delivery date
-    const shipmentsToCheck = await prisma.shipment.findMany({
+    // Get all containers that are in transit and have an ETA
+    const containersToCheck = await prisma.container.findMany({
       where: {
         status: {
-          not: ShipmentStatus.DELIVERED,
+          in: [ContainerLifecycleStatus.IN_TRANSIT, ContainerLifecycleStatus.LOADED],
         },
-        estimatedDelivery: {
+        estimatedArrival: {
           not: null,
         },
       },
       select: {
         id: true,
-        trackingNumber: true,
-        estimatedDelivery: true,
-        deliveryAlertStatus: true,
-        user: {
+        containerNumber: true,
+        estimatedArrival: true,
+        status: true,
+        shipments: {
           select: {
-            name: true,
-            email: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },
     });
 
     const results = {
-      total: shipmentsToCheck.length,
+      total: containersToCheck.length,
       warnings: 0,
       overdue: 0,
       onTime: 0,
       details: [] as Array<{
-        shipmentId: string;
-        trackingNumber: string;
-        oldStatus: string;
-        newStatus: string;
-        estimatedDelivery: Date;
-        userName: string;
+        containerId: string;
+        containerNumber: string;
+        status: string;
+        estimatedArrival: Date;
+        alertStatus: string;
       }>,
     };
 
-    // Check each shipment
-    for (const shipment of shipmentsToCheck) {
+    // Check each container
+    for (const container of containersToCheck) {
       try {
-        const eta = new Date(shipment.estimatedDelivery!);
-        let newAlertStatus: DeliveryAlertStatus;
+        const eta = new Date(container.estimatedArrival!);
+        let alertStatus: ArrivalAlertStatus;
 
         // Determine alert status
         if (now > eta) {
           // Past ETA - OVERDUE
-          newAlertStatus = DeliveryAlertStatus.OVERDUE;
+          alertStatus = ArrivalAlertStatus.OVERDUE;
           results.overdue++;
         } else if (eta <= threeDaysFromNow) {
           // Within 3 days of ETA - WARNING
-          newAlertStatus = DeliveryAlertStatus.WARNING;
+          alertStatus = ArrivalAlertStatus.WARNING;
           results.warnings++;
         } else {
           // More than 3 days until ETA - ON_TIME
-          newAlertStatus = DeliveryAlertStatus.ON_TIME;
+          alertStatus = ArrivalAlertStatus.ON_TIME;
           results.onTime++;
         }
 
-        // Update if status changed
-        if (newAlertStatus !== shipment.deliveryAlertStatus) {
-          await prisma.shipment.update({
-            where: { id: shipment.id },
-            data: {
-              deliveryAlertStatus: newAlertStatus as typeof DeliveryAlertStatus[keyof typeof DeliveryAlertStatus],
-            },
-          });
+        results.details.push({
+          containerId: container.id,
+          containerNumber: container.containerNumber,
+          status: container.status,
+          estimatedArrival: eta,
+          alertStatus: alertStatus,
+        });
 
-          results.details.push({
-            shipmentId: shipment.id,
-            trackingNumber: shipment.trackingNumber,
-            oldStatus: shipment.deliveryAlertStatus,
-            newStatus: newAlertStatus,
-            estimatedDelivery: eta,
-            userName: shipment.user.name || shipment.user.email,
-          });
-
-          // TODO: Send notification to user
-          // You can implement email/SMS notifications here based on the alert status
-        }
+        // TODO: Send notification to users with shipments in this container
+        // You can implement email/SMS notifications here based on the alert status
       } catch (error) {
-        console.error(`Error checking shipment ${shipment.id}:`, error);
+        console.error(`Error checking container ${container.id}:`, error);
       }
     }
 
     return NextResponse.json({
-      message: 'Delivery alerts check completed',
+      message: 'Container arrival alerts check completed',
       results,
     }, { status: 200 });
   } catch (error) {

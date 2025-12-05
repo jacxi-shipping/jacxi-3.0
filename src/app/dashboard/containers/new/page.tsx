@@ -1,192 +1,378 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowLeft, Package } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import Section from '@/components/layout/Section';
-
-type FormValues = {
-	containerNumber: string;
-	status: 'ACTIVE' | 'INACTIVE';
-};
+import { Card } from '@/components/ui/Card';
+import { AdminRoute } from '@/components/auth/AdminRoute';
 
 export default function NewContainerPage() {
-	const { data: session, status } = useSession();
-	const router = useRouter();
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [error, setError] = useState('');
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    containerNumber: '',
+    trackingNumber: '',
+    vesselName: '',
+    voyageNumber: '',
+    shippingLine: '',
+    bookingNumber: '',
+    loadingPort: '',
+    destinationPort: '',
+    transshipmentPorts: [''],
+    loadingDate: '',
+    departureDate: '',
+    estimatedArrival: '',
+    maxCapacity: 4,
+    notes: '',
+    autoTrackingEnabled: true,
+  });
 
-	const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
-		defaultValues: {
-			status: 'ACTIVE',
-		},
-	});
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-	useEffect(() => {
-		if (status === 'loading') return;
-		const role = session?.user?.role;
-		if (!session || role !== 'admin') {
-			router.replace('/dashboard');
-		}
-	}, [session, status, router]);
+    try {
+      const payload = {
+        ...formData,
+        transshipmentPorts: formData.transshipmentPorts.filter(p => p.trim()),
+      };
 
-	const onSubmit = async (data: FormValues) => {
-		setIsSubmitting(true);
-		setError('');
+      const response = await fetch('/api/containers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-		try {
-			const response = await fetch('/api/containers', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(data),
-			});
+      const data = await response.json();
 
-			const result = await response.json();
+      if (response.ok) {
+        alert('Container created successfully!');
+        router.push(`/dashboard/containers/${data.container.id}`);
+      } else {
+        alert(data.error || 'Failed to create container');
+      }
+    } catch (error) {
+      console.error('Error creating container:', error);
+      alert('Failed to create container');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-			if (response.ok) {
-				router.push(`/dashboard/containers/${result.container.id}`);
-			} else {
-				setError(result.message || 'Failed to create container');
-			}
-		} catch (error) {
-			console.error('Error creating container:', error);
-			setError('An error occurred while creating the container');
-		} finally {
-			setIsSubmitting(false);
-		}
-	};
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-	if (status === 'loading') {
-		return (
-			<div className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400"></div>
-			</div>
-		);
-	}
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: parseInt(e.target.value) || 0,
+    }));
+  };
 
-	const role = session?.user?.role;
-	if (!session || role !== 'admin') {
-		return null;
-	}
+  const addTransshipmentPort = () => {
+    setFormData(prev => ({
+      ...prev,
+      transshipmentPorts: [...prev.transshipmentPorts, ''],
+    }));
+  };
 
-	return (
-		<>
-			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
-				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-				<div className="absolute inset-0 opacity-[0.03]">
-					<svg className="w-full h-full" preserveAspectRatio="none">
-						<defs>
-							<pattern id="grid-new-container" width="40" height="40" patternUnits="userSpaceOnUse">
-								<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="1" />
-							</pattern>
-						</defs>
-						<rect width="100%" height="100%" fill="url(#grid-new-container)" className="text-cyan-400" />
-					</svg>
-				</div>
+  const removeTransshipmentPort = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      transshipmentPorts: prev.transshipmentPorts.filter((_, i) => i !== index),
+    }));
+  };
 
-				<div className="relative z-10">
-					<div className="flex items-center gap-6">
-						<Link href="/dashboard/containers">
-							<Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Back
-							</Button>
-						</Link>
-						<div>
-							<h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">Create Container</h1>
-							<p className="text-lg sm:text-xl text-white/70 mt-2">Create a new container</p>
-						</div>
-					</div>
-				</div>
-			</Section>
+  const updateTransshipmentPort = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      transshipmentPorts: prev.transshipmentPorts.map((port, i) => i === index ? value : port),
+    }));
+  };
 
-			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
-				<div className="max-w-2xl mx-auto">
-					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6 }}
-							className="relative rounded-xl bg-[var(--text-primary)]/50 backdrop-blur-sm border border-cyan-500/30 p-6 sm:p-8"
-						>
-							<div className="flex items-center gap-3 mb-6">
-								<div className="w-10 h-10 rounded-xl bg-[var(--text-primary)] border border-cyan-500/40 flex items-center justify-center">
-									<Package className="w-5 h-5 text-cyan-400" />
-								</div>
-								<div>
-									<h2 className="text-xl sm:text-2xl font-bold text-white">Container Information</h2>
-								</div>
-							</div>
+  return (
+    <AdminRoute>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Button onClick={() => router.push('/dashboard/containers')} className="mb-4">
+            ← Back
+          </Button>
 
-							<div className="space-y-4">
-								<div>
-									<label htmlFor="containerNumber" className="block text-sm font-medium text-white/90 mb-2">
-										Container Number <span className="text-red-400">*</span>
-									</label>
-									<input
-										type="text"
-										id="containerNumber"
-										{...register('containerNumber', { required: 'Container number is required' })}
-										placeholder="e.g., CONT-123456"
-										className={`w-full px-4 py-3 bg-[var(--text-primary)] border rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 ${
-											errors.containerNumber ? 'border-red-500/50' : 'border-cyan-500/30'
-										}`}
-									/>
-									{errors.containerNumber?.message && (
-										<p className="mt-2 text-sm text-red-400">{errors.containerNumber.message}</p>
-									)}
-								</div>
+          <Card>
+            <h1 className="text-2xl font-bold mb-6">Create New Container</h1>
 
-								<div>
-									<label htmlFor="status" className="block text-sm font-medium text-white/90 mb-2">
-										Status
-									</label>
-									<select
-										id="status"
-										{...register('status')}
-										className="w-full px-4 py-3 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
-									>
-										<option value="ACTIVE" className="bg-[var(--text-primary)]">Active</option>
-										<option value="INACTIVE" className="bg-[var(--text-primary)]">Inactive</option>
-									</select>
-								</div>
-							</div>
-						</motion.div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Basic Information */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Container Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="containerNumber"
+                      value={formData.containerNumber}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                      placeholder="ABCU1234567"
+                    />
+                  </div>
 
-						{error && (
-							<motion.div
-								initial={{ opacity: 0, y: -10 }}
-								animate={{ opacity: 1, y: 0 }}
-								className="relative rounded-xl bg-red-500/10 backdrop-blur-sm border border-red-500/30 p-6"
-							>
-								<p className="text-sm text-red-400">{error}</p>
-							</motion.div>
-						)}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Tracking Number
+                    </label>
+                    <input
+                      type="text"
+                      name="trackingNumber"
+                      value={formData.trackingNumber}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
 
-						<motion.div
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, delay: 0.2 }}
-							className="flex flex-col sm:flex-row justify-end gap-4 pt-4"
-						>
-							<Link href="/dashboard/containers" className="sm:w-auto w-full">
-								<Button type="button" variant="outline" disabled={isSubmitting} className="w-full sm:w-auto border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-									Cancel
-								</Button>
-							</Link>
-							<Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-lg shadow-cyan-500/30">
-								{isSubmitting ? 'Creating...' : 'Create Container'}
-							</Button>
-						</motion.div>
-					</form>
-				</div>
-			</Section>
-		</>
-	);
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Booking Number
+                    </label>
+                    <input
+                      type="text"
+                      name="bookingNumber"
+                      value={formData.bookingNumber}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Max Capacity (vehicles)
+                    </label>
+                    <input
+                      type="number"
+                      name="maxCapacity"
+                      value={formData.maxCapacity}
+                      onChange={handleNumberChange}
+                      min="1"
+                      max="20"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Details */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Shipping Details</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Vessel Name
+                    </label>
+                    <input
+                      type="text"
+                      name="vesselName"
+                      value={formData.vesselName}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Voyage Number
+                    </label>
+                    <input
+                      type="text"
+                      name="voyageNumber"
+                      value={formData.voyageNumber}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Shipping Line
+                    </label>
+                    <input
+                      type="text"
+                      name="shippingLine"
+                      value={formData.shippingLine}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                      placeholder="e.g., Maersk, MSC, COSCO"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Ports */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Ports</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Loading Port
+                    </label>
+                    <input
+                      type="text"
+                      name="loadingPort"
+                      value={formData.loadingPort}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Destination Port
+                    </label>
+                    <input
+                      type="text"
+                      name="destinationPort"
+                      value={formData.destinationPort}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium mb-2">
+                    Transshipment Ports (Optional)
+                  </label>
+                  {formData.transshipmentPorts.map((port, index) => (
+                    <div key={index} className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={port}
+                        onChange={(e) => updateTransshipmentPort(index, e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                        placeholder={`Transshipment port ${index + 1}`}
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => removeTransshipmentPort(index)}
+                        className="bg-red-500 hover:bg-red-600"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    onClick={addTransshipmentPort}
+                    className="mt-2"
+                  >
+                    + Add Transshipment Port
+                  </Button>
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Dates</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Loading Date
+                    </label>
+                    <input
+                      type="date"
+                      name="loadingDate"
+                      value={formData.loadingDate}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Departure Date
+                    </label>
+                    <input
+                      type="date"
+                      name="departureDate"
+                      value={formData.departureDate}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Estimated Arrival
+                    </label>
+                    <input
+                      type="date"
+                      name="estimatedArrival"
+                      value={formData.estimatedArrival}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Notes
+                </label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  placeholder="Any additional notes..."
+                />
+              </div>
+
+              {/* Auto-tracking */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="autoTrackingEnabled"
+                  name="autoTrackingEnabled"
+                  checked={formData.autoTrackingEnabled}
+                  onChange={(e) => setFormData(prev => ({ ...prev, autoTrackingEnabled: e.target.checked }))}
+                  className="h-4 w-4"
+                />
+                <label htmlFor="autoTrackingEnabled" className="text-sm font-medium">
+                  Enable automatic tracking updates
+                </label>
+              </div>
+
+              {/* Submit */}
+              <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  type="submit"
+                  disabled={loading || !formData.containerNumber}
+                  className="flex-1"
+                >
+                  {loading ? 'Creating...' : 'Create Container'}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => router.push('/dashboard/containers')}
+                  className="bg-gray-500 hover:bg-gray-600"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      </div>
+    </AdminRoute>
+  );
 }
-
