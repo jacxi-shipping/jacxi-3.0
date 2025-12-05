@@ -103,7 +103,7 @@ export default function NewShipmentPage() {
 		},
 	});
 
-	const [shipmentStatus, setShipmentStatus] = useState<'ON_HAND' | 'READY_FOR_SHIPMENT'>('ON_HAND');
+	const [shipmentStatus, setShipmentStatus] = useState<'ON_HAND' | 'IN_TRANSIT'>('ON_HAND');
 	const vehicleVINValue = watch('vehicleVIN');
 	const trackingNumberValue = watch('trackingNumber');
 
@@ -400,8 +400,8 @@ export default function NewShipmentPage() {
 
 	const onSubmit = async (data: ShipmentFormData) => {
 		try {
-			// Validate required fields for READY_FOR_SHIPMENT
-			if (shipmentStatus === 'READY_FOR_SHIPMENT') {
+			// Validate required fields for IN_TRANSIT
+			if (shipmentStatus === 'IN_TRANSIT') {
 				if (!data.origin || data.origin.trim().length < 3) {
 					setError('origin', { type: 'manual', message: 'Origin is required for ready-to-ship items (min 3 characters)' });
 					setSnackbar({ open: true, message: 'Origin is required for ready-to-ship items (min 3 characters)', severity: 'warning' });
@@ -419,7 +419,7 @@ export default function NewShipmentPage() {
 				setSnackbar({ open: true, message: 'Warning: Vehicle make and model are recommended for better tracking', severity: 'warning' });
 			}
 
-			if (!data.vehicleVIN && shipmentStatus === 'READY_FOR_SHIPMENT') {
+			if (!data.vehicleVIN && shipmentStatus === 'IN_TRANSIT') {
 				setSnackbar({ open: true, message: 'Warning: VIN number is recommended for shipments', severity: 'warning' });
 			}
 
@@ -593,19 +593,19 @@ export default function NewShipmentPage() {
 											</div>
 										</div>
 									</label>
-									<label 
-										className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
-											shipmentStatus === 'READY_FOR_SHIPMENT' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
-										}`}
-									>
-										<input
-											type="radio"
-											name="shipmentStatus"
-											value="READY_FOR_SHIPMENT"
-											checked={shipmentStatus === 'READY_FOR_SHIPMENT'}
-											onChange={() => setShipmentStatus('READY_FOR_SHIPMENT')}
-											className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
-										/>
+								<label 
+									className={`relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
+										shipmentStatus === 'IN_TRANSIT' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'
+									}`}
+								>
+									<input
+										type="radio"
+										name="shipmentStatus"
+										value="IN_TRANSIT"
+										checked={shipmentStatus === 'IN_TRANSIT'}
+										onChange={() => setShipmentStatus('IN_TRANSIT')}
+										className="mt-1 mr-3 w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50"
+									/>
 										<div>
 											<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Ready for Shipment</div>
 											<div className="text-[var(--text-secondary)] text-xs">
@@ -905,8 +905,8 @@ export default function NewShipmentPage() {
 							</CardContent>
 						</Card>
 
-						{/* Shipping Information - Only for READY_FOR_SHIPMENT */}
-						{shipmentStatus === 'READY_FOR_SHIPMENT' && (
+						{/* Shipping Information - Only for IN_TRANSIT */}
+						{shipmentStatus === 'IN_TRANSIT' && (
 							<Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
 								<CardHeader className="p-4 sm:p-6 border-b border-white/5">
 									<CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Shipping Information <span className="text-red-400">*</span></CardTitle>

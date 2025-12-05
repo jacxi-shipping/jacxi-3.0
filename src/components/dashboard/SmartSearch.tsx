@@ -65,7 +65,7 @@ const SHIPMENT_STATUSES = [
 
 const ITEM_STATUSES = [
   { value: 'ON_HAND', label: 'On Hand' },
-  { value: 'READY_FOR_SHIPMENT', label: 'Ready for Shipment' },
+  { value: 'IN_TRANSIT', label: 'In Transit' },
 ];
 
 export default function SmartSearch({

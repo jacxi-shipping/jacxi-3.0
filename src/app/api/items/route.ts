@@ -4,41 +4,9 @@ import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-// Container status enum (matches Prisma schema)
-enum ContainerStatus {
-  EMPTY = 'EMPTY',
-  PARTIAL = 'PARTIAL',
-  FULL = 'FULL',
-  SHIPPED = 'SHIPPED',
-  ARCHIVED = 'ARCHIVED',
-}
-
-// Helper function to update container status based on capacity
-async function updateContainerStatus(containerId: string) {
-  const container = await prisma.container.findUnique({
-    where: { id: containerId },
-    select: {
-      currentCount: true,
-      maxCapacity: true,
-    },
-  });
-
-  if (!container) return;
-
-  let newStatus: ContainerStatus;
-  if (container.currentCount === 0) {
-    newStatus = ContainerStatus.EMPTY;
-  } else if (container.currentCount >= container.maxCapacity) {
-    newStatus = ContainerStatus.FULL;
-  } else {
-    newStatus = ContainerStatus.PARTIAL;
-  }
-
-  await prisma.container.update({
-    where: { id: containerId },
-    data: { status: newStatus as typeof ContainerStatus[keyof typeof ContainerStatus] },
-  });
-}
+// Note: Items model has been removed in the new architecture
+// Shipments are now directly assigned to Containers
+// This endpoint is kept for backward compatibility but returns deprecation notice
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,131 +23,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await request.json();
-    const {
-      status,
-      containerId,
-      vin,
-      lotNumber,
-      auctionCity,
-      trackingNumber,
-      shippingOrigin,
-      shippingDestination,
-      estimatedDelivery,
-      freightCost,
-      towingCost,
-      clearanceCost,
-      vatCost,
-      customsCost,
-      otherCost,
-    } = data;
-
-    // Validate required fields
-    if (!vin || !lotNumber || !auctionCity) {
-      return NextResponse.json(
-        { message: 'VIN, Lot Number, and Auction City are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate READY_FOR_SHIPMENT status requirements
-    if (status === 'READY_FOR_SHIPMENT') {
-      if (!containerId || !trackingNumber || !shippingOrigin || !shippingDestination) {
-        return NextResponse.json(
-          { message: 'Container, tracking number, origin, and destination are required for ready-to-ship items' },
-          { status: 400 }
-        );
-      }
-
-      // Verify container exists and check capacity
-      const container = await prisma.container.findUnique({
-        where: { id: containerId },
-        select: {
-          currentCount: true,
-          maxCapacity: true,
-          status: true,
-        },
-      });
-
-      if (!container) {
-        return NextResponse.json(
-          { message: 'Container not found' },
-          { status: 404 }
-        );
-      }
-
-      // Check if container is full
-      if (container.currentCount >= container.maxCapacity) {
-        return NextResponse.json(
-          { message: `Container is full. Maximum capacity: ${container.maxCapacity} vehicles` },
-          { status: 400 }
-        );
-      }
-
-      // Check if container is already shipped
-      if (container.status === ContainerStatus.SHIPPED) {
-        return NextResponse.json(
-          { message: 'Cannot add items to a shipped container' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Create item and update container count in a transaction
-    const item = await prisma.$transaction(async (tx) => {
-      const createdItem = await tx.item.create({
-        data: {
-          status: status || 'ON_HAND',
-          containerId: containerId || null,
-          vin,
-          lotNumber,
-          auctionCity,
-          trackingNumber: trackingNumber || null,
-          shippingOrigin: shippingOrigin || null,
-          shippingDestination: shippingDestination || null,
-          estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
-          freightCost: freightCost ? parseFloat(freightCost) : 0,
-          towingCost: towingCost ? parseFloat(towingCost) : 0,
-          clearanceCost: clearanceCost ? parseFloat(clearanceCost) : 0,
-          vatCost: vatCost ? parseFloat(vatCost) : 0,
-          customsCost: customsCost ? parseFloat(customsCost) : 0,
-          otherCost: otherCost ? parseFloat(otherCost) : 0,
-        },
-        include: {
-          container: {
-            select: {
-              containerNumber: true,
-              currentCount: true,
-              maxCapacity: true,
-            },
-          },
-        },
-      });
-
-      // Increment container count if item is assigned to a container
-      if (containerId) {
-        await tx.container.update({
-          where: { id: containerId },
-          data: { currentCount: { increment: 1 } },
-        });
-
-        // Update container status
-        await updateContainerStatus(containerId);
-      }
-
-      return createdItem;
-    });
-
     return NextResponse.json(
-      { message: 'Item created successfully', item },
-      { status: 201 }
+      { 
+        message: 'Items endpoint is deprecated. Please use /api/shipments to create shipments instead.',
+        deprecated: true,
+        migrationGuide: 'Use POST /api/shipments with vehicle information',
+      },
+      { status: 410 } // 410 Gone - Resource no longer available
     );
   } catch (error) {
-    console.error('Error creating item:', error);
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error in deprecated items endpoint:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }
 
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth();
+
+    if (!session) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+
+    return NextResponse.json(
+      { 
+        message: 'Items endpoint is deprecated. Please use /api/shipments or /api/containers/[id]/shipments instead.',
+        deprecated: true,
+        alternatives: [
+          'GET /api/shipments - List all shipments',
+          'GET /api/containers/[id]/shipments - List shipments in a container',
+        ],
+      },
+      { status: 410 } // 410 Gone - Resource no longer available
+    );
+  } catch (error) {
+    console.error('Error in deprecated items endpoint:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  }
+}
