@@ -177,7 +177,7 @@ export async function GET(request: NextRequest) {
         users: userReports,
       });
     } else if (reportType === 'shipment-wise') {
-      // Shipment-wise payment report
+      // Shipment-wise payment report with expenses and profit
       const where: any = dateWhere;
       if (userId) {
         where.userId = userId;
@@ -209,15 +209,34 @@ export async function GET(request: NextRequest) {
       });
 
       const shipmentReports = shipments.map(shipment => {
-        const totalDebit = shipment.ledgerEntries
+        // Separate expenses from regular transactions
+        const expenses = shipment.ledgerEntries.filter(e => 
+          e.metadata && 
+          typeof e.metadata === 'object' && 
+          'isExpense' in e.metadata && 
+          (e.metadata as any).isExpense === true
+        );
+
+        const regularTransactions = shipment.ledgerEntries.filter(e => 
+          !e.metadata || 
+          typeof e.metadata !== 'object' || 
+          !('isExpense' in e.metadata) ||
+          (e.metadata as any).isExpense !== true
+        );
+
+        const totalDebit = regularTransactions
           .filter(e => e.type === 'DEBIT')
           .reduce((sum, e) => sum + e.amount, 0);
         
-        const totalCredit = shipment.ledgerEntries
+        const totalCredit = regularTransactions
           .filter(e => e.type === 'CREDIT')
           .reduce((sum, e) => sum + e.amount, 0);
 
+        const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
         const amountDue = totalDebit - totalCredit;
+        const revenue = totalCredit; // What was actually paid
+        const profit = revenue - totalExpenses; // Revenue minus expenses
 
         return {
           shipmentId: shipment.id,
@@ -229,6 +248,17 @@ export async function GET(request: NextRequest) {
           totalCharged: totalDebit,
           totalPaid: totalCredit,
           amountDue: Math.max(0, amountDue),
+          totalExpenses,
+          revenue,
+          profit,
+          profitMargin: revenue > 0 ? (profit / revenue) * 100 : 0,
+          expenses: expenses.map(e => ({
+            id: e.id,
+            description: e.description,
+            amount: e.amount,
+            type: (e.metadata as any)?.expenseType || 'OTHER',
+            date: e.transactionDate,
+          })),
           user: {
             id: shipment.user.id,
             name: shipment.user.name || shipment.user.email,
@@ -238,11 +268,24 @@ export async function GET(request: NextRequest) {
         };
       });
 
+      // Calculate overall summary
+      const totalRevenue = shipmentReports.reduce((sum, s) => sum + s.revenue, 0);
+      const totalExpenses = shipmentReports.reduce((sum, s) => sum + s.totalExpenses, 0);
+      const totalProfit = totalRevenue - totalExpenses;
+      const avgProfitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+
       return NextResponse.json({
         reportType: 'shipment-wise',
         period: {
           startDate: startDate || 'All time',
           endDate: endDate || 'Now',
+        },
+        summary: {
+          totalRevenue,
+          totalExpenses,
+          totalProfit,
+          avgProfitMargin,
+          shipmentCount: shipmentReports.length,
         },
         shipments: shipmentReports,
       });

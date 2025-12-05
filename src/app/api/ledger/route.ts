@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { createAuditLog } from '@/app/api/audit-logs/route';
 
 // Schema for creating a ledger entry
 const createLedgerEntrySchema = z.object({
@@ -217,6 +218,16 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Create audit log
+    await createAuditLog(
+      'LedgerEntry',
+      entry.id,
+      'CREATE',
+      session.user.id as string,
+      { entry },
+      request
+    );
 
     // If this is a credit entry linked to a shipment, check if it's fully paid
     if (validatedData.shipmentId && validatedData.type === 'CREDIT') {

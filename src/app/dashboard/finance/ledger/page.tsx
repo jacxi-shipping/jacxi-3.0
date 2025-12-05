@@ -112,15 +112,21 @@ export default function LedgerPage() {
     }
   };
 
-  const handleExport = async (format: 'csv' | 'pdf') => {
+  const handleExport = async (format: 'csv' | 'pdf' | 'excel') => {
     try {
       const params = new URLSearchParams({
-        format,
         ...(filters.startDate && { startDate: filters.startDate }),
         ...(filters.endDate && { endDate: filters.endDate }),
       });
 
-      const response = await fetch(`/api/ledger/export?${params}`);
+      let endpoint = '/api/ledger/export';
+      if (format === 'pdf') {
+        endpoint = '/api/ledger/export-pdf';
+      } else if (format === 'excel') {
+        endpoint = '/api/ledger/export-excel';
+      }
+
+      const response = await fetch(`${endpoint}?${params}`);
       
       if (!response.ok) {
         throw new Error('Failed to export ledger');
@@ -130,11 +136,25 @@ export default function LedgerPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ledger-${Date.now()}.${format}`;
+      
+      // Set appropriate filename based on format
+      if (format === 'pdf') {
+        a.download = `ledger-${Date.now()}.html`; // HTML can be opened in browser and printed to PDF
+      } else if (format === 'excel') {
+        a.download = `ledger-${Date.now()}.csv`;
+      } else {
+        a.download = `ledger-${Date.now()}.csv`;
+      }
+      
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      // For PDF, open in new tab for printing
+      if (format === 'pdf') {
+        window.open(url, '_blank');
+      }
     } catch (error) {
       console.error('Error exporting ledger:', error);
     }
@@ -211,6 +231,24 @@ export default function LedgerPage() {
               >
                 <Printer className="w-4 h-4 mr-2" />
                 Print
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport('pdf')}
+                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export PDF
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExport('excel')}
+                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Excel
               </Button>
               <Button
                 variant="outline"

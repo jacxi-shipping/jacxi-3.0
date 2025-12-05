@@ -524,8 +524,32 @@ model LedgerEntry {
   updatedAt       DateTime         @updatedAt
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   shipment        Shipment?        @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  auditLogs       AuditLog[]
 
   @@index([userId])
   @@index([shipmentId])
   @@index([transactionDate])
+}
+
+model AuditLog {
+  id            String        @id @default(cuid())
+  entityType    String        // Type of entity changed (e.g., 'LedgerEntry')
+  entityId      String        // ID of the changed entity
+  action        AuditAction   // CREATE, UPDATE, DELETE
+  performedBy   String        // User ID who performed the action
+  performedAt   DateTime      @default(now())
+  changes       Json?         // JSON of what changed (old vs new values)
+  ipAddress     String?
+  userAgent     String?
+  ledgerEntry   LedgerEntry?  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId])
+  @@index([performedBy])
+  @@index([performedAt])
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
 }
