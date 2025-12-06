@@ -3,23 +3,21 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Download, 
-  Filter, 
-  Search, 
-  Printer,
+import {
+  Download,
+  Print,
+  FilterList,
+  Search,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  FileText,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Section from '@/components/layout/Section';
+  AccountBalance,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  AttachMoney,
+} from '@mui/icons-material';
+import { Button, Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface LedgerEntry {
@@ -32,14 +30,8 @@ interface LedgerEntry {
   notes?: string;
   shipment?: {
     id: string;
-    trackingNumber: string;
     vehicleMake?: string;
     vehicleModel?: string;
-  };
-  user: {
-    id: string;
-    name?: string;
-    email: string;
   };
 }
 
@@ -66,12 +58,8 @@ export default function LedgerPage() {
     type: '',
     startDate: '',
     endDate: '',
-    shipmentId: '',
   });
   const [showFilters, setShowFilters] = useState(false);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isAdmin = session?.user?.role === 'admin';
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -80,8 +68,7 @@ export default function LedgerPage() {
       return;
     }
     fetchLedgerEntries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status, page, filters]);
+  }, [session, status, page, filters, router]);
 
   const fetchLedgerEntries = async () => {
     try {
@@ -93,7 +80,6 @@ export default function LedgerPage() {
         ...(filters.type && { type: filters.type }),
         ...(filters.startDate && { startDate: filters.startDate }),
         ...(filters.endDate && { endDate: filters.endDate }),
-        ...(filters.shipmentId && { shipmentId: filters.shipmentId }),
       });
 
       const response = await fetch(`/api/ledger?${params}`);
@@ -138,9 +124,8 @@ export default function LedgerPage() {
       const a = document.createElement('a');
       a.href = url;
       
-      // Set appropriate filename based on format
       if (format === 'pdf') {
-        a.download = `ledger-${Date.now()}.html`; // HTML can be opened in browser and printed to PDF
+        a.download = `ledger-${Date.now()}.html`;
       } else if (format === 'excel') {
         a.download = `ledger-${Date.now()}.csv`;
       } else {
@@ -152,7 +137,6 @@ export default function LedgerPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      // For PDF, open in new tab for printing
       if (format === 'pdf') {
         window.open(url, '_blank');
       }
@@ -182,367 +166,260 @@ export default function LedgerPage() {
     });
   };
 
+  const getBalanceColor = (balance: number) => {
+    if (balance > 0) return 'var(--error)';
+    if (balance < 0) return '#22c55e';
+    return 'var(--text-secondary)';
+  };
+
   if (status === 'loading' || loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-          <div className="text-center space-y-4 text-[var(--text-secondary)]">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)] mx-auto" />
-            <p>Loading ledger...</p>
-          </div>
-        </div>
+        <DashboardSurface>
+          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
+          </Box>
+        </DashboardSurface>
       </ProtectedRoute>
     );
   }
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--background)]">
-        <Section className="pt-6 pb-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-start gap-3 min-w-0 flex-1">
-              <Link href="/dashboard/finance">
-                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-3xl font-semibold text-[var(--text-primary)]">User Ledger</h1>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  View all your financial transactions and balance
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2 flex-wrap">
+      <DashboardSurface>
+        {/* Stats Cards */}
+        <DashboardGrid className="grid-cols-1 md:grid-cols-3">
+          <StatsCard
+            icon={TrendingUpIcon}
+            title="Total Debit"
+            value={formatCurrency(summary.totalDebit)}
+            subtitle="Amount owed"
+          />
+          <StatsCard
+            icon={TrendingDownIcon}
+            title="Total Credit"
+            value={formatCurrency(summary.totalCredit)}
+            subtitle="Amount paid"
+          />
+          <StatsCard
+            icon={AttachMoney}
+            title="Current Balance"
+            value={formatCurrency(summary.currentBalance)}
+            subtitle={summary.currentBalance > 0 ? 'Amount owed' : summary.currentBalance < 0 ? 'Credit balance' : 'Settled'}
+          />
+        </DashboardGrid>
+
+        {/* Filters Panel */}
+        <DashboardPanel
+          title="Filters"
+          description="Filter and search transactions"
+          actions={
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setShowFilters(!showFilters)}
+              startIcon={<FilterList />}
+              sx={{ textTransform: 'none', fontSize: '0.78rem' }}
+            >
+              {showFilters ? 'Hide' : 'Show'} Filters
+            </Button>
+          }
+        >
+          {showFilters && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                placeholder="Search transactions..."
+                size="small"
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                InputProps={{
+                  startAdornment: <Search sx={{ mr: 1, color: 'var(--text-secondary)', fontSize: 20 }} />,
+                }}
+                fullWidth
+              />
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Type</InputLabel>
+                  <Select
+                    value={filters.type}
+                    onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                    label="Type"
+                  >
+                    <MenuItem value="">All Types</MenuItem>
+                    <MenuItem value="DEBIT">Debit</MenuItem>
+                    <MenuItem value="CREDIT">Credit</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Start Date"
+                  type="date"
+                  size="small"
+                  value={filters.startDate}
+                  onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="End Date"
+                  type="date"
+                  size="small"
+                  value={filters.endDate}
+                  onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Box>
+            </Box>
+          )}
+        </DashboardPanel>
+
+        {/* Transactions Table */}
+        <DashboardPanel
+          title="Transaction History"
+          description={`Showing ${entries.length} transaction${entries.length !== 1 ? 's' : ''}`}
+          fullHeight
+          actions={
+            <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={handlePrint}
-                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+                startIcon={<Print />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
-                <Printer className="w-4 h-4 mr-2" />
                 Print
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={() => handleExport('pdf')}
-                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+                startIcon={<Download />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
-                <Download className="w-4 h-4 mr-2" />
-                Export PDF
+                PDF
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={() => handleExport('excel')}
-                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+                startIcon={<Download />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
-                <Download className="w-4 h-4 mr-2" />
-                Export Excel
+                Excel
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleExport('csv')}
-                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export CSV
-              </Button>
-            </div>
-          </div>
-        </Section>
-
-        {/* Summary Cards */}
-        <Section className="pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wide">Total Debit</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">
-                      {formatCurrency(summary.totalDebit)}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-red-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wide">Total Credit</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">
-                      {formatCurrency(summary.totalCredit)}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <TrendingDown className="w-6 h-6 text-green-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-[var(--text-secondary)] uppercase tracking-wide">Current Balance</p>
-                    <p className={`text-2xl font-bold mt-2 ${summary.currentBalance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {formatCurrency(Math.abs(summary.currentBalance))}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      {summary.currentBalance >= 0 ? 'In your favor' : 'Amount due'}
-                    </p>
-                  </div>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    summary.currentBalance >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'
-                  }`}>
-                    <DollarSign className={`w-6 h-6 ${summary.currentBalance >= 0 ? 'text-green-400' : 'text-red-400'}`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </Section>
-
-        {/* Filters */}
-        {showFilters && (
-          <Section className="pb-6">
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardHeader className="p-4 border-b border-white/5">
-                <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Filters</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-                      Search
-                    </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
-                      <input
-                        type="text"
-                        placeholder="Description or notes..."
-                        value={filters.search}
-                        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-                      Type
-                    </label>
-                    <select
-                      value={filters.type}
-                      onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40"
-                    >
-                      <option value="">All Types</option>
-                      <option value="DEBIT">Debit</option>
-                      <option value="CREDIT">Credit</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.startDate}
-                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.endDate}
-                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setFilters({
-                        search: '',
-                        type: '',
-                        startDate: '',
-                        endDate: '',
-                        shipmentId: '',
-                      });
-                      setPage(1);
-                    }}
-                    className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-                  >
-                    Clear Filters
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setPage(1);
-                      fetchLedgerEntries();
-                    }}
-                    className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)]"
-                    style={{ color: 'white' }}
-                  >
-                    Apply Filters
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </Section>
-        )}
-
-        {/* Ledger Table */}
-        <Section className="pb-16">
-          <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-            <CardHeader className="p-4 border-b border-white/5">
-              <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Transaction History</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-white/5">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                        Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                        Description
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                        Shipment
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                        Debit
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                        Credit
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                        Balance
-                      </th>
+            </Box>
+          }
+        >
+          {loading ? (
+            <Box sx={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
+            </Box>
+          ) : entries.length === 0 ? (
+            <Box sx={{ minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <AccountBalance sx={{ fontSize: 48, color: 'var(--text-secondary)', opacity: 0.5 }} />
+              <Typography sx={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                No transactions found
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              <Box sx={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Date</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Description</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Type</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Amount</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Balance</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {entries.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-[var(--text-secondary)]">
-                          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No ledger entries found</p>
+                  <tbody>
+                    {entries.map((entry) => (
+                      <tr key={entry.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '12px 8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                          {formatDate(entry.transactionDate)}
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                            {entry.description}
+                          </Typography>
+                          {entry.notes && (
+                            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+                              {entry.notes}
+                            </Typography>
+                          )}
+                          {entry.shipment && (
+                            <Typography sx={{ fontSize: '0.75rem', color: 'var(--accent-gold)', mt: 0.5 }}>
+                              {entry.shipment.vehicleMake} {entry.shipment.vehicleModel}
+                            </Typography>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <Box
+                            sx={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: 1,
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              backgroundColor: entry.type === 'DEBIT' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                              color: entry.type === 'DEBIT' ? '#ef4444' : '#22c55e',
+                            }}
+                          >
+                            {entry.type === 'DEBIT' ? <TrendingUpIcon sx={{ fontSize: 14 }} /> : <TrendingDownIcon sx={{ fontSize: 14 }} />}
+                            {entry.type}
+                          </Box>
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 600, color: entry.type === 'DEBIT' ? '#ef4444' : '#22c55e' }}>
+                          {entry.type === 'DEBIT' ? '+' : '-'}{formatCurrency(entry.amount)}
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 600, color: getBalanceColor(entry.balance) }}>
+                          {formatCurrency(entry.balance)}
                         </td>
                       </tr>
-                    ) : (
-                      entries.map((entry) => (
-                        <tr key={entry.id} className="hover:bg-white/5 transition-colors">
-                          <td className="px-4 py-3 text-sm text-[var(--text-primary)]">
-                            {formatDate(entry.transactionDate)}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="text-sm text-[var(--text-primary)]">{entry.description}</div>
-                            {entry.notes && (
-                              <div className="text-xs text-[var(--text-secondary)] mt-1">{entry.notes}</div>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-[var(--text-primary)]">
-                            {entry.shipment ? (
-                              <Link
-                                href={`/dashboard/shipments/${entry.shipment.id}`}
-                                className="text-cyan-400 hover:text-cyan-300 hover:underline"
-                              >
-                                {entry.shipment.trackingNumber}
-                              </Link>
-                            ) : (
-                              <span className="text-[var(--text-secondary)]">N/A</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-right">
-                            {entry.type === 'DEBIT' && (
-                              <span className="text-red-400 font-semibold">
-                                {formatCurrency(entry.amount)}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-right">
-                            {entry.type === 'CREDIT' && (
-                              <span className="text-green-400 font-semibold">
-                                {formatCurrency(entry.amount)}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-right">
-                            <span className={`font-semibold ${entry.balance >= 0 ? 'text-[var(--text-primary)]' : 'text-red-400'}`}>
-                              {formatCurrency(Math.abs(entry.balance))}
-                            </span>
-                          </td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
-              </div>
+              </Box>
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between p-4 border-t border-white/5">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 disabled:opacity-50"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Previous
-                  </Button>
-                  <span className="text-sm text-[var(--text-secondary)]">
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3 }}>
+                  <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Page {page} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page === totalPages}
-                    className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 disabled:opacity-50"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      startIcon={<ChevronLeft />}
+                      sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      endIcon={<ChevronRight />}
+                      sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                    >
+                      Next
+                    </Button>
+                  </Box>
+                </Box>
               )}
-            </CardContent>
-          </Card>
-        </Section>
-      </div>
+            </>
+          )}
+        </DashboardPanel>
+      </DashboardSurface>
     </ProtectedRoute>
   );
 }

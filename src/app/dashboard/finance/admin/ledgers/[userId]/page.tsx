@@ -4,29 +4,46 @@ import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { 
-  ArrowLeft,
-  Plus,
+import {
+  ArrowBack,
+  Add,
   Edit,
-  Trash2,
+  Delete,
   Download,
-  Filter,
+  Print,
+  FilterList,
   Search,
-  Printer,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
-  TrendingUp,
-  TrendingDown,
-  FileText,
-  X,
+  AttachMoney,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  Close,
   Check,
-} from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Section from '@/components/layout/Section';
+  AccountBalance,
+} from '@mui/icons-material';
+import {
+  Button,
+  Box,
+  CircularProgress,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Alert,
+  Snackbar,
+  Chip,
+} from '@mui/material';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Snackbar, Alert } from '@mui/material';
 
 interface LedgerEntry {
   id: string;
@@ -81,13 +98,12 @@ export default function UserLedgerManagementPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<LedgerEntry | null>(null);
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ 
-    open: false, 
-    message: '', 
-    severity: 'success' 
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success',
   });
 
-  // Form state for add/edit
   const [formData, setFormData] = useState({
     description: '',
     type: 'DEBIT' as 'DEBIT' | 'CREDIT',
@@ -135,7 +151,7 @@ export default function UserLedgerManagementPage() {
       });
 
       const response = await fetch(`/api/ledger?${params}`);
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch ledger entries');
       }
@@ -256,7 +272,7 @@ export default function UserLedgerManagementPage() {
 
       const endpoint = format === 'pdf' ? '/api/ledger/export-pdf' : '/api/ledger/export';
       const response = await fetch(`${endpoint}?${params}`);
-      
+
       if (!response.ok) throw new Error('Failed to export ledger');
 
       const blob = await response.blob();
@@ -294,492 +310,439 @@ export default function UserLedgerManagementPage() {
   };
 
   const getBalanceColor = (balance: number) => {
-    if (balance > 0) return 'text-red-400';
-    if (balance < 0) return 'text-green-400';
-    return 'text-gray-400';
+    if (balance > 0) return '#ef4444';
+    if (balance < 0) return '#22c55e';
+    return 'var(--text-secondary)';
   };
 
   if (status === 'loading' || loading || !user) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-          <div className="text-center space-y-4 text-[var(--text-secondary)]">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)] mx-auto" />
-            <p>Loading ledger...</p>
-          </div>
-        </div>
+        <DashboardSurface>
+          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
+          </Box>
+        </DashboardSurface>
       </ProtectedRoute>
     );
   }
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--background)]">
-        <Section>
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <Link href="/dashboard/finance/admin/ledgers">
-                <Button variant="outline" size="sm" className="mb-4">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to All Ledgers
-                </Button>
-              </Link>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-[var(--text-primary)]">
-                    {user.name || user.email}'s Ledger
-                  </h1>
-                  <p className="text-[var(--text-secondary)] mt-2">
-                    Manage financial transactions for {user.email}
-                  </p>
-                </div>
-                <Button onClick={() => setShowAddModal(true)} className="bg-cyan-500 hover:bg-cyan-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Transaction
-                </Button>
-              </div>
-            </div>
+      <DashboardSurface>
+        {/* Back Button & Title */}
+        <Box sx={{ mb: 2 }}>
+          <Link href="/dashboard/finance/admin/ledgers" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<ArrowBack />}
+              sx={{ textTransform: 'none', fontSize: '0.78rem', mb: 2 }}
+            >
+              Back to All Ledgers
+            </Button>
+          </Link>
+          <Typography variant="h5" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+            {user.name || user.email}'s Ledger
+          </Typography>
+          <Typography sx={{ fontSize: '0.9rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+            Manage financial transactions for {user.email}
+          </Typography>
+        </Box>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <Card className="border-[var(--border)] bg-[var(--panel)]">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Current Balance</p>
-                      <p className={`text-2xl font-bold mt-1 ${getBalanceColor(summary.currentBalance)}`}>
-                        {formatCurrency(summary.currentBalance)}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1">
-                        {summary.currentBalance > 0 ? 'Amount Owed' : summary.currentBalance < 0 ? 'Credit Balance' : 'Settled'}
-                      </p>
-                    </div>
-                    <div className={`p-3 rounded-lg ${summary.currentBalance > 0 ? 'bg-red-500/10' : summary.currentBalance < 0 ? 'bg-green-500/10' : 'bg-gray-500/10'}`}>
-                      {summary.currentBalance > 0 ? <TrendingUp className="w-6 h-6 text-red-400" /> : 
-                       summary.currentBalance < 0 ? <TrendingDown className="w-6 h-6 text-green-400" /> :
-                       <DollarSign className="w-6 h-6 text-gray-400" />}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Summary Cards */}
+        <DashboardGrid className="grid-cols-1 md:grid-cols-3">
+          <StatsCard
+            icon={summary.currentBalance > 0 ? TrendingUpIcon : summary.currentBalance < 0 ? TrendingDownIcon : AttachMoney}
+            title="Current Balance"
+            value={formatCurrency(summary.currentBalance)}
+            subtitle={summary.currentBalance > 0 ? 'Amount Owed' : summary.currentBalance < 0 ? 'Credit Balance' : 'Settled'}
+          />
+          <StatsCard
+            icon={TrendingUpIcon}
+            title="Total Debits"
+            value={formatCurrency(summary.totalDebit)}
+            subtitle="Amount charged"
+          />
+          <StatsCard
+            icon={TrendingDownIcon}
+            title="Total Credits"
+            value={formatCurrency(summary.totalCredit)}
+            subtitle="Amount paid"
+          />
+        </DashboardGrid>
 
-              <Card className="border-[var(--border)] bg-[var(--panel)]">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Total Debits</p>
-                      <p className="text-2xl font-bold text-[var(--text-primary)] mt-1">
-                        {formatCurrency(summary.totalDebit)}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1">Amount charged</p>
-                    </div>
-                    <div className="p-3 bg-blue-500/10 rounded-lg">
-                      <TrendingUp className="w-6 h-6 text-blue-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-[var(--border)] bg-[var(--panel)]">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Total Credits</p>
-                      <p className="text-2xl font-bold text-green-400 mt-1">
-                        {formatCurrency(summary.totalCredit)}
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1">Amount paid</p>
-                    </div>
-                    <div className="p-3 bg-green-500/10 rounded-lg">
-                      <TrendingDown className="w-6 h-6 text-green-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Filters and Actions */}
-            <Card className="border-[var(--border)] bg-[var(--panel)] mb-6">
-              <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex-1 w-full sm:w-auto">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
-                      <input
-                        type="text"
-                        placeholder="Search transactions..."
-                        value={filters.search}
-                        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="border-white/10"
-                    >
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filters
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleExport('pdf')}>
-                      <Download className="w-4 h-4 mr-2" />
-                      PDF
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleExport('excel')}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      Excel
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => window.print()}>
-                      <Printer className="w-4 h-4 mr-2" />
-                      Print
-                    </Button>
-                  </div>
-                </div>
-
-                {showFilters && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/10">
-                    <div>
-                      <label className="block text-xs text-[var(--text-secondary)] mb-2">Type</label>
-                      <select
-                        value={filters.type}
-                        onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      >
-                        <option value="">All Types</option>
-                        <option value="DEBIT">Debit Only</option>
-                        <option value="CREDIT">Credit Only</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[var(--text-secondary)] mb-2">Start Date</label>
-                      <input
-                        type="date"
-                        value={filters.startDate}
-                        onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[var(--text-secondary)] mb-2">End Date</label>
-                      <input
-                        type="date"
-                        value={filters.endDate}
-                        onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Transactions Table */}
-            <Card className="border-[var(--border)] bg-[var(--panel)]">
-              <CardHeader>
-                <CardTitle className="text-[var(--text-primary)]">
-                  Transaction History
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="border-b border-white/10">
-                      <tr className="text-left">
-                        <th className="px-6 py-4 text-xs font-semibold text-[var(--text-secondary)] uppercase">Date</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-[var(--text-secondary)] uppercase">Description</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-[var(--text-secondary)] uppercase">Type</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-[var(--text-secondary)] uppercase text-right">Amount</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-[var(--text-secondary)] uppercase text-right">Balance</th>
-                        <th className="px-6 py-4 text-xs font-semibold text-[var(--text-secondary)] uppercase">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/10">
-                      {entries.map((entry) => (
-                        <tr key={entry.id} className="hover:bg-white/5 transition-colors">
-                          <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">
-                            {formatDate(entry.transactionDate)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div>
-                              <p className="text-sm text-[var(--text-primary)]">{entry.description}</p>
-                              {entry.notes && (
-                                <p className="text-xs text-[var(--text-secondary)] mt-1">{entry.notes}</p>
-                              )}
-                              {entry.shipment && (
-                                <p className="text-xs text-cyan-400 mt-1">
-                                  {entry.shipment.vehicleMake} {entry.shipment.vehicleModel}
-                                </p>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              entry.type === 'DEBIT' 
-                                ? 'bg-red-500/10 text-red-400' 
-                                : 'bg-green-500/10 text-green-400'
-                            }`}>
-                              {entry.type === 'DEBIT' ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                              {entry.type}
-                            </span>
-                          </td>
-                          <td className={`px-6 py-4 text-sm font-semibold text-right ${
-                            entry.type === 'DEBIT' ? 'text-red-400' : 'text-green-400'
-                          }`}>
-                            {entry.type === 'DEBIT' ? '+' : '-'}{formatCurrency(entry.amount)}
-                          </td>
-                          <td className={`px-6 py-4 text-sm font-semibold text-right ${getBalanceColor(entry.balance)}`}>
-                            {formatCurrency(entry.balance)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openEditModal(entry)}
-                                className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-                              >
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteEntry(entry.id)}
-                                className="border-red-500/40 text-red-400 hover:bg-red-500/10"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {entries.length === 0 && (
-                    <div className="text-center py-12">
-                      <p className="text-[var(--text-secondary)]">No transactions found</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between px-6 py-4 border-t border-white/10">
-                    <div className="text-sm text-[var(--text-secondary)]">
-                      Page {page} of {totalPages}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </Section>
-
-        {/* Add Transaction Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <Card className="w-full max-w-md border-[var(--border)] bg-[var(--panel)] shadow-2xl">
-              <CardHeader className="border-b border-white/10">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[var(--text-primary)]">Add Transaction</CardTitle>
-                  <button onClick={() => setShowAddModal(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <form onSubmit={handleAddEntry} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Type *
-                    </label>
-                    <select
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value as 'DEBIT' | 'CREDIT' })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      required
-                    >
-                      <option value="DEBIT">Debit (User Owes)</option>
-                      <option value="CREDIT">Credit (Payment Received)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Description *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      placeholder="Enter transaction description"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Amount * (USD)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      placeholder="0.00"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Notes (Optional)
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      rows={3}
-                      placeholder="Add any additional notes"
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setShowAddModal(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-cyan-500 hover:bg-cyan-600">
-                      <Check className="w-4 h-4 mr-2" />
-                      Add Transaction
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Edit Transaction Modal */}
-        {showEditModal && selectedEntry && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <Card className="w-full max-w-md border-[var(--border)] bg-[var(--panel)] shadow-2xl">
-              <CardHeader className="border-b border-white/10">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-[var(--text-primary)]">Edit Transaction</CardTitle>
-                  <button onClick={() => setShowEditModal(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <form onSubmit={handleEditEntry} className="space-y-4">
-                  <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-4">
-                    <p className="text-xs text-yellow-400">
-                      Note: Type and amount cannot be edited to maintain ledger integrity. Only description and notes can be updated.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Type (Read-only)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.type}
-                      disabled
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/20 text-[var(--text-secondary)] cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Amount (Read-only)
-                    </label>
-                    <input
-                      type="text"
-                      value={formatCurrency(parseFloat(formData.amount))}
-                      disabled
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/20 text-[var(--text-secondary)] cursor-not-allowed"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Description *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
-                      Notes
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-black/40 text-[var(--text-primary)]"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setShowEditModal(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" className="bg-cyan-500 hover:bg-cyan-600">
-                      <Check className="w-4 h-4 mr-2" />
-                      Update Transaction
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        {/* Filters Panel */}
+        <DashboardPanel
+          title="Filters & Actions"
+          description="Search and filter transactions"
+          actions={
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => setShowAddModal(true)}
+              startIcon={<Add />}
+              sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
+            >
+              Add Transaction
+            </Button>
+          }
         >
-          <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <TextField
+                placeholder="Search transactions..."
+                size="small"
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                InputProps={{
+                  startAdornment: <Search sx={{ mr: 1, color: 'var(--text-secondary)', fontSize: 20 }} />,
+                }}
+                fullWidth
+              />
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setShowFilters(!showFilters)}
+                startIcon={<FilterList />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem', minWidth: 120 }}
+              >
+                {showFilters ? 'Hide' : 'Show'} Filters
+              </Button>
+            </Box>
+
+            {showFilters && (
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Type</InputLabel>
+                  <Select
+                    value={filters.type}
+                    onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                    label="Type"
+                  >
+                    <MenuItem value="">All Types</MenuItem>
+                    <MenuItem value="DEBIT">Debit Only</MenuItem>
+                    <MenuItem value="CREDIT">Credit Only</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Start Date"
+                  type="date"
+                  size="small"
+                  value={filters.startDate}
+                  onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="End Date"
+                  type="date"
+                  size="small"
+                  value={filters.endDate}
+                  onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                />
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => window.print()}
+                startIcon={<Print />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+              >
+                Print
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => handleExport('pdf')}
+                startIcon={<Download />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+              >
+                PDF
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => handleExport('excel')}
+                startIcon={<Download />}
+                sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+              >
+                Excel
+              </Button>
+            </Box>
+          </Box>
+        </DashboardPanel>
+
+        {/* Transactions Table */}
+        <DashboardPanel
+          title="Transaction History"
+          description={`${entries.length} transaction${entries.length !== 1 ? 's' : ''} found`}
+          fullHeight
+        >
+          {entries.length === 0 ? (
+            <Box sx={{ minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <AccountBalance sx={{ fontSize: 48, color: 'var(--text-secondary)', opacity: 0.5 }} />
+              <Typography sx={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                No transactions found
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              <Box sx={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Date</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Description</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Type</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Amount</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Balance</th>
+                      <th style={{ padding: '12px 8px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {entries.map((entry) => (
+                      <tr key={entry.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '12px 8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          {formatDate(entry.transactionDate)}
+                        </td>
+                        <td style={{ padding: '12px 8px' }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+                            {entry.description}
+                          </Typography>
+                          {entry.notes && (
+                            <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+                              {entry.notes}
+                            </Typography>
+                          )}
+                          {entry.shipment && (
+                            <Typography sx={{ fontSize: '0.75rem', color: 'var(--accent-gold)', mt: 0.5 }}>
+                              {entry.shipment.vehicleMake} {entry.shipment.vehicleModel}
+                            </Typography>
+                          )}
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <Chip
+                            label={entry.type}
+                            size="small"
+                            icon={entry.type === 'DEBIT' ? <TrendingUpIcon /> : <TrendingDownIcon />}
+                            sx={{
+                              backgroundColor: entry.type === 'DEBIT' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                              color: entry.type === 'DEBIT' ? '#ef4444' : '#22c55e',
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                            }}
+                          />
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 600, color: entry.type === 'DEBIT' ? '#ef4444' : '#22c55e' }}>
+                          {entry.type === 'DEBIT' ? '+' : '-'}{formatCurrency(entry.amount)}
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'right', fontSize: '0.9rem', fontWeight: 600, color: getBalanceColor(entry.balance) }}>
+                          {formatCurrency(entry.balance)}
+                        </td>
+                        <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+                            <IconButton
+                              size="small"
+                              onClick={() => openEditModal(entry)}
+                              sx={{ color: 'var(--accent-gold)' }}
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeleteEntry(entry.id)}
+                              sx={{ color: '#ef4444' }}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Box>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3 }}>
+                  <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    Page {page} of {totalPages}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      startIcon={<ChevronLeft />}
+                      sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      endIcon={<ChevronRight />}
+                      sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                    >
+                      Next
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </>
+          )}
+        </DashboardPanel>
+      </DashboardSurface>
+
+      {/* Add Transaction Modal */}
+      <Dialog open={showAddModal} onClose={() => setShowAddModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="h6">Add Transaction</Typography>
+            <IconButton onClick={() => setShowAddModal(false)} size="small">
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <form onSubmit={handleAddEntry}>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FormControl fullWidth>
+                <InputLabel>Type *</InputLabel>
+                <Select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'DEBIT' | 'CREDIT' })}
+                  label="Type *"
+                  required
+                >
+                  <MenuItem value="DEBIT">Debit (User Owes)</MenuItem>
+                  <MenuItem value="CREDIT">Credit (Payment Received)</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                label="Description *"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Enter transaction description"
+                required
+                fullWidth
+              />
+
+              <TextField
+                label="Amount * (USD)"
+                type="number"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                placeholder="0.00"
+                inputProps={{ step: '0.01', min: '0.01' }}
+                required
+                fullWidth
+              />
+
+              <TextField
+                label="Notes (Optional)"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                placeholder="Add any additional notes"
+                multiline
+                rows={3}
+                fullWidth
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowAddModal(false)} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" startIcon={<Check />} sx={{ textTransform: 'none' }}>
+              Add Transaction
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Edit Transaction Modal */}
+      <Dialog open={showEditModal} onClose={() => setShowEditModal(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="h6">Edit Transaction</Typography>
+            <IconButton onClick={() => setShowEditModal(false)} size="small">
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <form onSubmit={handleEditEntry}>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Alert severity="warning" sx={{ fontSize: '0.85rem' }}>
+                Note: Type and amount cannot be edited to maintain ledger integrity. Only description and notes can be updated.
+              </Alert>
+
+              <TextField
+                label="Type (Read-only)"
+                value={formData.type}
+                disabled
+                fullWidth
+              />
+
+              <TextField
+                label="Amount (Read-only)"
+                value={formatCurrency(parseFloat(formData.amount))}
+                disabled
+                fullWidth
+              />
+
+              <TextField
+                label="Description *"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                required
+                fullWidth
+              />
+
+              <TextField
+                label="Notes"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                multiline
+                rows={3}
+                fullWidth
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowEditModal(false)} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" startIcon={<Check />} sx={{ textTransform: 'none' }}>
+              Update Transaction
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </ProtectedRoute>
   );
 }
