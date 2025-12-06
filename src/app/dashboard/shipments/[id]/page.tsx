@@ -918,7 +918,13 @@ export default function ShipmentDetailPage() {
                                   {formatStatus(event.status)}
                                 </p>
                                 <p className="text-xs text-[var(--text-secondary)]">
-                                  {new Date('eventDate' in event ? event.eventDate : event.timestamp).toLocaleString()}
+                                  {(() => {
+                                    const dateValue = 'eventDate' in event ? event.eventDate : event.timestamp;
+                                    if (typeof dateValue === 'string') {
+                                      return new Date(dateValue).toLocaleString();
+                                    }
+                                    return 'N/A';
+                                  })()}
                                 </p>
                               </div>
                               <p className="text-sm text-[var(--text-secondary)]">{event.location}</p>
