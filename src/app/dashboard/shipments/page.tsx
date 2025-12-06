@@ -80,11 +80,12 @@ export default function ShipmentsListPage() {
 	const isAdmin = session?.user?.role === 'admin';
 
 	return (
-		<DashboardSurface>
+		<DashboardSurface className="overflow-hidden">
 			<DashboardPanel
 				title="Search"
 				description="Filter shipments instantly"
 				noBodyPadding
+				className="overflow-hidden"
 				actions={
 					isAdmin ? (
 						<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
@@ -92,7 +93,7 @@ export default function ShipmentsListPage() {
 								variant="contained"
 								size="small"
 								startIcon={<Add fontSize="small" />}
-								sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
+								sx={{ textTransform: 'none', fontSize: { xs: '0.72rem', sm: '0.75rem', md: '0.78rem' }, fontWeight: 600 }}
 							>
 								New shipment
 							</Button>
@@ -100,7 +101,7 @@ export default function ShipmentsListPage() {
 					) : null
 				}
 			>
-				<Box sx={{ px: 1.5, py: 1.5 }}>
+				<Box sx={{ px: { xs: 1, sm: 1.25, md: 1.5 }, py: { xs: 1, sm: 1.25, md: 1.5 } }}>
 					<SmartSearch
 						onSearch={handleSearch}
 						placeholder="Search shipments by tracking number, VIN, origin, destination..."
@@ -122,6 +123,8 @@ export default function ShipmentsListPage() {
 						: 'No shipments found'
 				}
 				fullHeight
+				className="overflow-hidden"
+				bodyClassName="overflow-hidden"
 			>
 				{loading ? (
 					<Box sx={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -158,7 +161,14 @@ export default function ShipmentsListPage() {
 					</Box>
 				) : (
 					<>
-						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+						<Box sx={{ 
+							display: 'flex', 
+							flexDirection: 'column', 
+							gap: { xs: 1, sm: 1.15, md: 1.25 },
+							minWidth: 0,
+							width: '100%',
+							overflow: 'hidden',
+						}}>
 							{shipments.map((shipment, index) => (
 								<ShipmentRow
 									key={shipment.id}
@@ -178,28 +188,37 @@ export default function ShipmentsListPage() {
 									alignItems: 'center',
 									justifyContent: 'space-between',
 									gap: 1,
+									width: '100%',
 								}}
 							>
 								<Button
 									variant="outlined"
 									size="small"
-									startIcon={<ChevronLeft sx={{ fontSize: 14 }} />}
+									startIcon={<ChevronLeft sx={{ fontSize: { xs: 12, sm: 14 } }} />}
 									onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
 									disabled={currentPage === 1}
-									sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+									sx={{ 
+										textTransform: 'none', 
+										fontSize: { xs: '0.7rem', sm: '0.72rem', md: '0.75rem' },
+										width: { xs: '100%', sm: 'auto' },
+									}}
 								>
 									Previous
 								</Button>
-								<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+								<Typography sx={{ fontSize: { xs: '0.7rem', sm: '0.72rem', md: '0.75rem' }, color: 'var(--text-secondary)' }}>
 									Page {currentPage} of {totalPages}
 								</Typography>
 								<Button
 									variant="outlined"
 									size="small"
-									endIcon={<ChevronRight sx={{ fontSize: 14 }} />}
+									endIcon={<ChevronRight sx={{ fontSize: { xs: 12, sm: 14 } }} />}
 									onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
 									disabled={currentPage === totalPages}
-									sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+									sx={{ 
+										textTransform: 'none', 
+										fontSize: { xs: '0.7rem', sm: '0.72rem', md: '0.75rem' },
+										width: { xs: '100%', sm: 'auto' },
+									}}
 								>
 									Next
 								</Button>
