@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { Session } from 'next-auth';
 import type { SvgIconComponent } from '@mui/icons-material';
-import { Dashboard, Inventory2, Description, Search, Analytics, Group, AllInbox, Receipt } from '@mui/icons-material';
+import { Dashboard, Inventory2, Description, Search, Analytics, Group, AllInbox, Receipt, AccountBalance, Payment, TrendingUp } from '@mui/icons-material';
 import { useSession } from 'next-auth/react';
 import { Drawer, Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 
@@ -28,6 +28,32 @@ const shipmentNavigation: NavigationItem[] = [
 		name: 'Shipments',
 		href: '/dashboard/shipments',
 		icon: Inventory2,
+	},
+];
+
+const financeNavigation: NavigationItem[] = [
+	{
+		name: 'My Ledger',
+		href: '/dashboard/finance/ledger',
+		icon: AccountBalance,
+	},
+	{
+		name: 'All User Ledgers',
+		href: '/dashboard/finance/admin/ledgers',
+		icon: TrendingUp,
+		adminOnly: true,
+	},
+	{
+		name: 'Record Payment',
+		href: '/dashboard/finance/record-payment',
+		icon: Payment,
+		adminOnly: true,
+	},
+	{
+		name: 'Reports',
+		href: '/dashboard/finance/reports',
+		icon: Analytics,
+		adminOnly: true,
 	},
 ];
 
@@ -280,13 +306,16 @@ function SidebarContent({
 				{/* Main */}
 				<NavSection items={mainNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
-				{/* Shipments */}
-				<NavSection title="Shipments" items={shipmentNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+			{/* Shipments */}
+			<NavSection title="Shipments" items={shipmentNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
 
-				{/* Admin Section */}
-				{isAdmin && (
-					<NavSection title="Admin" items={adminNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
-				)}
+			{/* Finance */}
+			<NavSection title="Finance" items={financeNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+
+			{/* Admin Section */}
+			{isAdmin && (
+				<NavSection title="Admin" items={adminNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />
+			)}
 
 				{/* Other */}
 				<NavSection items={otherNavigation} isAdmin={isAdmin} isActive={isActive} onNavClick={onNavClick} />

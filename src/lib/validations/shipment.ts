@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
-// Shipment validation schema
+// Shipment validation schema - Simplified per container-first architecture
+// Shipments only contain: car info, status, container ID, owner, and internal notes
 export const shipmentSchema = z.object({
+  // Owner/Customer
   userId: z.string().min(1, 'User assignment is required'),
+  
+  // Car Information
   vehicleType: z.string().min(1, 'Vehicle type is required'),
   vehicleMake: z.string().optional(),
   vehicleModel: z.string().optional(),
@@ -17,8 +21,6 @@ export const shipmentSchema = z.object({
   vehicleColor: z.string().optional(),
   lotNumber: z.string().optional(),
   auctionName: z.string().optional(),
-  origin: z.string().optional(), // Made optional - will be validated conditionally
-  destination: z.string().optional(), // Made optional - will be validated conditionally
   weight: z.string().optional().refine(
     (val) => !val || (parseFloat(val) > 0 && parseFloat(val) <= 50000),
     { message: 'Weight must be between 0 and 50,000 lbs' }
@@ -26,10 +28,6 @@ export const shipmentSchema = z.object({
   dimensions: z.string().optional().refine(
     (val) => !val || val.length <= 100,
     { message: 'Dimensions cannot exceed 100 characters' }
-  ),
-  specialInstructions: z.string().optional().refine(
-    (val) => !val || val.length <= 1000,
-    { message: 'Special instructions cannot exceed 1000 characters' }
   ),
   insuranceValue: z.string().optional().refine(
     (val) => !val || (parseFloat(val) > 0),
@@ -40,15 +38,35 @@ export const shipmentSchema = z.object({
     { message: 'Price must be greater than 0' }
   ),
   vehiclePhotos: z.array(z.string()).default([]),
-  trackingNumber: z.string().optional(),
-  // New fields
   hasKey: z.boolean().optional(),
   hasTitle: z.boolean().optional(),
   titleStatus: z.enum(['PENDING', 'DELIVERED']).optional(),
   paymentMode: z.enum(['CASH', 'DUE']).optional(),
+  
+  // Status (ON_HAND or IN_TRANSIT)
+  status: z.enum(['ON_HAND', 'IN_TRANSIT']).default('ON_HAND'),
+  
+  // Container ID (nullable, required when status is IN_TRANSIT)
+  containerId: z.string().optional(),
+  
+  // Internal Notes
+  internalNotes: z.string().optional().refine(
+    (val) => !val || val.length <= 2000,
+    { message: 'Internal notes cannot exceed 2000 characters' }
+  ),
+}).refine((data) => {
+  // If status is IN_TRANSIT, container ID is required
+  if (data.status === 'IN_TRANSIT' && !data.containerId) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Container selection is required when status is IN_TRANSIT',
+  path: ['containerId'],
 });
 
 export const shipmentUpdateSchema = z.object({
+  // Car Information
   vehicleType: z.string().min(1, 'Vehicle type is required').optional(),
   vehicleMake: z.string().optional(),
   vehicleModel: z.string().optional(),
@@ -63,15 +81,6 @@ export const shipmentUpdateSchema = z.object({
   vehicleColor: z.string().optional(),
   lotNumber: z.string().optional(),
   auctionName: z.string().optional(),
-  origin: z.string().min(3, 'Origin must be at least 3 characters').optional(),
-  destination: z.string().min(3, 'Destination must be at least 3 characters').optional(),
-  status: z.string().min(1, 'Status is required').optional(),
-  currentLocation: z.string().optional(),
-  estimatedDelivery: z.string().optional(),
-  progress: z.string().optional().refine(
-    (val) => !val || (parseInt(val) >= 0 && parseInt(val) <= 100),
-    { message: 'Progress must be between 0 and 100' }
-  ),
   weight: z.string().optional().refine(
     (val) => !val || (parseFloat(val) > 0 && parseFloat(val) <= 50000),
     { message: 'Weight must be between 0 and 50,000 lbs' }
@@ -80,10 +89,6 @@ export const shipmentUpdateSchema = z.object({
     (val) => !val || val.length <= 100,
     { message: 'Dimensions cannot exceed 100 characters' }
   ),
-  specialInstructions: z.string().optional().refine(
-    (val) => !val || val.length <= 1000,
-    { message: 'Special instructions cannot exceed 1000 characters' }
-  ),
   insuranceValue: z.string().optional().refine(
     (val) => !val || (parseFloat(val) > 0),
     { message: 'Insurance value must be greater than 0' }
@@ -91,6 +96,20 @@ export const shipmentUpdateSchema = z.object({
   price: z.string().optional().refine(
     (val) => !val || (parseFloat(val) > 0),
     { message: 'Price must be greater than 0' }
+  ),
+  hasKey: z.boolean().optional(),
+  hasTitle: z.boolean().optional(),
+  titleStatus: z.enum(['PENDING', 'DELIVERED']).optional(),
+  paymentMode: z.enum(['CASH', 'DUE']).optional(),
+  
+  // Status and Container
+  status: z.enum(['ON_HAND', 'IN_TRANSIT']).optional(),
+  containerId: z.string().optional(),
+  
+  // Internal Notes
+  internalNotes: z.string().optional().refine(
+    (val) => !val || val.length <= 2000,
+    { message: 'Internal notes cannot exceed 2000 characters' }
   ),
 });
 

@@ -38,8 +38,8 @@ import { Tabs, Tab, Box } from '@mui/material';
 interface ShipmentEvent {
   id: string;
   status: string;
-  location: string;
-  timestamp: string;
+  location: string | null;
+  eventDate: string;
   description: string | null;
   completed: boolean;
 }
@@ -70,26 +70,21 @@ interface Container {
 
 interface Shipment {
   id: string;
-  trackingNumber: string;
   userId: string;
   vehicleType: string;
   vehicleMake: string | null;
   vehicleModel: string | null;
   vehicleYear: number | null;
   vehicleVIN: string | null;
-  origin: string;
-  destination: string;
+  vehicleColor: string | null;
+  lotNumber: string | null;
+  auctionName: string | null;
   status: string;
-  currentLocation: string | null;
-  estimatedDelivery: string | null;
-  actualDelivery: string | null;
-  progress: number;
   price: number | null;
   weight: number | null;
   dimensions: string | null;
-  specialInstructions: string | null;
   insuranceValue: number | null;
-  containerPhotos: string[];
+  vehiclePhotos: string[];
   arrivalPhotos: string[];
   hasKey: boolean | null;
   hasTitle: boolean | null;
@@ -97,14 +92,25 @@ interface Shipment {
   vehicleAge: number | null;
   containerId: string | null;
   container: Container | null;
+  internalNotes: string | null;
+  paymentStatus: string;
+  paymentMode: string | null;
   createdAt: string;
   updatedAt: string;
   user: {
+    id: string;
     name: string | null;
     email: string;
     phone: string | null;
   };
-  events: ShipmentEvent[];
+  ledgerEntries: Array<{
+    id: string;
+    transactionDate: string;
+    description: string;
+    type: string;
+    amount: number;
+    balance: number;
+  }>;
 }
 
 const statusColors: Record<string, { text: string; bg: string; ring: string }> = {
@@ -247,7 +253,7 @@ export default function ShipmentDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           photos: images,
-          filename: `${title.replace(/\s+/g, '-')}-${shipment?.trackingNumber || 'photos'}`
+          filename: `${title.replace(/\s+/g, '-')}-${shipment?.vehicleVIN || shipment?.id || 'photos'}`
         }),
       });
       
@@ -257,7 +263,7 @@ export default function ShipmentDetailPage() {
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = `${title.replace(/\s+/g, '-')}-${shipment?.trackingNumber || 'photos'}.zip`;
+      link.download = `${title.replace(/\s+/g, '-')}-${shipment?.vehicleVIN || shipment?.id || 'photos'}.zip`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -449,10 +455,9 @@ export default function ShipmentDetailPage() {
   };
 
   const canUploadArrivalPhotos = session?.user?.role === 'admin' && 
-    (shipment?.status === 'ARRIVED_AT_DESTINATION' || 
-     shipment?.status === 'AT_PORT' || 
-     shipment?.status === 'CUSTOMS_CLEARANCE' ||
-     shipment?.status === 'OUT_FOR_DELIVERY');
+    (shipment?.container?.status === 'ARRIVED_PORT' || 
+     shipment?.container?.status === 'CUSTOMS_CLEARANCE' ||
+     shipment?.container?.status === 'RELEASED');
 
   const statusStyles = useMemo(() => statusColors, []);
   const isAdmin = session?.user?.role === 'admin';
@@ -519,9 +524,7 @@ export default function ShipmentDetailPage() {
                 <div className="min-w-0 flex-1 flex flex-col items-center justify-center">
                   <div className="w-full flex justify-center">
                     <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-primary)] text-center truncate max-w-xs sm:max-w-md md:max-w-lg">
-                      {shipment.trackingNumber.length > 18
-                        ? `${shipment.trackingNumber.slice(0, 15)}...`
-                        : shipment.trackingNumber}
+                      {shipment.vehicleVIN || `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'Shipment Details'}
                     </h1>
                   </div>
                   <p className="text-[var(--text-secondary)] text-xs sm:text-sm line-clamp-1 text-center w-full flex justify-center">
@@ -608,38 +611,42 @@ export default function ShipmentDetailPage() {
                       >
                         {formatStatus(shipment.status)}
                       </span>
-                      {shipment.progress > 0 && (
+                      {shipment.container && shipment.container.progress > 0 && (
                         <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                          Progress <span className="text-[var(--text-primary)] font-semibold">{shipment.progress}%</span>
+                          Progress <span className="text-[var(--text-primary)] font-semibold">{shipment.container.progress}%</span>
                         </span>
                       )}
                     </div>
                     <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg md:text-xl">Current Status</CardTitle>
                     <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-2">
-                      Monitor the latest milestone and location updates for this shipment.
+                      {shipment.status === 'ON_HAND' ? 'Vehicle is currently on hand, awaiting container assignment.' : 'Monitor the latest milestone and location updates for this shipment.'}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-3 sm:space-y-5 p-4 sm:p-6">
-                    <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)] transition-all duration-500"
-                        style={{ width: `${Math.max(Math.min(shipment.progress || 0, 100), 0)}%` }}
-                      />
-                    </div>
-                    {shipment.currentLocation && (
-                      <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-secondary)]">
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300 flex-shrink-0" />
-                        <span className="min-w-0">Currently located at <span className="text-[var(--text-primary)] truncate inline-block max-w-[150px] sm:max-w-none align-bottom">{shipment.currentLocation}</span></span>
-                      </div>
+                    {shipment.container && (
+                      <>
+                        <div className="h-1.5 sm:h-2 w-full overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)] transition-all duration-500"
+                            style={{ width: `${Math.max(Math.min(shipment.container.progress || 0, 100), 0)}%` }}
+                          />
+                        </div>
+                        {shipment.container.currentLocation && (
+                          <div className="flex items-center gap-2 text-xs sm:text-sm text-[var(--text-secondary)]">
+                            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-cyan-300 flex-shrink-0" />
+                            <span className="min-w-0">Currently located at <span className="text-[var(--text-primary)] truncate inline-block max-w-[150px] sm:max-w-none align-bottom">{shipment.container.currentLocation}</span></span>
+                          </div>
+                        )}
+                      </>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-[var(--text-secondary)]">
                       <div className="min-w-0">
                         <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Origin</p>
-                        <p className="text-[var(--text-primary)] truncate">{shipment.origin}</p>
+                        <p className="text-[var(--text-primary)] truncate">{shipment.container?.loadingPort || 'N/A'}</p>
                       </div>
                       <div className="min-w-0">
                         <p className="uppercase text-[10px] sm:text-xs tracking-wide text-[var(--text-secondary)]">Destination</p>
-                        <p className="text-[var(--text-primary)] truncate">{shipment.destination}</p>
+                        <p className="text-[var(--text-primary)] truncate">{shipment.container?.destinationPort || 'N/A'}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -647,17 +654,19 @@ export default function ShipmentDetailPage() {
 
                 <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
                   <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Shipping Route</CardTitle>
+                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Vehicle Specifications</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6">
                     <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Origin</dt>
-                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.origin}</dd>
+                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Vehicle</dt>
+                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">
+                          {`${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || '-'}
+                        </dd>
                       </div>
                       <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Destination</dt>
-                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.destination}</dd>
+                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">VIN</dt>
+                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold break-all">{shipment.vehicleVIN || '-'}</dd>
                       </div>
                       <div className="bg-white/3 rounded-lg p-3 sm:p-4">
                         <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Weight</dt>
@@ -668,10 +677,10 @@ export default function ShipmentDetailPage() {
                         <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.dimensions || '-'}</dd>
                       </div>
                     </dl>
-                    {shipment.specialInstructions && (
+                    {shipment.internalNotes && (
                       <div className="mt-4 bg-white/3 rounded-lg p-3 sm:p-4">
-                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-2">Special Instructions</p>
-                        <p className="text-xs sm:text-sm text-[var(--text-primary)]">{shipment.specialInstructions}</p>
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-2">Internal Notes</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)]">{shipment.internalNotes}</p>
                       </div>
                     )}
                   </CardContent>
@@ -830,17 +839,22 @@ export default function ShipmentDetailPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 space-y-4">
-                    {shipment.estimatedDelivery && (
+                    {shipment.container?.estimatedArrival && (
                       <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Estimated Delivery</p>
-                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.estimatedDelivery).toLocaleDateString()}</p>
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Estimated Arrival</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.container.estimatedArrival).toLocaleDateString()}</p>
                       </div>
                     )}
-                    {shipment.actualDelivery && (
+                    {shipment.container?.actualArrival && (
                       <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Actual Delivery</p>
-                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.actualDelivery).toLocaleDateString()}</p>
+                        <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Actual Arrival</p>
+                        <p className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.container.actualArrival).toLocaleDateString()}</p>
                       </div>
+                    )}
+                    {!shipment.container && (
+                      <p className="text-xs sm:text-sm text-[var(--text-secondary)] text-center py-4">
+                        Delivery timeline will be available once assigned to a container.
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -886,15 +900,15 @@ export default function ShipmentDetailPage() {
                   )}
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 space-y-6">
-                  {(!shipment.container || !shipment.container.trackingEvents || shipment.container.trackingEvents.length === 0) && shipment.events.length === 0 ? (
+                  {(!shipment.container || !shipment.container.trackingEvents || shipment.container.trackingEvents.length === 0) ? (
                     <p className="rounded-lg border border-white/10 bg-white/3 py-8 text-center text-sm text-[var(--text-secondary)]">
-                      {shipment.container ? 'No container tracking events yet.' : 'No tracking events yet.'}
+                      {shipment.container ? 'No container tracking events yet.' : 'No container assigned yet.'}
                     </p>
                   ) : (
                     <div className="relative pl-6">
                       <span className="absolute left-2 top-0 h-full w-0.5 bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
                       <ul className="space-y-6">
-                        {(shipment.container?.trackingEvents || shipment.events).map((event, index) => (
+                        {shipment.container.trackingEvents.map((event, index) => (
                           <motion.li
                             key={event.id}
                             initial={{ opacity: 0, y: 10 }}
@@ -909,7 +923,7 @@ export default function ShipmentDetailPage() {
                                   event.completed ? 'border-cyan-400 bg-cyan-400' : 'border-white/20 bg-white/5',
                                 )}
                               >
-                                {(shipment.container?.trackingEvents || shipment.events).length - index}
+                                {shipment.container?.trackingEvents?.length ? shipment.container.trackingEvents.length - index : 0}
                               </span>
                             </div>
                             <div className="rounded-lg border border-white/10 bg-white/3 p-4">
@@ -918,13 +932,7 @@ export default function ShipmentDetailPage() {
                                   {formatStatus(event.status)}
                                 </p>
                                 <p className="text-xs text-[var(--text-secondary)]">
-                                  {(() => {
-                                    const dateValue = 'eventDate' in event ? event.eventDate : event.timestamp;
-                                    if (typeof dateValue === 'string') {
-                                      return new Date(dateValue).toLocaleString();
-                                    }
-                                    return 'N/A';
-                                  })()}
+                                  {new Date(event.eventDate).toLocaleString()}
                                 </p>
                               </div>
                               <p className="text-sm text-[var(--text-secondary)]">{event.location}</p>
@@ -944,18 +952,18 @@ export default function ShipmentDetailPage() {
             {/* Photos Tab */}
             <TabPanel value={activeTab} index={2}>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {/* Container Photos */}
+                {/* Vehicle Photos */}
                 <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
                   <CardHeader className="p-4 sm:p-6 border-b border-white/5">
                     <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-base sm:text-lg font-bold">
                       <ImageIcon className="h-5 w-5 text-cyan-300" />
-                      Container Photos
+                      Vehicle Photos
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 space-y-4">
-                    {shipment.containerPhotos && shipment.containerPhotos.length > 0 ? (
+                    {shipment.vehiclePhotos && shipment.vehiclePhotos.length > 0 ? (
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {shipment.containerPhotos.map((photo, index) => (
+                        {shipment.vehiclePhotos.map((photo, index) => (
                           <motion.button
                             key={index}
                             initial={{ opacity: 0, scale: 0.9 }}
@@ -963,11 +971,11 @@ export default function ShipmentDetailPage() {
                             transition={{ duration: 0.2, delay: index * 0.05 }}
                             type="button"
                             className="relative group aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-                            onClick={() => openLightbox(shipment.containerPhotos, index, 'Container Photos')}
+                            onClick={() => openLightbox(shipment.vehiclePhotos, index, 'Vehicle Photos')}
                           >
                             <Image
                               src={photo}
-                              alt={`Container photo ${index + 1}`}
+                              alt={`Vehicle photo ${index + 1}`}
                               fill
                               className="object-cover"
                               unoptimized
@@ -977,7 +985,7 @@ export default function ShipmentDetailPage() {
                       </div>
                     ) : (
                       <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
-                        No container photos available.
+                        No vehicle photos available.
                       </p>
                     )}
                   </CardContent>
@@ -1133,25 +1141,31 @@ export default function ShipmentDetailPage() {
                   </CardContent>
                 </Card>
 
-                {/* Shipping Details */}
+                {/* Additional Details */}
                 <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
                   <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Shipping Details</CardTitle>
+                    <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Additional Details</CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6">
                     <dl className="grid grid-cols-1 gap-4">
-                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Tracking Number</dt>
-                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold break-all">{shipment.trackingNumber}</dd>
-                      </div>
-                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Origin</dt>
-                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.origin}</dd>
-                      </div>
-                      <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                        <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Destination</dt>
-                        <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.destination}</dd>
-                      </div>
+                      {shipment.lotNumber && (
+                        <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Lot Number</dt>
+                          <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.lotNumber}</dd>
+                        </div>
+                      )}
+                      {shipment.auctionName && (
+                        <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Auction Name</dt>
+                          <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.auctionName}</dd>
+                        </div>
+                      )}
+                      {shipment.vehicleColor && (
+                        <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Color</dt>
+                          <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.vehicleColor}</dd>
+                        </div>
+                      )}
                       {shipment.weight && (
                         <div className="bg-white/3 rounded-lg p-3 sm:p-4">
                           <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Weight</dt>
@@ -1164,10 +1178,10 @@ export default function ShipmentDetailPage() {
                           <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.dimensions}</dd>
                         </div>
                       )}
-                      {shipment.specialInstructions && (
+                      {shipment.internalNotes && (
                         <div className="bg-white/3 rounded-lg p-3 sm:p-4">
-                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Special Instructions</dt>
-                          <dd className="text-xs sm:text-sm text-[var(--text-primary)]">{shipment.specialInstructions}</dd>
+                          <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Internal Notes</dt>
+                          <dd className="text-xs sm:text-sm text-[var(--text-primary)]">{shipment.internalNotes}</dd>
                         </div>
                       )}
                     </dl>
