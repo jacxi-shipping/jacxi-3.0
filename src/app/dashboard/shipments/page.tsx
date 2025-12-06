@@ -11,18 +11,29 @@ import { DashboardSurface, DashboardPanel } from '@/components/dashboard/Dashboa
 
 interface Shipment {
 	id: string;
-	trackingNumber: string;
+	trackingNumber?: string;
 	vehicleType: string;
 	vehicleMake: string | null;
 	vehicleModel: string | null;
-	origin: string;
-	destination: string;
+	vehicleYear?: number | null;
+	vehicleVIN?: string | null;
+	origin?: string;
+	destination?: string;
 	status: string;
-	progress: number;
-	estimatedDelivery: string | null;
+	progress?: number;
+	estimatedDelivery?: string | null;
 	createdAt: string;
 	paymentStatus?: string;
-	user: {
+	containerId?: string | null;
+	container?: {
+		id: string;
+		containerNumber: string;
+		trackingNumber?: string | null;
+		status?: string;
+		currentLocation?: string | null;
+		progress?: number;
+	} | null;
+	user?: {
 		name: string | null;
 		email: string;
 	};

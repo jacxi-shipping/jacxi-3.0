@@ -30,6 +30,8 @@ import {
   Info,
   History,
   User,
+  Ship,
+  Container,
 } from 'lucide-react';
 import { Tabs, Tab, Box } from '@mui/material';
 
@@ -40,6 +42,30 @@ interface ShipmentEvent {
   timestamp: string;
   description: string | null;
   completed: boolean;
+}
+
+interface Container {
+  id: string;
+  containerNumber: string;
+  trackingNumber: string | null;
+  vesselName: string | null;
+  voyageNumber: string | null;
+  shippingLine: string | null;
+  bookingNumber: string | null;
+  loadingPort: string | null;
+  destinationPort: string | null;
+  transshipmentPorts: string[];
+  loadingDate: string | null;
+  departureDate: string | null;
+  estimatedArrival: string | null;
+  actualArrival: string | null;
+  status: string;
+  currentLocation: string | null;
+  progress: number;
+  maxCapacity: number;
+  currentCount: number;
+  notes: string | null;
+  trackingEvents: ShipmentEvent[];
 }
 
 interface Shipment {
@@ -69,6 +95,8 @@ interface Shipment {
   hasTitle: boolean | null;
   titleStatus: string | null;
   vehicleAge: number | null;
+  containerId: string | null;
+  container: Container | null;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -95,6 +123,17 @@ const statusColors: Record<string, { text: string; bg: string; ring: string }> =
   DELIVERED: { text: 'text-emerald-300', bg: 'bg-emerald-500/10', ring: 'ring-emerald-500/30' },
   CANCELLED: { text: 'text-red-300', bg: 'bg-red-500/10', ring: 'ring-red-500/30' },
   ON_HOLD: { text: 'text-orange-300', bg: 'bg-orange-500/10', ring: 'ring-orange-500/30' },
+};
+
+const containerStatusColors: Record<string, { text: string; bg: string; ring: string }> = {
+  CREATED: { text: 'text-gray-300', bg: 'bg-gray-500/10', ring: 'ring-gray-500/30' },
+  WAITING_FOR_LOADING: { text: 'text-yellow-300', bg: 'bg-yellow-500/10', ring: 'ring-yellow-500/30' },
+  LOADED: { text: 'text-blue-300', bg: 'bg-blue-500/10', ring: 'ring-blue-500/30' },
+  IN_TRANSIT: { text: 'text-indigo-300', bg: 'bg-indigo-500/10', ring: 'ring-indigo-500/30' },
+  ARRIVED_PORT: { text: 'text-green-300', bg: 'bg-green-500/10', ring: 'ring-green-500/30' },
+  CUSTOMS_CLEARANCE: { text: 'text-orange-300', bg: 'bg-orange-500/10', ring: 'ring-orange-500/30' },
+  RELEASED: { text: 'text-teal-300', bg: 'bg-teal-500/10', ring: 'ring-teal-500/30' },
+  CLOSED: { text: 'text-gray-400', bg: 'bg-gray-600/10', ring: 'ring-gray-600/30' },
 };
 
 export default function ShipmentDetailPage() {
@@ -638,6 +677,115 @@ export default function ShipmentDetailPage() {
                   </CardContent>
                 </Card>
 
+                {/* Container Shipping Information */}
+                {shipment.container && (
+                  <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+                    <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                      <div className="flex items-center justify-between gap-3">
+                        <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] text-base sm:text-lg font-bold">
+                          <Ship className="h-5 w-5 text-cyan-300" />
+                          Container Shipping Info
+                        </CardTitle>
+                        <Link href={`/dashboard/containers/${shipment.containerId}`}>
+                          <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 text-xs">
+                            View Container
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 sm:p-6 space-y-4">
+                      {/* Container Number and Status */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="bg-white/3 rounded-lg p-3 sm:p-4 flex-1">
+                          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Container Number</p>
+                          <p className="text-sm sm:text-base text-[var(--text-primary)] font-semibold">{shipment.container.containerNumber}</p>
+                        </div>
+                        {shipment.container.status && (
+                          <span
+                            className={cn(
+                              'inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide ring-1',
+                              containerStatusColors[shipment.container.status]?.text || 'text-[var(--text-primary)]',
+                              containerStatusColors[shipment.container.status]?.bg || 'bg-[rgba(var(--panel-rgb),0.55)]',
+                              containerStatusColors[shipment.container.status]?.ring || 'ring-white/20',
+                            )}
+                          >
+                            {formatStatus(shipment.container.status)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold">Shipping Progress</p>
+                          <span className="text-xs sm:text-sm font-medium text-[var(--text-primary)]">{shipment.container.progress}%</span>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="h-full bg-gradient-to-r from-cyan-500 to-[var(--accent-gold)] transition-all duration-500"
+                            style={{ width: `${Math.max(Math.min(shipment.container.progress || 0, 100), 0)}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Shipping Details */}
+                      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {shipment.container.trackingNumber && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Tracking Number</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold break-all">{shipment.container.trackingNumber}</dd>
+                          </div>
+                        )}
+                        {shipment.container.vesselName && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Vessel</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.container.vesselName}</dd>
+                          </div>
+                        )}
+                        {shipment.container.shippingLine && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Shipping Line</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.container.shippingLine}</dd>
+                          </div>
+                        )}
+                        {shipment.container.currentLocation && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Current Location</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold flex items-center gap-1">
+                              <MapPin className="w-3 h-3 text-cyan-300" />
+                              {shipment.container.currentLocation}
+                            </dd>
+                          </div>
+                        )}
+                        {shipment.container.loadingPort && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Loading Port</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.container.loadingPort}</dd>
+                          </div>
+                        )}
+                        {shipment.container.destinationPort && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Destination Port</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{shipment.container.destinationPort}</dd>
+                          </div>
+                        )}
+                        {shipment.container.estimatedArrival && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">ETA</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.container.estimatedArrival).toLocaleDateString()}</dd>
+                          </div>
+                        )}
+                        {shipment.container.actualArrival && (
+                          <div className="bg-white/3 rounded-lg p-3 sm:p-4">
+                            <dt className="text-[10px] sm:text-xs uppercase tracking-wide text-[var(--text-secondary)] font-semibold mb-1">Actual Arrival</dt>
+                            <dd className="text-xs sm:text-sm text-[var(--text-primary)] font-semibold">{new Date(shipment.container.actualArrival).toLocaleDateString()}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    </CardContent>
+                  </Card>
+                )}
+
                 </motion.div>
 
                 {/* Right Column - Financial & Delivery */}
@@ -728,18 +876,25 @@ export default function ShipmentDetailPage() {
             <TabPanel value={activeTab} index={1}>
               <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
                 <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                  <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">Tracking Timeline</CardTitle>
+                  <CardTitle className="text-[var(--text-primary)] text-base sm:text-lg font-bold">
+                    {shipment.container ? 'Container Tracking Timeline' : 'Tracking Timeline'}
+                  </CardTitle>
+                  {shipment.container && (
+                    <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+                      Tracking events from container {shipment.container.containerNumber}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent className="p-4 sm:p-6 space-y-6">
-                  {shipment.events.length === 0 ? (
+                  {(!shipment.container || !shipment.container.trackingEvents || shipment.container.trackingEvents.length === 0) && shipment.events.length === 0 ? (
                     <p className="rounded-lg border border-white/10 bg-white/3 py-8 text-center text-sm text-[var(--text-secondary)]">
-                      No tracking events yet.
+                      {shipment.container ? 'No container tracking events yet.' : 'No tracking events yet.'}
                     </p>
                   ) : (
                     <div className="relative pl-6">
                       <span className="absolute left-2 top-0 h-full w-0.5 bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
                       <ul className="space-y-6">
-                        {shipment.events.map((event, index) => (
+                        {(shipment.container?.trackingEvents || shipment.events).map((event, index) => (
                           <motion.li
                             key={event.id}
                             initial={{ opacity: 0, y: 10 }}
@@ -754,7 +909,7 @@ export default function ShipmentDetailPage() {
                                   event.completed ? 'border-cyan-400 bg-cyan-400' : 'border-white/20 bg-white/5',
                                 )}
                               >
-                                {shipment.events.length - index}
+                                {(shipment.container?.trackingEvents || shipment.events).length - index}
                               </span>
                             </div>
                             <div className="rounded-lg border border-white/10 bg-white/3 p-4">
@@ -763,7 +918,13 @@ export default function ShipmentDetailPage() {
                                   {formatStatus(event.status)}
                                 </p>
                                 <p className="text-xs text-[var(--text-secondary)]">
-                                  {new Date(event.timestamp).toLocaleString()}
+                                  {(() => {
+                                    const dateValue = 'eventDate' in event ? event.eventDate : event.timestamp;
+                                    if (typeof dateValue === 'string') {
+                                      return new Date(dateValue).toLocaleString();
+                                    }
+                                    return 'N/A';
+                                  })()}
                                 </p>
                               </div>
                               <p className="text-sm text-[var(--text-secondary)]">{event.location}</p>

@@ -21,6 +21,8 @@ interface ShipmentRowProps {
 		containerNumber: string;
 		trackingNumber?: string | null;
 		status?: string;
+		currentLocation?: string | null;
+		progress?: number;
 	} | null;
 	user?: {
 		name: string | null;
@@ -185,9 +187,9 @@ export default function ShipmentRow({
 					)}
 				</Box>
 
-				{/* Column 3: Container Info (for IN_TRANSIT) or Status Info (for ON_HAND) */}
+				{/* Column 3: Container Info or Status Info */}
 				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
-					{status === 'IN_TRANSIT' && container ? (
+					{container ? (
 						<>
 							<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
 								Container
@@ -212,7 +214,12 @@ export default function ShipmentRow({
 							</Box>
 							{container.status && (
 								<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.2 }}>
-									Status: {formatStatus(container.status)}
+									{formatStatus(container.status)} {container.progress !== undefined && `• ${container.progress}%`}
+								</Typography>
+							)}
+							{container.currentLocation && (
+								<Typography sx={{ fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' }, color: 'var(--text-secondary)', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+									📍 {container.currentLocation}
 								</Typography>
 							)}
 						</>

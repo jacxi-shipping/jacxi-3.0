@@ -21,6 +21,11 @@ interface Shipment {
 		containerNumber: string;
 		trackingNumber?: string | null;
 		status?: string;
+		currentLocation?: string | null;
+		estimatedArrival?: string | null;
+		vesselName?: string | null;
+		shippingLine?: string | null;
+		progress?: number;
 	} | null;
 }
 
@@ -99,7 +104,7 @@ export default function DashboardPage() {
 					description="Most recently added vehicles"
 					fullHeight
 					className="flex-1 min-h-0 overflow-hidden"
-					bodyClassName="flex flex-col gap-1 min-h-0 overflow-hidden"
+					bodyClassName="flex flex-col gap-1 min-h-0 overflow-y-auto overflow-x-hidden"
 					actions={
 						shipments.length > 0 ? (
 							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
@@ -176,7 +181,8 @@ export default function DashboardPage() {
 							minHeight: 0,
 							minWidth: 0,
 							width: '100%',
-							overflow: 'hidden',
+							overflowY: 'auto',
+							overflowX: 'hidden',
 						}}>
 							{recentShipments.map((shipment, index) => (
 								<ShipmentCard key={shipment.id} {...shipment} delay={0.2 + index * 0.05} />

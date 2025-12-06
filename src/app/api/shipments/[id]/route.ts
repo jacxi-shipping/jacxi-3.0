@@ -47,7 +47,32 @@ export async function GET(
 
     const shipment = await prisma.shipment.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        vehicleType: true,
+        vehicleMake: true,
+        vehicleModel: true,
+        vehicleYear: true,
+        vehicleVIN: true,
+        vehicleColor: true,
+        lotNumber: true,
+        auctionName: true,
+        hasKey: true,
+        hasTitle: true,
+        titleStatus: true,
+        vehicleAge: true,
+        weight: true,
+        dimensions: true,
+        insuranceValue: true,
+        status: true,
+        containerId: true,
+        userId: true,
+        internalNotes: true,
+        price: true,
+        paymentStatus: true,
+        paymentMode: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: {
             id: true,
