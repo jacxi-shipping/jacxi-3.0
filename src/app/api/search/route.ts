@@ -105,6 +105,9 @@ export async function GET(request: NextRequest) {
                 status: true,
                 progress: true,
                 estimatedArrival: true,
+                vesselName: true,
+                shippingLine: true,
+                currentLocation: true,
               },
             },
           },
@@ -117,27 +120,7 @@ export async function GET(request: NextRequest) {
         prisma.shipment.count({ where }),
       ]);
 
-      // Transform shipments to match expected interface
-      const transformedShipments = shipments.map(shipment => {
-        const trackingNumber = shipment.container?.trackingNumber || 
-                              shipment.container?.containerNumber || 
-                              `VIN-${shipment.vehicleVIN?.slice(-8) || shipment.id.slice(-8)}`;
-        const origin = shipment.container?.loadingPort || 'N/A';
-        const destination = shipment.container?.destinationPort || 'N/A';
-        const progress = shipment.container?.progress || 0;
-        const estimatedDelivery = shipment.container?.estimatedArrival || null;
-
-        return {
-          ...shipment,
-          trackingNumber,
-          origin,
-          destination,
-          progress,
-          estimatedDelivery,
-        };
-      });
-
-      results.shipments = transformedShipments;
+      results.shipments = shipments;
       results.totalShipments = totalShipments;
     }
 

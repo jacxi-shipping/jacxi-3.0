@@ -1,23 +1,27 @@
 "use client";
 
 import Link from 'next/link';
-import { Visibility, Edit, ArrowForward, CreditCard } from '@mui/icons-material';
-import { Box, Typography, Chip, Button, LinearProgress, Slide } from '@mui/material';
+import { Visibility, Edit, LocalShipping, CreditCard } from '@mui/icons-material';
+import { Box, Typography, Chip, Button, Slide } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 interface ShipmentRowProps {
 	id: string;
-	trackingNumber: string;
 	vehicleType: string;
 	vehicleMake: string | null;
 	vehicleModel: string | null;
-	origin: string;
-	destination: string;
+	vehicleYear?: number | null;
+	vehicleVIN?: string | null;
 	status: string;
-	progress: number;
-	estimatedDelivery: string | null;
 	createdAt: string;
 	paymentStatus?: string;
+	containerId?: string | null;
+	container?: {
+		id: string;
+		containerNumber: string;
+		trackingNumber?: string | null;
+		status?: string;
+	} | null;
 	user?: {
 		name: string | null;
 		email: string;
@@ -36,21 +40,8 @@ type StatusColors = {
 };
 
 const statusColors: Record<string, StatusColors> = {
-	PENDING: { bg: 'rgba(var(--text-secondary-rgb), 0.15)', text: 'var(--text-secondary)', border: 'rgba(var(--text-secondary-rgb), 0.4)', glow: 'rgba(var(--text-secondary-rgb), 0.3)' },
-	QUOTE_REQUESTED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	QUOTE_APPROVED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	PICKUP_SCHEDULED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	PICKUP_COMPLETED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
+	ON_HAND: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
 	IN_TRANSIT: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	AT_PORT: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	LOADED_ON_VESSEL: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	IN_TRANSIT_OCEAN: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	ARRIVED_AT_DESTINATION: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	CUSTOMS_CLEARANCE: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	OUT_FOR_DELIVERY: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	DELIVERED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	CANCELLED: { bg: 'rgba(var(--error-rgb), 0.15)', text: 'var(--error)', border: 'rgba(var(--error-rgb), 0.4)', glow: 'rgba(var(--error-rgb), 0.3)' },
-	ON_HOLD: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
 };
 
 const formatStatus = (status: string) => {
@@ -67,22 +58,21 @@ const paymentStatusColors: Record<string, StatusColors> = {
 
 export default function ShipmentRow({
 	id,
-	trackingNumber,
 	vehicleType,
 	vehicleMake,
 	vehicleModel,
-	origin,
-	destination,
+	vehicleYear,
+	vehicleVIN,
 	status,
-	progress,
-	estimatedDelivery,
 	createdAt,
 	paymentStatus,
+	containerId,
+	container,
 	user,
 	showCustomer = false,
 	delay = 0,
 }: ShipmentRowProps) {
-	const statusConfig = statusColors[status] || statusColors.PENDING;
+	const statusConfig = statusColors[status] || statusColors.ON_HAND;
 	const paymentConfig = paymentStatus ? (paymentStatusColors[paymentStatus] || paymentStatusColors.PENDING) : null;
 	const [isVisible, setIsVisible] = useState(false);
 
@@ -90,6 +80,8 @@ export default function ShipmentRow({
 		const timer = setTimeout(() => setIsVisible(true), delay * 1000);
 		return () => clearTimeout(timer);
 	}, [delay]);
+
+	const vehicleInfo = [vehicleMake, vehicleModel, vehicleYear].filter(Boolean).join(' ') || vehicleType;
 
 	return (
 		<Slide in={isVisible} direction="up" timeout={600}>
@@ -104,7 +96,7 @@ export default function ShipmentRow({
 					display: 'grid',
 					gridTemplateColumns: {
 						xs: '1fr',
-						md: 'minmax(0, 1.5fr) minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1fr) auto',
+						md: 'minmax(0, 1.5fr) minmax(0, 1.2fr) minmax(0, 1fr) auto',
 					},
 					gap: { xs: 1.25, md: 1.5 },
 					alignItems: 'center',
@@ -113,6 +105,7 @@ export default function ShipmentRow({
 					boxSizing: 'border-box',
 				}}
 			>
+				{/* Column 1: Vehicle Info & Status */}
 				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, overflow: 'hidden' }}>
 					<Typography
 						sx={{
@@ -124,8 +117,13 @@ export default function ShipmentRow({
 							whiteSpace: 'nowrap',
 						}}
 					>
-						{trackingNumber}
+						{vehicleInfo}
 					</Typography>
+					{vehicleVIN && (
+						<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)' }}>
+							VIN: {vehicleVIN}
+						</Typography>
+					)}
 					<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)' }}>
 						Created: {new Date(createdAt).toLocaleDateString()}
 					</Typography>
@@ -174,16 +172,12 @@ export default function ShipmentRow({
 					</Box>
 				</Box>
 
+				{/* Column 2: Vehicle Type */}
 				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
 					<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
-						Vehicle
+						Vehicle Type
 					</Typography>
 					<Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.78rem', md: '0.8rem' }, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{vehicleType}</Typography>
-					{(vehicleMake || vehicleModel) && (
-						<Typography sx={{ fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' }, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-							{vehicleMake || ''} {vehicleModel || ''}
-						</Typography>
-					)}
 					{showCustomer && user && (
 						<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
 							{user.name || user.email}
@@ -191,44 +185,53 @@ export default function ShipmentRow({
 					)}
 				</Box>
 
+				{/* Column 3: Container Info (for IN_TRANSIT) or Status Info (for ON_HAND) */}
 				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
-					<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
-						Route
-					</Typography>
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: { xs: '0.72rem', sm: '0.75rem', md: '0.78rem' }, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', minWidth: 0 }}>
-						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: '0 1 auto', maxWidth: { xs: '80px', sm: '100px', md: 'none' } }}>{origin}</Typography>
-						<ArrowForward sx={{ fontSize: { xs: 12, sm: 14 }, color: 'var(--accent-gold)', flexShrink: 0 }} />
-						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: '0 1 auto', maxWidth: { xs: '80px', sm: '100px', md: 'none' } }}>{destination}</Typography>
-					</Box>
-					<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-						ETA {estimatedDelivery ? new Date(estimatedDelivery).toLocaleDateString() : 'Pending'}
-					</Typography>
+					{status === 'IN_TRANSIT' && container ? (
+						<>
+							<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
+								Container
+							</Typography>
+							<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+								<LocalShipping sx={{ fontSize: { xs: 14, sm: 16 }, color: 'var(--accent-gold)' }} />
+								<Link href={`/dashboard/containers/${containerId}`} style={{ textDecoration: 'none' }}>
+									<Typography
+										sx={{
+											fontSize: { xs: '0.72rem', sm: '0.75rem', md: '0.78rem' },
+											fontWeight: 600,
+											color: 'var(--accent-gold)',
+											overflow: 'hidden',
+											textOverflow: 'ellipsis',
+											whiteSpace: 'nowrap',
+											'&:hover': { textDecoration: 'underline' },
+										}}
+									>
+										{container.containerNumber}
+									</Typography>
+								</Link>
+							</Box>
+							{container.status && (
+								<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.2 }}>
+									Status: {formatStatus(container.status)}
+								</Typography>
+							)}
+						</>
+					) : (
+						<>
+							<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
+								Location
+							</Typography>
+							<Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.78rem', md: '0.8rem' }, fontWeight: 600, color: 'var(--text-primary)' }}>
+								Warehouse
+							</Typography>
+							<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.2 }}>
+								On Hand
+							</Typography>
+						</>
+					)}
 				</Box>
 
-				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
-					<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
-						Progress
-					</Typography>
-					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
-						<Typography sx={{ fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' }, color: 'var(--text-secondary)' }}>Pipeline</Typography>
-						<Typography sx={{ fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' }, fontWeight: 600, color: statusConfig.text }}>{progress}%</Typography>
-					</Box>
-					<LinearProgress
-						variant="determinate"
-						value={progress}
-						aria-label={`Shipment ${trackingNumber} pipeline progress`}
-						sx={{
-							height: 4,
-							borderRadius: 2,
-							bgcolor: 'rgba(var(--panel-rgb), 0.8)',
-							'& .MuiLinearProgress-bar': {
-								background: statusConfig.text,
-								borderRadius: 2,
-							},
-						}}
-					/>
-				</Box>
-
+				{/* Column 4: Actions */}
 				<Box
 					sx={{
 						display: 'flex',

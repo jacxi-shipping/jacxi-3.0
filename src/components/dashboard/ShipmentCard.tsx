@@ -1,18 +1,24 @@
 "use client";
 
 import Link from 'next/link';
-import { ArrowForward } from '@mui/icons-material';
-import { Box, Typography, Chip, LinearProgress, Button, Slide } from '@mui/material';
+import { ArrowForward, LocalShipping } from '@mui/icons-material';
+import { Box, Typography, Chip, Button, Slide } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 type ShipmentCardProps = {
 	id: string;
-	trackingNumber: string;
+	vehicleType: string;
+	vehicleMake?: string | null;
+	vehicleModel?: string | null;
+	vehicleYear?: number | null;
+	vehicleVIN?: string | null;
 	status: string;
-	origin: string;
-	destination: string;
-	progress: number;
-	estimatedDelivery: string | null;
+	containerId?: string | null;
+	container?: {
+		containerNumber: string;
+		trackingNumber?: string | null;
+		status?: string;
+	} | null;
 	delay?: number;
 };
 
@@ -20,44 +26,31 @@ type StatusColors = {
 	bg: string;
 	text: string;
 	border: string;
-	glow: string;
 };
 
 const neutralStatus: StatusColors = {
 	bg: 'rgba(var(--panel-rgb), 0.35)',
 	text: 'var(--text-primary)',
 	border: 'var(--border)',
-	glow: 'rgba(var(--accent-gold-rgb), 0.2)',
 };
 
 const statusColors: Record<string, StatusColors> = {
-	'IN_TRANSIT': neutralStatus,
-	'IN_TRANSIT_OCEAN': neutralStatus,
-	'AT_PORT': neutralStatus,
-	'DELIVERED': neutralStatus,
-	'PICKUP_SCHEDULED': neutralStatus,
-	'PICKUP_COMPLETED': neutralStatus,
-	'PENDING': neutralStatus,
-	'QUOTE_REQUESTED': neutralStatus,
-	'QUOTE_APPROVED': neutralStatus,
-	'LOADED_ON_VESSEL': neutralStatus,
-	'ARRIVED_AT_DESTINATION': neutralStatus,
-	'CUSTOMS_CLEARANCE': neutralStatus,
-	'OUT_FOR_DELIVERY': neutralStatus,
-	'DELAYED': { bg: 'rgba(var(--error-rgb), 0.15)', text: 'var(--error)', border: 'var(--error)', glow: 'rgba(var(--error-rgb), 0.3)' },
-	'CANCELLED': { bg: 'rgba(var(--error-rgb), 0.15)', text: 'var(--error)', border: 'var(--error)', glow: 'rgba(var(--error-rgb), 0.3)' },
+	'ON_HAND': { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)' },
+	'IN_TRANSIT': { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)' },
 };
 
 const defaultColors: StatusColors = neutralStatus;
 
 export default function ShipmentCard({
 	id,
-	trackingNumber,
+	vehicleType,
+	vehicleMake,
+	vehicleModel,
+	vehicleYear,
+	vehicleVIN,
 	status,
-	origin,
-	destination,
-	progress,
-	estimatedDelivery,
+	containerId,
+	container,
 	delay = 0,
 }: ShipmentCardProps) {
 	const colors = statusColors[status] || defaultColors;
@@ -67,6 +60,8 @@ export default function ShipmentCard({
 		const timer = setTimeout(() => setIsVisible(true), delay * 1000);
 		return () => clearTimeout(timer);
 	}, [delay]);
+
+	const vehicleInfo = [vehicleMake, vehicleModel, vehicleYear].filter(Boolean).join(' ') || vehicleType;
 
 	return (
 		<Slide in={isVisible} direction="up" timeout={400}>
@@ -87,6 +82,7 @@ export default function ShipmentCard({
 					boxSizing: 'border-box',
 				}}
 			>
+				{/* Header: Vehicle Info & Status */}
 				<Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, minWidth: 0 }}>
 					<Box sx={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
 						<Typography
@@ -99,20 +95,22 @@ export default function ShipmentCard({
 								whiteSpace: 'nowrap',
 							}}
 						>
-							{trackingNumber}
+							{vehicleInfo}
 						</Typography>
-						<Typography
-							sx={{
-								fontSize: { xs: '0.6rem', sm: '0.65rem' },
-								color: 'var(--text-secondary)',
-								marginTop: 0.2,
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-							}}
-						>
-							ID: {id.slice(0, 8)}
-						</Typography>
+						{vehicleVIN && (
+							<Typography
+								sx={{
+									fontSize: { xs: '0.6rem', sm: '0.65rem' },
+									color: 'var(--text-secondary)',
+									marginTop: 0.2,
+									overflow: 'hidden',
+									textOverflow: 'ellipsis',
+									whiteSpace: 'nowrap',
+								}}
+							>
+								VIN: {vehicleVIN}
+							</Typography>
+						)}
 					</Box>
 					<Chip
 						label={status.replace(/_/g, ' ')}
@@ -136,101 +134,69 @@ export default function ShipmentCard({
 					/>
 				</Box>
 
-				<Box
-					sx={{
-						display: 'grid',
-						gridTemplateColumns: '1fr',
-						gap: 1,
-						minWidth: 0,
-					}}
-				>
-					<Box sx={{ minWidth: 0 }}>
-						<Typography
-							sx={{
-								fontSize: { xs: '0.6rem', sm: '0.65rem' },
-								textTransform: 'uppercase',
-								letterSpacing: '0.18em',
-								color: 'var(--text-secondary)',
-								marginBottom: 0.35,
-							}}
-						>
-							Origin
-						</Typography>
-						<Typography
-							sx={{
-								fontSize: { xs: '0.72rem', sm: '0.78rem' },
-								fontWeight: 500,
-								color: 'var(--text-primary)',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-							}}
-						>
-							{origin}
-						</Typography>
-					</Box>
-					<Box sx={{ minWidth: 0 }}>
-						<Typography
-							sx={{
-								fontSize: { xs: '0.6rem', sm: '0.65rem' },
-								textTransform: 'uppercase',
-								letterSpacing: '0.18em',
-								color: 'var(--text-secondary)',
-								marginBottom: 0.35,
-							}}
-						>
-							Destination
-						</Typography>
-						<Typography
-							sx={{
-								fontSize: { xs: '0.72rem', sm: '0.78rem' },
-								fontWeight: 500,
-								color: 'var(--text-primary)',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-							}}
-						>
-							{destination}
-						</Typography>
-					</Box>
-				</Box>
-
-				<Box sx={{ minWidth: 0 }}>
-					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-						<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.65rem' }, color: 'var(--text-secondary)' }}>Progress</Typography>
-						<Typography sx={{ fontSize: { xs: '0.64rem', sm: '0.68rem' }, fontWeight: 600, color: colors.text }}>{progress}%</Typography>
-					</Box>
-					<LinearProgress
-						variant="determinate"
-						value={progress}
-						aria-label={`Shipment ${trackingNumber} progress`}
+				{/* Vehicle Details */}
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+					<Typography
 						sx={{
-							height: 4,
-							borderRadius: 2,
-							backgroundColor: 'rgba(var(--panel-rgb), 0.8)',
-							'& .MuiLinearProgress-bar': {
-								backgroundColor: colors.text,
-								borderRadius: 2,
-							},
-						}}
-					/>
-				</Box>
-
-				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, minWidth: 0 }}>
-					<Typography 
-						sx={{ 
-							fontSize: { xs: '0.6rem', sm: '0.65rem' }, 
+							fontSize: { xs: '0.6rem', sm: '0.65rem' },
+							textTransform: 'uppercase',
+							letterSpacing: '0.18em',
 							color: 'var(--text-secondary)',
+						}}
+					>
+						Vehicle Type
+					</Typography>
+					<Typography
+						sx={{
+							fontSize: { xs: '0.72rem', sm: '0.78rem' },
+							fontWeight: 500,
+							color: 'var(--text-primary)',
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
 							whiteSpace: 'nowrap',
-							flex: 1,
 						}}
 					>
-						{estimatedDelivery ? `ETA ${new Date(estimatedDelivery).toLocaleDateString()}` : 'ETA pending'}
+						{vehicleType}
 					</Typography>
-					<Link href={`/dashboard/tracking/${id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+				</Box>
+
+				{/* Container Info (only for IN_TRANSIT) */}
+				{status === 'IN_TRANSIT' && container && (
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+						<Typography
+							sx={{
+								fontSize: { xs: '0.6rem', sm: '0.65rem' },
+								textTransform: 'uppercase',
+								letterSpacing: '0.18em',
+								color: 'var(--text-secondary)',
+							}}
+						>
+							Container
+						</Typography>
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+							<LocalShipping sx={{ fontSize: { xs: 14, sm: 16 }, color: 'var(--accent-gold)' }} />
+							<Link href={`/dashboard/containers/${containerId}`} style={{ textDecoration: 'none' }}>
+								<Typography
+									sx={{
+										fontSize: { xs: '0.72rem', sm: '0.78rem' },
+										fontWeight: 600,
+										color: 'var(--accent-gold)',
+										overflow: 'hidden',
+										textOverflow: 'ellipsis',
+										whiteSpace: 'nowrap',
+										'&:hover': { textDecoration: 'underline' },
+									}}
+								>
+									{container.containerNumber}
+								</Typography>
+							</Link>
+						</Box>
+					</Box>
+				)}
+
+				{/* Footer: View Details Button */}
+				<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, minWidth: 0, mt: 0.5 }}>
+					<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
 						<Button
 							variant="text"
 							size="small"
@@ -244,7 +210,7 @@ export default function ShipmentCard({
 								padding: 0,
 							}}
 						>
-							Track
+							View Details
 						</Button>
 					</Link>
 				</Box>
