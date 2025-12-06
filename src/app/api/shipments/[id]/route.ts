@@ -64,6 +64,8 @@ export async function GET(
         weight: true,
         dimensions: true,
         insuranceValue: true,
+        arrivalPhotos: true,
+        vehiclePhotos: true,
         status: true,
         containerId: true,
         userId: true,
