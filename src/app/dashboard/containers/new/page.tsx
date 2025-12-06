@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { AdminRoute } from '@/components/auth/AdminRoute';
-import { Download, Loader2 } from 'lucide-react';
+import Section from '@/components/layout/Section';
+import { ArrowLeft, Download, Loader2, Ship, Anchor, Calendar, MapPin, AlertCircle } from 'lucide-react';
 
 export default function NewContainerPage() {
   const router = useRouter();
@@ -48,7 +50,6 @@ export default function NewContainerPage() {
       if (response.ok && data.trackingData) {
         const trackingData = data.trackingData;
         
-        // Update form with fetched data
         setFormData(prev => ({
           ...prev,
           trackingNumber: trackingData.trackingNumber || prev.trackingNumber,
@@ -143,318 +144,395 @@ export default function NewContainerPage() {
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="max-w-4xl mx-auto">
-          <Button onClick={() => router.push('/dashboard/containers')} className="mb-4">
-            ← Back
-          </Button>
+      <div className="light-surface min-h-screen bg-[var(--background)]">
+        <Section className="pt-6 pb-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <Link href="/dashboard/containers">
+                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 flex-shrink-0 text-xs sm:text-sm">
+                  <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  Back
+                </Button>
+              </Link>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)] truncate">Create New Container</h1>
+                <p className="text-xs sm:text-sm text-[var(--text-secondary)] line-clamp-1">Add a new container with tracking information.</p>
+              </div>
+            </div>
+          </div>
+        </Section>
 
-          <Card>
-            <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Create New Container</h1>
+        <Section className="pb-16">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Fetch Data Success/Error Messages */}
+            {fetchSuccess && (
+              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <p>{fetchSuccess}</p>
+                </div>
+              </div>
+            )}
+            {fetchError && (
+              <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-300">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <p>{fetchError}</p>
+                </div>
+              </div>
+            )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic Information */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Basic Information</h2>
-                
-                {/* Fetch Data Success/Error Messages */}
-                {fetchSuccess && (
-                  <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                    <p className="text-sm text-green-800 dark:text-green-200">{fetchSuccess}</p>
+            {/* Basic Information */}
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
+                  <Ship className="h-5 w-5 text-cyan-300" />
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div className="md:col-span-2">
+                  <label htmlFor="containerNumber" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
+                    Container Number <span className="text-red-400">*</span>
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="text"
+                      id="containerNumber"
+                      name="containerNumber"
+                      value={formData.containerNumber}
+                      onChange={handleChange}
+                      required
+                      className="flex-1 px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                      placeholder="e.g., ABCU1234567"
+                    />
+                    <Button
+                      type="button"
+                      onClick={fetchContainerData}
+                      disabled={fetching || !formData.containerNumber.trim()}
+                      variant="outline"
+                      className="sm:w-auto w-full border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 whitespace-nowrap"
+                    >
+                      {fetching ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Fetching...
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-4 h-4 mr-2" />
+                          Fetch Data
+                        </>
+                      )}
+                    </Button>
                   </div>
-                )}
-                {fetchError && (
-                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">{fetchError}</p>
-                  </div>
-                )}
+                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                    Enter container number and click &quot;Fetch Data&quot; to automatically retrieve shipping information
+                  </p>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                      Container Number <span className="text-red-500">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        name="containerNumber"
-                        value={formData.containerNumber}
-                        onChange={handleChange}
-                        required
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
-                        placeholder="ABCU1234567"
-                      />
-                      <Button
-                        type="button"
-                        onClick={fetchContainerData}
-                        disabled={fetching || !formData.containerNumber.trim()}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 flex items-center gap-2"
-                      >
-                        {fetching ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Fetching...
-                          </>
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4" />
-                            Fetch Data
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      Enter container number and click &quot;Fetch Data&quot; to automatically retrieve shipping information
-                    </p>
-                  </div>
-
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="trackingNumber" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Tracking Number
                     </label>
                     <input
                       type="text"
+                      id="trackingNumber"
                       name="trackingNumber"
                       value={formData.trackingNumber}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="Tracking identifier"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="bookingNumber" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Booking Number
                     </label>
                     <input
                       type="text"
+                      id="bookingNumber"
                       name="bookingNumber"
                       value={formData.bookingNumber}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="Booking reference"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="maxCapacity" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Max Capacity (vehicles)
                     </label>
                     <input
                       type="number"
+                      id="maxCapacity"
                       name="maxCapacity"
                       value={formData.maxCapacity}
                       onChange={handleNumberChange}
                       min="1"
                       max="20"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="e.g., 4"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Shipping Details */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Shipping Details</h2>
+            {/* Shipping Details */}
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
+                  <Anchor className="h-5 w-5 text-cyan-300" />
+                  Shipping Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="vesselName" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Vessel Name
                     </label>
                     <input
                       type="text"
+                      id="vesselName"
                       name="vesselName"
                       value={formData.vesselName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="e.g., MSC GULSUN"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="voyageNumber" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Voyage Number
                     </label>
                     <input
                       type="text"
+                      id="voyageNumber"
                       name="voyageNumber"
                       value={formData.voyageNumber}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="e.g., V123"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                  <div className="md:col-span-2">
+                    <label htmlFor="shippingLine" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Shipping Line
                     </label>
                     <input
                       type="text"
+                      id="shippingLine"
                       name="shippingLine"
                       value={formData.shippingLine}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
-                      placeholder="e.g., Maersk, MSC, COSCO"
+                      placeholder="e.g., Maersk Line, MSC, CMA CGM, COSCO"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Ports */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Ports</h2>
+            {/* Ports */}
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
+                  <MapPin className="h-5 w-5 text-cyan-300" />
+                  Ports
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="loadingPort" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Loading Port
                     </label>
                     <input
                       type="text"
+                      id="loadingPort"
                       name="loadingPort"
                       value={formData.loadingPort}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="e.g., Shanghai, China"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="destinationPort" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Destination Port
                     </label>
                     <input
                       type="text"
+                      id="destinationPort"
                       name="destinationPort"
                       value={formData.destinationPort}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      placeholder="e.g., Los Angeles, USA"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                <div>
+                  <label className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                     Transshipment Ports (Optional)
                   </label>
-                  {formData.transshipmentPorts.map((port, index) => (
-                    <div key={index} className="flex gap-2 mb-2">
-                      <input
-                        type="text"
-                        value={port}
-                        onChange={(e) => updateTransshipmentPort(index, e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
-                        placeholder={`Transshipment port ${index + 1}`}
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => removeTransshipmentPort(index)}
-                        className="bg-red-500 hover:bg-red-600"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
+                  <div className="space-y-2">
+                    {formData.transshipmentPorts.map((port, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={port}
+                          onChange={(e) => updateTransshipmentPort(index, e.target.value)}
+                          className="flex-1 px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
+                          placeholder={`Transshipment port ${index + 1}`}
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => removeTransshipmentPort(index)}
+                          variant="outline"
+                          className="border-red-500/40 text-red-300 hover:bg-red-500/10"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                   <Button
                     type="button"
                     onClick={addTransshipmentPort}
-                    className="mt-2"
+                    variant="outline"
+                    className="mt-3 border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
                   >
                     + Add Transshipment Port
                   </Button>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Dates */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Dates</h2>
+            {/* Dates */}
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
+                  <Calendar className="h-5 w-5 text-cyan-300" />
+                  Important Dates
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="loadingDate" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Loading Date
                     </label>
                     <input
                       type="date"
+                      id="loadingDate"
                       name="loadingDate"
                       value={formData.loadingDate}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="departureDate" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Departure Date
                     </label>
                     <input
                       type="date"
+                      id="departureDate"
                       name="departureDate"
                       value={formData.departureDate}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="estimatedArrival" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
                       Estimated Arrival
                     </label>
                     <input
                       type="date"
+                      id="estimatedArrival"
                       name="estimatedArrival"
                       value={formData.estimatedArrival}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent"
                     />
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                  Notes
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent"
-                  placeholder="Any additional notes..."
-                />
-              </div>
+            {/* Notes and Settings */}
+            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
+              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
+                <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Additional Information</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div>
+                  <label htmlFor="notes" className="block text-xs sm:text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
+                    Notes
+                  </label>
+                  <textarea
+                    id="notes"
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 focus:border-transparent resize-none"
+                    placeholder="Any additional notes or special instructions..."
+                  />
+                </div>
 
-              {/* Auto-tracking */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="autoTrackingEnabled"
-                  name="autoTrackingEnabled"
-                  checked={formData.autoTrackingEnabled}
-                  onChange={(e) => setFormData(prev => ({ ...prev, autoTrackingEnabled: e.target.checked }))}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                />
-                <label htmlFor="autoTrackingEnabled" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Enable automatic tracking updates
-                </label>
-              </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="autoTrackingEnabled"
+                    name="autoTrackingEnabled"
+                    checked={formData.autoTrackingEnabled}
+                    onChange={(e) => setFormData(prev => ({ ...prev, autoTrackingEnabled: e.target.checked }))}
+                    className="w-5 h-5 text-cyan-500 border-cyan-500/30 rounded focus:ring-cyan-500/50"
+                  />
+                  <label htmlFor="autoTrackingEnabled" className="text-sm font-medium text-[var(--text-primary)]">
+                    Enable automatic tracking updates
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Submit */}
-              <div className="flex gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <Button
-                  type="submit"
-                  disabled={loading || !formData.containerNumber}
-                  className="flex-1"
-                >
-                  {loading ? 'Creating...' : 'Create Container'}
-                </Button>
+            {/* Submit Buttons */}
+            <div className="flex justify-end gap-3">
+              <Link href="/dashboard/containers">
                 <Button
                   type="button"
-                  onClick={() => router.push('/dashboard/containers')}
-                  className="bg-gray-500 hover:bg-gray-600"
+                  variant="outline"
+                  disabled={loading}
+                  className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
                 >
                   Cancel
                 </Button>
-              </div>
-            </form>
-          </Card>
-        </div>
+              </Link>
+              <Button
+                type="submit"
+                disabled={loading || !formData.containerNumber}
+                className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
+                style={{ color: 'white' }}
+              >
+                {loading ? 'Creating...' : 'Create Container'}
+              </Button>
+            </div>
+          </form>
+        </Section>
       </div>
     </AdminRoute>
   );
