@@ -71,7 +71,7 @@ export default function NewShipmentPage() {
 	const router = useRouter();
 	const [users, setUsers] = useState<UserOption[]>([]);
 	const [loadingUsers, setLoadingUsers] = useState(true);
-	const [containerPhotos, setContainerPhotos] = useState<string[]>([]);
+	const [vehiclePhotos, setVehiclePhotos] = useState<string[]>([]);
 	const [uploading, setUploading] = useState(false);
 	const [decodingVin, setDecodingVin] = useState(false);
 	const [vinDecodeMessage, setVinDecodeMessage] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export default function NewShipmentPage() {
 		resolver: zodResolver(shipmentSchema),
 		mode: 'onBlur',
 		defaultValues: {
-			containerPhotos: [],
+			vehiclePhotos: [],
 			trackingNumber: '',
 		},
 	});
@@ -362,9 +362,9 @@ export default function NewShipmentPage() {
 			}
 
 			const result = (await response.json()) as { url: string };
-			setContainerPhotos((prev) => {
+			setVehiclePhotos((prev) => {
 				const next = [...prev, result.url];
-				setValue('containerPhotos', next, { shouldDirty: true, shouldTouch: true });
+				setValue('vehiclePhotos', next, { shouldDirty: true, shouldTouch: true });
 				return next;
 			});
 			setSnackbar({ open: true, message: 'Photo uploaded successfully', severity: 'success' });
@@ -393,9 +393,9 @@ export default function NewShipmentPage() {
 	};
 
 	const removePhoto = (index: number) => {
-		const newPhotos = containerPhotos.filter((_, i) => i !== index);
-		setContainerPhotos(newPhotos);
-		setValue('containerPhotos', newPhotos);
+		const newPhotos = vehiclePhotos.filter((_, i) => i !== index);
+		setVehiclePhotos(newPhotos);
+		setValue('vehiclePhotos', newPhotos);
 	};
 
 	const onSubmit = async (data: ShipmentFormData) => {
@@ -423,7 +423,7 @@ export default function NewShipmentPage() {
 				setSnackbar({ open: true, message: 'Warning: VIN number is recommended for shipments', severity: 'warning' });
 			}
 
-			const payload: ShipmentCreatePayload = { ...data, containerPhotos };
+			const payload: ShipmentCreatePayload = { ...data, vehiclePhotos };
 
 			// Add shipment status to payload (use uppercase enum values)
 			payload.status = shipmentStatus === 'ON_HAND' ? 'PENDING' : 'IN_TRANSIT';
@@ -1103,22 +1103,22 @@ export default function NewShipmentPage() {
 							</Card>
 						)}
 
-						{/* Container Photos */}
+						{/* Vehicle Photos */}
 						<Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
 									<ImageIcon className="h-5 w-5 text-cyan-300" />
-									Container Photos
+									Vehicle Photos
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="p-4 sm:p-6 space-y-4">
 								<div>
 									<label
-										htmlFor="container-photos"
+										htmlFor="vehicle-photos"
 										className="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-cyan-500/40 rounded-lg bg-white/3 hover:bg-white/5 hover:border-cyan-500/60 transition-all cursor-pointer group"
 									>
 										<input
-											id="container-photos"
+											id="vehicle-photos"
 											type="file"
 											multiple
 											accept="image/jpeg,image/jpg,image/png,image/webp"
@@ -1136,7 +1136,7 @@ export default function NewShipmentPage() {
 												<>
 													<Upload className="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 mb-2" />
 													<p className="mb-1 text-sm text-[var(--text-primary)]">
-														<span className="font-semibold text-cyan-400">Click to upload</span> container photos
+														<span className="font-semibold text-cyan-400">Click to upload</span> vehicle photos
 													</p>
 													<p className="text-xs text-[var(--text-secondary)]">PNG, JPG, JPEG, WEBP (MAX. 5MB per file)</p>
 												</>
@@ -1145,13 +1145,13 @@ export default function NewShipmentPage() {
 									</label>
 								</div>
 
-								{containerPhotos.length > 0 ? (
+								{vehiclePhotos.length > 0 ? (
 									<div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-										{containerPhotos.map((photo, index) => (
+										{vehiclePhotos.map((photo, index) => (
 											<div key={index} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
 												<Image
 													src={photo}
-													alt={`Container photo ${index + 1}`}
+													alt={`Vehicle photo ${index + 1}`}
 													fill
 													className="object-cover"
 													unoptimized
@@ -1160,7 +1160,7 @@ export default function NewShipmentPage() {
 													type="button"
 													onClick={() => removePhoto(index)}
 													className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500/70 hover:bg-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-													aria-label="Remove container photo"
+													aria-label="Remove vehicle photo"
 												>
 													<X className="w-4 h-4 text-[var(--text-primary)]" />
 												</button>
@@ -1168,7 +1168,7 @@ export default function NewShipmentPage() {
 										))}
 									</div>
 								) : (
-									<p className="text-sm text-[var(--text-secondary)]">No container photos uploaded yet.</p>
+									<p className="text-sm text-[var(--text-secondary)]">No vehicle photos uploaded yet.</p>
 								)}
 							</CardContent>
 						</Card>

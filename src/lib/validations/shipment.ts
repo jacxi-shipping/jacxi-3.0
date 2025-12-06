@@ -39,7 +39,7 @@ export const shipmentSchema = z.object({
     (val) => !val || (parseFloat(val) > 0),
     { message: 'Price must be greater than 0' }
   ),
-  containerPhotos: z.array(z.string()).default([]),
+  vehiclePhotos: z.array(z.string()).default([]),
   trackingNumber: z.string().optional(),
   // New fields
   hasKey: z.boolean().optional(),
