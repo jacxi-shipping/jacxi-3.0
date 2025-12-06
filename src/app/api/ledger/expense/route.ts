@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
@@ -16,7 +15,7 @@ const addExpenseSchema = z.object({
 // POST - Add an expense to a shipment
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -35,7 +34,6 @@ export async function POST(request: NextRequest) {
       where: { id: validatedData.shipmentId },
       select: {
         id: true,
-        trackingNumber: true,
         userId: true,
         vehicleMake: true,
         vehicleModel: true,
@@ -59,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Create expense description
     const expenseTypeLabel = validatedData.expenseType.replace(/_/g, ' ').toLowerCase();
     const vehicleInfo = `${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'Vehicle';
-    const description = `${validatedData.description} - ${expenseTypeLabel} for ${vehicleInfo} (${shipment.trackingNumber})`;
+    const description = `${validatedData.description} - ${expenseTypeLabel} for ${vehicleInfo} (Shipment ${shipment.id})`;
 
     // Create ledger entry for expense
     const entry = await prisma.ledgerEntry.create({
@@ -88,7 +86,6 @@ export async function POST(request: NextRequest) {
         shipment: {
           select: {
             id: true,
-            trackingNumber: true,
             vehicleMake: true,
             vehicleModel: true,
           },
@@ -103,7 +100,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid data', details: error.errors },
+        { error: 'Invalid data', details: error.issues },
         { status: 400 }
       );
     }
@@ -118,7 +115,7 @@ export async function POST(request: NextRequest) {
 // GET - Get expenses for a shipment
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -8,7 +8,6 @@ import { ArrowLeft, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AdminRoute from '@/components/auth/AdminRoute';
 
 interface User {

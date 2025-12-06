@@ -114,7 +114,6 @@ export async function POST(request: NextRequest) {
             container: {
               select: {
                 containerNumber: true,
-                trackingNumber: true,
                 vesselName: true,
                 status: true,
               },

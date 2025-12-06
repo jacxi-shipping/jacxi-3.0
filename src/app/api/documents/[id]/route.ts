@@ -25,8 +25,10 @@ export async function GET(
       include: {
         shipment: {
           select: {
-            trackingNumber: true,
+            id: true,
             vehicleType: true,
+            vehicleMake: true,
+            vehicleModel: true,
           },
         },
         user: {

@@ -138,7 +138,7 @@ export async function PATCH(
     const updateData: Prisma.ShipmentUpdateInput = {};
 
     // Basic vehicle info
-    if (data.userId !== undefined) updateData.userId = data.userId;
+    if (data.userId !== undefined) updateData.user = { connect: { id: data.userId } };
     if (data.vehicleType !== undefined) updateData.vehicleType = data.vehicleType;
     if (data.vehicleMake !== undefined) updateData.vehicleMake = data.vehicleMake;
     if (data.vehicleModel !== undefined) updateData.vehicleModel = data.vehicleModel;
@@ -175,7 +175,7 @@ export async function PATCH(
       
       // If changing to ON_HAND, remove container
       if (data.status === 'ON_HAND') {
-        updateData.containerId = null;
+        updateData.container = { disconnect: true };
       }
     }
 
@@ -203,10 +203,10 @@ export async function PATCH(
           );
         }
 
-        updateData.containerId = data.containerId;
+        updateData.container = { connect: { id: data.containerId } };
         updateData.status = 'IN_TRANSIT'; // Auto-set to IN_TRANSIT when assigning container
       } else {
-        updateData.containerId = null;
+        updateData.container = { disconnect: true };
         updateData.status = 'ON_HAND'; // Auto-set to ON_HAND when removing container
       }
     }
@@ -214,19 +214,19 @@ export async function PATCH(
     // Photos
     if (data.vehiclePhotos !== undefined) {
       if (data.replacePhotos) {
-        updateData.vehiclePhotos = data.vehiclePhotos;
+        updateData.vehiclePhotos = { set: data.vehiclePhotos || [] };
       } else {
         const currentPhotos = (existingShipment.vehiclePhotos as string[]) || [];
-        updateData.vehiclePhotos = [...currentPhotos, ...data.vehiclePhotos];
+        updateData.vehiclePhotos = { set: [...currentPhotos, ...(data.vehiclePhotos || [])] };
       }
     }
 
     if (data.arrivalPhotos !== undefined) {
       if (data.replacePhotos) {
-        updateData.arrivalPhotos = data.arrivalPhotos;
+        updateData.arrivalPhotos = { set: data.arrivalPhotos || [] };
       } else {
         const currentPhotos = (existingShipment.arrivalPhotos as string[]) || [];
-        updateData.arrivalPhotos = [...currentPhotos, ...data.arrivalPhotos];
+        updateData.arrivalPhotos = { set: [...currentPhotos, ...(data.arrivalPhotos || [])] };
       }
     }
 
@@ -260,7 +260,6 @@ export async function PATCH(
 
     // Other fields
     if (data.dimensions !== undefined) updateData.dimensions = data.dimensions;
-    if (data.specialInstructions !== undefined) updateData.specialInstructions = data.specialInstructions;
     if (data.internalNotes !== undefined) updateData.internalNotes = data.internalNotes;
     if (data.hasKey !== undefined) updateData.hasKey = data.hasKey;
     if (data.hasTitle !== undefined) updateData.hasTitle = data.hasTitle;

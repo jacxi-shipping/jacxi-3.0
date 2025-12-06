@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       include: {
         shipment: {
           select: {
-            trackingNumber: true,
+            id: true,
             vehicleType: true,
           },
         },
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       include: {
         shipment: {
           select: {
-            trackingNumber: true,
+            id: true,
           },
         },
       },

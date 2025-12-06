@@ -31,7 +31,7 @@ import {
   History,
   User,
 } from 'lucide-react';
-import { Tabs, Tab, Box, Typography } from '@mui/material';
+import { Tabs, Tab, Box } from '@mui/material';
 
 interface ShipmentEvent {
   id: string;

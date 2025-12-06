@@ -6,7 +6,43 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { AdminRoute } from '@/components/auth/AdminRoute';
-import Link from 'next/link';
+
+interface Shipment {
+  id: string;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  vehicleVIN: string | null;
+  status: string;
+}
+
+interface Expense {
+  id: string;
+  type: string;
+  amount: number;
+  date: string;
+}
+
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  amount: number;
+  status: string;
+}
+
+interface Document {
+  id: string;
+  name: string;
+  type: string;
+  fileUrl: string;
+}
+
+interface TrackingEvent {
+  id: string;
+  status: string;
+  location: string | null;
+  description: string | null;
+  eventDate: string;
+}
 
 interface Container {
   id: string;
@@ -30,11 +66,11 @@ interface Container {
   currentCount: number;
   notes: string | null;
   createdAt: string;
-  shipments: any[];
-  expenses: any[];
-  invoices: any[];
-  documents: any[];
-  trackingEvents: any[];
+  shipments: Shipment[];
+  expenses: Expense[];
+  invoices: Invoice[];
+  documents: Document[];
+  trackingEvents: TrackingEvent[];
   totals: {
     expenses: number;
     invoices: number;
@@ -75,6 +111,7 @@ export default function ContainerDetailPage() {
     if (params.id) {
       fetchContainer();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
   const fetchContainer = async () => {
@@ -398,7 +435,7 @@ export default function ContainerDetailPage() {
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {container.shipments.map((shipment: any) => (
+                    {container.shipments.map((shipment) => (
                       <div
                         key={shipment.id}
                         className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
@@ -462,7 +499,7 @@ export default function ContainerDetailPage() {
                   <p className="text-gray-600 dark:text-gray-400">No tracking events yet</p>
                 ) : (
                   <div className="space-y-4">
-                    {container.trackingEvents.map((event: any) => (
+                    {container.trackingEvents.map((event) => (
                       <div key={event.id} className="border-l-4 border-indigo-600 pl-4">
                         <div className="flex justify-between">
                           <p className="font-medium">{event.status}</p>

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
@@ -15,7 +14,7 @@ const recordPaymentSchema = z.object({
 // POST - Record a payment from a user
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -37,7 +36,6 @@ export async function POST(request: NextRequest) {
       },
       select: {
         id: true,
-        trackingNumber: true,
         price: true,
         vehicleMake: true,
         vehicleModel: true,
@@ -63,7 +61,7 @@ export async function POST(request: NextRequest) {
     const newBalance = currentBalance - validatedData.amount;
 
     // Create a credit ledger entry
-    const shipmentInfo = shipments.map(s => `${s.trackingNumber} (${s.vehicleMake} ${s.vehicleModel})`).join(', ');
+    const shipmentInfo = shipments.map(s => `${s.id || ""} (${s.vehicleMake} ${s.vehicleModel})`).join(', ');
     const description = `Payment received for shipment(s): ${shipmentInfo}`;
 
     const entry = await prisma.ledgerEntry.create({
@@ -122,7 +120,7 @@ export async function POST(request: NextRequest) {
           data: {
             userId: validatedData.userId,
             shipmentId: shipment.id,
-            description: `Payment applied to shipment ${shipment.trackingNumber}`,
+            description: `Payment applied to shipment ${shipment.id || ""}`,
             type: 'CREDIT',
             amount: paymentForShipment,
             balance: newBalance, // Same balance as the main entry
@@ -147,7 +145,6 @@ export async function POST(request: NextRequest) {
           },
           select: {
             id: true,
-            trackingNumber: true,
             paymentStatus: true,
           },
         });
@@ -171,7 +168,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid data', details: error.errors },
+        { error: 'Invalid data', details: error.issues },
         { status: 400 }
       );
     }

@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const prisma = new PrismaClient();
 
 // Note: Items model has been removed in the new architecture
 // Shipments are now directly assigned to Containers
 // This endpoint is kept for backward compatibility but returns deprecation notice
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
@@ -37,6 +39,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();

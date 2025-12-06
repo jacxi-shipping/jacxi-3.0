@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET - Fetch audit logs
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -26,7 +25,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
 
     // Build where clause
-    const where: any = {};
+    const where: Record<string, string> = {};
 
     if (entityId) {
       where.entityId = entityId;
@@ -72,35 +71,5 @@ export async function GET(request: NextRequest) {
       { error: 'Failed to fetch audit logs' },
       { status: 500 }
     );
-  }
-}
-
-// Helper function to create audit log (to be used by other routes)
-export async function createAuditLog(
-  entityType: string,
-  entityId: string,
-  action: 'CREATE' | 'UPDATE' | 'DELETE',
-  performedBy: string,
-  changes?: any,
-  request?: NextRequest
-) {
-  try {
-    const ipAddress = request?.headers.get('x-forwarded-for') || request?.headers.get('x-real-ip') || null;
-    const userAgent = request?.headers.get('user-agent') || null;
-
-    await prisma.auditLog.create({
-      data: {
-        entityType,
-        entityId,
-        action,
-        performedBy,
-        changes,
-        ipAddress,
-        userAgent,
-      },
-    });
-  } catch (error) {
-    console.error('Error creating audit log:', error);
-    // Don't throw error - audit logging should not break main operations
   }
 }

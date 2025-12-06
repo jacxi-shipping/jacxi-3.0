@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, PrismaClient, TitleStatus } from '@prisma/client';
+import { Prisma, PrismaClient, TitleStatus, PaymentStatus } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
@@ -71,7 +71,6 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               containerNumber: true,
-              trackingNumber: true,
               vesselName: true,
               status: true,
               estimatedArrival: true,
@@ -170,7 +169,6 @@ export async function POST(request: NextRequest) {
       auctionName,
       weight,
       dimensions,
-      specialInstructions,
       insuranceValue,
       price,
       vehiclePhotos,
@@ -314,11 +312,10 @@ export async function POST(request: NextRequest) {
           containerId: containerId || null,
           weight: parsedWeight,
           dimensions,
-          specialInstructions,
           insuranceValue: parsedInsuranceValue,
           price: parsedPrice,
           vehiclePhotos: sanitizedVehiclePhotos,
-          paymentStatus: finalPaymentStatus,
+          paymentStatus: finalPaymentStatus as PaymentStatus,
           paymentMode: paymentMode || null,
           internalNotes: internalNotes || null,
           // Vehicle details

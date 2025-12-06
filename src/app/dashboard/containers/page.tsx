@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -62,6 +61,7 @@ export default function ContainersPage() {
 
   useEffect(() => {
     fetchContainers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, statusFilter, searchQuery]);
 
   const fetchContainers = async () => {

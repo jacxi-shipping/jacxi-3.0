@@ -1256,7 +1256,7 @@ export default function NewShipmentPage() {
 											<div>
 												<div className="text-[var(--text-primary)] font-semibold text-sm mb-1">Due Payment</div>
 												<div className="text-[var(--text-secondary)] text-xs">
-													Payment to be collected later. Amount will be added to user's ledger as due.
+													Payment to be collected later. Amount will be added to user&apos;s ledger as due.
 												</div>
 											</div>
 										</label>
@@ -1264,14 +1264,14 @@ export default function NewShipmentPage() {
 									{watch('paymentMode') === 'CASH' && (
 										<div className="mt-3 p-3 rounded-lg bg-green-500/10 border border-green-500/30">
 											<p className="text-xs text-green-400">
-												✓ Cash payment selected. A debit and credit entry will be created in the user's ledger (net zero balance).
+												✓ Cash payment selected. A debit and credit entry will be created in the user&apos;s ledger (net zero balance).
 											</p>
 										</div>
 									)}
 									{watch('paymentMode') === 'DUE' && (
 										<div className="mt-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
 											<p className="text-xs text-yellow-400">
-												⚠ Due payment selected. Only a debit entry will be created, increasing the user's outstanding balance.
+												⚠ Due payment selected. Only a debit entry will be created, increasing the user&apos;s outstanding balance.
 											</p>
 										</div>
 									)}

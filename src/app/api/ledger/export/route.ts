@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET - Export ledger data as CSV/Excel-compatible format
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -23,17 +22,17 @@ export async function GET(request: NextRequest) {
     const targetUserId = isAdmin && userId ? userId : session.user.id;
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId: targetUserId,
     };
 
     if (startDate || endDate) {
       where.transactionDate = {};
       if (startDate) {
-        where.transactionDate.gte = new Date(startDate);
+        (where.transactionDate as Record<string, unknown>).gte = new Date(startDate);
       }
       if (endDate) {
-        where.transactionDate.lte = new Date(endDate);
+        (where.transactionDate as Record<string, unknown>).lte = new Date(endDate);
       }
     }
 
@@ -47,13 +46,13 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        shipment: {
-          select: {
-            trackingNumber: true,
-            vehicleMake: true,
-            vehicleModel: true,
+          shipment: {
+            select: {
+              id: true,
+              vehicleMake: true,
+              vehicleModel: true,
+            },
           },
-        },
       },
       orderBy: {
         transactionDate: 'asc',
@@ -82,7 +81,7 @@ export async function GET(request: NextRequest) {
     // Data rows
     for (const entry of entries) {
       const shipmentInfo = entry.shipment
-        ? `${entry.shipment.trackingNumber} (${entry.shipment.vehicleMake} ${entry.shipment.vehicleModel})`
+        ? `${entry.shipment.id || ""} (${entry.shipment.vehicleMake} ${entry.shipment.vehicleModel})`
         : 'N/A';
 
       csvRows.push([

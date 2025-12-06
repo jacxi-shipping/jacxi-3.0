@@ -8,7 +8,6 @@ import Section from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ArrowLeft, Image as ImageIcon, Upload, X, Loader2 } from 'lucide-react';
-import { TruckIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { Snackbar, Alert } from '@mui/material';

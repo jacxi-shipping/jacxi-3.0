@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET - Export ledger as PDF (generates HTML that can be printed to PDF)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,17 +21,17 @@ export async function GET(request: NextRequest) {
     const targetUserId = isAdmin && userId ? userId : session.user.id;
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId: targetUserId,
     };
 
     if (startDate || endDate) {
       where.transactionDate = {};
       if (startDate) {
-        where.transactionDate.gte = new Date(startDate);
+        (where.transactionDate as Record<string, unknown>).gte = new Date(startDate);
       }
       if (endDate) {
-        where.transactionDate.lte = new Date(endDate);
+        (where.transactionDate as Record<string, unknown>).lte = new Date(endDate);
       }
     }
 
@@ -43,7 +42,7 @@ export async function GET(request: NextRequest) {
         include: {
           shipment: {
             select: {
-              trackingNumber: true,
+              id: true,
               vehicleMake: true,
               vehicleModel: true,
             },
@@ -249,7 +248,7 @@ export async function GET(request: NextRequest) {
       <tbody>
         ${entries.map(entry => {
           const shipmentInfo = entry.shipment
-            ? `${entry.shipment.trackingNumber}`
+            ? `${entry.shipment.id || ""}`
             : 'N/A';
           const date = new Date(entry.transactionDate).toLocaleString();
           
