@@ -41,18 +41,21 @@ export default function StatsCard({
 					border: '1px solid var(--border)',
 					background: 'var(--panel)',
 					boxShadow: '0 12px 30px rgba(var(--text-primary-rgb), 0.08)',
-					padding: 1.5,
+					padding: { xs: 1, sm: 1.25, md: 1.5 },
 					display: 'flex',
 					alignItems: 'center',
-					gap: 1.5,
+					gap: { xs: 1, sm: 1.25, md: 1.5 },
 					position: 'relative',
 					overflow: 'hidden',
+					minWidth: 0,
+					width: '100%',
+					boxSizing: 'border-box',
 				}}
 			>
 				<Box
 					sx={{
-						width: 38,
-						height: 38,
+						width: { xs: 32, sm: 36, md: 38 },
+						height: { xs: 32, sm: 36, md: 38 },
 						borderRadius: 2,
 						border: '1px solid var(--border)',
 						background: 'rgba(var(--accent-gold-rgb), 0.15)',
@@ -62,23 +65,26 @@ export default function StatsCard({
 						flexShrink: 0,
 					}}
 				>
-					<Icon sx={{ fontSize: 18, color: 'var(--accent-gold)' }} />
+					<Icon sx={{ fontSize: { xs: 16, sm: 17, md: 18 }, color: 'var(--accent-gold)' }} />
 				</Box>
-				<Box sx={{ flex: 1, minWidth: 0 }}>
+				<Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
 					<Typography
 						sx={{
-							fontSize: '0.65rem',
+							fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' },
 							textTransform: 'uppercase',
 							letterSpacing: '0.22em',
 							color: 'var(--text-secondary)',
 							marginBottom: 0.5,
+							overflow: 'hidden',
+							textOverflow: 'ellipsis',
+							whiteSpace: 'nowrap',
 						}}
 					>
 						{title}
 					</Typography>
 						<Typography
 							sx={{
-								fontSize: '1.25rem',
+								fontSize: { xs: '1.1rem', sm: '1.18rem', md: '1.25rem' },
 								fontWeight: 700,
 								color: 'var(--text-primary)',
 								lineHeight: 1.15,
@@ -89,9 +95,12 @@ export default function StatsCard({
 					{subtitle && (
 						<Typography
 							sx={{
-								fontSize: '0.72rem',
+								fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.72rem' },
 								color: 'var(--text-secondary)',
 								marginTop: 0.25,
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
+								whiteSpace: 'nowrap',
 							}}
 						>
 							{subtitle}
@@ -103,13 +112,14 @@ export default function StatsCard({
 						label={`${trend.isPositive ? '+' : '−'}${Math.abs(trend.value)}%`}
 						size="small"
 						sx={{
-							fontSize: '0.65rem',
+							fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' },
 							fontWeight: 600,
-							height: 20,
-							px: 0.75,
+							height: { xs: 18, sm: 19, md: 20 },
+							px: { xs: 0.5, sm: 0.6, md: 0.75 },
 							color: trend.isPositive ? 'var(--text-primary)' : 'var(--error)',
 							borderColor: trend.isPositive ? 'var(--border)' : 'var(--error)',
 							background: trend.isPositive ? 'var(--background)' : 'rgba(var(--error-rgb), 0.12)',
+							flexShrink: 0,
 						}}
 						variant="outlined"
 					/>

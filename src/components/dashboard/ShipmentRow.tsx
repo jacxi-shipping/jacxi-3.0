@@ -100,7 +100,7 @@ export default function ShipmentRow({
 					border: '1px solid rgba(var(--panel-rgb), 0.9)',
 					borderRadius: 2,
 					boxShadow: '0 18px 32px rgba(var(--text-primary-rgb), 0.08)',
-					padding: { xs: 1.5, md: 1.75 },
+					padding: { xs: 1.25, sm: 1.5, md: 1.75 },
 					display: 'grid',
 					gridTemplateColumns: {
 						xs: '1fr',
@@ -108,12 +108,15 @@ export default function ShipmentRow({
 					},
 					gap: { xs: 1.25, md: 1.5 },
 					alignItems: 'center',
+					minWidth: 0,
+					width: '100%',
+					boxSizing: 'border-box',
 				}}
 			>
-				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0 }}>
+				<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, minWidth: 0, overflow: 'hidden' }}>
 					<Typography
 						sx={{
-							fontSize: '0.9rem',
+							fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' },
 							fontWeight: 600,
 							color: 'var(--text-primary)',
 							overflow: 'hidden',
@@ -123,35 +126,47 @@ export default function ShipmentRow({
 					>
 						{trackingNumber}
 					</Typography>
-					<Typography sx={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
+					<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)' }}>
 						Created: {new Date(createdAt).toLocaleDateString()}
 					</Typography>
-					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minWidth: 0 }}>
 						<Chip
 							label={formatStatus(status)}
 							size="small"
 							sx={{
-								height: 20,
-								fontSize: '0.65rem',
+								height: { xs: 18, sm: 20 },
+								fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' },
 								fontWeight: 600,
 								bgcolor: statusConfig.bg,
 								color: statusConfig.text,
 								borderColor: statusConfig.border,
+								maxWidth: '100%',
+								'& .MuiChip-label': {
+									px: { xs: 0.5, sm: 0.75 },
+									overflow: 'hidden',
+									textOverflow: 'ellipsis',
+								},
 							}}
 							variant="outlined"
 						/>
 						{paymentStatus && paymentConfig && (
 							<Chip
-								icon={<CreditCard sx={{ fontSize: 14, color: paymentConfig.text }} />}
+								icon={<CreditCard sx={{ fontSize: { xs: 12, sm: 14 }, color: paymentConfig.text }} />}
 								label={formatStatus(paymentStatus)}
 								size="small"
 								sx={{
-									height: 20,
-									fontSize: '0.62rem',
+									height: { xs: 18, sm: 20 },
+									fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' },
 									fontWeight: 600,
 									bgcolor: paymentConfig.bg,
 									color: paymentConfig.text,
 									borderColor: paymentConfig.border,
+									maxWidth: '100%',
+									'& .MuiChip-label': {
+										px: { xs: 0.5, sm: 0.75 },
+										overflow: 'hidden',
+										textOverflow: 'ellipsis',
+									},
 								}}
 								variant="outlined"
 							/>
@@ -159,44 +174,44 @@ export default function ShipmentRow({
 					</Box>
 				</Box>
 
-				<Box sx={{ minWidth: 0 }}>
-					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
+				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+					<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
 						Vehicle
 					</Typography>
-					<Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-primary)' }}>{vehicleType}</Typography>
+					<Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.78rem', md: '0.8rem' }, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{vehicleType}</Typography>
 					{(vehicleMake || vehicleModel) && (
-						<Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+						<Typography sx={{ fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' }, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
 							{vehicleMake || ''} {vehicleModel || ''}
 						</Typography>
 					)}
 					{showCustomer && user && (
-						<Typography sx={{ fontSize: '0.68rem', color: 'var(--text-secondary)', mt: 0.3 }}>
+						<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
 							{user.name || user.email}
 						</Typography>
 					)}
 				</Box>
 
-				<Box sx={{ minWidth: 0 }}>
-					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
+				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+					<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
 						Route
 					</Typography>
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden' }}>
-						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{origin}</Typography>
-						<ArrowForward sx={{ fontSize: 14, color: 'var(--accent-gold)' }} />
-						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{destination}</Typography>
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontSize: { xs: '0.72rem', sm: '0.75rem', md: '0.78rem' }, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', minWidth: 0 }}>
+						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: '0 1 auto', maxWidth: { xs: '80px', sm: '100px', md: 'none' } }}>{origin}</Typography>
+						<ArrowForward sx={{ fontSize: { xs: 12, sm: 14 }, color: 'var(--accent-gold)', flexShrink: 0 }} />
+						<Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: '0 1 auto', maxWidth: { xs: '80px', sm: '100px', md: 'none' } }}>{destination}</Typography>
 					</Box>
-					<Typography sx={{ fontSize: '0.68rem', color: 'var(--text-secondary)', mt: 0.2 }}>
+					<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
 						ETA {estimatedDelivery ? new Date(estimatedDelivery).toLocaleDateString() : 'Pending'}
 					</Typography>
 				</Box>
 
-				<Box sx={{ minWidth: 0 }}>
-					<Typography sx={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
+				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+					<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
 						Progress
 					</Typography>
 					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.4 }}>
-						<Typography sx={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Pipeline</Typography>
-						<Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: statusConfig.text }}>{progress}%</Typography>
+						<Typography sx={{ fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' }, color: 'var(--text-secondary)' }}>Pipeline</Typography>
+						<Typography sx={{ fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' }, fontWeight: 600, color: statusConfig.text }}>{progress}%</Typography>
 					</Box>
 					<LinearProgress
 						variant="determinate"
@@ -221,19 +236,20 @@ export default function ShipmentRow({
 						gap: 0.75,
 						justifyContent: { xs: 'flex-end', md: 'center' },
 						alignItems: { xs: 'center', md: 'flex-end' },
+						flexShrink: 0,
 					}}
 				>
 					<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none' }}>
 						<Button
 							variant="outlined"
 							size="small"
-							startIcon={<Visibility sx={{ fontSize: 14 }} />}
+							startIcon={<Visibility sx={{ fontSize: { xs: 12, sm: 14 } }} />}
 							sx={{
-								fontSize: '0.7rem',
+								fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' },
 								fontWeight: 600,
 								borderColor: 'rgba(var(--accent-gold-rgb), 0.4)',
 								color: 'var(--accent-gold)',
-								paddingX: 1.2,
+								paddingX: { xs: 0.75, sm: 1, md: 1.2 },
 								textTransform: 'none',
 							}}
 						>
@@ -244,9 +260,9 @@ export default function ShipmentRow({
 						<Button
 							variant="text"
 							size="small"
-							startIcon={<Edit sx={{ fontSize: 14 }} />}
+							startIcon={<Edit sx={{ fontSize: { xs: 12, sm: 14 } }} />}
 							sx={{
-								fontSize: '0.7rem',
+								fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' },
 								fontWeight: 600,
 								color: 'var(--text-secondary)',
 								textTransform: 'none',

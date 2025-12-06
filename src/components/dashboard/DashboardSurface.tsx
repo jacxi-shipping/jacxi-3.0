@@ -13,10 +13,11 @@ export function DashboardSurface({ children, className, noPadding = false }: Das
 			className={cn(
 				'relative mx-auto flex w-full max-w-[1380px] flex-col gap-3 px-3 py-4 sm:px-5 lg:px-8',
 				'text-[var(--text-primary)]',
+				'min-w-0 overflow-hidden',
 				noPadding && 'px-0 sm:px-0',
 				className,
 			)}
-			style={{ backgroundColor: 'var(--background)' }}
+			style={{ backgroundColor: 'var(--background)', maxWidth: '100%' }}
 		>
 			{children}
 		</div>
@@ -115,6 +116,7 @@ export function DashboardPanel({
 		<section
 			className={cn(
 				'relative flex flex-col rounded-2xl border text-[var(--text-primary)]',
+				'min-w-0 overflow-hidden',
 				fullHeight && 'h-full',
 				className,
 			)}
@@ -122,27 +124,29 @@ export function DashboardPanel({
 				borderColor: 'var(--border)',
 				backgroundColor: 'var(--panel)',
 				boxShadow: '0 16px 40px rgba(var(--text-primary-rgb),0.08)',
+				maxWidth: '100%',
 			}}
 		>
 			{(title || description || actions) && (
 				<header
 					className={cn(
 						'flex flex-col gap-1 px-4 pt-4 text-[var(--text-primary)] sm:flex-row sm:items-center sm:justify-between',
+						'min-w-0 overflow-hidden',
 						noHeaderBorder ? 'pb-1' : 'border-b pb-3',
 					)}
 					style={!noHeaderBorder ? { borderColor: 'var(--border)' } : undefined}
 				>
-					<div className="flex flex-col gap-0.5">
+					<div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
 						{title && (
-							<p className="text-[0.95rem] font-semibold tracking-tight text-[var(--text-primary)]">{title}</p>
+							<p className="text-[0.95rem] font-semibold tracking-tight text-[var(--text-primary)] overflow-hidden text-ellipsis">{title}</p>
 						)}
-						{description && <p className="text-[0.8rem] text-[var(--text-secondary)]">{description}</p>}
+						{description && <p className="text-[0.8rem] text-[var(--text-secondary)] overflow-hidden text-ellipsis">{description}</p>}
 					</div>
 					{actions && <div className="flex flex-shrink-0 items-center gap-2 text-[0.8rem]">{actions}</div>}
 				</header>
 			)}
 			<div
-				className={cn('flex-1', noBodyPadding ? '' : 'px-4 pb-4 pt-3', bodyClassName)}
+				className={cn('flex-1 min-w-0', noBodyPadding ? '' : 'px-4 pb-4 pt-3', bodyClassName)}
 				style={{ color: 'var(--text-primary)' }}
 			>
 				{children}

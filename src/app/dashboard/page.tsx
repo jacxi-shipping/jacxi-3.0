@@ -95,7 +95,7 @@ export default function DashboardPage() {
 	const recentShipments = useMemo(() => shipments.slice(0, 2), [shipments]);
 
 	return (
-		<DashboardSurface className="flex-1 min-h-0">
+		<DashboardSurface className="flex-1 min-h-0 overflow-hidden">
 
 			<DashboardGrid className="grid-cols-2 md:grid-cols-4 flex-shrink-0 gap-2">
 				<StatsCard icon={LocalShipping} title="Active shipments" value={stats.active} />
@@ -104,13 +104,13 @@ export default function DashboardPage() {
 				<StatsCard icon={TrendingUp} title="Delivered" value={stats.delivered} />
 			</DashboardGrid>
 
-			<DashboardGrid className="grid-cols-1 flex-1 min-h-0 gap-2">
+			<DashboardGrid className="grid-cols-1 flex-1 min-h-0 gap-2 overflow-hidden">
 				<DashboardPanel
 					title="Recent shipments"
 					description="The latest files updated in the last sync."
 					fullHeight
-					className="flex-1 min-h-0"
-					bodyClassName="flex flex-col gap-1 min-h-0"
+					className="flex-1 min-h-0 overflow-hidden"
+					bodyClassName="flex flex-col gap-1 min-h-0 overflow-hidden"
 					actions={
 						shipments.length > 0 ? (
 							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
@@ -179,7 +179,16 @@ export default function DashboardPage() {
 							</Link>
 						</Box>
 					) : (
-						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flex: 1, minHeight: 0 }}>
+						<Box sx={{ 
+							display: 'flex', 
+							flexDirection: 'column', 
+							gap: 1, 
+							flex: 1, 
+							minHeight: 0,
+							minWidth: 0,
+							width: '100%',
+							overflow: 'hidden',
+						}}>
 							{recentShipments.map((shipment, index) => (
 								<ShipmentCard key={shipment.id} {...shipment} delay={0.2 + index * 0.05} />
 							))}

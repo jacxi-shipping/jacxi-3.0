@@ -71,10 +71,14 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               containerNumber: true,
+              trackingNumber: true,
               vesselName: true,
               status: true,
               estimatedArrival: true,
               currentLocation: true,
+              loadingPort: true,
+              destinationPort: true,
+              progress: true,
             },
           },
           user: {
@@ -94,8 +98,30 @@ export async function GET(request: NextRequest) {
       prisma.shipment.count({ where }),
     ]);
 
+    // Transform shipments to include legacy fields for backwards compatibility
+    const transformedShipments = shipments.map(shipment => {
+      const trackingNumber = shipment.container?.trackingNumber || 
+                            shipment.container?.containerNumber || 
+                            `VIN-${shipment.vehicleVIN?.slice(-8) || shipment.id.slice(-8)}`;
+      const origin = shipment.container?.loadingPort || 'Warehouse';
+      const destination = shipment.container?.destinationPort || 'Pending';
+      const progress = shipment.container?.progress || 0;
+      const estimatedDelivery = shipment.container?.estimatedArrival || null;
+      const containerStatus = shipment.status === 'IN_TRANSIT' ? shipment.container?.status || 'IN_TRANSIT' : shipment.status;
+
+      return {
+        ...shipment,
+        trackingNumber,
+        origin,
+        destination,
+        progress,
+        estimatedDelivery,
+        status: containerStatus,
+      };
+    });
+
     return NextResponse.json({
-      shipments,
+      shipments: transformedShipments,
       pagination: {
         total,
         page,
