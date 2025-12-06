@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, InvoiceStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { auth } from '@/lib/auth';
 
 const prisma = new PrismaClient();
@@ -60,17 +60,17 @@ export async function GET() {
 					paymentStatus: true,
 				},
 			}),
-			prisma.invoice.findMany({
+			prisma.containerInvoice.findMany({
 				select: {
 					id: true,
 					invoiceNumber: true,
 					status: true,
-					totalUSD: true,
-					dueDate: true,
+					amount: true,
+					date: true,
 					createdAt: true,
 					container: {
 						select: {
-							shipment: {
+							shipments: {
 								select: {
 									userId: true,
 								},
@@ -95,8 +95,8 @@ export async function GET() {
 		const totalShipments = shipments.length;
 		const activeShipments = shipments.filter((shipment) => ACTIVE_SHIPMENT_STATUSES.includes(shipment.status as typeof ACTIVE_SHIPMENT_STATUSES[number])).length;
 		const totalRevenue = invoices
-			.filter((invoice) => invoice.status === InvoiceStatus.PAID)
-			.reduce((acc, invoice) => acc + invoice.totalUSD, 0);
+			.filter((invoice) => invoice.status === 'PAID')
+			.reduce((acc, invoice) => acc + invoice.amount, 0);
 
 		const shipmentsByStatusMap = new Map<string, number>();
 		shipments.forEach((shipment) => {
@@ -115,8 +115,8 @@ export async function GET() {
 
 		const revenueByMonth = months.map((month) => {
 			const total = invoices
-				.filter((invoice) => invoice.status === InvoiceStatus.PAID && monthKey(invoice.createdAt) === month.key)
-				.reduce((acc, invoice) => acc + invoice.totalUSD, 0);
+				.filter((invoice) => invoice.status === "PAID" && monthKey(invoice.createdAt) === month.key)
+				.reduce((acc, invoice) => acc + invoice.amount, 0);
 			return { month: month.label, totalUSD: formatCurrency(total) };
 		});
 
@@ -124,7 +124,7 @@ export async function GET() {
 		invoices.forEach((invoice) => {
 			const current = invoiceStatusMap.get(invoice.status) ?? { count: 0, totalUSD: 0 };
 			current.count += 1;
-			current.totalUSD += invoice.totalUSD;
+			current.totalUSD += invoice.amount;
 			invoiceStatusMap.set(invoice.status, current);
 		});
 
@@ -136,20 +136,15 @@ export async function GET() {
 
 		const overdueInvoices = invoices
 			.filter((invoice) => {
-				if (!invoice.dueDate) {
-					return invoice.status === InvoiceStatus.OVERDUE;
-				}
-				const isPastDue = invoice.dueDate < new Date();
-				const isUnpaid = invoice.status !== InvoiceStatus.PAID && invoice.status !== InvoiceStatus.CANCELLED;
-				return isPastDue && isUnpaid;
+				return invoice.status === 'OVERDUE';
 			})
 			.slice(0, 8)
 			.map((invoice) => ({
 				id: invoice.id,
 				invoiceNumber: invoice.invoiceNumber,
 				status: invoice.status,
-				totalUSD: formatCurrency(invoice.totalUSD),
-				dueDate: invoice.dueDate,
+				totalUSD: formatCurrency(invoice.amount),
+				date: invoice.date,
 			}));
 
 		const topCustomerMap = new Map<
@@ -169,14 +164,14 @@ export async function GET() {
 		});
 
 		invoices.forEach((invoice) => {
-			const userId = invoice.container?.shipment?.userId;
+			const userId = invoice.container?.shipments?.[0]?.userId;
 			if (!userId) return;
 			const entry = topCustomerMap.get(userId) ?? {
 				shipmentCount: 0,
 				revenue: 0,
 				lastShipmentDate: null,
 			};
-			entry.revenue += invoice.status === InvoiceStatus.PAID ? invoice.totalUSD : 0;
+			entry.revenue += invoice.status === "PAID" ? invoice.amount : 0;
 			topCustomerMap.set(userId, entry);
 		});
 

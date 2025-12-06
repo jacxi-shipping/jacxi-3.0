@@ -19,7 +19,7 @@ export async function GET() {
       );
     }
 
-    const invoices = await prisma.invoice.findMany({
+    const invoices = await prisma.containerInvoice.findMany({
       include: {
         container: {
           select: {
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
     // Create invoice
-    const invoice = await prisma.invoice.create({
+    const invoice = await prisma.containerInvoice.create({
       data: {
         containerId,
         invoiceNumber,
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    const invoiceWithItems = await prisma.invoice.findUnique({
+    const invoiceWithItems = await prisma.containerInvoice.findUnique({
       where: { id: invoice.id },
       include: {
         container: {

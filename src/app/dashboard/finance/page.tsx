@@ -9,7 +9,6 @@ import {
   TrendingUp, 
   TrendingDown, 
   Users,
-  Package,
   FileText,
   Download,
   PlusCircle,

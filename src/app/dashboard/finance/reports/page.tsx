@@ -18,11 +18,80 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
 
+type UserBalance = {
+  userId: string;
+  userName: string;
+  currentBalance: number;
+};
+
+type UserReport = {
+  userId: string;
+  userName: string;
+  email: string;
+  totalDebit: number;
+  totalCredit: number;
+  currentBalance: number;
+  shipmentStats: {
+    total: number;
+    paid: number;
+    due: number;
+  };
+};
+
+type ShipmentReport = {
+  shipmentId: string;
+  trackingNumber: string | null;
+  vehicle: string;
+  price: number | null;
+  paymentStatus: string;
+  totalCharged: number;
+  totalPaid: number;
+  amountDue: number;
+  totalExpenses: number;
+  revenue: number;
+  profit: number;
+  profitMargin: number;
+  user: {
+    id: string;
+    name: string;
+  };
+};
+
+type ReportData = {
+  reportType: string;
+  period?: {
+    startDate: string;
+    endDate: string;
+  };
+  ledgerSummary?: {
+    totalDebit: number;
+    totalCredit: number;
+    netBalance: number;
+    debitCount: number;
+    creditCount: number;
+  };
+  shipmentSummary?: Array<{
+    status: string;
+    totalAmount: number;
+    count: number;
+  }>;
+  userBalances?: UserBalance[];
+  users?: UserReport[];
+  summary?: {
+    totalRevenue: number;
+    totalExpenses: number;
+    totalProfit: number;
+    avgProfitMargin: number;
+    shipmentCount: number;
+  };
+  shipments?: ShipmentReport[];
+};
+
 export default function FinancialReportsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [reportType, setReportType] = useState<'summary' | 'user-wise' | 'shipment-wise'>('summary');
-  const [reportData, setReportData] = useState<any>(null);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     startDate: '',
@@ -38,6 +107,7 @@ export default function FinancialReportsPage() {
       return;
     }
     fetchReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, router, reportType]);
 
   const fetchReport = async () => {
@@ -339,7 +409,7 @@ export default function FinancialReportsPage() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
-                            {reportData.userBalances.map((user: any) => (
+                            {reportData.userBalances.map((user) => (
                               <tr key={user.userId} className="hover:bg-white/5">
                                 <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{user.userName}</td>
                                 <td className="px-4 py-3 text-sm text-right">
@@ -362,7 +432,7 @@ export default function FinancialReportsPage() {
             {reportType === 'user-wise' && (
               <Section className="pb-16">
                 <div className="space-y-6">
-                  {reportData.users.map((user: any) => (
+                  {reportData.users.map((user) => (
                     <Card key={user.userId} className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
                       <CardHeader className="p-4 border-b border-white/5">
                         <div className="flex items-center justify-between">
@@ -422,7 +492,7 @@ export default function FinancialReportsPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                          {reportData.shipments.map((shipment: any) => (
+                          {reportData.shipments.map((shipment) => (
                             <tr key={shipment.shipmentId} className="hover:bg-white/5">
                               <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{shipment.trackingNumber}</td>
                               <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{shipment.vehicle}</td>

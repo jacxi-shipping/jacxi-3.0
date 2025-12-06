@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET - Generate financial reports
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -24,14 +23,14 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     // Build where clause for date filtering
-    const dateWhere: any = {};
+    const dateWhere: Record<string, unknown> = {};
     if (startDate || endDate) {
       dateWhere.createdAt = {};
       if (startDate) {
-        dateWhere.createdAt.gte = new Date(startDate);
+        (dateWhere.createdAt as Record<string, unknown>).gte = new Date(startDate);
       }
       if (endDate) {
-        dateWhere.createdAt.lte = new Date(endDate);
+        (dateWhere.createdAt as Record<string, unknown>).lte = new Date(endDate);
       }
     }
 
@@ -178,7 +177,7 @@ export async function GET(request: NextRequest) {
       });
     } else if (reportType === 'shipment-wise') {
       // Shipment-wise payment report with expenses and profit
-      const where: any = dateWhere;
+      const where: Record<string, unknown> = { ...dateWhere };
       if (userId) {
         where.userId = userId;
       }
@@ -214,14 +213,14 @@ export async function GET(request: NextRequest) {
           e.metadata && 
           typeof e.metadata === 'object' && 
           'isExpense' in e.metadata && 
-          (e.metadata as any).isExpense === true
+          (e.metadata as Record<string, unknown>).isExpense === true
         );
 
         const regularTransactions = shipment.ledgerEntries.filter(e => 
           !e.metadata || 
           typeof e.metadata !== 'object' || 
           !('isExpense' in e.metadata) ||
-          (e.metadata as any).isExpense !== true
+          (e.metadata as Record<string, unknown>).isExpense !== true
         );
 
         const totalDebit = regularTransactions
@@ -256,7 +255,7 @@ export async function GET(request: NextRequest) {
             id: e.id,
             description: e.description,
             amount: e.amount,
-            type: (e.metadata as any)?.expenseType || 'OTHER',
+            type: (e.metadata as Record<string, unknown>)?.expenseType || 'OTHER',
             date: e.transactionDate,
           })),
           user: {

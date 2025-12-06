@@ -20,7 +20,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    const invoice = await prisma.invoice.findUnique({
+    const invoice = await prisma.containerInvoice.findUnique({
       where: { id },
       include: {
         container: {
@@ -86,7 +86,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const data = (await request.json()) as UpdateInvoicePayload;
     const { status, paidDate, wireTransferDetails, dueDate } = data;
 
-    const updateData: Prisma.InvoiceUpdateInput = {};
+    const updateData: Prisma.ContainerInvoiceUpdateInput = {};
 
     if (status) {
       updateData.status = status;
@@ -111,7 +111,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       updateData.overdue = dueDateValue < new Date() && status !== 'PAID';
     } else {
       // Check existing due date
-      const invoice = await prisma.invoice.findUnique({
+      const invoice = await prisma.containerInvoice.findUnique({
         where: { id },
         select: { dueDate: true, status: true },
       });
@@ -121,7 +121,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     // Get invoice first to get containerId
-    const existingInvoice = await prisma.invoice.findUnique({
+    const existingInvoice = await prisma.containerInvoice.findUnique({
       where: { id },
       select: { containerId: true },
     });
@@ -139,7 +139,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       select: { shipmentId: true },
     });
 
-    const invoice = await prisma.invoice.update({
+    const invoice = await prisma.containerInvoice.update({
       where: { id },
       data: updateData,
       include: {

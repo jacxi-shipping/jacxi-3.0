@@ -10,6 +10,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
 
+interface ShipmentDetail {
+  id: string;
+  trackingNumber: string | null;
+  vehicleMake: string | null;
+  vehicleModel: string | null;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+  amountDue: number;
+  createdAt: string;
+  ageInDays: number;
+  price: number | null;
+}
+
 interface AgingReport {
   reportType: string;
   generatedAt: string;
@@ -26,10 +42,10 @@ interface AgingReport {
     };
   };
   details: {
-    current: any[];
-    aging30: any[];
-    aging60: any[];
-    aging90: any[];
+    current: ShipmentDetail[];
+    aging30: ShipmentDetail[];
+    aging60: ShipmentDetail[];
+    aging90: ShipmentDetail[];
   };
 }
 
@@ -297,7 +313,7 @@ export default function AgingReportPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {selectedDetails.map((shipment: any) => (
+                      {selectedDetails.map((shipment) => (
                         <tr key={shipment.id} className="hover:bg-white/5 transition-colors">
                           <td className="px-4 py-3 text-sm text-[var(--text-primary)]">
                             <Link

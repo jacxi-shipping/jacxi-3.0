@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
-import { createAuditLog } from '@/app/api/audit-logs/route';
+import { createAuditLog } from '@/lib/audit';
 
 // Schema for creating a ledger entry
 const createLedgerEntrySchema = z.object({
@@ -13,13 +12,13 @@ const createLedgerEntrySchema = z.object({
   type: z.enum(['DEBIT', 'CREDIT']),
   amount: z.number().positive(),
   notes: z.string().optional(),
-  metadata: z.any().optional(),
+  metadata: z.record(z.unknown()).optional(),
 });
 
 // GET - Fetch ledger entries with filters
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -40,7 +39,7 @@ export async function GET(request: NextRequest) {
     const targetUserId = isAdmin && userId ? userId : session.user.id;
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId: targetUserId,
     };
 
@@ -102,6 +101,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate summary
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const summary = await prisma.ledgerEntry.aggregate({
       where,
       _sum: {
@@ -156,7 +156,7 @@ export async function GET(request: NextRequest) {
 // POST - Create a new ledger entry
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid data', details: error.errors },
+        { error: 'Invalid data', details: error.issues },
         { status: 400 }
       );
     }

@@ -50,3 +50,6 @@ export default function AdminRoute({ children }: AdminRouteProps) {
   return <>{children}</>;
 }
 
+// Export as named export as well for backwards compatibility
+export { AdminRoute };
+

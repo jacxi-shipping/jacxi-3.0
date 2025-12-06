@@ -138,6 +138,7 @@ export default function AddExpensePage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -317,7 +318,7 @@ export default function AddExpensePage() {
                       <div>
                         <p className="text-sm font-semibold text-yellow-400">Important</p>
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
-                          This expense will be added to the user's ledger as a debit (amount owed). 
+                          This expense will be added to the user&apos;s ledger as a debit (amount owed). 
                           It will increase their outstanding balance and be linked to this shipment.
                         </p>
                       </div>

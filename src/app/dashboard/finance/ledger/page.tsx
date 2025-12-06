@@ -9,7 +9,6 @@ import {
   Download, 
   Filter, 
   Search, 
-  Calendar,
   Printer,
   ChevronLeft,
   ChevronRight,
@@ -71,6 +70,7 @@ export default function LedgerPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isAdmin = session?.user?.role === 'admin';
 
   useEffect(() => {
@@ -80,6 +80,7 @@ export default function LedgerPage() {
       return;
     }
     fetchLedgerEntries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status, page, filters]);
 
   const fetchLedgerEntries = async () => {

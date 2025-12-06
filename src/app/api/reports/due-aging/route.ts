@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET - Generate due aging report
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -21,7 +20,7 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId');
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       paymentStatus: 'PENDING', // Only unpaid shipments
     };
 
@@ -49,11 +48,24 @@ export async function GET(request: NextRequest) {
     });
 
     const now = new Date();
+    
+    type ShipmentData = {
+      id: string;
+      trackingNumber: string | null;
+      vehicleMake: string | null;
+      vehicleModel: string | null;
+      user: { id: string; name: string | null; email: string };
+      amountDue: number;
+      createdAt: Date;
+      ageInDays: number;
+      price: number | null;
+    };
+    
     const agingBuckets = {
-      current: [] as any[],      // 0-30 days
-      aging30: [] as any[],       // 31-60 days
-      aging60: [] as any[],       // 61-90 days
-      aging90: [] as any[],       // 90+ days
+      current: [] as ShipmentData[],      // 0-30 days
+      aging30: [] as ShipmentData[],       // 31-60 days
+      aging60: [] as ShipmentData[],       // 61-90 days
+      aging90: [] as ShipmentData[],       // 90+ days
     };
 
     let totalCurrent = 0;

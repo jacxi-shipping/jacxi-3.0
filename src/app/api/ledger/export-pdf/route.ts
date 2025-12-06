@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 
 // GET - Export ledger as PDF (generates HTML that can be printed to PDF)
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
     const targetUserId = isAdmin && userId ? userId : session.user.id;
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId: targetUserId,
     };
 
