@@ -24,16 +24,12 @@ export async function GET() {
         container: {
           select: {
             containerNumber: true,
-            shipmentId: true,
-          },
-        },
-        items: {
-          include: {
-            item: {
+            shipments: {
               select: {
-                vin: true,
-                lotNumber: true,
-                auctionCity: true,
+                id: true,
+                vehicleVIN: true,
+                vehicleMake: true,
+                vehicleModel: true,
               },
             },
           },
@@ -186,19 +182,9 @@ export async function POST(request: NextRequest) {
         container: {
           select: {
             containerNumber: true,
-            shipmentId: true,
+            shipments: { select: { id: true, vehicleVIN: true, vehicleMake: true, vehicleModel: true } },
           },
         },
-        items: {
-          include: {
-            item: {
-              select: {
-                vin: true,
-                lotNumber: true,
-                auctionCity: true,
-              },
-            },
-          },
         },
       },
     });

@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
     
     type ShipmentData = {
       id: string;
-      trackingNumber: string | null;
       vehicleMake: string | null;
       vehicleModel: string | null;
       user: { id: string; name: string | null; email: string };
@@ -83,7 +82,6 @@ export async function GET(request: NextRequest) {
 
       const shipmentData = {
         id: shipment.id,
-        trackingNumber: shipment.trackingNumber,
         vehicleMake: shipment.vehicleMake,
         vehicleModel: shipment.vehicleModel,
         user: shipment.user,

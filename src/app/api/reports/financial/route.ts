@@ -124,7 +124,6 @@ export async function GET(request: NextRequest) {
             where: dateWhere,
             select: {
               id: true,
-              trackingNumber: true,
               vehicleMake: true,
               vehicleModel: true,
               price: true,
@@ -186,7 +185,6 @@ export async function GET(request: NextRequest) {
         where,
         select: {
           id: true,
-          trackingNumber: true,
           vehicleMake: true,
           vehicleModel: true,
           price: true,
@@ -239,7 +237,6 @@ export async function GET(request: NextRequest) {
 
         return {
           shipmentId: shipment.id,
-          trackingNumber: shipment.trackingNumber,
           vehicle: `${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'N/A',
           price: shipment.price || 0,
           paymentStatus: shipment.paymentStatus,

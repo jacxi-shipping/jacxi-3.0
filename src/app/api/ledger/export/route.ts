@@ -29,10 +29,10 @@ export async function GET(request: NextRequest) {
     if (startDate || endDate) {
       where.transactionDate = {};
       if (startDate) {
-        where.transactionDate.gte = new Date(startDate);
+        (where.transactionDate as Record<string, unknown>).gte = new Date(startDate);
       }
       if (endDate) {
-        where.transactionDate.lte = new Date(endDate);
+        (where.transactionDate as Record<string, unknown>).lte = new Date(endDate);
       }
     }
 
@@ -46,13 +46,13 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        shipment: {
-          select: {
-            trackingNumber: true,
-            vehicleMake: true,
-            vehicleModel: true,
+          shipment: {
+            select: {
+              id: true,
+              vehicleMake: true,
+              vehicleModel: true,
+            },
           },
-        },
       },
       orderBy: {
         transactionDate: 'asc',
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     // Data rows
     for (const entry of entries) {
       const shipmentInfo = entry.shipment
-        ? `${entry.shipment.trackingNumber} (${entry.shipment.vehicleMake} ${entry.shipment.vehicleModel})`
+        ? `${entry.shipment.id || ""} (${entry.shipment.vehicleMake} ${entry.shipment.vehicleModel})`
         : 'N/A';
 
       csvRows.push([

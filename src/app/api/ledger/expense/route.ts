@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
       where: { id: validatedData.shipmentId },
       select: {
         id: true,
-        trackingNumber: true,
         userId: true,
         vehicleMake: true,
         vehicleModel: true,
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Create expense description
     const expenseTypeLabel = validatedData.expenseType.replace(/_/g, ' ').toLowerCase();
     const vehicleInfo = `${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'Vehicle';
-    const description = `${validatedData.description} - ${expenseTypeLabel} for ${vehicleInfo} (${shipment.trackingNumber})`;
+    const description = `${validatedData.description} - ${expenseTypeLabel} for ${vehicleInfo} (Shipment ${shipment.id})`;
 
     // Create ledger entry for expense
     const entry = await prisma.ledgerEntry.create({
@@ -87,7 +86,6 @@ export async function POST(request: NextRequest) {
         shipment: {
           select: {
             id: true,
-            trackingNumber: true,
             vehicleMake: true,
             vehicleModel: true,
           },

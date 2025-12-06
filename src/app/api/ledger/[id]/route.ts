@@ -7,7 +7,7 @@ import { z } from 'zod';
 const updateLedgerEntrySchema = z.object({
   description: z.string().min(1).optional(),
   notes: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // GET - Fetch a single ledger entry
@@ -36,7 +36,6 @@ export async function GET(
         shipment: {
           select: {
             id: true,
-            trackingNumber: true,
             vehicleMake: true,
             vehicleModel: true,
             price: true,
@@ -100,7 +99,7 @@ export async function PATCH(
       data: {
         description: validatedData.description,
         notes: validatedData.notes,
-        metadata: validatedData.metadata,
+        metadata: validatedData.metadata as never,
       },
       include: {
         user: {
@@ -113,7 +112,6 @@ export async function PATCH(
         shipment: {
           select: {
             id: true,
-            trackingNumber: true,
             vehicleMake: true,
             vehicleModel: true,
           },

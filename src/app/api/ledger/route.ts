@@ -12,7 +12,7 @@ const createLedgerEntrySchema = z.object({
   type: z.enum(['DEBIT', 'CREDIT']),
   amount: z.number().positive(),
   notes: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 // GET - Fetch ledger entries with filters
@@ -54,10 +54,10 @@ export async function GET(request: NextRequest) {
     if (startDate || endDate) {
       where.transactionDate = {};
       if (startDate) {
-        where.transactionDate.gte = new Date(startDate);
+        (where.transactionDate as Record<string, unknown>).gte = new Date(startDate);
       }
       if (endDate) {
-        where.transactionDate.lte = new Date(endDate);
+        (where.transactionDate as Record<string, unknown>).lte = new Date(endDate);
       }
     }
 
@@ -85,7 +85,6 @@ export async function GET(request: NextRequest) {
         shipment: {
           select: {
             id: true,
-            trackingNumber: true,
             vehicleMake: true,
             vehicleModel: true,
             price: true,
@@ -198,7 +197,7 @@ export async function POST(request: NextRequest) {
         balance: newBalance,
         createdBy: session.user.id as string,
         notes: validatedData.notes,
-        metadata: validatedData.metadata,
+        metadata: validatedData.metadata as never,
       },
       include: {
         user: {
@@ -211,7 +210,6 @@ export async function POST(request: NextRequest) {
         shipment: {
           select: {
             id: true,
-            trackingNumber: true,
             vehicleMake: true,
             vehicleModel: true,
           },

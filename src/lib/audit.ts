@@ -20,7 +20,7 @@ export async function createAuditLog(
         entityId,
         action,
         performedBy,
-        changes,
+        changes: changes as never,
         ipAddress,
         userAgent,
       },

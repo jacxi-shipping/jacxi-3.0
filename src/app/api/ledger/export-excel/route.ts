@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
     if (startDate || endDate) {
       where.transactionDate = {};
       if (startDate) {
-        where.transactionDate.gte = new Date(startDate);
+        (where.transactionDate as Record<string, unknown>).gte = new Date(startDate);
       }
       if (endDate) {
-        where.transactionDate.lte = new Date(endDate);
+        (where.transactionDate as Record<string, unknown>).lte = new Date(endDate);
       }
     }
 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         include: {
           shipment: {
             select: {
-              trackingNumber: true,
+              id: true,
               vehicleMake: true,
               vehicleModel: true,
             },
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
     for (const entry of entries) {
       const date = new Date(entry.transactionDate);
       const shipmentInfo = entry.shipment
-        ? `${entry.shipment.trackingNumber}`
+        ? `Shipment ${entry.shipment.id || ""}`
         : '';
       const vehicleInfo = entry.shipment
         ? `${entry.shipment.vehicleMake || ''} ${entry.shipment.vehicleModel || ''}`.trim()

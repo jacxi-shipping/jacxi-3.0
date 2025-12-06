@@ -344,7 +344,7 @@ export default function FinancialReportsPage() {
               <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                 <Calendar className="w-4 h-4" />
                 <span>
-                  Report Period: {formatDate(reportData.period.startDate)} - {formatDate(reportData.period.endDate)}
+                  Report Period: {reportData.period ? `${formatDate(reportData.period.startDate)} - ${formatDate(reportData.period.endDate)}` : 'N/A'}
                 </span>
               </div>
             </Section>
@@ -358,10 +358,10 @@ export default function FinancialReportsPage() {
                       <CardContent className="p-6">
                         <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Total Debit</p>
                         <p className="text-2xl font-bold text-red-400 mt-2">
-                          {formatCurrency(reportData.ledgerSummary.totalDebit)}
+                          {formatCurrency(reportData.ledgerSummary?.totalDebit || 0)}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
-                          {reportData.ledgerSummary.debitCount} transactions
+                          {reportData.ledgerSummary?.debitCount} transactions
                         </p>
                       </CardContent>
                     </Card>
@@ -370,10 +370,10 @@ export default function FinancialReportsPage() {
                       <CardContent className="p-6">
                         <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Total Credit</p>
                         <p className="text-2xl font-bold text-green-400 mt-2">
-                          {formatCurrency(reportData.ledgerSummary.totalCredit)}
+                          {formatCurrency(reportData.ledgerSummary?.totalCredit || 0)}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
-                          {reportData.ledgerSummary.creditCount} transactions
+                          {reportData.ledgerSummary?.creditCount} transactions
                         </p>
                       </CardContent>
                     </Card>
@@ -382,12 +382,12 @@ export default function FinancialReportsPage() {
                       <CardContent className="p-6">
                         <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Net Balance</p>
                         <p className={`text-2xl font-bold mt-2 ${
-                          reportData.ledgerSummary.netBalance >= 0 ? 'text-green-400' : 'text-red-400'
+                          (reportData.ledgerSummary?.netBalance || 0) >= 0 ? 'text-green-400' : 'text-red-400'
                         }`}>
-                          {formatCurrency(Math.abs(reportData.ledgerSummary.netBalance))}
+                          {formatCurrency(Math.abs(reportData.ledgerSummary?.netBalance || 0))}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)] mt-1">
-                          {reportData.ledgerSummary.netBalance >= 0 ? 'Receivable' : 'Payable'}
+                          {(reportData.ledgerSummary?.netBalance || 0) >= 0 ? 'Receivable' : 'Payable'}
                         </p>
                       </CardContent>
                     </Card>
@@ -409,7 +409,7 @@ export default function FinancialReportsPage() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-white/5">
-                            {reportData.userBalances.map((user) => (
+                            {reportData.userBalances?.map((user) => (
                               <tr key={user.userId} className="hover:bg-white/5">
                                 <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{user.userName}</td>
                                 <td className="px-4 py-3 text-sm text-right">
@@ -432,7 +432,7 @@ export default function FinancialReportsPage() {
             {reportType === 'user-wise' && (
               <Section className="pb-16">
                 <div className="space-y-6">
-                  {reportData.users.map((user) => (
+                  {reportData.users?.map((user) => (
                     <Card key={user.userId} className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
                       <CardHeader className="p-4 border-b border-white/5">
                         <div className="flex items-center justify-between">
@@ -492,7 +492,7 @@ export default function FinancialReportsPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                          {reportData.shipments.map((shipment) => (
+                          {reportData.shipments?.map((shipment) => (
                             <tr key={shipment.shipmentId} className="hover:bg-white/5">
                               <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{shipment.trackingNumber}</td>
                               <td className="px-4 py-3 text-sm text-[var(--text-primary)]">{shipment.vehicle}</td>

@@ -29,7 +29,6 @@ export async function POST(request: NextRequest) {
       select: {
         id: true,
         containerNumber: true,
-        trackingNumber: true,
         status: true,
         estimatedArrival: true,
         lastLocationUpdate: true,
