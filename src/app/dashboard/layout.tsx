@@ -48,18 +48,26 @@ export default function DashboardLayout({
 							height: 'calc(100vh - 40px)',
 							bgcolor: 'var(--background)',
 							backgroundImage: 'none',
+							overflow: 'auto',
+							/* Custom scrollbar styling */
+							'&::-webkit-scrollbar': {
+								width: '8px',
+							},
+							'&::-webkit-scrollbar-track': {
+								bgcolor: 'transparent',
+							},
+							'&::-webkit-scrollbar-thumb': {
+								bgcolor: 'rgba(var(--border-rgb), 0.5)',
+								borderRadius: '4px',
+								'&:hover': {
+									bgcolor: 'rgba(var(--border-rgb), 0.7)',
+								},
+							},
+							scrollbarWidth: 'thin',
+							scrollbarColor: 'rgba(var(--border-rgb), 0.5) transparent',
 						}}
 					>
-						<Box
-							sx={{
-								height: '100%',
-								display: 'flex',
-								flexDirection: 'column',
-								overflow: 'hidden',
-							}}
-						>
-							<div className="dashboard-scroll">{children}</div>
-						</Box>
+						{children}
 					</Box>
 				</Box>
 			</Box>
