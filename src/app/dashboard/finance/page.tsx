@@ -277,8 +277,8 @@ export default function FinancePage() {
               <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* View Ledger */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* My Ledger */}
                 <Link href="/dashboard/finance/ledger">
                   <div className="p-4 rounded-lg border border-white/10 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all cursor-pointer">
                     <div className="flex items-center gap-3">
@@ -286,17 +286,34 @@ export default function FinancePage() {
                         <FileText className="w-5 h-5 text-cyan-400" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-[var(--text-primary)]">View Ledger</p>
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">My Ledger</p>
                         <p className="text-xs text-[var(--text-secondary)]">Check your transactions</p>
                       </div>
                     </div>
                   </div>
                 </Link>
 
+                {/* All User Ledgers */}
+                {isAdmin && (
+                  <Link href="/dashboard/finance/admin/ledgers">
+                    <div className="p-4 rounded-lg border border-white/10 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-[var(--text-primary)]">All User Ledgers</p>
+                          <p className="text-xs text-[var(--text-secondary)]">View all user ledgers</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                )}
+
                 {/* Record Payment */}
                 {isAdmin && (
                   <Link href="/dashboard/finance/record-payment">
-                    <div className="p-4 rounded-lg border border-white/10 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all cursor-pointer">
+                    <div className="p-4 rounded-lg border border-white/10 hover:border-green-500/50 hover:bg-green-500/5 transition-all cursor-pointer">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
                           <PlusCircle className="w-5 h-5 text-green-400" />
@@ -313,7 +330,7 @@ export default function FinancePage() {
                 {/* View Reports */}
                 {isAdmin && (
                   <Link href="/dashboard/finance/reports">
-                    <div className="p-4 rounded-lg border border-white/10 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all cursor-pointer">
+                    <div className="p-4 rounded-lg border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all cursor-pointer">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
                           <Download className="w-5 h-5 text-purple-400" />

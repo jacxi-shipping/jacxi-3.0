@@ -33,27 +33,9 @@ const shipmentNavigation: NavigationItem[] = [
 
 const financeNavigation: NavigationItem[] = [
 	{
-		name: 'My Ledger',
-		href: '/dashboard/finance/ledger',
+		name: 'Finance',
+		href: '/dashboard/finance',
 		icon: AccountBalance,
-	},
-	{
-		name: 'All User Ledgers',
-		href: '/dashboard/finance/admin/ledgers',
-		icon: TrendingUp,
-		adminOnly: true,
-	},
-	{
-		name: 'Record Payment',
-		href: '/dashboard/finance/record-payment',
-		icon: Payment,
-		adminOnly: true,
-	},
-	{
-		name: 'Reports',
-		href: '/dashboard/finance/reports',
-		icon: Analytics,
-		adminOnly: true,
 	},
 ];
 
