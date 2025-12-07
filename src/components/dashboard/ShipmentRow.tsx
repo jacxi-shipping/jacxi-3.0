@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { Visibility, Edit, LocalShipping, CreditCard, LocationOn, CalendarToday } from '@mui/icons-material';
-import { Box, Typography, Chip, Button, Slide, LinearProgress } from '@mui/material';
+import { Box, Typography, Slide, LinearProgress } from '@mui/material';
 import { useState, useEffect } from 'react';
+import { StatusBadge, Button } from '@/components/design-system';
 
 interface ShipmentRowProps {
 	id: string;
@@ -37,28 +38,8 @@ interface ShipmentRowProps {
 	delay?: number;
 }
 
-type StatusColors = {
-	bg: string;
-	text: string;
-	border: string;
-	glow: string;
-};
-
-const statusColors: Record<string, StatusColors> = {
-	ON_HAND: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	IN_TRANSIT: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-};
-
 const formatStatus = (status: string) => {
 	return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l) => l.toUpperCase());
-};
-
-const paymentStatusColors: Record<string, StatusColors> = {
-	PENDING: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	COMPLETED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	FAILED: { bg: 'rgba(var(--error-rgb), 0.15)', text: 'var(--error)', border: 'rgba(var(--error-rgb), 0.4)', glow: 'rgba(var(--error-rgb), 0.3)' },
-	REFUNDED: { bg: 'rgba(var(--accent-gold-rgb), 0.15)', text: 'var(--accent-gold)', border: 'rgba(var(--accent-gold-rgb), 0.4)', glow: 'rgba(var(--accent-gold-rgb), 0.3)' },
-	CANCELLED: { bg: 'rgba(var(--text-secondary-rgb), 0.15)', text: 'var(--text-secondary)', border: 'rgba(var(--text-secondary-rgb), 0.4)', glow: 'rgba(var(--text-secondary-rgb), 0.3)' },
 };
 
 export default function ShipmentRow({
@@ -77,8 +58,6 @@ export default function ShipmentRow({
 	showCustomer = false,
 	delay = 0,
 }: ShipmentRowProps) {
-	const statusConfig = statusColors[status] || statusColors.ON_HAND;
-	const paymentConfig = paymentStatus ? (paymentStatusColors[paymentStatus] || paymentStatusColors.PENDING) : null;
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
@@ -132,49 +111,21 @@ export default function ShipmentRow({
 					<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)' }}>
 						Created: {new Date(createdAt).toLocaleDateString()}
 					</Typography>
-					<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minWidth: 0 }}>
-						<Chip
-							label={formatStatus(status)}
-							size="small"
-							sx={{
-								height: { xs: 18, sm: 20 },
-								fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' },
-								fontWeight: 600,
-								bgcolor: statusConfig.bg,
-								color: statusConfig.text,
-								borderColor: statusConfig.border,
-								maxWidth: '100%',
-								'& .MuiChip-label': {
-									px: { xs: 0.5, sm: 0.75 },
-									overflow: 'hidden',
-									textOverflow: 'ellipsis',
-								},
-							}}
-							variant="outlined"
+				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minWidth: 0 }}>
+					<StatusBadge 
+						status={status} 
+						variant="default" 
+						size="sm"
+					/>
+					{paymentStatus && (
+						<StatusBadge 
+							status={paymentStatus} 
+							variant="default" 
+							size="sm"
+							icon={<CreditCard sx={{ fontSize: 14 }} />}
 						/>
-						{paymentStatus && paymentConfig && (
-							<Chip
-								icon={<CreditCard sx={{ fontSize: { xs: 12, sm: 14 }, color: paymentConfig.text }} />}
-								label={formatStatus(paymentStatus)}
-								size="small"
-								sx={{
-									height: { xs: 18, sm: 20 },
-									fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' },
-									fontWeight: 600,
-									bgcolor: paymentConfig.bg,
-									color: paymentConfig.text,
-									borderColor: paymentConfig.border,
-									maxWidth: '100%',
-									'& .MuiChip-label': {
-										px: { xs: 0.5, sm: 0.75 },
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-									},
-								}}
-								variant="outlined"
-							/>
-						)}
-					</Box>
+					)}
+				</Box>
 				</Box>
 
 				{/* Column 2: Vehicle Type */}
@@ -323,39 +274,26 @@ export default function ShipmentRow({
 						flexShrink: 0,
 					}}
 				>
-					<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none' }}>
-						<Button
-							variant="outlined"
-							size="small"
-							startIcon={<Visibility sx={{ fontSize: { xs: 12, sm: 14 } }} />}
-							sx={{
-								fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' },
-								fontWeight: 600,
-								borderColor: 'rgba(var(--accent-gold-rgb), 0.4)',
-								color: 'var(--accent-gold)',
-								paddingX: { xs: 0.75, sm: 1, md: 1.2 },
-								textTransform: 'none',
-							}}
-						>
-							View
-						</Button>
-					</Link>
-					<Link href={`/dashboard/shipments/${id}/edit`} style={{ textDecoration: 'none' }}>
-						<Button
-							variant="text"
-							size="small"
-							startIcon={<Edit sx={{ fontSize: { xs: 12, sm: 14 } }} />}
-							sx={{
-								fontSize: { xs: '0.65rem', sm: '0.68rem', md: '0.7rem' },
-								fontWeight: 600,
-								color: 'var(--text-secondary)',
-								textTransform: 'none',
-								paddingX: 0.5,
-							}}
-						>
-							Edit
-						</Button>
-					</Link>
+				<Link href={`/dashboard/shipments/${id}`} style={{ textDecoration: 'none' }}>
+					<Button
+						variant="outline"
+						size="sm"
+						icon={<Visibility sx={{ fontSize: 14 }} />}
+						iconPosition="start"
+					>
+						View
+					</Button>
+				</Link>
+				<Link href={`/dashboard/shipments/${id}/edit`} style={{ textDecoration: 'none' }}>
+					<Button
+						variant="ghost"
+						size="sm"
+						icon={<Edit sx={{ fontSize: 14 }} />}
+						iconPosition="start"
+					>
+						Edit
+					</Button>
+				</Link>
 				</Box>
 			</Box>
 		</Slide>

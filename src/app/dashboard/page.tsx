@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Add, Inventory2, TrendingUp, LocalShipping, LocationOn } from '@mui/icons-material';
-import { Button, Box, Typography } from '@mui/material';
-import StatsCard from '@/components/dashboard/StatsCard';
+import { Box } from '@mui/material';
 import ShipmentCard from '@/components/dashboard/ShipmentCard';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { StatsCard, Button, EmptyState, LoadingState } from '@/components/design-system';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 
 interface Shipment {
@@ -98,12 +98,36 @@ export default function DashboardPage() {
 	return (
 		<DashboardSurface className="flex-1 min-h-0 overflow-hidden">
 
-			<DashboardGrid className="grid-cols-2 md:grid-cols-4 flex-shrink-0 gap-2">
-				<StatsCard icon={Inventory2} title="On Hand" value={stats.onHand} />
-				<StatsCard icon={LocalShipping} title="In Transit" value={stats.inTransit} />
-				<StatsCard icon={LocationOn} title="Total Shipments" value={stats.total} />
-				<StatsCard icon={TrendingUp} title="With Container" value={stats.withContainer} />
-			</DashboardGrid>
+		<DashboardGrid className="grid-cols-2 md:grid-cols-4 flex-shrink-0 gap-2">
+			<StatsCard 
+				icon={<Inventory2 sx={{ fontSize: 20 }} />} 
+				title="On Hand" 
+				value={stats.onHand}
+				variant="success"
+				size="md"
+			/>
+			<StatsCard 
+				icon={<LocalShipping sx={{ fontSize: 20 }} />} 
+				title="In Transit" 
+				value={stats.inTransit}
+				variant="info"
+				size="md"
+			/>
+			<StatsCard 
+				icon={<LocationOn sx={{ fontSize: 20 }} />} 
+				title="Total Shipments" 
+				value={stats.total}
+				variant="default"
+				size="md"
+			/>
+			<StatsCard 
+				icon={<TrendingUp sx={{ fontSize: 20 }} />} 
+				title="With Container" 
+				value={stats.withContainer}
+				variant="warning"
+				size="md"
+			/>
+		</DashboardGrid>
 
 			<DashboardGrid className="grid-cols-1 flex-1 min-h-0 gap-2 overflow-hidden">
 				<DashboardPanel
@@ -112,75 +136,43 @@ export default function DashboardPage() {
 					fullHeight
 					className="flex-1 min-h-0 overflow-hidden"
 					bodyClassName="flex flex-col gap-1 min-h-0 overflow-y-auto overflow-x-hidden"
-					actions={
-						shipments.length > 0 ? (
-							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-								<Button
-									variant="outlined"
-									size="small"
-									sx={{
-										textTransform: 'none',
-										borderColor: 'var(--border)',
-										color: 'var(--text-secondary)',
-									}}
-								>
-									Open board
-								</Button>
-							</Link>
-						) : null
-					}
+				actions={
+					shipments.length > 0 ? (
+						<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
+							<Button variant="outline" size="sm">
+								Open board
+							</Button>
+						</Link>
+					) : null
+				}
 				>
-					{loading ? (
-						<Box sx={{ 
-							display: 'flex', 
-							flexDirection: 'column', 
-							gap: 1, 
-							flex: 1, 
-							minHeight: 0,
-							minWidth: 0,
-							width: '100%',
-						}}>
-							<SkeletonCard />
-							<SkeletonCard />
-						</Box>
-					) : recentShipments.length === 0 ? (
-						<Box
-							sx={{
-								flex: 1,
-								minHeight: 0,
-								display: 'flex',
-								flexDirection: 'column',
-								alignItems: 'center',
-								justifyContent: 'center',
-								gap: 1,
-								textAlign: 'center',
-								py: 3,
-							}}
-						>
-							<Inventory2 sx={{ fontSize: 36, color: 'var(--text-secondary)' }} />
-							<Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-								No shipments yet
-							</Typography>
+				{loading ? (
+					<Box sx={{ 
+						display: 'flex', 
+						flexDirection: 'column', 
+						gap: 1, 
+						flex: 1, 
+						minHeight: 0,
+						minWidth: 0,
+						width: '100%',
+					}}>
+						<SkeletonCard />
+						<SkeletonCard />
+					</Box>
+				) : recentShipments.length === 0 ? (
+					<EmptyState
+						icon={<Inventory2 />}
+						title="No shipments yet"
+						description="Get started by creating your first shipment"
+						action={
 							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
-								<Button
-									variant="contained"
-									size="small"
-									startIcon={<Add fontSize="small" />}
-									sx={{
-										textTransform: 'none',
-										backgroundColor: 'var(--accent-gold)',
-										fontSize: '0.78rem',
-										fontWeight: 600,
-										mt: 0.5,
-										color: 'var(--background)',
-										'&:hover': { backgroundColor: 'var(--accent-gold)' },
-									}}
-								>
+								<Button variant="primary" size="md" icon={<Add />} iconPosition="start">
 									Create shipment
 								</Button>
 							</Link>
-						</Box>
-					) : (
+						}
+					/>
+				) : (
 						<Box sx={{ 
 							display: 'flex', 
 							flexDirection: 'column', 
