@@ -3,6 +3,8 @@
  * 
  * Import all design tokens from this single file:
  * import { colors, typography, spacing, shadows, animations } from '@/lib/design-tokens';
+ * 
+ * @version 2.0.0 - Phase 4 Enhancements
  */
 
 // Export all token modules
@@ -12,6 +14,7 @@ export * from './spacing';
 export * from './shadows';
 export * from './animations';
 export * from './borders';
+export * from './dark-mode';
 
 // Re-export for convenience
 export { colors, cssVariables, rgbVariables } from './colors';
@@ -20,6 +23,7 @@ export { spacing, semanticSpacing, muiSpacing } from './spacing';
 export { shadows, designSystemShadows, elevation } from './shadows';
 export { animations, motionVariants, muiFadeTiming, keyframes } from './animations';
 export { borders, semanticBorders, muiBorderRadius } from './borders';
+export { darkModeColors, generateDarkModeCss } from './dark-mode';
 
 // Design token summary for documentation
 export const designTokens = {
@@ -64,7 +68,7 @@ export const designTokens = {
 } as const;
 
 // Version
-export const DESIGN_SYSTEM_VERSION = '1.0.0';
+export const DESIGN_SYSTEM_VERSION = '2.0.0'; // Phase 4 Enhancements
 
 // Usage examples in comments for developers
 /**

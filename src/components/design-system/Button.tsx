@@ -136,6 +136,13 @@ export default function Button({
         transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
         ...variantStyle,
         ...sizeStyle,
+        // Micro-interactions
+        '&:active:not(:disabled)': {
+          transform: 'scale(0.98)',
+        },
+        '&:hover:not(:disabled)': {
+          transform: 'translateY(-1px)',
+        },
         ...buttonProps.sx,
       }}
     >

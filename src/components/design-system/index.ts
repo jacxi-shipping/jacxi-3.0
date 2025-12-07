@@ -3,6 +3,8 @@
  * 
  * Import all design system components from this central location.
  * All components follow consistent APIs and use design tokens.
+ * 
+ * @version 2.0.0 - Phase 4 Enhancements
  */
 
 // Form Components
@@ -38,3 +40,35 @@ export { default as PageHeader } from './PageHeader';
 // Overlay Components
 export { default as Modal, ConfirmDialog } from './Modal';
 export type { ModalProps, ConfirmDialogProps } from './Modal';
+
+// Toast Notifications (Phase 4)
+export { Toaster, toast } from './Toast';
+
+// Navigation (Phase 4)
+export { default as Breadcrumbs, BreadcrumbsCompact } from './Breadcrumbs';
+export type { BreadcrumbItem } from './Breadcrumbs';
+
+// Loading States (Phase 4)
+export { 
+  Skeleton,
+  SkeletonText,
+  SkeletonParagraph,
+  SkeletonAvatar,
+  SkeletonCard,
+  SkeletonTable,
+  SkeletonTableRow,
+  SkeletonStatsCard,
+  SkeletonFormField,
+  SkeletonImage,
+  SkeletonGroup
+} from './Skeleton';
+
+// Tooltips (Phase 4)
+export { default as Tooltip, InfoTooltip } from './Tooltip';
+export type { TooltipProps } from './Tooltip';
+
+// Theme (Phase 4)
+export { ThemeToggle } from './ThemeToggle';
+
+// Keyboard Shortcuts (Phase 4)
+export { default as KeyboardShortcutHelp } from './KeyboardShortcutHelp';
