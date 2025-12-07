@@ -43,7 +43,13 @@ export default function DashboardPage() {
 	const fetchDashboardData = useCallback(async () => {
 		try {
 			setLoading(true);
-			const response = await fetch('/api/shipments?limit=100');
+			
+			// Add minimum loading time to ensure skeleton is visible
+			const [response] = await Promise.all([
+				fetch('/api/shipments?limit=100'),
+				new Promise(resolve => setTimeout(resolve, 500)) // Minimum 500ms loading
+			]);
+			
 			if (!response.ok) {
 				setShipments([]);
 				setStats({

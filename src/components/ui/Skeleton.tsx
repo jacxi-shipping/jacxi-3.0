@@ -72,21 +72,21 @@ export function SkeletonText({ lines = 1, className }: { lines?: number; classNa
 
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn('p-4 border border-[var(--border)] rounded-xl bg-[var(--panel)] space-y-4', className)}>
+    <div className={cn('p-4 border border-[var(--border)] rounded-xl bg-[var(--background)] space-y-4', className)}>
       <div className="flex items-start justify-between">
         <div className="space-y-2 flex-1">
-          <Skeleton variant="text" width="60%" height={20} />
-          <Skeleton variant="text" width="40%" height={16} />
+          <Skeleton variant="text" width="60%" height={20} animation="pulse" />
+          <Skeleton variant="text" width="40%" height={16} animation="pulse" />
         </div>
-        <Skeleton variant="circular" width={40} height={40} />
+        <Skeleton variant="circular" width={40} height={40} animation="pulse" />
       </div>
       <div className="space-y-2">
-        <Skeleton variant="text" width="100%" />
-        <Skeleton variant="text" width="80%" />
+        <Skeleton variant="text" width="100%" animation="pulse" />
+        <Skeleton variant="text" width="80%" animation="pulse" />
       </div>
       <div className="flex gap-2">
-        <Skeleton variant="rectangular" width={80} height={32} />
-        <Skeleton variant="rectangular" width={80} height={32} />
+        <Skeleton variant="rectangular" width={80} height={32} animation="pulse" />
+        <Skeleton variant="rectangular" width={80} height={32} animation="pulse" />
       </div>
     </div>
   );
