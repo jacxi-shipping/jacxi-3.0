@@ -25,6 +25,7 @@ import {
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { NotificationCenter } from '@/components/ui/NotificationCenter';
 
 interface HeaderProps {
 	onMenuClick?: () => void;
@@ -145,22 +146,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					<ThemeToggle />
 					
 					{/* Notifications */}
-					<Tooltip title="Notifications">
-						<IconButton
-							sx={{
-								color: 'var(--text-secondary)',
-								p: 1,
-								'&:hover': {
-									bgcolor: 'rgba(var(--border-rgb), 0.4)',
-									color: 'var(--text-primary)',
-								},
-							}}
-						>
-							<Badge badgeContent={3} color="error">
-								<Notifications sx={{ fontSize: 20 }} />
-							</Badge>
-						</IconButton>
-					</Tooltip>
+					<NotificationCenter />
 
 					{/* Settings */}
 					<Tooltip title="Settings">

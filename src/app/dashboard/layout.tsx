@@ -4,6 +4,10 @@ import { useState } from 'react';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Header from '@/components/dashboard/Header';
+import { BottomNavigation } from '@/components/mobile/BottomNavigation';
+import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal';
+import { FloatingActionButton } from '@/components/ui/FloatingActionButton';
+import { useGlobalShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Box } from '@mui/material';
 
 export default function DashboardLayout({
@@ -12,6 +16,7 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	const [mobileOpen, setMobileOpen] = useState(false);
+	const shortcuts = useGlobalShortcuts();
 
 	return (
 		<ProtectedRoute>
@@ -45,7 +50,7 @@ export default function DashboardLayout({
 					sx={{
 						flexGrow: 1,
 						minWidth: 0,
-						height: 'calc(100vh - 64px)',
+						height: { xs: 'calc(100vh - 64px - 64px)', lg: 'calc(100vh - 64px)' },
 						bgcolor: 'var(--background)',
 						backgroundImage: 'none',
 						overflow: 'auto',
@@ -56,11 +61,21 @@ export default function DashboardLayout({
 						},
 						scrollbarWidth: 'none',
 						msOverflowStyle: 'none',
+						pb: { xs: 2, lg: 0 },
 					}}
 				>
 					{children}
 				</Box>
 				</Box>
+
+				{/* Mobile Bottom Navigation */}
+				<BottomNavigation />
+
+				{/* Floating Action Button */}
+				<FloatingActionButton />
+
+				{/* Keyboard Shortcuts Modal */}
+				<KeyboardShortcutsModal shortcuts={shortcuts} />
 			</Box>
 		</ProtectedRoute>
 	);
