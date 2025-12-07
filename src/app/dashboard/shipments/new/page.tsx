@@ -7,13 +7,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, AlertCircle, Upload, X, Loader2, Package, User, DollarSign, FileText } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { ArrowLeft, Upload, X, Loader2, Package, User, DollarSign, FileText, CheckCircle, ArrowRight } from 'lucide-react';
+import { Box, Stepper, Step, StepLabel, Typography, Snackbar, Alert } from '@mui/material';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, ActionButton, FormField } from '@/components/design-system';
 import { shipmentSchema, type ShipmentFormData } from '@/lib/validations/shipment';
-import Section from '@/components/layout/Section';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Snackbar, Alert } from '@mui/material';
 
 interface UserOption {
 	id: string;
@@ -30,9 +29,18 @@ interface ContainerOption {
 	destinationPort: string | null;
 }
 
+const steps = [
+	{ label: 'Vehicle Info', icon: Package },
+	{ label: 'Photos', icon: Upload },
+	{ label: 'Status', icon: CheckCircle },
+	{ label: 'Customer', icon: User },
+	{ label: 'Review', icon: FileText },
+];
+
 export default function NewShipmentPage() {
 	const { data: session } = useSession();
 	const router = useRouter();
+	const [activeStep, setActiveStep] = useState(0);
 	const [users, setUsers] = useState<UserOption[]>([]);
 	const [containers, setContainers] = useState<ContainerOption[]>([]);
 	const [loadingUsers, setLoadingUsers] = useState(true);
@@ -52,6 +60,7 @@ export default function NewShipmentPage() {
 		formState: { errors, isSubmitting },
 		setValue,
 		watch,
+		trigger,
 	} = useForm<ShipmentFormData>({
 		resolver: zodResolver(shipmentSchema),
 		mode: 'onBlur',
@@ -63,6 +72,7 @@ export default function NewShipmentPage() {
 
 	const statusValue = watch('status');
 	const vinValue = watch('vehicleVIN');
+	const formValues = watch();
 
 	// Fetch users
 	useEffect(() => {
@@ -204,526 +214,875 @@ export default function NewShipmentPage() {
 		}
 	};
 
+	const handleNext = async () => {
+		let fieldsToValidate: (keyof ShipmentFormData)[] = [];
+
+		switch (activeStep) {
+			case 0: // Vehicle Info
+				fieldsToValidate = ['vehicleType', 'vehicleVIN', 'vehicleMake', 'vehicleModel', 'vehicleYear'];
+				break;
+			case 1: // Photos - optional, can skip
+				break;
+			case 2: // Status
+				fieldsToValidate = ['status'];
+				if (statusValue === 'IN_TRANSIT') {
+					fieldsToValidate.push('containerId');
+				}
+				break;
+			case 3: // Customer & Financial
+				fieldsToValidate = ['userId', 'price'];
+				break;
+		}
+
+		if (fieldsToValidate.length > 0) {
+			const isValid = await trigger(fieldsToValidate);
+			if (!isValid) return;
+		}
+
+		setActiveStep((prev) => prev + 1);
+	};
+
+	const handleBack = () => {
+		setActiveStep((prev) => prev - 1);
+	};
+
 	if (session?.user?.role !== 'admin') {
 		return (
 			<ProtectedRoute>
-				<Section>
-					<div className="text-center py-12">
-						<h2 className="text-2xl font-bold text-[var(--text-primary)]">Access Denied</h2>
-						<p className="text-[var(--text-secondary)] mt-2">Only administrators can create shipments.</p>
-					</div>
-				</Section>
+				<DashboardSurface>
+					<Box sx={{ textAlign: 'center', py: 12 }}>
+						<Typography variant="h4" sx={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+							Access Denied
+						</Typography>
+						<Typography sx={{ color: 'var(--text-secondary)', mt: 2 }}>
+							Only administrators can create shipments.
+						</Typography>
+					</Box>
+				</DashboardSurface>
 			</ProtectedRoute>
 		);
 	}
 
 	return (
 		<ProtectedRoute>
-			<div className="min-h-screen bg-[var(--background)]">
-				<Section>
-					<div className="max-w-5xl mx-auto">
-						{/* Header */}
-						<div className="mb-8">
-							<Link href="/dashboard/shipments">
-								<Button variant="outline" size="sm" className="mb-4">
-									<ArrowLeft className="w-4 h-4 mr-2" />
-									Back to Shipments
-								</Button>
-							</Link>
-							<h1 className="text-3xl font-bold text-[var(--text-primary)]">Add New Shipment</h1>
-							<p className="text-[var(--text-secondary)] mt-2">
-								Enter vehicle information and assign status. Shipping data is managed at the container level.
-							</p>
-						</div>
+			<DashboardSurface>
+				<PageHeader
+					title="Create New Shipment"
+					description="Add vehicle information with guided steps"
+					actions={
+						<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
+							<ActionButton variant="outline" icon={<ArrowLeft className="w-4 h-4" />} size="small">
+								Back
+							</ActionButton>
+						</Link>
+					}
+				/>
 
-						<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-							{/* Vehicle Information */}
-							<Card className="border-[var(--border)] bg-[var(--panel)]">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
-										<Package className="w-5 h-5" />
-										Vehicle Information
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									{/* VIN */}
-									<div>
-										<label htmlFor="vehicleVIN" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											VIN (Vehicle Identification Number)
-										</label>
-										<div className="flex gap-2">
-											<input
+				{/* Stepper */}
+				<DashboardPanel>
+					<Stepper
+						activeStep={activeStep}
+						alternativeLabel
+						sx={{
+							'& .MuiStepLabel-root .Mui-completed': {
+								color: 'var(--accent-gold)',
+							},
+							'& .MuiStepLabel-label.Mui-completed': {
+								color: 'var(--text-primary)',
+								fontWeight: 600,
+							},
+							'& .MuiStepLabel-root .Mui-active': {
+								color: 'var(--accent-gold)',
+							},
+							'& .MuiStepLabel-label.Mui-active': {
+								color: 'var(--text-primary)',
+								fontWeight: 600,
+							},
+							'& .MuiStepLabel-label': {
+								color: 'var(--text-secondary)',
+								fontSize: '0.85rem',
+							},
+							'& .MuiStepConnector-line': {
+								borderColor: 'var(--border)',
+							},
+							'& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
+								borderColor: 'var(--accent-gold)',
+							},
+							'& .MuiStepIcon-root': {
+								color: 'var(--border)',
+								fontSize: '2rem',
+							},
+							'& .MuiStepIcon-root.Mui-active': {
+								color: 'var(--accent-gold)',
+							},
+							'& .MuiStepIcon-root.Mui-completed': {
+								color: 'var(--accent-gold)',
+							},
+						}}
+					>
+						{steps.map((step, index) => (
+							<Step key={step.label}>
+								<StepLabel>{step.label}</StepLabel>
+							</Step>
+						))}
+					</Stepper>
+				</DashboardPanel>
+
+				{/* Form Content */}
+				<form onSubmit={handleSubmit(onSubmit)}>
+					{/* Step 0: Vehicle Information */}
+					{activeStep === 0 && (
+						<DashboardPanel title="Vehicle Information" description="Enter basic vehicle details">
+							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+								{/* VIN */}
+								<Box>
+									<Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
+										<Box sx={{ flex: 1 }}>
+											<FormField
 												id="vehicleVIN"
-												{...register('vehicleVIN')}
-												className={`flex-1 rounded-lg border ${errors.vehicleVIN ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]`}
+												label="VIN (Vehicle Identification Number)"
 												placeholder="17-character VIN"
-												maxLength={17}
+												error={!!errors.vehicleVIN}
+												helperText={errors.vehicleVIN?.message}
+												{...register('vehicleVIN')}
+												inputProps={{ maxLength: 17 }}
 											/>
-											<Button
-												type="button"
-												onClick={() => vinValue && decodeVIN(vinValue)}
-												disabled={!vinValue || vinValue.length !== 17 || decodingVin}
-												variant="outline"
-											>
-												{decodingVin ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Decode'}
-											</Button>
-										</div>
-										{errors.vehicleVIN && <p className="mt-1 text-sm text-red-400">{errors.vehicleVIN.message}</p>}
-									</div>
-
-									{/* Vehicle Type */}
-									<div>
-										<label htmlFor="vehicleType" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											Vehicle Type *
-										</label>
-										<select
-											id="vehicleType"
-											{...register('vehicleType')}
-											className={`w-full rounded-lg border ${errors.vehicleType ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
+										</Box>
+										<ActionButton
+											type="button"
+											onClick={() => vinValue && decodeVIN(vinValue)}
+											disabled={!vinValue || vinValue.length !== 17 || decodingVin}
+											variant="outline"
+											icon={decodingVin ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
 										>
-											<option value="">Select type</option>
-											<option value="sedan">Sedan</option>
-											<option value="suv">SUV</option>
-											<option value="truck">Truck</option>
-											<option value="motorcycle">Motorcycle</option>
-											<option value="van">Van</option>
-											<option value="coupe">Coupe</option>
-											<option value="convertible">Convertible</option>
-											<option value="wagon">Wagon</option>
-											<option value="other">Other</option>
-										</select>
-										{errors.vehicleType && <p className="mt-1 text-sm text-red-400">{errors.vehicleType.message}</p>}
-									</div>
+											{decodingVin ? 'Decoding...' : 'Decode'}
+										</ActionButton>
+									</Box>
+								</Box>
 
-									{/* Make, Model, Year */}
-									<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-										<div>
-											<label htmlFor="vehicleMake" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Make
-											</label>
-											<input
-												id="vehicleMake"
-												{...register('vehicleMake')}
-												className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 text-[var(--text-primary)]"
-												placeholder="e.g., Toyota"
-											/>
-										</div>
-										<div>
-											<label htmlFor="vehicleModel" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Model
-											</label>
-											<input
-												id="vehicleModel"
-												{...register('vehicleModel')}
-												className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 text-[var(--text-primary)]"
-												placeholder="e.g., Camry"
-											/>
-										</div>
-										<div>
-											<label htmlFor="vehicleYear" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Year
-											</label>
-											<input
-												id="vehicleYear"
-												{...register('vehicleYear')}
-												type="number"
-												className={`w-full rounded-lg border ${errors.vehicleYear ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-												placeholder="e.g., 2022"
-											/>
-											{errors.vehicleYear && <p className="mt-1 text-sm text-red-400">{errors.vehicleYear.message}</p>}
-										</div>
-									</div>
-
-									{/* Color, Lot Number, Auction */}
-									<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-										<div>
-											<label htmlFor="vehicleColor" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Color
-											</label>
-											<input
-												id="vehicleColor"
-												{...register('vehicleColor')}
-												className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 text-[var(--text-primary)]"
-												placeholder="e.g., Blue"
-											/>
-										</div>
-										<div>
-											<label htmlFor="lotNumber" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Lot Number
-											</label>
-											<input
-												id="lotNumber"
-												{...register('lotNumber')}
-												className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 text-[var(--text-primary)]"
-												placeholder="Auction lot #"
-											/>
-										</div>
-										<div>
-											<label htmlFor="auctionName" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Auction Name
-											</label>
-											<input
-												id="auctionName"
-												{...register('auctionName')}
-												className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 text-[var(--text-primary)]"
-												placeholder="e.g., Copart"
-											/>
-										</div>
-									</div>
-
-									{/* Weight, Dimensions */}
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label htmlFor="weight" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Weight (lbs)
-											</label>
-											<input
-												id="weight"
-												{...register('weight')}
-												type="number"
-												className={`w-full rounded-lg border ${errors.weight ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-												placeholder="Vehicle weight"
-											/>
-											{errors.weight && <p className="mt-1 text-sm text-red-400">{errors.weight.message}</p>}
-										</div>
-										<div>
-											<label htmlFor="dimensions" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Dimensions
-											</label>
-											<input
-												id="dimensions"
-												{...register('dimensions')}
-												className={`w-full rounded-lg border ${errors.dimensions ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-												placeholder="L x W x H"
-											/>
-											{errors.dimensions && <p className="mt-1 text-sm text-red-400">{errors.dimensions.message}</p>}
-										</div>
-									</div>
-
-									{/* Has Key, Has Title */}
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div className="flex items-center gap-3">
-											<input
-												id="hasKey"
-												type="checkbox"
-												{...register('hasKey')}
-												className="w-5 h-5 rounded border-white/10 bg-black/40"
-											/>
-											<label htmlFor="hasKey" className="text-sm font-semibold text-[var(--text-secondary)]">
-												Has Key
-											</label>
-										</div>
-										<div className="flex items-center gap-3">
-											<input
-												id="hasTitle"
-												type="checkbox"
-												{...register('hasTitle')}
-												className="w-5 h-5 rounded border-white/10 bg-black/40"
-											/>
-											<label htmlFor="hasTitle" className="text-sm font-semibold text-[var(--text-secondary)]">
-												Has Title
-											</label>
-										</div>
-									</div>
-
-									{/* Title Status */}
-									{watch('hasTitle') && (
-										<div>
-											<label htmlFor="titleStatus" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Title Status
-											</label>
-											<select
-												id="titleStatus"
-												{...register('titleStatus')}
-												className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 text-[var(--text-primary)]"
-											>
-												<option value="">Select status</option>
-												<option value="PENDING">Pending</option>
-												<option value="DELIVERED">Delivered</option>
-											</select>
-										</div>
+								{/* Vehicle Type */}
+								<Box>
+									<Typography
+										component="label"
+										htmlFor="vehicleType"
+										sx={{
+											display: 'block',
+											fontSize: '0.875rem',
+											fontWeight: 500,
+											color: 'var(--text-primary)',
+											mb: 1,
+										}}
+									>
+										Vehicle Type *
+									</Typography>
+									<select
+										id="vehicleType"
+										{...register('vehicleType')}
+										style={{
+											width: '100%',
+											padding: '10px 12px',
+											borderRadius: '16px',
+											border: errors.vehicleType ? '2px solid var(--error)' : '1px solid rgba(var(--border-rgb), 0.9)',
+											backgroundColor: 'var(--background)',
+											color: 'var(--text-primary)',
+											fontSize: '0.875rem',
+										}}
+									>
+										<option value="">Select type</option>
+										<option value="sedan">Sedan</option>
+										<option value="suv">SUV</option>
+										<option value="truck">Truck</option>
+										<option value="motorcycle">Motorcycle</option>
+										<option value="van">Van</option>
+										<option value="coupe">Coupe</option>
+										<option value="convertible">Convertible</option>
+										<option value="wagon">Wagon</option>
+										<option value="other">Other</option>
+									</select>
+									{errors.vehicleType && (
+										<Typography sx={{ fontSize: '0.75rem', color: 'var(--error)', mt: 0.5 }}>
+											{errors.vehicleType.message}
+										</Typography>
 									)}
+								</Box>
 
-									{/* Vehicle Photos */}
-									<div>
-										<label className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											Vehicle Photos
-										</label>
-										<label
-											htmlFor="photos"
-											className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-cyan-500/50 transition-colors"
+								{/* Make, Model, Year */}
+								<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
+									<FormField
+										id="vehicleMake"
+										label="Make"
+										placeholder="e.g., Toyota"
+										{...register('vehicleMake')}
+									/>
+									<FormField
+										id="vehicleModel"
+										label="Model"
+										placeholder="e.g., Camry"
+										{...register('vehicleModel')}
+									/>
+									<FormField
+										id="vehicleYear"
+										label="Year"
+										type="number"
+										placeholder="e.g., 2022"
+										error={!!errors.vehicleYear}
+										helperText={errors.vehicleYear?.message}
+										{...register('vehicleYear')}
+									/>
+								</Box>
+
+								{/* Color, Lot Number, Auction */}
+								<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
+									<FormField
+										id="vehicleColor"
+										label="Color"
+										placeholder="e.g., Blue"
+										{...register('vehicleColor')}
+									/>
+									<FormField
+										id="lotNumber"
+										label="Lot Number"
+										placeholder="Auction lot #"
+										{...register('lotNumber')}
+									/>
+									<FormField
+										id="auctionName"
+										label="Auction Name"
+										placeholder="e.g., Copart"
+										{...register('auctionName')}
+									/>
+								</Box>
+
+								{/* Weight, Dimensions */}
+								<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+									<FormField
+										id="weight"
+										label="Weight (lbs)"
+										type="number"
+										placeholder="Vehicle weight"
+										error={!!errors.weight}
+										helperText={errors.weight?.message}
+										{...register('weight')}
+									/>
+									<FormField
+										id="dimensions"
+										label="Dimensions"
+										placeholder="L x W x H"
+										error={!!errors.dimensions}
+										helperText={errors.dimensions?.message}
+										{...register('dimensions')}
+									/>
+								</Box>
+
+								{/* Has Key, Has Title */}
+								<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 3 }}>
+									<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+										<input
+											id="hasKey"
+											type="checkbox"
+											{...register('hasKey')}
+											style={{
+												width: '20px',
+												height: '20px',
+												borderRadius: '4px',
+												border: '1px solid var(--border)',
+												cursor: 'pointer',
+											}}
+										/>
+										<Typography component="label" htmlFor="hasKey" sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>
+											Has Key
+										</Typography>
+									</Box>
+									<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+										<input
+											id="hasTitle"
+											type="checkbox"
+											{...register('hasTitle')}
+											style={{
+												width: '20px',
+												height: '20px',
+												borderRadius: '4px',
+												border: '1px solid var(--border)',
+												cursor: 'pointer',
+											}}
+										/>
+										<Typography component="label" htmlFor="hasTitle" sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}>
+											Has Title
+										</Typography>
+									</Box>
+								</Box>
+
+								{/* Title Status */}
+								{watch('hasTitle') && (
+									<Box>
+										<Typography
+											component="label"
+											htmlFor="titleStatus"
+											sx={{
+												display: 'block',
+												fontSize: '0.875rem',
+												fontWeight: 500,
+												color: 'var(--text-primary)',
+												mb: 1,
+											}}
 										>
-											<input
-												id="photos"
-												type="file"
-												multiple
-												accept="image/*"
-												onChange={handleFileSelect}
-												className="hidden"
-												disabled={uploading}
-											/>
-											<div className="flex flex-col items-center justify-center pt-5 pb-6">
-												{uploading ? (
-													<Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-												) : (
-													<>
-														<Upload className="w-8 h-8 text-cyan-400 mb-2" />
-														<p className="text-sm text-[var(--text-secondary)]">Click to upload vehicle photos</p>
-													</>
-												)}
-											</div>
-										</label>
+											Title Status
+										</Typography>
+										<select
+											id="titleStatus"
+											{...register('titleStatus')}
+											style={{
+												width: '100%',
+												padding: '10px 12px',
+												borderRadius: '16px',
+												border: '1px solid rgba(var(--border-rgb), 0.9)',
+												backgroundColor: 'var(--background)',
+												color: 'var(--text-primary)',
+												fontSize: '0.875rem',
+											}}
+										>
+											<option value="">Select status</option>
+											<option value="PENDING">Pending</option>
+											<option value="DELIVERED">Delivered</option>
+										</select>
+									</Box>
+								)}
+							</Box>
+						</DashboardPanel>
+					)}
 
-										{vehiclePhotos.length > 0 && (
-											<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-												{vehiclePhotos.map((photo, index) => (
-													<div key={index} className="relative group aspect-square">
-														<Image
-															src={photo}
-															alt={`Vehicle photo ${index + 1}`}
-															fill
-															className="object-cover rounded-lg"
-															unoptimized
-														/>
-														<button
-															type="button"
-															onClick={() => removePhoto(index)}
-															className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-														>
-															<X className="w-4 h-4 text-white" />
-														</button>
-													</div>
-												))}
-											</div>
+					{/* Step 1: Photos */}
+					{activeStep === 1 && (
+						<DashboardPanel title="Vehicle Photos" description="Upload images of the vehicle">
+							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+								<label
+									htmlFor="photos"
+									style={{
+										display: 'flex',
+										flexDirection: 'column',
+										alignItems: 'center',
+										justifyContent: 'center',
+										width: '100%',
+										minHeight: '200px',
+										border: '2px dashed var(--border)',
+										borderRadius: '16px',
+										cursor: uploading ? 'not-allowed' : 'pointer',
+										transition: 'all 0.2s ease',
+										backgroundColor: 'var(--background)',
+									}}
+									onMouseEnter={(e) => {
+										if (!uploading) {
+											e.currentTarget.style.borderColor = 'var(--accent-gold)';
+											e.currentTarget.style.backgroundColor = 'rgba(var(--accent-gold-rgb), 0.05)';
+										}
+									}}
+									onMouseLeave={(e) => {
+										e.currentTarget.style.borderColor = 'var(--border)';
+										e.currentTarget.style.backgroundColor = 'var(--background)';
+									}}
+								>
+									<input
+										id="photos"
+										type="file"
+										multiple
+										accept="image/*"
+										onChange={handleFileSelect}
+										style={{ display: 'none' }}
+										disabled={uploading}
+									/>
+									<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4 }}>
+										{uploading ? (
+											<>
+												<Loader2 style={{ fontSize: 40, color: 'var(--accent-gold)' }} className="animate-spin" />
+												<Typography sx={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+													Uploading...
+												</Typography>
+											</>
+										) : (
+											<>
+												<Upload style={{ fontSize: 40, color: 'var(--accent-gold)' }} />
+												<Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+													Click to upload vehicle photos
+												</Typography>
+												<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+													PNG, JPG up to 10MB (Multiple files supported)
+												</Typography>
+											</>
 										)}
-									</div>
-								</CardContent>
-							</Card>
+									</Box>
+								</label>
 
-							{/* Status and Container Assignment */}
-							<Card className="border-[var(--border)] bg-[var(--panel)]">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
-										<Package className="w-5 h-5" />
-										Status & Container Assignment
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									{/* Status */}
-									<div>
-										<label htmlFor="status" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											Shipment Status *
-										</label>
-										<select
-											id="status"
-											{...register('status')}
-											className={`w-full rounded-lg border ${errors.status ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-										>
-											<option value="ON_HAND">On Hand</option>
-											<option value="IN_TRANSIT">In Transit</option>
-										</select>
-										{errors.status && <p className="mt-1 text-sm text-red-400">{errors.status.message}</p>}
-										<p className="mt-1 text-xs text-[var(--text-secondary)]">
-											{statusValue === 'ON_HAND' 
-												? 'Vehicle is currently on hand, not yet assigned to a container'
-												: 'Vehicle is in transit - must be assigned to a container'}
-										</p>
-									</div>
+								{vehiclePhotos.length > 0 && (
+									<Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, gap: 2 }}>
+										{vehiclePhotos.map((photo, index) => (
+											<Box
+												key={index}
+												sx={{
+													position: 'relative',
+													aspectRatio: '1',
+													borderRadius: 2,
+													overflow: 'hidden',
+													border: '1px solid var(--border)',
+													'&:hover .remove-button': {
+														opacity: 1,
+													},
+												}}
+											>
+												<Image
+													src={photo}
+													alt={`Vehicle photo ${index + 1}`}
+													fill
+													className="object-cover"
+													unoptimized
+												/>
+												<Box
+													className="remove-button"
+													component="button"
+													type="button"
+													onClick={() => removePhoto(index)}
+													sx={{
+														position: 'absolute',
+														top: 8,
+														right: 8,
+														bgcolor: 'rgba(239, 68, 68, 0.9)',
+														borderRadius: '50%',
+														p: 0.5,
+														opacity: 0,
+														transition: 'opacity 0.2s ease',
+														cursor: 'pointer',
+														border: 'none',
+														'&:hover': {
+															bgcolor: 'rgb(239, 68, 68)',
+														},
+													}}
+												>
+													<X style={{ fontSize: 16, color: 'white' }} />
+												</Box>
+											</Box>
+										))}
+									</Box>
+								)}
+							</Box>
+						</DashboardPanel>
+					)}
 
-									{/* Container Selection - Only shown when IN_TRANSIT */}
-									{statusValue === 'IN_TRANSIT' && (
-										<div>
-											<label htmlFor="containerId" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Container *
-											</label>
-											{loadingContainers ? (
-												<div className="flex items-center gap-2 text-[var(--text-secondary)]">
-													<Loader2 className="w-4 h-4 animate-spin" />
-													Loading containers...
-												</div>
-											) : (
-												<>
-													<select
-														id="containerId"
-														{...register('containerId')}
-														className={`w-full rounded-lg border ${errors.containerId ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-													>
-														<option value="">Select a container</option>
-														{containers.map((container) => (
-															<option key={container.id} value={container.id}>
-																{container.containerNumber} - {container.destinationPort || 'No destination'} ({container.currentCount}/{container.maxCapacity}) - {container.status}
-															</option>
-														))}
-													</select>
-													{errors.containerId && <p className="mt-1 text-sm text-red-400">{errors.containerId.message}</p>}
-													<div className="mt-2">
-														<Link href="/dashboard/containers/new" target="_blank">
-															<Button type="button" variant="outline" size="sm">
-																Create New Container
-															</Button>
-														</Link>
-													</div>
-												</>
-											)}
-										</div>
+					{/* Step 2: Status & Container */}
+					{activeStep === 2 && (
+						<DashboardPanel title="Status & Container" description="Set shipment status and assign to container">
+							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+								{/* Status */}
+								<Box>
+									<Typography
+										component="label"
+										htmlFor="status"
+										sx={{
+											display: 'block',
+											fontSize: '0.875rem',
+											fontWeight: 500,
+											color: 'var(--text-primary)',
+											mb: 1,
+										}}
+									>
+										Shipment Status *
+									</Typography>
+									<select
+										id="status"
+										{...register('status')}
+										style={{
+											width: '100%',
+											padding: '10px 12px',
+											borderRadius: '16px',
+											border: errors.status ? '2px solid var(--error)' : '1px solid rgba(var(--border-rgb), 0.9)',
+											backgroundColor: 'var(--background)',
+											color: 'var(--text-primary)',
+											fontSize: '0.875rem',
+										}}
+									>
+										<option value="ON_HAND">On Hand</option>
+										<option value="IN_TRANSIT">In Transit</option>
+									</select>
+									{errors.status && (
+										<Typography sx={{ fontSize: '0.75rem', color: 'var(--error)', mt: 0.5 }}>
+											{errors.status.message}
+										</Typography>
 									)}
-								</CardContent>
-							</Card>
+									<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+										{statusValue === 'ON_HAND' 
+											? 'Vehicle is currently on hand, not yet assigned to a container'
+											: 'Vehicle is in transit - must be assigned to a container'}
+									</Typography>
+								</Box>
 
-							{/* Owner/Customer */}
-							<Card className="border-[var(--border)] bg-[var(--panel)]">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
-										<User className="w-5 h-5" />
-										Owner/Customer
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<div>
-										<label htmlFor="userId" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											Select Customer *
-										</label>
-										{loadingUsers ? (
-											<div className="flex items-center gap-2 text-[var(--text-secondary)]">
-												<Loader2 className="w-4 h-4 animate-spin" />
-												Loading customers...
-											</div>
+								{/* Container Selection - Only shown when IN_TRANSIT */}
+								{statusValue === 'IN_TRANSIT' && (
+									<Box>
+										<Typography
+											component="label"
+											htmlFor="containerId"
+											sx={{
+												display: 'block',
+												fontSize: '0.875rem',
+												fontWeight: 500,
+												color: 'var(--text-primary)',
+												mb: 1,
+											}}
+										>
+											Container *
+										</Typography>
+										{loadingContainers ? (
+											<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: 'var(--text-secondary)' }}>
+												<Loader2 style={{ fontSize: 18 }} className="animate-spin" />
+												<Typography sx={{ fontSize: '0.85rem' }}>Loading containers...</Typography>
+											</Box>
 										) : (
 											<>
 												<select
-													id="userId"
-													{...register('userId')}
-													className={`w-full rounded-lg border ${errors.userId ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
+													id="containerId"
+													{...register('containerId')}
+													style={{
+														width: '100%',
+														padding: '10px 12px',
+														borderRadius: '16px',
+														border: errors.containerId ? '2px solid var(--error)' : '1px solid rgba(var(--border-rgb), 0.9)',
+														backgroundColor: 'var(--background)',
+														color: 'var(--text-primary)',
+														fontSize: '0.875rem',
+													}}
 												>
-													<option value="">Select customer</option>
-													{users.map((user) => (
-														<option key={user.id} value={user.id}>
-															{user.name || user.email}
+													<option value="">Select a container</option>
+													{containers.map((container) => (
+														<option key={container.id} value={container.id}>
+															{container.containerNumber} - {container.destinationPort || 'No destination'} ({container.currentCount}/{container.maxCapacity})
 														</option>
 													))}
 												</select>
-												{errors.userId && <p className="mt-1 text-sm text-red-400">{errors.userId.message}</p>}
+												{errors.containerId && (
+													<Typography sx={{ fontSize: '0.75rem', color: 'var(--error)', mt: 0.5 }}>
+														{errors.containerId.message}
+													</Typography>
+												)}
+												<Box sx={{ mt: 2 }}>
+													<Link href="/dashboard/containers/new" target="_blank" style={{ textDecoration: 'none' }}>
+														<ActionButton type="button" variant="outline" size="small">
+															Create New Container
+														</ActionButton>
+													</Link>
+												</Box>
 											</>
 										)}
-									</div>
-								</CardContent>
-							</Card>
+									</Box>
+								)}
+							</Box>
+						</DashboardPanel>
+					)}
 
-							{/* Financial Information */}
-							<Card className="border-[var(--border)] bg-[var(--panel)]">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
-										<DollarSign className="w-5 h-5" />
-										Financial Information
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div>
-											<label htmlFor="price" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Price ($)
-											</label>
-											<input
-												id="price"
-												{...register('price')}
-												type="number"
-												step="0.01"
-												className={`w-full rounded-lg border ${errors.price ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-												placeholder="0.00"
-											/>
-											{errors.price && <p className="mt-1 text-sm text-red-400">{errors.price.message}</p>}
-										</div>
-										<div>
-											<label htmlFor="insuranceValue" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-												Insurance Value ($)
-											</label>
-											<input
-												id="insuranceValue"
-												{...register('insuranceValue')}
-												type="number"
-												step="0.01"
-												className={`w-full rounded-lg border ${errors.insuranceValue ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)]`}
-												placeholder="0.00"
-											/>
-											{errors.insuranceValue && <p className="mt-1 text-sm text-red-400">{errors.insuranceValue.message}</p>}
-										</div>
-									</div>
-
-									<div>
-										<label htmlFor="paymentMode" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											Payment Mode
-										</label>
-										<div className="grid grid-cols-2 gap-4">
-											<label className={`flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors ${watch('paymentMode') === 'CASH' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'}`}>
-												<input
-													type="radio"
-													value="CASH"
-													{...register('paymentMode')}
-													className="sr-only"
-												/>
-												<span className="text-sm font-semibold text-[var(--text-primary)]">Cash</span>
-											</label>
-											<label className={`flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors ${watch('paymentMode') === 'DUE' ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10'}`}>
-												<input
-													type="radio"
-													value="DUE"
-													{...register('paymentMode')}
-													className="sr-only"
-												/>
-												<span className="text-sm font-semibold text-[var(--text-primary)]">Due</span>
-											</label>
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Internal Notes */}
-							<Card className="border-[var(--border)] bg-[var(--panel)]">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2 text-[var(--text-primary)]">
-										<FileText className="w-5 h-5" />
-										Internal Notes
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<div>
-										<label htmlFor="internalNotes" className="block text-sm font-semibold text-[var(--text-secondary)] mb-2">
-											Notes (Internal Use Only)
-										</label>
-										<textarea
-											id="internalNotes"
-											{...register('internalNotes')}
-											rows={4}
-											className={`w-full rounded-lg border ${errors.internalNotes ? 'border-red-500' : 'border-white/10'} bg-black/40 px-4 py-2.5 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]`}
-											placeholder="Add any internal notes about this shipment..."
-										/>
-										{errors.internalNotes && <p className="mt-1 text-sm text-red-400">{errors.internalNotes.message}</p>}
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* Submit Button */}
-							<div className="flex justify-end gap-4">
-								<Link href="/dashboard/shipments">
-									<Button type="button" variant="outline">
-										Cancel
-									</Button>
-								</Link>
-								<Button type="submit" disabled={isSubmitting} className="bg-cyan-500 hover:bg-cyan-600">
-									{isSubmitting ? (
-										<>
-											<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-											Creating...
-										</>
+					{/* Step 3: Customer & Financial */}
+					{activeStep === 3 && (
+						<DashboardPanel title="Customer & Financial" description="Select customer and enter pricing">
+							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+								{/* Customer Selection */}
+								<Box>
+									<Typography
+										component="label"
+										htmlFor="userId"
+										sx={{
+											display: 'block',
+											fontSize: '0.875rem',
+											fontWeight: 500,
+											color: 'var(--text-primary)',
+											mb: 1,
+										}}
+									>
+										Select Customer *
+									</Typography>
+									{loadingUsers ? (
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, color: 'var(--text-secondary)' }}>
+											<Loader2 style={{ fontSize: 18 }} className="animate-spin" />
+											<Typography sx={{ fontSize: '0.85rem' }}>Loading customers...</Typography>
+										</Box>
 									) : (
-										'Create Shipment'
+										<>
+											<select
+												id="userId"
+												{...register('userId')}
+												style={{
+													width: '100%',
+													padding: '10px 12px',
+													borderRadius: '16px',
+													border: errors.userId ? '2px solid var(--error)' : '1px solid rgba(var(--border-rgb), 0.9)',
+													backgroundColor: 'var(--background)',
+													color: 'var(--text-primary)',
+													fontSize: '0.875rem',
+												}}
+											>
+												<option value="">Select customer</option>
+												{users.map((user) => (
+													<option key={user.id} value={user.id}>
+														{user.name || user.email}
+													</option>
+												))}
+											</select>
+											{errors.userId && (
+												<Typography sx={{ fontSize: '0.75rem', color: 'var(--error)', mt: 0.5 }}>
+													{errors.userId.message}
+												</Typography>
+											)}
+										</>
 									)}
-								</Button>
-							</div>
-						</form>
-					</div>
-				</Section>
-			</div>
+								</Box>
+
+								{/* Financial Fields */}
+								<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+									<FormField
+										id="price"
+										label="Price ($)"
+										type="number"
+										placeholder="0.00"
+										error={!!errors.price}
+										helperText={errors.price?.message}
+										{...register('price')}
+										inputProps={{ step: '0.01' }}
+										leftIcon={<DollarSign style={{ fontSize: 18, color: 'var(--text-secondary)' }} />}
+									/>
+									<FormField
+										id="insuranceValue"
+										label="Insurance Value ($)"
+										type="number"
+										placeholder="0.00"
+										error={!!errors.insuranceValue}
+										helperText={errors.insuranceValue?.message}
+										{...register('insuranceValue')}
+										inputProps={{ step: '0.01' }}
+										leftIcon={<DollarSign style={{ fontSize: 18, color: 'var(--text-secondary)' }} />}
+									/>
+								</Box>
+
+								{/* Payment Mode */}
+								<Box>
+									<Typography
+										sx={{
+											display: 'block',
+											fontSize: '0.875rem',
+											fontWeight: 500,
+											color: 'var(--text-primary)',
+											mb: 1.5,
+										}}
+									>
+										Payment Mode
+									</Typography>
+									<Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+										<Box
+											component="label"
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												justifyContent: 'center',
+												gap: 1.5,
+												p: 2,
+												border: watch('paymentMode') === 'CASH' ? '2px solid var(--accent-gold)' : '1px solid var(--border)',
+												borderRadius: 2,
+												bgcolor: watch('paymentMode') === 'CASH' ? 'rgba(var(--accent-gold-rgb), 0.08)' : 'var(--panel)',
+												cursor: 'pointer',
+												transition: 'all 0.2s ease',
+												'&:hover': {
+													borderColor: 'var(--accent-gold)',
+												},
+											}}
+										>
+											<input
+												type="radio"
+												value="CASH"
+												{...register('paymentMode')}
+												style={{ display: 'none' }}
+											/>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												Cash
+											</Typography>
+										</Box>
+										<Box
+											component="label"
+											sx={{
+												display: 'flex',
+												alignItems: 'center',
+												justifyContent: 'center',
+												gap: 1.5,
+												p: 2,
+												border: watch('paymentMode') === 'DUE' ? '2px solid var(--accent-gold)' : '1px solid var(--border)',
+												borderRadius: 2,
+												bgcolor: watch('paymentMode') === 'DUE' ? 'rgba(var(--accent-gold-rgb), 0.08)' : 'var(--panel)',
+												cursor: 'pointer',
+												transition: 'all 0.2s ease',
+												'&:hover': {
+													borderColor: 'var(--accent-gold)',
+												},
+											}}
+										>
+											<input
+												type="radio"
+												value="DUE"
+												{...register('paymentMode')}
+												style={{ display: 'none' }}
+											/>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												Due
+											</Typography>
+										</Box>
+									</Box>
+								</Box>
+							</Box>
+						</DashboardPanel>
+					)}
+
+					{/* Step 4: Review & Submit */}
+					{activeStep === 4 && (
+						<DashboardPanel title="Review & Submit" description="Verify all details before creating">
+							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+								{/* Summary */}
+								<Box
+									sx={{
+										p: 3,
+										borderRadius: 2,
+										border: '1px solid var(--border)',
+										bgcolor: 'var(--background)',
+									}}
+								>
+									<Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', mb: 2 }}>
+										Shipment Summary
+									</Typography>
+									<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+										<Box>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 0.5 }}>
+												Vehicle
+											</Typography>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{formValues.vehicleYear} {formValues.vehicleMake} {formValues.vehicleModel}
+											</Typography>
+										</Box>
+										<Box>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 0.5 }}>
+												VIN
+											</Typography>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+												{formValues.vehicleVIN || 'N/A'}
+											</Typography>
+										</Box>
+										<Box>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 0.5 }}>
+												Type
+											</Typography>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+												{formValues.vehicleType}
+											</Typography>
+										</Box>
+										<Box>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 0.5 }}>
+												Status
+											</Typography>
+											<Box
+												sx={{
+													display: 'inline-block',
+													px: 1.5,
+													py: 0.5,
+													borderRadius: 1,
+													bgcolor: formValues.status === 'IN_TRANSIT' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(156, 163, 175, 0.15)',
+													color: formValues.status === 'IN_TRANSIT' ? 'rgb(99, 102, 241)' : 'rgb(156, 163, 175)',
+													fontSize: '0.75rem',
+													fontWeight: 600,
+												}}
+											>
+												{formValues.status === 'IN_TRANSIT' ? 'In Transit' : 'On Hand'}
+											</Box>
+										</Box>
+										<Box>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 0.5 }}>
+												Price
+											</Typography>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--accent-gold)' }}>
+												${formValues.price || '0.00'}
+											</Typography>
+										</Box>
+										<Box>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 0.5 }}>
+												Payment Mode
+											</Typography>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{formValues.paymentMode || 'N/A'}
+											</Typography>
+										</Box>
+									</Box>
+
+									{vehiclePhotos.length > 0 && (
+										<Box sx={{ mt: 2, pt: 2, borderTop: '1px solid var(--border)' }}>
+											<Typography sx={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-secondary)', mb: 1 }}>
+												Photos Uploaded
+											</Typography>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{vehiclePhotos.length} photo{vehiclePhotos.length !== 1 ? 's' : ''}
+											</Typography>
+										</Box>
+									)}
+								</Box>
+
+								{/* Internal Notes */}
+								<Box>
+									<FormField
+										id="internalNotes"
+										label="Internal Notes (Optional)"
+										placeholder="Add any internal notes about this shipment..."
+										multiline
+										rows={4}
+										error={!!errors.internalNotes}
+										helperText={errors.internalNotes?.message}
+										{...register('internalNotes')}
+									/>
+								</Box>
+							</Box>
+						</DashboardPanel>
+					)}
+
+					{/* Navigation Buttons */}
+					<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+						<ActionButton
+							type="button"
+							variant="outline"
+							onClick={handleBack}
+							disabled={activeStep === 0}
+							icon={<ArrowLeft className="w-4 h-4" />}
+						>
+							Back
+						</ActionButton>
+
+						<Box sx={{ display: 'flex', gap: 2 }}>
+							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
+								<ActionButton type="button" variant="ghost">
+									Cancel
+								</ActionButton>
+							</Link>
+							
+							{activeStep === steps.length - 1 ? (
+								<ActionButton
+									type="submit"
+									variant="primary"
+									disabled={isSubmitting}
+									icon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+								>
+									{isSubmitting ? 'Creating...' : 'Create Shipment'}
+								</ActionButton>
+							) : (
+								<ActionButton
+									type="button"
+									variant="primary"
+									onClick={handleNext}
+									icon={<ArrowRight className="w-4 h-4" />}
+									iconPosition="end"
+								>
+									Next
+								</ActionButton>
+							)}
+						</Box>
+					</Box>
+				</form>
+			</DashboardSurface>
 
 			<Snackbar
 				open={snackbar.open}
@@ -731,7 +1090,34 @@ export default function NewShipmentPage() {
 				onClose={() => setSnackbar({ ...snackbar, open: false })}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 			>
-				<Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+				<Alert 
+					severity={snackbar.severity} 
+					onClose={() => setSnackbar({ ...snackbar, open: false })}
+					sx={{
+						bgcolor: snackbar.severity === 'success' 
+							? 'rgba(74, 222, 128, 0.15)' 
+							: snackbar.severity === 'error' 
+							? 'rgba(239, 68, 68, 0.15)' 
+							: 'rgba(251, 191, 36, 0.15)',
+						border: snackbar.severity === 'success' 
+							? '1px solid rgba(74, 222, 128, 0.3)' 
+							: snackbar.severity === 'error' 
+							? '1px solid rgba(239, 68, 68, 0.3)' 
+							: '1px solid rgba(251, 191, 36, 0.3)',
+						color: snackbar.severity === 'success' 
+							? 'rgb(74, 222, 128)' 
+							: snackbar.severity === 'error' 
+							? 'rgb(239, 68, 68)' 
+							: 'rgb(251, 191, 36)',
+						'& .MuiAlert-icon': {
+							color: snackbar.severity === 'success' 
+								? 'rgb(74, 222, 128)' 
+								: snackbar.severity === 'error' 
+								? 'rgb(239, 68, 68)' 
+								: 'rgb(251, 191, 36)',
+						},
+					}}
+				>
 					{snackbar.message}
 				</Alert>
 			</Snackbar>

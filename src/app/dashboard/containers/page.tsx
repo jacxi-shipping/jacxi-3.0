@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { Box, Typography } from '@mui/material';
+import { Package, Ship, MapPin, TrendingUp, Calendar, FileText, DollarSign, Receipt } from 'lucide-react';
 import { AdminRoute } from '@/components/auth/AdminRoute';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
 
 interface Container {
   id: string;
@@ -28,20 +31,20 @@ interface Container {
   };
 }
 
-const statusColors: Record<string, string> = {
-  CREATED: 'bg-gray-500',
-  WAITING_FOR_LOADING: 'bg-yellow-500',
-  LOADED: 'bg-blue-500',
-  IN_TRANSIT: 'bg-indigo-600',
-  ARRIVED_PORT: 'bg-green-500',
-  CUSTOMS_CLEARANCE: 'bg-orange-500',
-  RELEASED: 'bg-teal-500',
-  CLOSED: 'bg-gray-700',
+const statusColors: Record<string, { bg: string; text: string; border: string }> = {
+  CREATED: { bg: 'rgba(156, 163, 175, 0.15)', text: 'rgb(156, 163, 175)', border: 'rgba(156, 163, 175, 0.3)' },
+  WAITING_FOR_LOADING: { bg: 'rgba(251, 191, 36, 0.15)', text: 'rgb(251, 191, 36)', border: 'rgba(251, 191, 36, 0.3)' },
+  LOADED: { bg: 'rgba(59, 130, 246, 0.15)', text: 'rgb(59, 130, 246)', border: 'rgba(59, 130, 246, 0.3)' },
+  IN_TRANSIT: { bg: 'rgba(99, 102, 241, 0.15)', text: 'rgb(99, 102, 241)', border: 'rgba(99, 102, 241, 0.3)' },
+  ARRIVED_PORT: { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(34, 197, 94)', border: 'rgba(34, 197, 94, 0.3)' },
+  CUSTOMS_CLEARANCE: { bg: 'rgba(249, 115, 22, 0.15)', text: 'rgb(249, 115, 22)', border: 'rgba(249, 115, 22, 0.3)' },
+  RELEASED: { bg: 'rgba(20, 184, 166, 0.15)', text: 'rgb(20, 184, 166)', border: 'rgba(20, 184, 166, 0.3)' },
+  CLOSED: { bg: 'rgba(107, 114, 128, 0.15)', text: 'rgb(107, 114, 128)', border: 'rgba(107, 114, 128, 0.3)' },
 };
 
 const statusLabels: Record<string, string> = {
   CREATED: 'Created',
-  WAITING_FOR_LOADING: 'Waiting for Loading',
+  WAITING_FOR_LOADING: 'Waiting',
   LOADED: 'Loaded',
   IN_TRANSIT: 'In Transit',
   ARRIVED_PORT: 'Arrived',
@@ -58,6 +61,7 @@ export default function ContainersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     fetchContainers();
@@ -100,44 +104,117 @@ export default function ContainersPage() {
     fetchContainers();
   };
 
+  const stats = {
+    total: containers.length,
+    inTransit: containers.filter(c => c.status === 'IN_TRANSIT').length,
+    arrived: containers.filter(c => c.status === 'ARRIVED_PORT' || c.status === 'RELEASED').length,
+    avgCapacity: containers.length > 0 
+      ? Math.round((containers.reduce((sum, c) => sum + (c.currentCount / c.maxCapacity * 100), 0) / containers.length))
+      : 0,
+  };
+
+  if (loading && containers.length === 0) {
+    return (
+      <AdminRoute>
+        <LoadingState fullScreen message="Loading containers..." />
+      </AdminRoute>
+    );
+  }
+
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  Containers
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Manage shipping containers and tracking
-                </p>
-              </div>
-              <Button onClick={() => router.push('/dashboard/containers/new')}>
-                + New Container
-              </Button>
-            </div>
+      <DashboardSurface>
+        <PageHeader
+          title="Containers"
+          description="Manage shipping containers and tracking"
+          actions={
+            <Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
+              <ActionButton variant="primary" icon={<Package className="w-4 h-4" />}>
+                New Container
+              </ActionButton>
+            </Link>
+          }
+        />
 
-            {/* Filters */}
-            <div className="flex gap-4 mb-4">
-              <form onSubmit={handleSearch} className="flex-1">
-                <input
-                  type="text"
+        {/* Stats */}
+        <DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            icon={<Package style={{ fontSize: 18 }} />}
+            title="Total Containers"
+            value={stats.total}
+            subtitle="All containers"
+          />
+          <StatsCard
+            icon={<Ship style={{ fontSize: 18 }} />}
+            title="In Transit"
+            value={stats.inTransit}
+            subtitle="Currently shipping"
+            iconColor="rgb(99, 102, 241)"
+            iconBg="rgba(99, 102, 241, 0.15)"
+            delay={0.1}
+          />
+          <StatsCard
+            icon={<MapPin style={{ fontSize: 18 }} />}
+            title="Arrived"
+            value={stats.arrived}
+            subtitle="At destination"
+            iconColor="rgb(34, 197, 94)"
+            iconBg="rgba(34, 197, 94, 0.15)"
+            delay={0.2}
+          />
+          <StatsCard
+            icon={<TrendingUp style={{ fontSize: 18 }} />}
+            title="Avg Capacity"
+            value={`${stats.avgCapacity}%`}
+            subtitle="Container utilization"
+            iconColor="rgb(20, 184, 166)"
+            iconBg="rgba(20, 184, 166, 0.15)"
+            delay={0.3}
+          />
+        </DashboardGrid>
+
+        {/* Filters */}
+        <DashboardPanel title="Search & Filter" description="Find containers quickly">
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+            <Box sx={{ flex: 1 }}>
+              <form onSubmit={handleSearch}>
+                <FormField
+                  label=""
                   placeholder="Search by container #, tracking #, vessel..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  leftIcon={<Package style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
                 />
               </form>
+            </Box>
+            <Box sx={{ minWidth: { xs: '100%', md: 200 } }}>
+              <Typography
+                component="label"
+                sx={{
+                  display: 'block',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: 'var(--text-primary)',
+                  mb: 1,
+                }}
+              >
+                Status Filter
+              </Typography>
               <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value);
                   setPage(1);
                 }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(var(--border-rgb), 0.9)',
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.875rem',
+                }}
               >
                 <option value="all">All Status</option>
                 {Object.entries(statusLabels).map(([value, label]) => (
@@ -146,144 +223,196 @@ export default function ContainersPage() {
                   </option>
                 ))}
               </select>
-            </div>
-          </div>
+            </Box>
+          </Box>
+        </DashboardPanel>
 
-          {/* Container Grid */}
+        {/* Container Grid */}
+        <DashboardPanel title={`All Containers (${containers.length})`} fullHeight>
           {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading containers...</p>
-            </div>
+            <LoadingState message="Loading containers..." />
           ) : containers.length === 0 ? (
-            <Card className="text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">No containers found</p>
-              <Button className="mt-4" onClick={() => router.push('/dashboard/containers/new')}>
-                Create First Container
-              </Button>
-            </Card>
+            <EmptyState
+              icon={<Package />}
+              title="No containers found"
+              description="Create your first container to get started"
+              action={
+                <Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
+                  <ActionButton variant="primary">Create First Container</ActionButton>
+                </Link>
+              }
+            />
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {containers.map((container) => (
-                  <Card
+              <DashboardGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {containers.map((container, index) => (
+                  <Box
                     key={container.id}
-                    className="hover:shadow-lg transition-shadow cursor-pointer"
                     onClick={() => router.push(`/dashboard/containers/${container.id}`)}
+                    sx={{
+                      borderRadius: 2,
+                      border: '1px solid var(--border)',
+                      background: 'var(--panel)',
+                      boxShadow: '0 12px 30px rgba(var(--text-primary-rgb), 0.08)',
+                      p: 2,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 20px 40px rgba(var(--text-primary-rgb), 0.12)',
+                      },
+                    }}
                   >
                     {/* Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                      <Box>
+                        <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {container.containerNumber}
-                        </h3>
+                        </Typography>
                         {container.trackingNumber && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Tracking: {container.trackingNumber}
-                          </p>
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+                            {container.trackingNumber}
+                          </Typography>
                         )}
-                      </div>
-                      <Badge className={statusColors[container.status]}>
+                      </Box>
+                      <Box
+                        sx={{
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 1,
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          ...statusColors[container.status],
+                          border: `1px solid ${statusColors[container.status].border}`,
+                          bgcolor: statusColors[container.status].bg,
+                          color: statusColors[container.status].text,
+                        }}
+                      >
                         {statusLabels[container.status]}
-                      </Badge>
-                    </div>
+                      </Box>
+                    </Box>
 
                     {/* Progress */}
-                    <div className="mb-4">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                        <span className="text-gray-900 dark:text-white font-medium">
+                    <Box sx={{ mb: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                        <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                          Progress
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                           {container.progress}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-indigo-600 h-2 rounded-full transition-all"
-                          style={{ width: `${container.progress}%` }}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: 6,
+                          borderRadius: 1,
+                          bgcolor: 'var(--background)',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: `${container.progress}%`,
+                            height: '100%',
+                            bgcolor: 'var(--accent-gold)',
+                            transition: 'width 0.3s ease',
+                          }}
                         />
-                      </div>
-                    </div>
+                      </Box>
+                    </Box>
 
                     {/* Details */}
-                    <div className="space-y-2 text-sm">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
                       {container.vesselName && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Vessel:</span>
-                          <span className="text-gray-900 dark:text-white font-medium">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Ship style={{ fontSize: 14, color: 'var(--text-secondary)' }} />
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                             {container.vesselName}
-                          </span>
-                        </div>
-                      )}
-                      {container.shippingLine && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Line:</span>
-                          <span className="text-gray-900 dark:text-white font-medium">
-                            {container.shippingLine}
-                          </span>
-                        </div>
+                          </Typography>
+                        </Box>
                       )}
                       {container.destinationPort && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Destination:</span>
-                          <span className="text-gray-900 dark:text-white font-medium">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <MapPin style={{ fontSize: 14, color: 'var(--text-secondary)' }} />
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                             {container.destinationPort}
-                          </span>
-                        </div>
+                          </Typography>
+                        </Box>
                       )}
                       {container.estimatedArrival && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">ETA:</span>
-                          <span className="text-gray-900 dark:text-white font-medium">
-                            {new Date(container.estimatedArrival).toLocaleDateString()}
-                          </span>
-                        </div>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Calendar style={{ fontSize: 14, color: 'var(--text-secondary)' }} />
+                          <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                            ETA: {new Date(container.estimatedArrival).toLocaleDateString()}
+                          </Typography>
+                        </Box>
                       )}
-                    </div>
+                    </Box>
 
                     {/* Stats */}
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex justify-between text-sm">
-                        <div>
-                          <span className="text-gray-600 dark:text-gray-400">Vehicles: </span>
-                          <span className="text-gray-900 dark:text-white font-bold">
-                            {container._count.shipments}/{container.maxCapacity}
-                          </span>
-                        </div>
-                        <div className="flex gap-3 text-gray-600 dark:text-gray-400">
-                          <span>📄 {container._count.documents}</span>
-                          <span>💰 {container._count.expenses}</span>
-                          <span>📊 {container._count.invoices}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
+                    <Box
+                      sx={{
+                        pt: 2,
+                        borderTop: '1px solid var(--border)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Package style={{ fontSize: 14, color: 'var(--accent-gold)' }} />
+                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                          {container._count.shipments}/{container.maxCapacity}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 2, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <FileText style={{ fontSize: 12 }} />
+                          <span>{container._count.documents}</span>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <DollarSign style={{ fontSize: 12 }} />
+                          <span>{container._count.expenses}</span>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Receipt style={{ fontSize: 12 }} />
+                          <span>{container._count.invoices}</span>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
+              </DashboardGrid>
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="mt-8 flex justify-center gap-2">
-                  <Button
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
+                  <ActionButton
+                    variant="outline"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
+                    size="small"
                   >
                     Previous
-                  </Button>
-                  <span className="px-4 py-2 text-gray-700 dark:text-gray-300">
+                  </ActionButton>
+                  <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Page {page} of {totalPages}
-                  </span>
-                  <Button
+                  </Typography>
+                  <ActionButton
+                    variant="outline"
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
+                    size="small"
                   >
                     Next
-                  </Button>
-                </div>
+                  </ActionButton>
+                </Box>
               )}
             </>
           )}
-        </div>
-      </div>
+        </DashboardPanel>
+      </DashboardSurface>
     </AdminRoute>
   );
 }

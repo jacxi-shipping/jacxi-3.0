@@ -3,20 +3,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { FileText, ShieldCheck, Download, Upload, Search, AlertCircle } from 'lucide-react';
-import { Box } from '@mui/material';
-
-import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
-import Section from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
+import { FileText, ShieldCheck, Download, Upload, Search as SearchIcon, Folder } from 'lucide-react';
+import { Box, Typography } from '@mui/material';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
 
 type DocumentCategory = {
 	id: string;
 	title: string;
 	description: string;
 	icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-	accent: string;
+	iconColor: string;
+	iconBg: string;
 	documents: Array<{
 		id: string;
 		name: string;
@@ -31,15 +29,17 @@ export default function DocumentsPage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
 	const [search, setSearch] = useState('');
+	const [loading, setLoading] = useState(false);
 
 	const categories = useMemo<DocumentCategory[]>(
 		() => [
 			{
 				id: 'templates',
 				title: 'Company Templates',
-				description: 'Download ready-to-use templates for invoices, statements, customs, and compliance documents.',
+				description: 'Download ready-to-use templates for invoices, statements, and compliance.',
 				icon: FileText,
-				accent: 'from-cyan-500/30 via-cyan-500/20 to-transparent border-cyan-500/40 shadow-cyan-500/20',
+				iconColor: 'rgb(34, 211, 238)',
+				iconBg: 'rgba(34, 211, 238, 0.15)',
 				documents: [
 					{
 						id: 'template-invoice',
@@ -72,7 +72,8 @@ export default function DocumentsPage() {
 				title: 'Uploaded Documents',
 				description: 'Track documents uploaded for containers, shipments, and customer records.',
 				icon: Upload,
-				accent: 'from-blue-500/30 via-blue-500/20 to-transparent border-blue-500/40 shadow-blue-500/20',
+				iconColor: 'rgb(59, 130, 246)',
+				iconBg: 'rgba(59, 130, 246, 0.15)',
 				documents: [
 					{
 						id: 'upload-manifest',
@@ -84,7 +85,7 @@ export default function DocumentsPage() {
 					},
 					{
 						id: 'upload-customs',
-						name: 'Customs Clearance Proof - REF# 02383',
+						name: 'Customs Clearance Proof',
 						type: 'upload',
 						size: '3.2 MB',
 						updatedAt: '2025-11-05',
@@ -92,7 +93,7 @@ export default function DocumentsPage() {
 					},
 					{
 						id: 'upload-insurance',
-						name: 'Insurance Certificate - VIN 5YJ3E1EA7MF123456',
+						name: 'Insurance Certificate',
 						type: 'upload',
 						size: '1.6 MB',
 						updatedAt: '2025-11-02',
@@ -103,9 +104,10 @@ export default function DocumentsPage() {
 			{
 				id: 'compliance',
 				title: 'Compliance & Security',
-				description: 'Policies, certifications, and legal references for Jacxi operations.',
+				description: 'Policies, certifications, and legal references for operations.',
 				icon: ShieldCheck,
-				accent: 'from-purple-500/30 via-purple-500/20 to-transparent border-purple-500/40 shadow-purple-500/20',
+				iconColor: 'rgb(168, 85, 247)',
+				iconBg: 'rgba(168, 85, 247, 0.15)',
 				documents: [
 					{
 						id: 'policy-gdpr',
@@ -117,7 +119,7 @@ export default function DocumentsPage() {
 					},
 					{
 						id: 'policy-iso',
-						name: 'ISO 9001 Certification Overview',
+						name: 'ISO 9001 Certification',
 						type: 'template',
 						size: '3.6 MB',
 						updatedAt: '2025-09-28',
@@ -125,7 +127,7 @@ export default function DocumentsPage() {
 					},
 					{
 						id: 'policy-sop',
-						name: 'Jacxi Security SOP (Internal)',
+						name: 'Security SOP (Internal)',
 						type: 'template',
 						size: '2.1 MB',
 						updatedAt: '2025-09-12',
@@ -149,17 +151,21 @@ export default function DocumentsPage() {
 			.filter((category) => category.documents.length > 0);
 	}, [categories, search]);
 
-	const pendingDocumentsCount = useMemo(
-		() =>
-			categories
-				.flatMap((category) => category.documents)
-				.filter((doc) => doc.status === 'required').length,
+	const stats = useMemo(
+		() => {
+			const allDocs = categories.flatMap(c => c.documents);
+			return {
+				total: allDocs.length,
+				required: allDocs.filter(d => d.status === 'required').length,
+				categories: categories.length,
+				storage: '3.1 GB',
+			};
+		},
 		[categories]
 	);
 
 	useEffect(() => {
 		if (status === 'loading') return;
-
 		const role = session?.user?.role;
 		if (!session || role !== 'admin') {
 			router.replace('/dashboard');
@@ -168,170 +174,182 @@ export default function DocumentsPage() {
 
 	const role = session?.user?.role;
 	if (status === 'loading' || !session || role !== 'admin') {
-		return (
-			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]" />
-			</div>
-		);
+		return <LoadingState fullScreen message="Loading documents..." />;
 	}
 
 	return (
-		<DashboardSurface className="light-surface">
-			<DashboardPanel title="Snapshot" description="Quick glance at activity" noBodyPadding>
-				<Box sx={{ px: { xs: 2, sm: 3 }, py: 1.5 }}>
-					<motion.div
-						initial={{ opacity: 0, y: 16 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.15 }}
-						className="grid grid-cols-1 md:grid-cols-3 gap-4"
-					>
-						<div className="rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg shadow-cyan-500/10">
-							<p className="text-sm text-white/60">Active Categories</p>
-							<p className="text-3xl font-semibold text-white mt-1">{categories.length}</p>
-							<p className="text-xs text-white/40 mt-2">Templates, uploads, compliance.</p>
-						</div>
-						<div className="rounded-xl border border-blue-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg shadow-blue-500/10">
-							<p className="text-sm text-white/60">Required Documents</p>
-							<p className="text-3xl font-semibold text-white mt-1">{pendingDocumentsCount}</p>
-							<p className="text-xs text-white/40 mt-2">Ensure these remain up to date.</p>
-						</div>
-						<div className="rounded-xl border border-purple-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-5 shadow-lg shadow-purple-500/10">
-							<p className="text-sm text-white/60">Storage Usage</p>
-							<p className="text-3xl font-semibold text-white mt-1">3.1 GB</p>
-							<p className="text-xs text-white/40 mt-2">Includes uploaded manifests and certificates.</p>
-						</div>
-					</motion.div>
-				</Box>
+		<DashboardSurface>
+			<PageHeader
+				title="Documents"
+				description="Manage templates, uploads, and compliance documents"
+				actions={
+					<>
+						<ActionButton variant="outline" icon={<Download className="w-4 h-4" />} size="small">
+							Download All
+						</ActionButton>
+						<ActionButton variant="primary" icon={<Upload className="w-4 h-4" />} size="small">
+							Upload Document
+						</ActionButton>
+					</>
+				}
+			/>
+
+			{/* Stats */}
+			<DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+				<StatsCard
+					icon={<FileText style={{ fontSize: 18 }} />}
+					title="Total Documents"
+					value={stats.total}
+					subtitle="All documents"
+				/>
+				<StatsCard
+					icon={<Folder style={{ fontSize: 18 }} />}
+					title="Categories"
+					value={stats.categories}
+					subtitle="Document types"
+					iconColor="rgb(59, 130, 246)"
+					iconBg="rgba(59, 130, 246, 0.15)"
+					delay={0.1}
+				/>
+				<StatsCard
+					icon={<ShieldCheck style={{ fontSize: 18 }} />}
+					title="Required"
+					value={stats.required}
+					subtitle="Must be updated"
+					iconColor="rgb(239, 68, 68)"
+					iconBg="rgba(239, 68, 68, 0.15)"
+					delay={0.2}
+				/>
+				<StatsCard
+					icon={<Upload style={{ fontSize: 18 }} />}
+					title="Storage"
+					value={stats.storage}
+					subtitle="Total size"
+					iconColor="rgb(168, 85, 247)"
+					iconBg="rgba(168, 85, 247, 0.15)"
+					delay={0.3}
+				/>
+			</DashboardGrid>
+
+			{/* Search */}
+			<DashboardPanel title="Search Documents" description="Find documents by name">
+				<FormField
+					label=""
+					placeholder="Search documents..."
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					leftIcon={<SearchIcon style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
+				/>
 			</DashboardPanel>
 
-			<DashboardPanel title="Document library" description="Search and manage every document">
-			<Section className="bg-[var(--text-primary)] py-4 sm:py-6">
-				<div className="max-w-6xl mx-auto space-y-10">
-					<motion.div
-						initial={{ opacity: 0, y: 16 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.5, delay: 0.2 }}
-						className="relative rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/70 backdrop-blur-md p-6 shadow-lg shadow-cyan-500/10"
-					>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="relative">
-								<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-cyan-400/70" />
-								<input
-									value={search}
-									onChange={(event) => setSearch(event.target.value)}
-									placeholder="Search documents by name..."
-									className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[var(--text-primary)] border border-cyan-500/30 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-								/>
-							</div>
-							<div className="flex flex-wrap gap-3 md:justify-end">
-								<Button className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] text-white">
-									<Download className="w-4 h-4 mr-2" />
-									Download All Templates
-								</Button>
-								<Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-									<Upload className="w-4 h-4 mr-2" />
-									Upload Document
-								</Button>
-							</div>
-						</div>
-					</motion.div>
-
-					{filteredCategories.length === 0 ? (
-						<motion.div
-							initial={{ opacity: 0, y: 16 }}
-							animate={{ opacity: 1, y: 0 }}
-							className="rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/50 backdrop-blur-sm p-16 text-center"
-						>
-							<AlertCircle className="w-14 h-14 text-white/30 mx-auto mb-4" />
-							<p className="text-white/70 text-lg">No documents match “{search}”. Try a different search term.</p>
-						</motion.div>
-					) : (
-						filteredCategories.map((category, idx) => {
-							const Icon = category.icon;
-							return (
-								<motion.div
-									key={category.id}
-									initial={{ opacity: 0, y: 24 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ duration: 0.5, delay: idx * 0.1 }}
-									className="space-y-6"
+			{/* Categories */}
+			{filteredCategories.length === 0 ? (
+				<DashboardPanel fullHeight>
+					<EmptyState
+						icon={<FileText />}
+						title="No documents found"
+						description={`No documents match "${search}". Try a different search term.`}
+					/>
+				</DashboardPanel>
+			) : (
+				filteredCategories.map((category) => {
+					const Icon = category.icon;
+					return (
+						<DashboardPanel
+							key={category.id}
+							title={category.title}
+							description={category.description}
+							actions={
+								<Box
+									sx={{
+										width: 40,
+										height: 40,
+										borderRadius: 2,
+										display: 'flex',
+										alignItems: 'center',
+										justifyContent: 'center',
+										bgcolor: category.iconBg,
+										color: category.iconColor,
+									}}
 								>
-									<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-										<div className="flex items-center gap-4">
-											<div
-												className={`w-12 h-12 rounded-xl border flex items-center justify-center bg-gradient-to-br ${category.accent}`}
+									<Icon style={{ fontSize: 20 }} />
+								</Box>
+							}
+						>
+							<DashboardGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+								{category.documents.map((document) => (
+									<Box
+										key={document.id}
+										sx={{
+											borderRadius: 2,
+											border: '1px solid var(--border)',
+											background: 'var(--panel)',
+											boxShadow: '0 8px 20px rgba(var(--text-primary-rgb), 0.06)',
+											p: 2,
+											cursor: 'pointer',
+											transition: 'all 0.2s ease',
+											'&:hover': {
+												transform: 'translateY(-2px)',
+												boxShadow: '0 16px 32px rgba(var(--text-primary-rgb), 0.1)',
+												borderColor: category.iconColor,
+											},
+										}}
+									>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+											<Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)', flex: 1 }}>
+												{document.name}
+											</Typography>
+											{document.status && (
+												<Box
+													sx={{
+														px: 1,
+														py: 0.5,
+														borderRadius: 1,
+														fontSize: '0.65rem',
+														fontWeight: 600,
+														textTransform: 'uppercase',
+														...(document.status === 'required'
+															? { bgcolor: 'rgba(239, 68, 68, 0.15)', color: 'rgb(239, 68, 68)', border: '1px solid rgba(239, 68, 68, 0.3)' }
+															: { bgcolor: 'rgba(34, 211, 238, 0.15)', color: 'rgb(34, 211, 238)', border: '1px solid rgba(34, 211, 238, 0.3)' }),
+													}}
+												>
+													{document.status}
+												</Box>
+											)}
+										</Box>
+
+										<Box sx={{ display: 'flex', gap: 2, mb: 2, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+											<Box
+												sx={{
+													px: 1.5,
+													py: 0.5,
+													borderRadius: 1,
+													bgcolor: 'var(--background)',
+													textTransform: 'capitalize',
+												}}
 											>
-												<Icon className="w-6 h-6 text-white" strokeWidth={1.5} />
-											</div>
-											<div>
-												<h2 className="text-2xl font-semibold text-white">{category.title}</h2>
-												<p className="text-sm text-white/60">{category.description}</p>
-											</div>
-										</div>
-										<Button variant="ghost" className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
-											View All
-										</Button>
-									</div>
+												{document.type}
+											</Box>
+											{document.size && <span>{document.size}</span>}
+											<span>Updated {new Date(document.updatedAt).toLocaleDateString()}</span>
+										</Box>
 
-									<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-										{category.documents.map((document, docIdx) => (
-											<motion.div
-												key={document.id}
-												initial={{ opacity: 0, y: 16 }}
-												whileInView={{ opacity: 1, y: 0 }}
-												viewport={{ once: true }}
-												transition={{ duration: 0.4, delay: docIdx * 0.05 }}
-												className="relative rounded-xl border border-cyan-500/20 bg-[var(--text-primary)]/60 backdrop-blur-md p-5 hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all"
-											>
-												<div className="flex items-start justify-between gap-3">
-													<div className="space-y-2">
-														<p className="text-sm font-semibold text-white">{document.name}</p>
-														<div className="flex items-center gap-3 text-xs text-white/50">
-															<span className="px-2 py-1 rounded-full border border-white/10 bg-white/5 capitalize">
-																{document.type}
-															</span>
-															{document.size && <span>{document.size}</span>}
-															<span>Updated {new Date(document.updatedAt).toLocaleDateString()}</span>
-														</div>
-													</div>
-
-													{document.status && (
-														<span
-															className={`px-2 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-																document.status === 'required'
-																	? 'bg-red-500/20 border border-red-500/40 text-red-300'
-																	: document.status === 'optional'
-																	? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-200'
-																	: 'bg-white/10 border border-white/20 text-white/60'
-															}`}
-														>
-															{document.status}
-														</span>
-													)}
-												</div>
-
-												<div className="mt-4 flex flex-wrap gap-3 text-xs text-white/50">
-													<Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-														<Download className="w-4 h-4 mr-2" />
-														Download
-													</Button>
-													<Button variant="ghost" size="sm" className="text-white/60 hover:text-white hover:bg-white/10">
-														View Details
-													</Button>
-												</div>
-											</motion.div>
-										))}
-									</div>
-								</motion.div>
-							);
-						})
-					)}
-				</div>
-			</Section>
-			</DashboardPanel>
+										<Box sx={{ display: 'flex', gap: 1 }}>
+											<ActionButton variant="outline" size="small" sx={{ flex: 1 }}>
+												<Download className="w-3 h-3 mr-1" />
+												Download
+											</ActionButton>
+											<ActionButton variant="ghost" size="small">
+												View
+											</ActionButton>
+										</Box>
+									</Box>
+								))}
+							</DashboardGrid>
+						</DashboardPanel>
+					);
+				})
+			)}
 		</DashboardSurface>
 	);
 }
-
-

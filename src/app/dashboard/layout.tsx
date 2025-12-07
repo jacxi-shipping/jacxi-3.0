@@ -39,28 +39,27 @@ export default function DashboardLayout({
 					{/* Sidebar */}
 					<Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
-					{/* Main Content */}
-					<Box
-						component="main"
-						sx={{
-							flexGrow: 1,
-							minWidth: 0,
-							height: 'calc(100vh - 40px)',
-							bgcolor: 'var(--background)',
-							backgroundImage: 'none',
-						}}
-					>
-						<Box
-							sx={{
-								height: '100%',
-								display: 'flex',
-								flexDirection: 'column',
-								overflow: 'hidden',
-							}}
-						>
-							<div className="dashboard-scroll">{children}</div>
-						</Box>
-					</Box>
+				{/* Main Content */}
+				<Box
+					component="main"
+					sx={{
+						flexGrow: 1,
+						minWidth: 0,
+						height: 'calc(100vh - 40px)',
+						bgcolor: 'var(--background)',
+						backgroundImage: 'none',
+						overflow: 'auto',
+						/* Hide scrollbar completely */
+						'&::-webkit-scrollbar': {
+							width: 0,
+							height: 0,
+						},
+						scrollbarWidth: 'none',
+						msOverflowStyle: 'none',
+					}}
+				>
+					{children}
+				</Box>
 				</Box>
 			</Box>
 		</ProtectedRoute>
