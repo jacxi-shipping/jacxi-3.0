@@ -34,6 +34,8 @@ import {
   Container,
 } from 'lucide-react';
 import { Tabs, Tab, Box, ImageList, ImageListItem, ImageListItemBar, IconButton as MuiIconButton } from '@mui/material';
+import { toast } from '@/lib/toast';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 interface ShipmentEvent {
   id: string;
@@ -239,7 +241,7 @@ export default function ShipmentDetailPage() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Error downloading photo:', error);
-      alert('Failed to download photo');
+      toast.error('Failed to download photo', 'Please try again');
     } finally {
       setDownloading(false);
     }
@@ -270,7 +272,7 @@ export default function ShipmentDetailPage() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Error downloading photos:', error);
-      alert('Failed to download photos');
+      toast.error('Failed to download photos', 'Please try again');
     } finally {
       setDownloading(false);
     }
@@ -338,11 +340,11 @@ export default function ShipmentDetailPage() {
         router.push('/dashboard/shipments');
       } else {
         const data = await response.json();
-        alert(data.message || 'Failed to delete shipment');
+        toast.error('Failed to delete shipment', data.message || 'Please try again');
       }
     } catch (error) {
       console.error('Error deleting shipment:', error);
-      alert('An error occurred while deleting the shipment');
+      toast.error('Failed to delete shipment', 'An error occurred. Please try again');
     }
   };
 
@@ -373,7 +375,7 @@ export default function ShipmentDetailPage() {
     } catch (error) {
       console.error('Error uploading file:', error);
       const message = error instanceof Error ? error.message : 'Failed to upload image';
-      alert(message);
+      toast.error('Upload failed', message);
       return null;
     } finally {
       setUploading(false);
@@ -410,11 +412,11 @@ export default function ShipmentDetailPage() {
           setShowArrivalUpload(false);
         } else {
           const error = await response.json();
-          alert(error.message || 'Failed to save arrival photos');
+          toast.error('Failed to save photos', error.message || 'Please try again');
         }
       } catch (error) {
         console.error('Error saving arrival photos:', error);
-        alert('An error occurred while saving arrival photos');
+        toast.error('Failed to save photos', 'An error occurred. Please try again');
       }
     }
 
@@ -444,13 +446,13 @@ export default function ShipmentDetailPage() {
         // Revert on error
         setArrivalPhotos(arrivalPhotos);
         const error = await response.json();
-        alert(error.message || 'Failed to remove photo');
+        toast.error('Failed to remove photo', error.message || 'Please try again');
       }
     } catch (error) {
       // Revert on error
       setArrivalPhotos(arrivalPhotos);
       console.error('Error removing photo:', error);
-      alert('An error occurred while removing photo');
+      toast.error('Failed to remove photo', 'An error occurred. Please try again');
     }
   };
 
@@ -512,6 +514,15 @@ export default function ShipmentDetailPage() {
         <div className="relative">
           <Section className="pb-4 pt-4 sm:pt-6">
             <div className="flex flex-col gap-4 sm:gap-6">
+              {/* Breadcrumbs */}
+              <Breadcrumbs 
+                items={[
+                  { label: 'Shipments', href: '/dashboard/shipments' },
+                  { label: shipment.vehicleVIN || `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'Details' },
+                ]}
+                className="mb-2"
+              />
+              
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                 <div className="flex items-center gap-2 sm:gap-3 flex-1">
                   <Link href="/dashboard/shipments">

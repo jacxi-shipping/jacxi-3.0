@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 interface HeaderProps {
 	onMenuClick?: () => void;
@@ -140,6 +141,9 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 
 				{/* Right Actions */}
 				<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+					{/* Theme Toggle */}
+					<ThemeToggle />
+					
 					{/* Notifications */}
 					<Tooltip title="Notifications">
 						<IconButton

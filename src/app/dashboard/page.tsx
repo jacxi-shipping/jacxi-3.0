@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Add, Inventory2, TrendingUp, LocalShipping, LocationOn } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography } from '@mui/material';
+import { Button, Box, Typography } from '@mui/material';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ShipmentCard from '@/components/dashboard/ShipmentCard';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 
 interface Shipment {
 	id: string;
@@ -124,16 +125,17 @@ export default function DashboardPage() {
 					}
 				>
 					{loading ? (
-						<Box
-							sx={{
-								flex: 1,
-								minHeight: 0,
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}
-						>
-							<CircularProgress size={28} sx={{ color: 'var(--accent-gold)' }} />
+						<Box sx={{ 
+							display: 'flex', 
+							flexDirection: 'column', 
+							gap: 1, 
+							flex: 1, 
+							minHeight: 0,
+							minWidth: 0,
+							width: '100%',
+						}}>
+							<SkeletonCard />
+							<SkeletonCard />
 						</Box>
 					) : recentShipments.length === 0 ? (
 						<Box

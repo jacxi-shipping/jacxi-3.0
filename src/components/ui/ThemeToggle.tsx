@@ -1,33 +1,47 @@
-"use client";
+'use client';
 
-import { DarkMode, LightMode } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
-import { useState } from 'react';
+import { Moon, Sun } from 'lucide-react';
+import { IconButton, Tooltip } from '@mui/material';
+import { useTheme } from '@/hooks/useTheme';
 
-export default function ThemeToggle({ className }: { className?: string }) {
-	// For now, we'll keep the UI dark mode only as per the design
-	// This is a placeholder for future theme toggle functionality
-	const [theme] = useState('dark');
+export function ThemeToggle() {
+  const { theme, toggleTheme, mounted } = useTheme();
 
-	return (
-		<IconButton
-			aria-label="Toggle theme"
-			disabled
-			sx={{
-				width: 40,
-				height: 40,
-				color: 'var(--text-secondary)',
-				'&:hover': {
-					bgcolor: 'rgba(var(--text-secondary-rgb), 0.08)',
-				},
-			}}
-			className={className}
-		>
-			{theme === 'dark' ? (
-				<LightMode sx={{ fontSize: 20 }} />
-			) : (
-				<DarkMode sx={{ fontSize: 20 }} />
-			)}
-		</IconButton>
-	);
+  if (!mounted) {
+    return (
+      <IconButton
+        size="small"
+        sx={{
+          color: 'var(--text-secondary)',
+          p: 1,
+        }}
+      >
+        <div className="w-5 h-5" />
+      </IconButton>
+    );
+  }
+
+  return (
+    <Tooltip title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+      <IconButton
+        onClick={toggleTheme}
+        size="small"
+        sx={{
+          color: 'var(--text-secondary)',
+          p: 1,
+          '&:hover': {
+            bgcolor: 'rgba(var(--border-rgb), 0.4)',
+            color: 'var(--text-primary)',
+          },
+        }}
+        aria-label="Toggle theme"
+      >
+        {theme === 'light' ? (
+          <Moon className="w-5 h-5" />
+        ) : (
+          <Sun className="w-5 h-5" />
+        )}
+      </IconButton>
+    </Tooltip>
+  );
 }

@@ -9,6 +9,7 @@ import { AdminRoute } from '@/components/auth/AdminRoute';
 import Section from '@/components/layout/Section';
 import { ArrowLeft, Download, Loader2, Ship, Anchor, Calendar, MapPin, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Stepper, Step, StepLabel, Box } from '@mui/material';
+import { toast } from '@/lib/toast';
 
 const steps = ['Basic Info', 'Shipping Details', 'Ports', 'Dates', 'Additional Info'];
 
@@ -106,14 +107,14 @@ export default function NewContainerPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Container created successfully!');
+        toast.success('Container created successfully!', 'Redirecting to container details...');
         router.push(`/dashboard/containers/${data.container.id}`);
       } else {
-        alert(data.error || 'Failed to create container');
+        toast.error('Failed to create container', data.error || 'An error occurred');
       }
     } catch (error) {
       console.error('Error creating container:', error);
-      alert('Failed to create container');
+      toast.error('Failed to create container', 'Please try again later');
     } finally {
       setLoading(false);
     }

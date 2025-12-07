@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { AdminRoute } from '@/components/auth/AdminRoute';
+import { toast } from '@/lib/toast';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 interface Shipment {
   id: string;
@@ -123,7 +125,7 @@ export default function ContainerDetailPage() {
       if (response.ok) {
         setContainer(data.container);
       } else {
-        alert('Container not found');
+        toast.error('Container not found', 'Redirecting to containers list...');
         router.push('/dashboard/containers');
       }
     } catch (error) {
@@ -145,15 +147,15 @@ export default function ContainerDetailPage() {
       });
 
       if (response.ok) {
-        alert('Status updated successfully');
+        toast.success('Status updated successfully', 'Container status has been updated');
         fetchContainer();
       } else {
         const data = await response.json();
-        alert(data.error || 'Failed to update status');
+        toast.error('Failed to update status', data.error || 'Please try again');
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('Failed to update status');
+      toast.error('Failed to update status', 'An error occurred. Please try again');
     } finally {
       setUpdating(false);
     }
@@ -187,6 +189,15 @@ export default function ContainerDetailPage() {
     <AdminRoute>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
+          {/* Breadcrumbs */}
+          <Breadcrumbs 
+            items={[
+              { label: 'Containers', href: '/dashboard/containers' },
+              { label: container.containerNumber },
+            ]}
+            className="mb-4"
+          />
+          
           {/* Header */}
           <div className="mb-6">
             <Button onClick={() => router.push('/dashboard/containers')} className="mb-4">

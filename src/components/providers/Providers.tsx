@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { SessionProvider } from './SessionProvider';
 import { ThemeProvider } from './ThemeProvider';
+import { Toaster } from 'sonner';
 import i18n from '@/lib/i18n';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <I18nextProvider i18n={i18n}>
           <QueryClientProvider client={queryClient}>
             {children}
+            <Toaster 
+              position="top-right"
+              expand={false}
+              richColors
+              closeButton
+              theme="light"
+              toastOptions={{
+                style: {
+                  background: 'var(--panel)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                },
+                className: 'toast-custom',
+              }}
+            />
             <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProvider>
         </I18nextProvider>
