@@ -39,36 +39,27 @@ export default function DashboardLayout({
 					{/* Sidebar */}
 					<Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
-					{/* Main Content */}
-					<Box
-						component="main"
-						sx={{
-							flexGrow: 1,
-							minWidth: 0,
-							height: 'calc(100vh - 40px)',
-							bgcolor: 'var(--background)',
-							backgroundImage: 'none',
-							overflow: 'auto',
-							/* Custom scrollbar styling */
-							'&::-webkit-scrollbar': {
-								width: '8px',
-							},
-							'&::-webkit-scrollbar-track': {
-								bgcolor: 'transparent',
-							},
-							'&::-webkit-scrollbar-thumb': {
-								bgcolor: 'rgba(var(--border-rgb), 0.5)',
-								borderRadius: '4px',
-								'&:hover': {
-									bgcolor: 'rgba(var(--border-rgb), 0.7)',
-								},
-							},
-							scrollbarWidth: 'thin',
-							scrollbarColor: 'rgba(var(--border-rgb), 0.5) transparent',
-						}}
-					>
-						{children}
-					</Box>
+				{/* Main Content */}
+				<Box
+					component="main"
+					sx={{
+						flexGrow: 1,
+						minWidth: 0,
+						height: 'calc(100vh - 40px)',
+						bgcolor: 'var(--background)',
+						backgroundImage: 'none',
+						overflow: 'auto',
+						/* Hide scrollbar completely */
+						'&::-webkit-scrollbar': {
+							width: 0,
+							height: 0,
+						},
+						scrollbarWidth: 'none',
+						msOverflowStyle: 'none',
+					}}
+				>
+					{children}
+				</Box>
 				</Box>
 			</Box>
 		</ProtectedRoute>
