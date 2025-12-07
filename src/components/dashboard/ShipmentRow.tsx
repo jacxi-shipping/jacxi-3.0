@@ -1,8 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { Visibility, Edit, LocalShipping, CreditCard } from '@mui/icons-material';
-import { Box, Typography, Chip, Button, Slide } from '@mui/material';
+import { Visibility, Edit, LocalShipping, CreditCard, LocationOn, CalendarToday } from '@mui/icons-material';
+import { Box, Typography, Chip, Button, Slide, LinearProgress } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 interface ShipmentRowProps {
@@ -23,6 +23,9 @@ interface ShipmentRowProps {
 		status?: string;
 		currentLocation?: string | null;
 		progress?: number;
+		estimatedArrival?: string | null;
+		vesselName?: string | null;
+		shippingLine?: string | null;
 	} | null;
 	user?: {
 		name: string | null;
@@ -190,10 +193,12 @@ export default function ShipmentRow({
 				{/* Column 3: Container Info or Status Info */}
 				<Box sx={{ minWidth: 0, overflow: 'hidden' }}>
 					{container ? (
-						<>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
 							<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
-								Container
+								Container Shipping
 							</Typography>
+							
+							{/* Container Number */}
 							<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
 								<LocalShipping sx={{ fontSize: { xs: 14, sm: 16 }, color: 'var(--accent-gold)' }} />
 								<Link href={`/dashboard/containers/${containerId}`} style={{ textDecoration: 'none' }}>
@@ -212,17 +217,86 @@ export default function ShipmentRow({
 									</Typography>
 								</Link>
 							</Box>
+
+							{/* Progress Bar */}
+							{typeof container.progress === 'number' && (
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, mt: 0.3 }}>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+										<Typography
+											sx={{
+												fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' },
+												color: 'var(--text-secondary)',
+											}}
+										>
+											Progress
+										</Typography>
+										<Typography
+											sx={{
+												fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' },
+												fontWeight: 600,
+												color: 'var(--accent-gold)',
+											}}
+										>
+											{container.progress}%
+										</Typography>
+									</Box>
+									<LinearProgress
+										variant="determinate"
+										value={container.progress}
+										sx={{
+											height: 4,
+											borderRadius: 1,
+											backgroundColor: 'rgba(var(--border-rgb), 0.3)',
+											'& .MuiLinearProgress-bar': {
+												backgroundColor: 'var(--accent-gold)',
+												borderRadius: 1,
+											},
+										}}
+									/>
+								</Box>
+							)}
+
+							{/* Status */}
 							{container.status && (
 								<Typography sx={{ fontSize: { xs: '0.62rem', sm: '0.65rem', md: '0.68rem' }, color: 'var(--text-secondary)', mt: 0.2 }}>
-									{formatStatus(container.status)} {container.progress !== undefined && `• ${container.progress}%`}
+									Status: {formatStatus(container.status)}
 								</Typography>
 							)}
+
+							{/* Current Location */}
 							{container.currentLocation && (
+								<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.2 }}>
+									<LocationOn sx={{ fontSize: { xs: 12, sm: 14 }, color: 'var(--text-secondary)' }} />
+									<Typography sx={{ fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' }, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+										{container.currentLocation}
+									</Typography>
+								</Box>
+							)}
+
+							{/* Vessel Name */}
+							{container.vesselName && (
 								<Typography sx={{ fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' }, color: 'var(--text-secondary)', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-									📍 {container.currentLocation}
+									🚢 {container.vesselName}
 								</Typography>
 							)}
-						</>
+
+							{/* Estimated Arrival */}
+							{container.estimatedArrival && (
+								<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.2 }}>
+									<CalendarToday sx={{ fontSize: { xs: 12, sm: 14 }, color: 'var(--text-secondary)' }} />
+									<Typography sx={{ fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' }, color: 'var(--text-secondary)' }}>
+										ETA: {new Date(container.estimatedArrival).toLocaleDateString()}
+									</Typography>
+								</Box>
+							)}
+
+							{/* Shipping Line */}
+							{container.shippingLine && (
+								<Typography sx={{ fontSize: { xs: '0.58rem', sm: '0.6rem', md: '0.62rem' }, color: 'var(--text-secondary)', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+									Line: {container.shippingLine}
+									</Typography>
+							)}
+						</Box>
 					) : (
 						<>
 							<Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.62rem', md: '0.65rem' }, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--text-secondary)', mb: 0.3 }}>
