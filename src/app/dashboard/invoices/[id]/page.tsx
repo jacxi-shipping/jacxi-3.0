@@ -9,6 +9,7 @@ import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Section from '@/components/layout/Section';
 import { pdf } from '@react-pdf/renderer';
+import { toast } from '@/lib/toast';
 import {
 	InvoicePdfTemplate,
 	InvoicePdfCompanyInfo,
@@ -176,11 +177,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				alert('Failed to update invoice');
+				toast.error('Failed to update invoice', 'Please try again');
 			}
 		} catch (error) {
 			console.error('Error updating invoice:', error);
-			alert('An error occurred');
+			toast.error('Failed to update invoice', 'An error occurred. Please try again');
 		} finally {
 			setIsUpdating(false);
 		}
@@ -201,11 +202,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				alert('Failed to update wire transfer details');
+				toast.error('Failed to update wire transfer details', 'Please try again');
 			}
 		} catch (error) {
 			console.error('Error updating wire details:', error);
-			alert('An error occurred');
+			toast.error('Failed to update wire transfer details', 'An error occurred. Please try again');
 		} finally {
 			setIsUpdating(false);
 		}
@@ -290,7 +291,7 @@ export default function InvoiceDetailPage() {
 			setTimeout(() => URL.revokeObjectURL(url), 0);
 		} catch (error) {
 			console.error('Error exporting invoice PDF:', error);
-			alert('Unable to generate PDF. Please try again.');
+			toast.error('Failed to generate PDF', 'Unable to export. Please try again');
 		} finally {
 			setIsExporting(false);
 		}

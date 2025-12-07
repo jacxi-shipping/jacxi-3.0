@@ -7,7 +7,11 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import Section from '@/components/layout/Section';
-import { ArrowLeft, Download, Loader2, Ship, Anchor, Calendar, MapPin, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Ship, Anchor, Calendar, MapPin, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Stepper, Step, StepLabel, Box } from '@mui/material';
+import { toast } from '@/lib/toast';
+
+const steps = ['Basic Info', 'Shipping Details', 'Ports', 'Dates', 'Additional Info'];
 
 export default function NewContainerPage() {
   const router = useRouter();
@@ -15,6 +19,7 @@ export default function NewContainerPage() {
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [fetchSuccess, setFetchSuccess] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     containerNumber: '',
     trackingNumber: '',
@@ -75,6 +80,14 @@ export default function NewContainerPage() {
     }
   };
 
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -94,14 +107,14 @@ export default function NewContainerPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Container created successfully!');
+        toast.success('Container created successfully!', 'Redirecting to container details...');
         router.push(`/dashboard/containers/${data.container.id}`);
       } else {
-        alert(data.error || 'Failed to create container');
+        toast.error('Failed to create container', data.error || 'An error occurred');
       }
     } catch (error) {
       console.error('Error creating container:', error);
-      alert('Failed to create container');
+      toast.error('Failed to create container', 'Please try again later');
     } finally {
       setLoading(false);
     }
@@ -163,6 +176,48 @@ export default function NewContainerPage() {
         </Section>
 
         <Section className="pb-16">
+          {/* Stepper */}
+          <Box sx={{ width: '100%', mb: 4 }}>
+            <Stepper 
+              activeStep={activeStep} 
+              alternativeLabel
+              sx={{
+                '& .MuiStepLabel-root .Mui-completed': {
+                  color: 'var(--accent-gold)',
+                },
+                '& .MuiStepLabel-root .Mui-active': {
+                  color: 'var(--accent-gold)',
+                },
+                '& .MuiStepLabel-label': {
+                  color: 'var(--text-secondary)',
+                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                },
+                '& .MuiStepLabel-label.Mui-active': {
+                  color: 'var(--accent-gold)',
+                  fontWeight: 600,
+                },
+                '& .MuiStepLabel-label.Mui-completed': {
+                  color: 'var(--text-primary)',
+                },
+                '& .MuiStepIcon-root': {
+                  color: 'var(--border)',
+                },
+                '& .MuiStepIcon-root.Mui-active': {
+                  color: 'var(--accent-gold)',
+                },
+                '& .MuiStepIcon-root.Mui-completed': {
+                  color: 'var(--accent-gold)',
+                },
+              }}
+            >
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
+
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Fetch Data Success/Error Messages */}
             {fetchSuccess && (
@@ -182,7 +237,8 @@ export default function NewContainerPage() {
               </div>
             )}
 
-            {/* Basic Information */}
+            {/* Step 0: Basic Information */}
+            {activeStep === 0 && (
             <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader className="p-4 sm:p-6 border-b border-white/5">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
@@ -281,8 +337,10 @@ export default function NewContainerPage() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
-            {/* Shipping Details */}
+            {/* Step 1: Shipping Details */}
+            {activeStep === 1 && (
             <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader className="p-4 sm:p-6 border-b border-white/5">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
@@ -339,8 +397,10 @@ export default function NewContainerPage() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
-            {/* Ports */}
+            {/* Step 2: Ports */}
+            {activeStep === 2 && (
             <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader className="p-4 sm:p-6 border-b border-white/5">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
@@ -417,8 +477,10 @@ export default function NewContainerPage() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
-            {/* Dates */}
+            {/* Step 3: Dates */}
+            {activeStep === 3 && (
             <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader className="p-4 sm:p-6 border-b border-white/5">
                 <CardTitle className="flex items-center gap-2 text-base sm:text-lg font-bold text-[var(--text-primary)]">
@@ -472,8 +534,10 @@ export default function NewContainerPage() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
-            {/* Notes and Settings */}
+            {/* Step 4: Notes and Settings */}
+            {activeStep === 4 && (
             <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
               <CardHeader className="p-4 sm:p-6 border-b border-white/5">
                 <CardTitle className="text-base sm:text-lg font-bold text-[var(--text-primary)]">Additional Information</CardTitle>
@@ -509,27 +573,58 @@ export default function NewContainerPage() {
                 </div>
               </CardContent>
             </Card>
+            )}
 
-            {/* Submit Buttons */}
-            <div className="flex justify-end gap-3">
-              <Link href="/dashboard/containers">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={loading}
-                  className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-                >
-                  Cancel
-                </Button>
-              </Link>
-              <Button
-                type="submit"
-                disabled={loading || !formData.containerNumber}
-                className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
-                style={{ color: 'white' }}
-              >
-                {loading ? 'Creating...' : 'Create Container'}
-              </Button>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between gap-3">
+              <div className="flex gap-3">
+                <Link href="/dashboard/containers">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={loading}
+                    className="border-red-500/40 text-red-300 hover:bg-red-500/10"
+                  >
+                    Cancel
+                  </Button>
+                </Link>
+                {activeStep > 0 && (
+                  <Button
+                    type="button"
+                    onClick={handleBack}
+                    variant="outline"
+                    disabled={loading}
+                    className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
+                )}
+              </div>
+              
+              <div className="flex gap-3">
+                {activeStep < steps.length - 1 ? (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={loading || (activeStep === 0 && !formData.containerNumber)}
+                    className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
+                    style={{ color: 'white' }}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={loading || !formData.containerNumber}
+                    className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
+                    style={{ color: 'white' }}
+                  >
+                    {loading ? 'Creating...' : 'Create Container'}
+                  </Button>
+                )}
+              </div>
             </div>
           </form>
         </Section>

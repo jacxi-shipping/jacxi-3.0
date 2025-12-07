@@ -1139,3 +1139,98 @@ html {
 .text-pretty {
   text-wrap: pretty;
 }
+
+/* ============================================================================
+   NEW UI/UX ENHANCEMENTS
+   ============================================================================ */
+
+/* Image loading animations */
+@keyframes shimmer-loading {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+.animate-shimmer {
+	animation: shimmer-loading 2s infinite;
+}
+
+/* Skeleton pulse animation */
+@keyframes skeleton-pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+.animate-pulse {
+	animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.animate-fade-in {
+	animation: fade-in 0.2s ease-out;
+}
+
+/* Driver.js custom styling */
+.driver-popover {
+	background: var(--panel) !important;
+	color: var(--text-primary) !important;
+	border: 1px solid var(--border) !important;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+.driver-popover-title {
+	color: var(--text-primary) !important;
+	font-size: 1rem !important;
+	font-weight: 700 !important;
+}
+
+.driver-popover-description {
+	color: var(--text-secondary) !important;
+	font-size: 0.875rem !important;
+}
+
+.driver-popover-footer {
+	border-top: 1px solid var(--border) !important;
+}
+
+.driver-popover-prev-btn,
+.driver-popover-next-btn,
+.driver-popover-close-btn {
+	color: var(--text-primary) !important;
+	border: 1px solid var(--border) !important;
+	background: var(--background) !important;
+}
+
+.driver-popover-next-btn {
+	background: var(--accent-gold) !important;
+	color: white !important;
+	border: none !important;
+}
+
+.driver-popover-next-btn:hover {
+	background: #C99B2F !important;
+}
+
+.driver-popover-close-btn:hover,
+.driver-popover-prev-btn:hover {
+	background: var(--panel) !important;
+}
+
+.driver-popover-progress-text {
+	color: var(--text-secondary) !important;
+}

@@ -24,6 +24,8 @@ import {
 } from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { NotificationCenter } from '@/components/ui/NotificationCenter';
 
 interface HeaderProps {
 	onMenuClick?: () => void;
@@ -60,9 +62,9 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 		>
 			<Toolbar
 				sx={{
-					minHeight: 40,
-					px: 1.5,
-					py: 0.5,
+					minHeight: 64,
+					px: { xs: 2, sm: 3 },
+					py: { xs: 1, sm: 1.5 },
 					color: 'var(--text-primary)',
 				}}
 			>
@@ -71,15 +73,14 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					edge="start"
 					color="inherit"
 					onClick={onMenuClick}
-					size="small"
 					sx={{
-						mr: 1.5,
+						mr: 2,
 						display: { xs: 'flex', lg: 'none' },
 						color: 'var(--text-primary)',
-						p: 0.75,
+						p: 1,
 					}}
 				>
-					<MenuIcon sx={{ fontSize: 20 }} />
+					<MenuIcon sx={{ fontSize: 24 }} />
 				</IconButton>
 
 				{/* Logo/Title */}
@@ -87,15 +88,15 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					<Link href="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
 					<Box
 						sx={{
-							width: 24,
-							height: 24,
+							width: 32,
+							height: 32,
 							borderRadius: 1,
 							backgroundColor: 'var(--accent-gold)',
 							display: 'flex',
 							alignItems: 'center',
 							justifyContent: 'center',
 							fontWeight: 800,
-							fontSize: '0.8125rem',
+							fontSize: '1rem',
 							color: 'var(--background)',
 						}}
 					>
@@ -105,7 +106,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 						sx={{
 							display: { xs: 'none', sm: 'block' },
 							fontWeight: 700,
-							fontSize: '0.875rem',
+							fontSize: '1.125rem',
 							color: 'var(--text-primary)',
 						}}
 					>
@@ -128,7 +129,7 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 							<Typography
 								sx={{
 									display: { xs: 'none', md: 'block' },
-									fontSize: '0.6875rem',
+									fontSize: '0.875rem',
 									color: 'var(--text-secondary)',
 									fontWeight: 500,
 								}}
@@ -141,40 +142,26 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 
 				{/* Right Actions */}
 				<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+					{/* Theme Toggle */}
+					<ThemeToggle />
+					
 					{/* Notifications */}
-					<Tooltip title="Notifications">
-						<IconButton
-							size="small"
-							sx={{
-								color: 'var(--text-secondary)',
-								p: 0.75,
-								'&:hover': {
-									bgcolor: 'rgba(var(--border-rgb), 0.4)',
-									color: 'var(--text-primary)',
-								},
-							}}
-						>
-							<Badge badgeContent={3} color="error">
-								<Notifications sx={{ fontSize: 16 }} />
-							</Badge>
-						</IconButton>
-					</Tooltip>
+					<NotificationCenter />
 
 					{/* Settings */}
 					<Tooltip title="Settings">
 						<Link href="/dashboard/settings" style={{ textDecoration: 'none' }}>
 							<IconButton
-								size="small"
 								sx={{
 									color: 'var(--text-secondary)',
-									p: 0.75,
+									p: 1,
 									'&:hover': {
 										bgcolor: 'rgba(var(--border-rgb), 0.4)',
 										color: 'var(--text-primary)',
 									},
 								}}
 							>
-								<Settings sx={{ fontSize: 16 }} />
+								<Settings sx={{ fontSize: 20 }} />
 							</IconButton>
 						</Link>
 					</Tooltip>
@@ -183,18 +170,17 @@ export default function Header({ onMenuClick, pageTitle }: HeaderProps) {
 					<Tooltip title="Account">
 						<IconButton
 							onClick={handleProfileMenuOpen}
-							size="small"
 							sx={{
-								ml: 0.5,
-								p: 0.5,
+								ml: 1,
+								p: 0.75,
 							}}
 						>
 						<Avatar
 							sx={{
-								width: 24,
-								height: 24,
+								width: 32,
+								height: 32,
 								bgcolor: 'var(--accent-gold)',
-								fontSize: '0.6875rem',
+								fontSize: '0.875rem',
 								fontWeight: 600,
 								color: 'var(--background)',
 							}}
