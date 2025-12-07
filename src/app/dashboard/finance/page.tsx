@@ -4,20 +4,19 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Box, Typography } from '@mui/material';
 import { 
   DollarSign, 
   TrendingUp, 
   TrendingDown, 
   Users,
   FileText,
-  Download,
   PlusCircle,
   AlertCircle,
   CheckCircle,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Section from '@/components/layout/Section';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, StatsCard, ActionButton, LoadingState } from '@/components/design-system';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface FinancialSummary {
@@ -97,318 +96,367 @@ export default function FinancePage() {
   if (status === 'loading' || loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-          <div className="text-center space-y-4 text-[var(--text-secondary)]">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)] mx-auto" />
-            <p>Loading financial data...</p>
-          </div>
-        </div>
+        <LoadingState fullScreen message="Loading financial data..." />
       </ProtectedRoute>
     );
   }
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[var(--background)]">
-        <Section className="pt-6 pb-6">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Accounting & Finance</h1>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
-                Manage ledgers, payments, and financial reports
-              </p>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {isAdmin && (
-                <Link href="/dashboard/finance/record-payment">
-                  <Button
-                    size="sm"
-                    className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)]"
-                    style={{ color: 'white' }}
-                  >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Record Payment
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </Section>
+      <DashboardSurface>
+        <PageHeader
+          title="Accounting & Finance"
+          description="Manage ledgers, payments, and financial reports"
+          actions={
+            isAdmin && (
+              <Link href="/dashboard/finance/record-payment" style={{ textDecoration: 'none' }}>
+                <ActionButton variant="primary" icon={<PlusCircle className="w-4 h-4" />}>
+                  Record Payment
+                </ActionButton>
+              </Link>
+            )
+          }
+        />
 
-        {/* Summary Cards */}
-        <Section className="pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Total Debit */}
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Total Debit</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">
-                      {formatCurrency(summary?.ledgerSummary.totalDebit || 0)}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      {summary?.ledgerSummary.debitCount || 0} transactions
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-red-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Total Credit */}
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Total Credit</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">
-                      {formatCurrency(summary?.ledgerSummary.totalCredit || 0)}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      {summary?.ledgerSummary.creditCount || 0} transactions
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                    <TrendingDown className="w-6 h-6 text-green-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Net Balance */}
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Net Balance</p>
-                    <p className={`text-2xl font-bold mt-2 ${
-                      (summary?.ledgerSummary.netBalance || 0) >= 0 ? 'text-green-400' : 'text-red-400'
-                    }`}>
-                      {formatCurrency(Math.abs(summary?.ledgerSummary.netBalance || 0))}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      {(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'Receivable' : 'Payable'}
-                    </p>
-                  </div>
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    (summary?.ledgerSummary.netBalance || 0) >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'
-                  }`}>
-                    <DollarSign className={`w-6 h-6 ${
-                      (summary?.ledgerSummary.netBalance || 0) >= 0 ? 'text-green-400' : 'text-red-400'
-                    }`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Users with Balance */}
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide">Active Users</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">
-                      {getUsersWithBalance()}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      With outstanding balance
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                    <Users className="w-6 h-6 text-cyan-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </Section>
+        {/* Summary Stats */}
+        <DashboardGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            icon={<TrendingUp style={{ fontSize: 18 }} />}
+            title="Total Debit"
+            value={formatCurrency(summary?.ledgerSummary.totalDebit || 0)}
+            subtitle={`${summary?.ledgerSummary.debitCount || 0} transactions`}
+            iconColor="rgb(248, 113, 113)"
+            iconBg="rgba(248, 113, 113, 0.15)"
+          />
+          <StatsCard
+            icon={<TrendingDown style={{ fontSize: 18 }} />}
+            title="Total Credit"
+            value={formatCurrency(summary?.ledgerSummary.totalCredit || 0)}
+            subtitle={`${summary?.ledgerSummary.creditCount || 0} transactions`}
+            iconColor="rgb(74, 222, 128)"
+            iconBg="rgba(74, 222, 128, 0.15)"
+            delay={0.1}
+          />
+          <StatsCard
+            icon={<DollarSign style={{ fontSize: 18 }} />}
+            title="Net Balance"
+            value={formatCurrency(Math.abs(summary?.ledgerSummary.netBalance || 0))}
+            subtitle={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'Receivable' : 'Payable'}
+            iconColor={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)'}
+            iconBg={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'rgba(74, 222, 128, 0.15)' : 'rgba(248, 113, 113, 0.15)'}
+            delay={0.2}
+          />
+          <StatsCard
+            icon={<Users style={{ fontSize: 18 }} />}
+            title="Active Users"
+            value={getUsersWithBalance()}
+            subtitle="With outstanding balance"
+            iconColor="rgb(34, 211, 238)"
+            iconBg="rgba(34, 211, 238, 0.15)"
+            delay={0.3}
+          />
+        </DashboardGrid>
 
         {/* Shipment Payment Status */}
-        <Section className="pb-6">
-          <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-            <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-              <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Shipment Payment Status</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Paid Shipments */}
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-green-500/10 border border-green-500/30">
-                  <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-[var(--text-primary)]">Paid Shipments</p>
-                    <p className="text-2xl font-bold text-green-400 mt-1">
-                      {getPaidShipments().count}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      Total: {formatCurrency(getPaidShipments().totalAmount)}
-                    </p>
-                  </div>
-                </div>
+        <DashboardPanel title="Shipment Payment Status" description="Overview of paid and pending shipments">
+          <DashboardGrid className="grid-cols-1 md:grid-cols-2">
+            <Box
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                border: '1px solid rgba(74, 222, 128, 0.3)',
+                bgcolor: 'rgba(74, 222, 128, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(74, 222, 128, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <CheckCircle style={{ fontSize: 24, color: 'rgb(74, 222, 128)' }} />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Paid Shipments
+                </Typography>
+                <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'rgb(74, 222, 128)', mt: 0.5 }}>
+                  {getPaidShipments().count}
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+                  Total: {formatCurrency(getPaidShipments().totalAmount)}
+                </Typography>
+              </Box>
+            </Box>
 
-                {/* Due Shipments */}
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                  <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
-                    <AlertCircle className="w-6 h-6 text-yellow-400" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-[var(--text-primary)]">Due Shipments</p>
-                    <p className="text-2xl font-bold text-yellow-400 mt-1">
-                      {getDueShipments().count}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)] mt-1">
-                      Total: {formatCurrency(getDueShipments().totalAmount)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Section>
+            <Box
+              sx={{
+                p: 2.5,
+                borderRadius: 2,
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+                bgcolor: 'rgba(251, 191, 36, 0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(251, 191, 36, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <AlertCircle style={{ fontSize: 24, color: 'rgb(251, 191, 36)' }} />
+              </Box>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Due Shipments
+                </Typography>
+                <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'rgb(251, 191, 36)', mt: 0.5 }}>
+                  {getDueShipments().count}
+                </Typography>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+                  Total: {formatCurrency(getDueShipments().totalAmount)}
+                </Typography>
+              </Box>
+            </Box>
+          </DashboardGrid>
+        </DashboardPanel>
 
         {/* Quick Actions */}
-        <Section className="pb-6">
-          <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-            <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-              <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* My Ledger */}
-                <Link href="/dashboard/finance/ledger">
-                  <div className="p-4 rounded-lg border border-white/10 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-cyan-400" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--text-primary)]">My Ledger</p>
-                        <p className="text-xs text-[var(--text-secondary)]">Check your transactions</p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+        <DashboardPanel title="Quick Actions" description="Navigate to finance sections">
+          <DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <Link href="/dashboard/finance/ledger" style={{ textDecoration: 'none' }}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: '1px solid var(--border)',
+                  bgcolor: 'var(--panel)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    borderColor: 'rgb(34, 211, 238)',
+                    boxShadow: '0 12px 24px rgba(var(--text-primary-rgb), 0.12)',
+                  },
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 1.5,
+                      bgcolor: 'rgba(34, 211, 238, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <FileText style={{ fontSize: 18, color: 'rgb(34, 211, 238)' }} />
+                  </Box>
+                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    My Ledger
+                  </Typography>
+                </Box>
+                <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                  View your transactions
+                </Typography>
+              </Box>
+            </Link>
 
-                {/* All User Ledgers */}
-                {isAdmin && (
-                  <Link href="/dashboard/finance/admin/ledgers">
-                    <div className="p-4 rounded-lg border border-white/10 hover:border-amber-500/50 hover:bg-amber-500/5 transition-all cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                          <Users className="w-5 h-5 text-amber-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[var(--text-primary)]">All User Ledgers</p>
-                          <p className="text-xs text-[var(--text-secondary)]">View all user ledgers</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                )}
+            {isAdmin && (
+              <Link href="/dashboard/finance/admin/ledgers" style={{ textDecoration: 'none' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: '1px solid var(--border)',
+                    bgcolor: 'var(--panel)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      borderColor: 'rgb(251, 191, 36)',
+                      boxShadow: '0 12px 24px rgba(var(--text-primary-rgb), 0.12)',
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                    <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 1.5,
+                        bgcolor: 'rgba(251, 191, 36, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Users style={{ fontSize: 18, color: 'rgb(251, 191, 36)' }} />
+                    </Box>
+                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      All User Ledgers
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    View all user ledgers
+                  </Typography>
+                </Box>
+              </Link>
+            )}
 
-                {/* Record Payment */}
-                {isAdmin && (
-                  <Link href="/dashboard/finance/record-payment">
-                    <div className="p-4 rounded-lg border border-white/10 hover:border-green-500/50 hover:bg-green-500/5 transition-all cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                          <PlusCircle className="w-5 h-5 text-green-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[var(--text-primary)]">Record Payment</p>
-                          <p className="text-xs text-[var(--text-secondary)]">Log received payment</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                )}
+            {isAdmin && (
+              <Link href="/dashboard/finance/record-payment" style={{ textDecoration: 'none' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: '1px solid var(--border)',
+                    bgcolor: 'var(--panel)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      borderColor: 'rgb(74, 222, 128)',
+                      boxShadow: '0 12px 24px rgba(var(--text-primary-rgb), 0.12)',
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                    <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 1.5,
+                        bgcolor: 'rgba(74, 222, 128, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <PlusCircle style={{ fontSize: 18, color: 'rgb(74, 222, 128)' }} />
+                    </Box>
+                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Record Payment
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    Log received payment
+                  </Typography>
+                </Box>
+              </Link>
+            )}
 
-                {/* View Reports */}
-                {isAdmin && (
-                  <Link href="/dashboard/finance/reports">
-                    <div className="p-4 rounded-lg border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                          <Download className="w-5 h-5 text-purple-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-[var(--text-primary)]">Financial Reports</p>
-                          <p className="text-xs text-[var(--text-secondary)]">View detailed reports</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </Section>
+            {isAdmin && (
+              <Link href="/dashboard/finance/reports" style={{ textDecoration: 'none' }}>
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: '1px solid var(--border)',
+                    bgcolor: 'var(--panel)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      borderColor: 'rgb(168, 85, 247)',
+                      boxShadow: '0 12px 24px rgba(var(--text-primary-rgb), 0.12)',
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                    <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 1.5,
+                        bgcolor: 'rgba(168, 85, 247, 0.15)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <FileText style={{ fontSize: 18, color: 'rgb(168, 85, 247)' }} />
+                    </Box>
+                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      Financial Reports
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    View detailed reports
+                  </Typography>
+                </Box>
+              </Link>
+            )}
+          </DashboardGrid>
+        </DashboardPanel>
 
-        {/* User Balances (Admin only) */}
+        {/* User Balances Table */}
         {isAdmin && summary && summary.userBalances.length > 0 && (
-          <Section className="pb-16">
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                <CardTitle className="text-lg font-bold text-[var(--text-primary)]">User Balances</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-white/5">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                          User
-                        </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                          Current Balance
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {summary.userBalances.slice(0, 10).map((user) => (
-                        <tr key={user.userId} className="hover:bg-white/5 transition-colors">
-                          <td className="px-4 py-3 text-sm text-[var(--text-primary)]">
-                            {user.userName}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-right">
-                            <span className={`font-semibold ${
-                              user.currentBalance >= 0 ? 'text-[var(--text-primary)]' : 'text-red-400'
-                            }`}>
-                              {formatCurrency(Math.abs(user.currentBalance))}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            {user.currentBalance === 0 ? (
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-500/10 text-green-400">
-                                Settled
-                              </span>
-                            ) : user.currentBalance > 0 ? (
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-500/10 text-yellow-400">
-                                Due
-                              </span>
-                            ) : (
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-cyan-500/10 text-cyan-400">
-                                Credit
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </Section>
+          <DashboardPanel title="User Balances" description="Users with outstanding balances">
+            <Box sx={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0 }}>
+                <thead>
+                  <tr style={{ backgroundColor: 'var(--background)' }}>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      User
+                    </th>
+                    <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Balance
+                    </th>
+                    <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.userBalances.slice(0, 10).map((user) => (
+                    <tr key={user.userId} style={{ borderTop: '1px solid var(--border)' }}>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                        {user.userName}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 600, color: user.currentBalance >= 0 ? 'var(--text-primary)' : 'rgb(248, 113, 113)' }}>
+                        {formatCurrency(Math.abs(user.currentBalance))}
+                      </td>
+                      <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                        {user.currentBalance === 0 ? (
+                          <Box component="span" sx={{ px: 1.5, py: 0.5, borderRadius: 1, fontSize: '0.7rem', fontWeight: 600, bgcolor: 'rgba(74, 222, 128, 0.15)', color: 'rgb(74, 222, 128)', border: '1px solid rgba(74, 222, 128, 0.3)' }}>
+                            Settled
+                          </Box>
+                        ) : user.currentBalance > 0 ? (
+                          <Box component="span" sx={{ px: 1.5, py: 0.5, borderRadius: 1, fontSize: '0.7rem', fontWeight: 600, bgcolor: 'rgba(251, 191, 36, 0.15)', color: 'rgb(251, 191, 36)', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                            Due
+                          </Box>
+                        ) : (
+                          <Box component="span" sx={{ px: 1.5, py: 0.5, borderRadius: 1, fontSize: '0.7rem', fontWeight: 600, bgcolor: 'rgba(34, 211, 238, 0.15)', color: 'rgb(34, 211, 238)', border: '1px solid rgba(34, 211, 238, 0.3)' }}>
+                            Credit
+                          </Box>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+          </DashboardPanel>
         )}
-      </div>
+      </DashboardSurface>
     </ProtectedRoute>
   );
 }

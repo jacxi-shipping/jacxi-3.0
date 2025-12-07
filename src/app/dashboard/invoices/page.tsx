@@ -3,11 +3,11 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Receipt, Search, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
+import { Receipt, CheckCircle, Clock, AlertCircle, Search as SearchIcon, Plus } from 'lucide-react';
+import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
 
 interface Invoice {
 	id: string;
@@ -84,24 +84,20 @@ export default function InvoicesPage() {
 	);
 
 	const getStatusColor = (status: string, overdue: boolean) => {
-		if (status === 'PAID') return 'bg-green-500/20 text-green-400 border-green-500/30';
-		if (overdue || status === 'OVERDUE') return 'bg-red-500/20 text-red-400 border-red-500/30';
-		if (status === 'SENT') return 'bg-sky-500/20 text-sky-300 border-sky-500/30';
-		return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+		if (status === 'PAID') return { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(34, 197, 94)', border: 'rgba(34, 197, 94, 0.3)' };
+		if (overdue || status === 'OVERDUE') return { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(239, 68, 68)', border: 'rgba(239, 68, 68, 0.3)' };
+		if (status === 'SENT') return { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.3)' };
+		return { bg: 'rgba(156, 163, 175, 0.15)', text: 'rgb(156, 163, 175)', border: 'rgba(156, 163, 175, 0.3)' };
 	};
 
-	const getStatusIcon = (status: string) => {
-		if (status === 'PAID') return <CheckCircle className="w-4 h-4" />;
-		if (status === 'OVERDUE') return <AlertCircle className="w-4 h-4" />;
-		return <Clock className="w-4 h-4" />;
+	const getStatusIcon = (status: string, overdue: boolean) => {
+		if (status === 'PAID') return <CheckCircle style={{ fontSize: 16 }} />;
+		if (overdue || status === 'OVERDUE') return <AlertCircle style={{ fontSize: 16 }} />;
+		return <Clock style={{ fontSize: 16 }} />;
 	};
 
 	if (status === 'loading' || loading) {
-		return (
-			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]"></div>
-			</div>
-		);
+		return <LoadingState fullScreen message="Loading invoices..." />;
 	}
 
 	const role = session?.user?.role;
@@ -110,64 +106,93 @@ export default function InvoicesPage() {
 	}
 
 	return (
-		<DashboardSurface className="light-surface">
-
-			<DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-				{[
-					{ label: 'Total invoices', value: stats.total, icon: Receipt },
-					{ label: 'Paid', value: stats.paid, icon: CheckCircle },
-					{ label: 'Overdue', value: stats.overdue, icon: AlertCircle },
-					{ label: 'Pending', value: stats.pending, icon: Clock },
-				].map((card, idx) => (
-					<motion.div
-						key={card.label}
-						initial={{ opacity: 0, y: 20 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						viewport={{ once: true }}
-						transition={{ duration: 0.5, delay: idx * 0.1 }}
-						className="rounded-xl border border-white/10 bg-[var(--text-primary)]/70 p-5 shadow-lg"
-					>
-						<div className="flex items-center justify-between">
-							<div>
-								<p className="text-sm text-white/70 mb-1">{card.label}</p>
-								<p className="text-3xl font-bold text-white">{card.value}</p>
-							</div>
-							<div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-								<card.icon className="w-5 h-5" />
-							</div>
-						</div>
-					</motion.div>
-				))}
-			</DashboardGrid>
-
-			<DashboardPanel
-				title="Filters"
-				description="Narrow down invoices quickly"
+		<DashboardSurface>
+			<PageHeader
+				title="Invoices"
+				description="Manage and track all invoices"
 				actions={
 					<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-						<button className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-400 transition">
-							New invoice
-						</button>
+						<ActionButton variant="primary" icon={<Plus className="w-4 h-4" />}>
+							New Invoice
+						</ActionButton>
 					</Link>
 				}
-			>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="relative">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cyan-400/70" />
-						<Input
-							type="text"
+			/>
+
+			{/* Stats */}
+			<DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+				<StatsCard
+					icon={<Receipt style={{ fontSize: 18 }} />}
+					title="Total Invoices"
+					value={stats.total}
+					subtitle="All invoices"
+				/>
+				<StatsCard
+					icon={<CheckCircle style={{ fontSize: 18 }} />}
+					title="Paid"
+					value={stats.paid}
+					subtitle="Completed payments"
+					iconColor="rgb(34, 197, 94)"
+					iconBg="rgba(34, 197, 94, 0.15)"
+					delay={0.1}
+				/>
+				<StatsCard
+					icon={<AlertCircle style={{ fontSize: 18 }} />}
+					title="Overdue"
+					value={stats.overdue}
+					subtitle="Requires attention"
+					iconColor="rgb(239, 68, 68)"
+					iconBg="rgba(239, 68, 68, 0.15)"
+					delay={0.2}
+				/>
+				<StatsCard
+					icon={<Clock style={{ fontSize: 18 }} />}
+					title="Pending"
+					value={stats.pending}
+					subtitle="Awaiting payment"
+					iconColor="rgb(14, 165, 233)"
+					iconBg="rgba(14, 165, 233, 0.15)"
+					delay={0.3}
+				/>
+			</DashboardGrid>
+
+			{/* Filters */}
+			<DashboardPanel title="Search & Filter" description="Find invoices quickly">
+				<Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
+					<Box sx={{ flex: 1 }}>
+						<FormField
+							label=""
 							placeholder="Search by invoice number or container..."
-							className="w-full pl-10 pr-4 py-2 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white placeholder:text-white/50 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
+							leftIcon={<SearchIcon style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
 						/>
-					</div>
-					<div className="relative">
-						<Receipt className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cyan-400/70" />
+					</Box>
+					<Box sx={{ minWidth: { xs: '100%', md: 200 } }}>
+						<Typography
+							component="label"
+							sx={{
+								display: 'block',
+								fontSize: '0.875rem',
+								fontWeight: 500,
+								color: 'var(--text-primary)',
+								mb: 1,
+							}}
+						>
+							Status Filter
+						</Typography>
 						<select
-							className="w-full pl-10 pr-4 py-2 bg-[var(--text-primary)] border border-cyan-500/30 rounded-lg text-white appearance-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
 							value={statusFilter}
 							onChange={(e) => setStatusFilter(e.target.value)}
+							style={{
+								width: '100%',
+								padding: '10px 12px',
+								borderRadius: '16px',
+								border: '1px solid rgba(var(--border-rgb), 0.9)',
+								backgroundColor: 'var(--background)',
+								color: 'var(--text-primary)',
+								fontSize: '0.875rem',
+							}}
 						>
 							<option value="all">All Status</option>
 							<option value="DRAFT">Draft</option>
@@ -175,57 +200,106 @@ export default function InvoicesPage() {
 							<option value="PAID">Paid</option>
 							<option value="OVERDUE">Overdue</option>
 						</select>
-					</div>
-				</div>
+					</Box>
+				</Box>
 			</DashboardPanel>
 
-			<DashboardPanel
-				title={`All invoices (${filteredInvoices.length})`}
-				description="Click a row to open the invoice"
-				fullHeight
-			>
+			{/* Invoices List */}
+			<DashboardPanel title={`All Invoices (${filteredInvoices.length})`} description="Click to view details" fullHeight>
 				{filteredInvoices.length === 0 ? (
-					<div className="rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/50 backdrop-blur-sm p-12 text-center">
-						<Receipt className="w-16 h-16 text-white/30 mx-auto mb-4" />
-						<p className="text-white/70">No invoices found</p>
-					</div>
+					<EmptyState
+						icon={<Receipt />}
+						title="No invoices found"
+						description={searchTerm || statusFilter !== 'all' ? "Try adjusting your filters" : "Create your first invoice to get started"}
+						action={
+							!searchTerm && statusFilter === 'all' && (
+								<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
+									<ActionButton variant="primary">Create Invoice</ActionButton>
+								</Link>
+							)
+						}
+					/>
 				) : (
-					<div className="space-y-4 sm:space-y-5">
-						{filteredInvoices.map((invoice, index) => (
-							<Link key={invoice.id} href={`/dashboard/invoices/${invoice.id}`}>
-								<motion.div
-									initial={{ opacity: 0, y: 20 }}
-									whileInView={{ opacity: 1, y: 0 }}
-									viewport={{ once: true }}
-									transition={{ duration: 0.4, delay: index * 0.05 }}
-									className="group rounded-xl border border-cyan-500/30 bg-[var(--text-primary)]/60 p-5 hover:border-cyan-500/60 hover:shadow-lg hover:shadow-cyan-500/20 transition"
-								>
-									<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-										<div className="flex-1 min-w-0">
-											<div className="flex items-center gap-3 mb-2 flex-wrap">
-												<h3 className="text-lg font-bold text-white">{invoice.invoiceNumber}</h3>
-												<span className={`px-3 py-1 text-xs font-medium rounded-full border flex items-center gap-1 ${getStatusColor(invoice.status, invoice.overdue)}`}>
-													{getStatusIcon(invoice.status)}
-													{invoice.status} {invoice.overdue && '(Overdue)'}
-												</span>
-											</div>
-											<p className="text-sm text-white/60">Container: {invoice.container.containerNumber}</p>
-											{invoice.dueDate && (
-												<p className="text-sm text-white/60 mt-1">Due: {new Date(invoice.dueDate).toLocaleDateString()}</p>
-											)}
-										</div>
-										<div className="text-right">
-											<p className="text-xl font-bold text-cyan-400">${invoice.totalUSD.toFixed(2)}</p>
-											<p className="text-sm text-white/60">{invoice.totalAED.toFixed(2)} AED</p>
-										</div>
-									</div>
-								</motion.div>
-							</Link>
-						))}
-					</div>
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+						{filteredInvoices.map((invoice, index) => {
+							const statusStyle = getStatusColor(invoice.status, invoice.overdue);
+							return (
+								<Link key={invoice.id} href={`/dashboard/invoices/${invoice.id}`} style={{ textDecoration: 'none' }}>
+									<Box
+										sx={{
+											borderRadius: 2,
+											border: '1px solid var(--border)',
+											background: 'var(--panel)',
+											boxShadow: '0 8px 20px rgba(var(--text-primary-rgb), 0.06)',
+											p: 2,
+											cursor: 'pointer',
+											transition: 'all 0.2s ease',
+											'&:hover': {
+												transform: 'translateY(-2px)',
+												boxShadow: '0 16px 32px rgba(var(--text-primary-rgb), 0.1)',
+												borderColor: 'var(--accent-gold)',
+											},
+										}}
+									>
+										<Box
+											sx={{
+												display: 'flex',
+												flexDirection: { xs: 'column', sm: 'row' },
+												justifyContent: 'space-between',
+												alignItems: { xs: 'flex-start', sm: 'center' },
+												gap: 2,
+											}}
+										>
+											<Box sx={{ flex: 1, minWidth: 0 }}>
+												<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
+													<Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+														{invoice.invoiceNumber}
+													</Typography>
+													<Box
+														sx={{
+															px: 1.5,
+															py: 0.5,
+															borderRadius: 1,
+															fontSize: '0.7rem',
+															fontWeight: 600,
+															display: 'flex',
+															alignItems: 'center',
+															gap: 0.5,
+															...statusStyle,
+															border: `1px solid ${statusStyle.border}`,
+															bgcolor: statusStyle.bg,
+															color: statusStyle.text,
+														}}
+													>
+														{getStatusIcon(invoice.status, invoice.overdue)}
+														{invoice.status} {invoice.overdue && '(Overdue)'}
+													</Box>
+												</Box>
+												<Typography sx={{ fontSize: '0.8rem', color: 'var(--text-secondary)', mb: 0.5 }}>
+													Container: {invoice.container.containerNumber}
+												</Typography>
+												{invoice.dueDate && (
+													<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+														Due: {new Date(invoice.dueDate).toLocaleDateString()}
+													</Typography>
+												)}
+											</Box>
+											<Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+												<Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
+													${invoice.totalUSD.toFixed(2)}
+												</Typography>
+												<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+													{invoice.totalAED.toFixed(2)} AED
+												</Typography>
+											</Box>
+										</Box>
+									</Box>
+								</Link>
+							);
+						})}
+					</Box>
 				)}
 			</DashboardPanel>
 		</DashboardSurface>
 	);
 }
-
