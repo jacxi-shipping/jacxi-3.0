@@ -33,7 +33,7 @@ import {
   Ship,
   Container,
 } from 'lucide-react';
-import { Tabs, Tab, Box } from '@mui/material';
+import { Tabs, Tab, Box, ImageList, ImageListItem, ImageListItemBar, IconButton as MuiIconButton } from '@mui/material';
 
 interface ShipmentEvent {
   id: string;
@@ -962,27 +962,68 @@ export default function ShipmentDetailPage() {
                   </CardHeader>
                   <CardContent className="p-4 sm:p-6 space-y-4">
                     {shipment.vehiclePhotos && shipment.vehiclePhotos.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      <ImageList
+                        sx={{
+                          width: '100%',
+                          maxHeight: 500,
+                          borderRadius: 2,
+                        }}
+                        cols={3}
+                        gap={12}
+                        rowHeight={164}
+                      >
                         {shipment.vehiclePhotos.map((photo, index) => (
-                          <motion.button
+                          <ImageListItem
                             key={index}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.2, delay: index * 0.05 }}
-                            type="button"
-                            className="relative group aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                            sx={{
+                              cursor: 'pointer',
+                              overflow: 'hidden',
+                              borderRadius: 2,
+                              border: '1px solid var(--border)',
+                              transition: 'all 0.2s',
+                              '&:hover': {
+                                transform: 'scale(1.05)',
+                                boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+                                '& .MuiImageListItemBar-root': {
+                                  opacity: 1,
+                                },
+                              },
+                            }}
                             onClick={() => openLightbox(shipment.vehiclePhotos, index, 'Vehicle Photos')}
                           >
                             <Image
                               src={photo}
                               alt={`Vehicle photo ${index + 1}`}
                               fill
-                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              style={{ objectFit: 'cover' }}
                               unoptimized
                             />
-                          </motion.button>
+                            <ImageListItemBar
+                              title={`Photo ${index + 1}`}
+                              sx={{
+                                opacity: 0,
+                                transition: 'opacity 0.2s',
+                                background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+                                '& .MuiImageListItemBar-title': {
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  color: 'var(--background)',
+                                },
+                              }}
+                              position="top"
+                              actionIcon={
+                                <MuiIconButton
+                                  sx={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                                  aria-label={`View photo ${index + 1}`}
+                                >
+                                  <ImageIcon className="w-5 h-5" />
+                                </MuiIconButton>
+                              }
+                            />
+                          </ImageListItem>
                         ))}
-                      </div>
+                      </ImageList>
                     ) : (
                       <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
                         No vehicle photos available.
@@ -1042,23 +1083,68 @@ export default function ShipmentDetailPage() {
                     )}
 
                     {arrivalPhotos.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      <ImageList
+                        sx={{
+                          width: '100%',
+                          maxHeight: 500,
+                          borderRadius: 2,
+                        }}
+                        cols={3}
+                        gap={12}
+                        rowHeight={164}
+                      >
                         {arrivalPhotos.map((photo, index) => (
-                          <motion.button
+                          <ImageListItem
                             key={index}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.2, delay: index * 0.05 }}
-                            type="button"
-                            className="relative group aspect-square overflow-hidden rounded-lg border border-[var(--border)] bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                            sx={{
+                              cursor: 'pointer',
+                              overflow: 'hidden',
+                              borderRadius: 2,
+                              border: '1px solid var(--border)',
+                              transition: 'all 0.2s',
+                              position: 'relative',
+                              '&:hover': {
+                                transform: 'scale(1.05)',
+                                boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+                                '& .MuiImageListItemBar-root': {
+                                  opacity: 1,
+                                },
+                                '& .delete-button': {
+                                  opacity: 1,
+                                },
+                              },
+                            }}
                             onClick={() => openLightbox(arrivalPhotos, index, 'Arrival Photos')}
                           >
                             <Image
                               src={photo}
                               alt={`Arrival photo ${index + 1}`}
                               fill
-                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              style={{ objectFit: 'cover' }}
                               unoptimized
+                            />
+                            <ImageListItemBar
+                              title={`Photo ${index + 1}`}
+                              sx={{
+                                opacity: 0,
+                                transition: 'opacity 0.2s',
+                                background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+                                '& .MuiImageListItemBar-title': {
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  color: 'var(--background)',
+                                },
+                              }}
+                              position="top"
+                              actionIcon={
+                                <MuiIconButton
+                                  sx={{ color: 'rgba(255, 255, 255, 0.8)' }}
+                                  aria-label={`View photo ${index + 1}`}
+                                >
+                                  <ImageIcon className="w-5 h-5" />
+                                </MuiIconButton>
+                              }
                             />
                             {canUploadArrivalPhotos && (
                               <button
@@ -1067,14 +1153,15 @@ export default function ShipmentDetailPage() {
                                   event.stopPropagation();
                                   removeArrivalPhoto(index);
                                 }}
-                                className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-red-500/80 text-[var(--text-primary)] opacity-0 transition-opacity group-hover:opacity-100"
+                                className="delete-button absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-red-500/90 text-white opacity-0 transition-opacity hover:bg-red-600"
+                                style={{ backdropFilter: 'blur(4px)' }}
                               >
                                 <X className="h-4 w-4" />
                               </button>
                             )}
-                          </motion.button>
+                          </ImageListItem>
                         ))}
-                      </div>
+                      </ImageList>
                     ) : (
                       <p className="rounded-lg border border-[var(--border)] bg-[rgba(var(--panel-rgb),0.4)] py-8 text-center text-sm text-[var(--text-secondary)]">
                         {canUploadArrivalPhotos
