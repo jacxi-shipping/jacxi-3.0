@@ -8,9 +8,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Upload, X, Loader2, Package, User, DollarSign, FileText, CheckCircle, ArrowRight } from 'lucide-react';
-import { Box, Stepper, Step, StepLabel, Typography, Snackbar, Alert } from '@mui/material';
+import { Box, Stepper, Step, StepLabel, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, ActionButton, FormField } from '@/components/design-system';
+import { PageHeader, Button, FormField, Breadcrumbs, toast } from '@/components/design-system';
 import { shipmentSchema, type ShipmentFormData } from '@/lib/validations/shipment';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
@@ -48,11 +48,6 @@ export default function NewShipmentPage() {
 	const [vehiclePhotos, setVehiclePhotos] = useState<string[]>([]);
 	const [uploading, setUploading] = useState(false);
 	const [decodingVin, setDecodingVin] = useState(false);
-	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'warning' }>({ 
-		open: false, 
-		message: '', 
-		severity: 'success' 
-	});
 
 	const {
 		register,
@@ -133,11 +128,13 @@ export default function NewShipmentPage() {
 				if (modelResult?.Value) setValue('vehicleModel', modelResult.Value);
 				if (yearResult?.Value) setValue('vehicleYear', yearResult.Value);
 
-				setSnackbar({ open: true, message: 'VIN decoded successfully!', severity: 'success' });
+				toast.success('VIN decoded successfully!');
 			}
 		} catch (error) {
 			console.error('Error decoding VIN:', error);
-			setSnackbar({ open: true, message: 'Failed to decode VIN', severity: 'error' });
+			toast.error('Failed to decode VIN', {
+				description: 'Please check the VIN and try again'
+			});
 		} finally {
 			setDecodingVin(false);
 		}
@@ -166,7 +163,9 @@ export default function NewShipmentPage() {
 			}
 		} catch (error) {
 			console.error('Error uploading photo:', error);
-			setSnackbar({ open: true, message: 'Failed to upload photo', severity: 'error' });
+			toast.error('Failed to upload photo', {
+				description: 'Please try again'
+			});
 		} finally {
 			setUploading(false);
 		}
@@ -201,16 +200,20 @@ export default function NewShipmentPage() {
 			const result = await response.json();
 
 			if (response.ok) {
-				setSnackbar({ open: true, message: 'Shipment created successfully!', severity: 'success' });
+				toast.success('Shipment created successfully!');
 				setTimeout(() => {
 					router.push('/dashboard/shipments');
 				}, 1500);
 			} else {
-				setSnackbar({ open: true, message: result.message || 'Failed to create shipment', severity: 'error' });
+				toast.error(result.message || 'Failed to create shipment', {
+					description: 'Please check your inputs and try again'
+				});
 			}
 		} catch (error) {
 			console.error('Error creating shipment:', error);
-			setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
 		}
 	};
 
@@ -266,14 +269,19 @@ export default function NewShipmentPage() {
 	return (
 		<ProtectedRoute>
 			<DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
+				
 				<PageHeader
 					title="Create New Shipment"
 					description="Add vehicle information with guided steps"
 					actions={
 						<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-							<ActionButton variant="outline" icon={<ArrowLeft className="w-4 h-4" />} size="small">
+							<Button variant="outline" icon={<ArrowLeft className="w-4 h-4" />} iconPosition="start" size="sm">
 								Back
-							</ActionButton>
+							</Button>
 						</Link>
 					}
 				/>
@@ -348,15 +356,16 @@ export default function NewShipmentPage() {
 												inputProps={{ maxLength: 17 }}
 											/>
 										</Box>
-										<ActionButton
+										<Button
 											type="button"
+											variant="outline"
+											size="sm"
 											onClick={() => vinValue && decodeVIN(vinValue)}
 											disabled={!vinValue || vinValue.length !== 17 || decodingVin}
-											variant="outline"
-											icon={decodingVin ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+											loading={decodingVin}
 										>
 											{decodingVin ? 'Decoding...' : 'Decode'}
-										</ActionButton>
+										</Button>
 									</Box>
 								</Box>
 
@@ -763,9 +772,9 @@ export default function NewShipmentPage() {
 												)}
 												<Box sx={{ mt: 2 }}>
 													<Link href="/dashboard/containers/new" target="_blank" style={{ textDecoration: 'none' }}>
-														<ActionButton type="button" variant="outline" size="small">
+														<Button type="button" variant="outline" size="sm">
 															Create New Container
-														</ActionButton>
+														</Button>
 													</Link>
 												</Box>
 											</>
@@ -1083,44 +1092,6 @@ export default function NewShipmentPage() {
 					</Box>
 				</form>
 			</DashboardSurface>
-
-			<Snackbar
-				open={snackbar.open}
-				autoHideDuration={6000}
-				onClose={() => setSnackbar({ ...snackbar, open: false })}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-			>
-				<Alert 
-					severity={snackbar.severity} 
-					onClose={() => setSnackbar({ ...snackbar, open: false })}
-					sx={{
-						bgcolor: snackbar.severity === 'success' 
-							? 'rgba(74, 222, 128, 0.15)' 
-							: snackbar.severity === 'error' 
-							? 'rgba(239, 68, 68, 0.15)' 
-							: 'rgba(251, 191, 36, 0.15)',
-						border: snackbar.severity === 'success' 
-							? '1px solid rgba(74, 222, 128, 0.3)' 
-							: snackbar.severity === 'error' 
-							? '1px solid rgba(239, 68, 68, 0.3)' 
-							: '1px solid rgba(251, 191, 36, 0.3)',
-						color: snackbar.severity === 'success' 
-							? 'rgb(74, 222, 128)' 
-							: snackbar.severity === 'error' 
-							? 'rgb(239, 68, 68)' 
-							: 'rgb(251, 191, 36)',
-						'& .MuiAlert-icon': {
-							color: snackbar.severity === 'success' 
-								? 'rgb(74, 222, 128)' 
-								: snackbar.severity === 'error' 
-								? 'rgb(239, 68, 68)' 
-								: 'rgb(251, 191, 36)',
-						},
-					}}
-				>
-					{snackbar.message}
-				</Alert>
-			</Snackbar>
 		</ProtectedRoute>
 	);
 }

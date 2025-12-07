@@ -3,6 +3,7 @@ import { Inter, Urbanist } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import { Providers } from "@/components/providers/Providers";
+import { Toaster } from "@/components/design-system";
 import Script from "next/script";
 
 const inter = Inter({
@@ -48,6 +49,7 @@ export default function RootLayout({
               {children}
             </ConditionalLayout>
           </div>
+          <Toaster />
         </Providers>
       </body>
     </html>

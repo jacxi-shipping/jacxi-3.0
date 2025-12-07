@@ -5,9 +5,8 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Header from '@/components/dashboard/Header';
 import { BottomNavigation } from '@/components/mobile/BottomNavigation';
-import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal';
+import { KeyboardShortcutHelp } from '@/components/design-system';
 import { FloatingActionButton } from '@/components/ui/FloatingActionButton';
-import { useGlobalShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Box } from '@mui/material';
 
 export default function DashboardLayout({
@@ -16,7 +15,6 @@ export default function DashboardLayout({
 	children: React.ReactNode;
 }) {
 	const [mobileOpen, setMobileOpen] = useState(false);
-	const shortcuts = useGlobalShortcuts();
 
 	return (
 		<ProtectedRoute>
@@ -74,8 +72,8 @@ export default function DashboardLayout({
 				{/* Floating Action Button */}
 				<FloatingActionButton />
 
-				{/* Keyboard Shortcuts Modal */}
-				<KeyboardShortcutsModal shortcuts={shortcuts} />
+				{/* Keyboard Shortcuts Help - Press ? key */}
+				<KeyboardShortcutHelp />
 			</Box>
 		</ProtectedRoute>
 	);

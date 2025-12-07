@@ -6,8 +6,15 @@ import { Add, Inventory2, TrendingUp, LocalShipping, LocationOn } from '@mui/ico
 import { Box } from '@mui/material';
 import ShipmentCard from '@/components/dashboard/ShipmentCard';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { StatsCard, Button, EmptyState, LoadingState } from '@/components/design-system';
-import { SkeletonCard } from '@/components/ui/Skeleton';
+import { 
+	StatsCard, 
+	Button, 
+	EmptyState, 
+	LoadingState, 
+	SkeletonCard, 
+	Breadcrumbs,
+	toast 
+} from '@/components/design-system';
 
 interface Shipment {
 	id: string;
@@ -77,6 +84,9 @@ export default function DashboardPage() {
 			});
 		} catch (error) {
 			console.error('Error fetching dashboard data:', error);
+			toast.error('Failed to load dashboard data', {
+				description: 'Please refresh the page to try again'
+			});
 			setShipments([]);
 			setStats({
 				onHand: 0,
@@ -97,6 +107,10 @@ export default function DashboardPage() {
 
 	return (
 		<DashboardSurface className="flex-1 min-h-0 overflow-hidden">
+		{/* Breadcrumbs */}
+		<Box sx={{ px: 2, pt: 2 }}>
+			<Breadcrumbs />
+		</Box>
 
 		<DashboardGrid className="grid-cols-2 md:grid-cols-4 flex-shrink-0 gap-2">
 			<StatsCard 

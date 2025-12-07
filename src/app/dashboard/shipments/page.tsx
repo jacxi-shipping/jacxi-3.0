@@ -4,10 +4,11 @@ import { useSession } from 'next-auth/react';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Add, ChevronLeft, ChevronRight, Inventory2 } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import ShipmentRow from '@/components/dashboard/ShipmentRow';
 import SmartSearch, { SearchFilters } from '@/components/dashboard/SmartSearch';
 import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { Button, EmptyState, Breadcrumbs, SkeletonTable, toast } from '@/components/design-system';
 
 interface Shipment {
 	id: string;
@@ -73,6 +74,9 @@ export default function ShipmentsListPage() {
 			setTotalPages(Math.ceil((data.totalShipments ?? 0) / 10) || 1);
 		} catch (error) {
 			console.error('Error fetching shipments:', error);
+			toast.error('Failed to load shipments', {
+				description: 'Please try again or refresh the page'
+			});
 			setShipments([]);
 		} finally {
 			setLoading(false);
@@ -92,6 +96,11 @@ export default function ShipmentsListPage() {
 
 	return (
 		<DashboardSurface className="overflow-hidden">
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2 }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<DashboardPanel
 				title="Search"
 				description="Filter shipments instantly"
@@ -101,10 +110,10 @@ export default function ShipmentsListPage() {
 					isAdmin ? (
 						<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
 							<Button
-								variant="contained"
-								size="small"
-								startIcon={<Add fontSize="small" />}
-								sx={{ textTransform: 'none', fontSize: { xs: '0.72rem', sm: '0.75rem', md: '0.78rem' }, fontWeight: 600 }}
+								variant="primary"
+								size="sm"
+								icon={<Add fontSize="small" />}
+								iconPosition="start"
 							>
 								New shipment
 							</Button>
@@ -138,38 +147,22 @@ export default function ShipmentsListPage() {
 				bodyClassName="overflow-hidden"
 			>
 				{loading ? (
-					<Box sx={{ minHeight: 260, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-						<CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
-					</Box>
+					<SkeletonTable rows={5} columns={6} />
 				) : shipments.length === 0 ? (
-					<Box
-						sx={{
-							minHeight: 240,
-							display: 'flex',
-							flexDirection: 'column',
-							alignItems: 'center',
-							justifyContent: 'center',
-							gap: 1,
-							textAlign: 'center',
-						}}
-					>
-						<Inventory2 sx={{ fontSize: 42, color: 'rgba(var(--text-secondary-rgb), 0.35)' }} />
-						<Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-							No shipments found
-						</Typography>
-						{isAdmin && (
-							<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
-								<Button
-									variant="contained"
-									size="small"
-									startIcon={<Add fontSize="small" />}
-									sx={{ textTransform: 'none', fontSize: '0.75rem', fontWeight: 600 }}
-								>
-									Create shipment
-								</Button>
-							</Link>
-						)}
-					</Box>
+					<EmptyState
+						icon={<Inventory2 />}
+						title="No shipments found"
+						description={searchFilters.query ? "Try adjusting your search filters" : "Get started by creating your first shipment"}
+						action={
+							isAdmin ? (
+								<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
+									<Button variant="primary" icon={<Add />} iconPosition="start">
+										Create shipment
+									</Button>
+								</Link>
+							) : undefined
+						}
+					/>
 				) : (
 					<>
 						<Box sx={{ 
@@ -203,16 +196,13 @@ export default function ShipmentsListPage() {
 								}}
 							>
 								<Button
-									variant="outlined"
-									size="small"
-									startIcon={<ChevronLeft sx={{ fontSize: { xs: 12, sm: 14 } }} />}
+									variant="outline"
+									size="sm"
+									icon={<ChevronLeft sx={{ fontSize: { xs: 12, sm: 14 } }} />}
+									iconPosition="start"
 									onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
 									disabled={currentPage === 1}
-									sx={{ 
-										textTransform: 'none', 
-										fontSize: { xs: '0.7rem', sm: '0.72rem', md: '0.75rem' },
-										width: { xs: '100%', sm: 'auto' },
-									}}
+									sx={{ width: { xs: '100%', sm: 'auto' } }}
 								>
 									Previous
 								</Button>
@@ -220,16 +210,13 @@ export default function ShipmentsListPage() {
 									Page {currentPage} of {totalPages}
 								</Typography>
 								<Button
-									variant="outlined"
-									size="small"
-									endIcon={<ChevronRight sx={{ fontSize: { xs: 12, sm: 14 } }} />}
+									variant="outline"
+									size="sm"
+									icon={<ChevronRight sx={{ fontSize: { xs: 12, sm: 14 } }} />}
+									iconPosition="end"
 									onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
 									disabled={currentPage === totalPages}
-									sx={{ 
-										textTransform: 'none', 
-										fontSize: { xs: '0.7rem', sm: '0.72rem', md: '0.75rem' },
-										width: { xs: '100%', sm: 'auto' },
-									}}
+									sx={{ width: { xs: '100%', sm: 'auto' } }}
 								>
 									Next
 								</Button>

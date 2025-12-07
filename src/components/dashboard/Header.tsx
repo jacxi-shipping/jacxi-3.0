@@ -24,7 +24,7 @@ import {
 } from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { ThemeToggle } from '@/components/design-system';
 import { NotificationCenter } from '@/components/ui/NotificationCenter';
 
 interface HeaderProps {
