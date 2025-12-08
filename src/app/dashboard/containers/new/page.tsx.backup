@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import Section from '@/components/layout/Section';
 import { ArrowLeft, Download, Loader2, Ship, Anchor, Calendar, MapPin, AlertCircle, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Stepper, Step, StepLabel, Box } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { toast } from '@/lib/toast';
 
 const steps = ['Basic Info', 'Shipping Details', 'Ports', 'Dates', 'Additional Info'];
 
@@ -106,20 +107,14 @@ export default function NewContainerPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Container created successfully!', {
-          description: 'Redirecting to container details...'
-        });
+        toast.success('Container created successfully!', 'Redirecting to container details...');
         router.push(`/dashboard/containers/${data.container.id}`);
       } else {
-        toast.error('Failed to create container', {
-          description: data.error || 'An error occurred'
-        });
+        toast.error('Failed to create container', data.error || 'An error occurred');
       }
     } catch (error) {
       console.error('Error creating container:', error);
-      toast.error('Failed to create container', {
-        description: 'Please try again later'
-      });
+      toast.error('Failed to create container', 'Please try again later');
     } finally {
       setLoading(false);
     }

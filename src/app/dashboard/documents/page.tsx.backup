@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { FileText, ShieldCheck, Download, Upload, Search as SearchIcon, Folder } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast } from '@/components/design-system';
+import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
 
 type DocumentCategory = {
 	id: string;
@@ -184,12 +184,12 @@ export default function DocumentsPage() {
 				description="Manage templates, uploads, and compliance documents"
 				actions={
 					<>
-						<Button variant="outline" icon={<Download className="w-4 h-4" />} size="sm">
+						<ActionButton variant="outline" icon={<Download className="w-4 h-4" />} size="small">
 							Download All
-						</Button>
-						<Button variant="primary" icon={<Upload className="w-4 h-4" />} size="sm">
+						</ActionButton>
+						<ActionButton variant="primary" icon={<Upload className="w-4 h-4" />} size="small">
 							Upload Document
-						</Button>
+						</ActionButton>
 					</>
 				}
 			/>
@@ -335,13 +335,13 @@ export default function DocumentsPage() {
 										</Box>
 
 										<Box sx={{ display: 'flex', gap: 1 }}>
-											<Button variant="outline" size="sm" sx={{ flex: 1 }}>
+											<ActionButton variant="outline" size="small" sx={{ flex: 1 }}>
 												<Download className="w-3 h-3 mr-1" />
 												Download
-											</Button>
-											<Button variant="ghost" size="sm">
+											</ActionButton>
+											<ActionButton variant="ghost" size="small">
 												View
-											</Button>
+											</ActionButton>
 										</Box>
 									</Box>
 								))}

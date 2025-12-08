@@ -19,12 +19,11 @@ import {
 	CartesianGrid,
 	XAxis,
 	YAxis,
-	Tooltip as ChartTooltip,
+	Tooltip,
 	BarChart,
 	Bar,
 } from 'recharts';
-import { Box, Typography, Zoom, CircularProgress } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { Box, Button, Typography, Zoom, CircularProgress } from '@mui/material';
 
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
@@ -262,9 +261,9 @@ export default function AnalyticsPage() {
 						</Box>
 					))}
 					<Button
-						variant="outline"
-						size="sm"
-						icon={<RefreshCcw size={14} />}
+						variant="outlined"
+						size="small"
+						startIcon={<RefreshCcw size={14} />}
 						onClick={handleRefresh}
 						disabled={refreshing}
 						sx={{ textTransform: 'none', fontSize: '0.75rem' }}

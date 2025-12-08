@@ -10,8 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ArrowLeft, Image as ImageIcon, Upload, X, Loader2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { Alert } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { Snackbar, Alert } from '@mui/material';
 
 type PhotoSection = 'container' | 'arrival';
 
@@ -184,7 +183,7 @@ export default function EditShipmentPage() {
       }));
 
       setTrackingMessage('Shipping details retrieved from carrier and updated in form.');
-      toast.success('Shipping details retrieved from carrier and updated in form.');
+      setSnackbar({ open: true, message: 'Shipping details retrieved from carrier and updated in form.', severity: 'success' });
     } catch (error) {
       console.error('Error fetching tracking details:', error);
       const message = error instanceof Error ? error.message : 'Failed to fetch tracking details.';
@@ -238,13 +237,13 @@ export default function EditShipmentPage() {
     
     // Validation checks
     if (!formData.userId) {
-      toast.warning('User assignment is required');
+      setSnackbar({ open: true, message: 'User assignment is required', severity: 'warning' });
       setErrors({ userId: 'User assignment is required' });
       return;
     }
 
     if (!formData.vehicleType) {
-      toast.warning('Vehicle type is required');
+      setSnackbar({ open: true, message: 'Vehicle type is required', severity: 'warning' });
       setErrors({ vehicleType: 'Vehicle type is required' });
       return;
     }
@@ -259,7 +258,7 @@ export default function EditShipmentPage() {
     }
 
     if (formData.vehicleVIN && formData.vehicleVIN.length > 0 && formData.vehicleVIN.length < 17) {
-      toast.warning('VIN must be at least 17 characters');
+      setSnackbar({ open: true, message: 'VIN must be at least 17 characters', severity: 'warning' });
       setErrors({ vehicleVIN: 'VIN must be at least 17 characters' });
       return;
     }
@@ -267,7 +266,7 @@ export default function EditShipmentPage() {
     if (formData.weight) {
       const weight = parseFloat(formData.weight);
       if (isNaN(weight) || weight <= 0 || weight > 50000) {
-        toast.warning('Weight must be between 0 and 50,000 lbs');
+        setSnackbar({ open: true, message: 'Weight must be between 0 and 50,000 lbs', severity: 'warning' });
         setErrors({ weight: 'Invalid weight' });
         return;
       }
@@ -276,20 +275,20 @@ export default function EditShipmentPage() {
     if (formData.progress) {
       const progress = parseInt(formData.progress);
       if (isNaN(progress) || progress < 0 || progress > 100) {
-        toast.warning('Progress must be between 0 and 100');
+        setSnackbar({ open: true, message: 'Progress must be between 0 and 100', severity: 'warning' });
         setErrors({ progress: 'Invalid progress' });
         return;
       }
     }
 
     if (formData.origin && formData.origin.trim().length > 0 && formData.origin.trim().length < 3) {
-      toast.warning('Origin must be at least 3 characters');
+      setSnackbar({ open: true, message: 'Origin must be at least 3 characters', severity: 'warning' });
       setErrors({ origin: 'Origin must be at least 3 characters' });
       return;
     }
 
     if (formData.destination && formData.destination.trim().length > 0 && formData.destination.trim().length < 3) {
-      toast.warning('Destination must be at least 3 characters');
+      setSnackbar({ open: true, message: 'Destination must be at least 3 characters', severity: 'warning' });
       setErrors({ destination: 'Destination must be at least 3 characters' });
       return;
     }
@@ -314,7 +313,7 @@ export default function EditShipmentPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success('Shipment updated successfully!');
+        setSnackbar({ open: true, message: 'Shipment updated successfully!', severity: 'success' });
         setTimeout(() => {
           router.push(`/dashboard/shipments/${params.id}`);
         }, 800);
@@ -336,14 +335,14 @@ export default function EditShipmentPage() {
   const handlePhotoUpload = async (section: PhotoSection, file: File) => {
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
+      setSnackbar({ open: true, message: 'File size must be less than 5MB', severity: 'error' });
       return;
     }
 
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      toast.error('Invalid file type. Please upload JPG, PNG, or WEBP images');
+      setSnackbar({ open: true, message: 'Invalid file type. Please upload JPG, PNG, or WEBP images', severity: 'error' });
       return;
     }
 
@@ -366,10 +365,10 @@ export default function EditShipmentPage() {
 
       if (section === 'container') {
         setContainerPhotos((prev) => [...prev, result.url]);
-        toast.success('Container photo uploaded successfully');
+        setSnackbar({ open: true, message: 'Container photo uploaded successfully', severity: 'success' });
       } else {
         setArrivalPhotos((prev) => [...prev, result.url]);
-        toast.success('Arrival photo uploaded successfully');
+        setSnackbar({ open: true, message: 'Arrival photo uploaded successfully', severity: 'success' });
       }
     } catch (error) {
       console.error('Error uploading photo:', error);

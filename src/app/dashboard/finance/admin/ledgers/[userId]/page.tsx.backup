@@ -41,7 +41,6 @@ import {
   Snackbar,
   Chip,
 } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -163,7 +162,7 @@ export default function UserLedgerManagementPage() {
       setTotalPages(data.pagination.totalPages);
     } catch (error) {
       console.error('Error fetching ledger:', error);
-      toast.error('Failed to load ledger');
+      setSnackbar({ open: true, message: 'Failed to load ledger', severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -185,7 +184,7 @@ export default function UserLedgerManagementPage() {
       });
 
       if (response.ok) {
-        toast.success('Transaction added successfully');
+        setSnackbar({ open: true, message: 'Transaction added successfully', severity: 'success' });
         setShowAddModal(false);
         setFormData({ description: '', type: 'DEBIT', amount: '', notes: '' });
         fetchLedgerEntries();
@@ -195,7 +194,7 @@ export default function UserLedgerManagementPage() {
       }
     } catch (error) {
       console.error('Error adding entry:', error);
-      toast.error('An error occurred');
+      setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
     }
   };
 
@@ -214,7 +213,7 @@ export default function UserLedgerManagementPage() {
       });
 
       if (response.ok) {
-        toast.success('Transaction updated successfully');
+        setSnackbar({ open: true, message: 'Transaction updated successfully', severity: 'success' });
         setShowEditModal(false);
         setSelectedEntry(null);
         setFormData({ description: '', type: 'DEBIT', amount: '', notes: '' });
@@ -225,7 +224,7 @@ export default function UserLedgerManagementPage() {
       }
     } catch (error) {
       console.error('Error updating entry:', error);
-      toast.error('An error occurred');
+      setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
     }
   };
 
@@ -240,7 +239,7 @@ export default function UserLedgerManagementPage() {
       });
 
       if (response.ok) {
-        toast.success('Transaction deleted successfully');
+        setSnackbar({ open: true, message: 'Transaction deleted successfully', severity: 'success' });
         fetchLedgerEntries();
       } else {
         const error = await response.json();
@@ -248,7 +247,7 @@ export default function UserLedgerManagementPage() {
       }
     } catch (error) {
       console.error('Error deleting entry:', error);
-      toast.error('An error occurred');
+      setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
     }
   };
 
@@ -286,10 +285,10 @@ export default function UserLedgerManagementPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success('Ledger exported successfully');
+      setSnackbar({ open: true, message: 'Ledger exported successfully', severity: 'success' });
     } catch (error) {
       console.error('Error exporting ledger:', error);
-      toast.error('Failed to export ledger');
+      setSnackbar({ open: true, message: 'Failed to export ledger', severity: 'error' });
     }
   };
 
@@ -335,9 +334,9 @@ export default function UserLedgerManagementPage() {
         <Box sx={{ mb: 2 }}>
           <Link href="/dashboard/finance/admin/ledgers" style={{ textDecoration: 'none' }}>
             <Button
-              variant="outline"
-              size="sm"
-              icon={<ArrowBack />}
+              variant="outlined"
+              size="small"
+              startIcon={<ArrowBack />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', mb: 2 }}
             >
               Back to All Ledgers
@@ -379,10 +378,10 @@ export default function UserLedgerManagementPage() {
           description="Search and filter transactions"
           actions={
             <Button
-              variant="primary"
-              size="sm"
+              variant="contained"
+              size="small"
               onClick={() => setShowAddModal(true)}
-              icon={<Add />}
+              startIcon={<Add />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
             >
               Add Transaction
@@ -393,7 +392,7 @@ export default function UserLedgerManagementPage() {
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
                 placeholder="Search transactions..."
-                size="sm"
+                size="small"
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 InputProps={{
@@ -402,10 +401,10 @@ export default function UserLedgerManagementPage() {
                 fullWidth
               />
               <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={() => setShowFilters(!showFilters)}
-                icon={<FilterList />}
+                startIcon={<FilterList />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem', minWidth: 120 }}
               >
                 {showFilters ? 'Hide' : 'Show'} Filters
@@ -414,7 +413,7 @@ export default function UserLedgerManagementPage() {
 
             {showFilters && (
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
-                <FormControl size="sm" fullWidth>
+                <FormControl size="small" fullWidth>
                   <InputLabel>Type</InputLabel>
                   <Select
                     value={filters.type}
@@ -429,7 +428,7 @@ export default function UserLedgerManagementPage() {
                 <TextField
                   label="Start Date"
                   type="date"
-                  size="sm"
+                  size="small"
                   value={filters.startDate}
                   onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
@@ -438,7 +437,7 @@ export default function UserLedgerManagementPage() {
                 <TextField
                   label="End Date"
                   type="date"
-                  size="sm"
+                  size="small"
                   value={filters.endDate}
                   onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
@@ -449,28 +448,28 @@ export default function UserLedgerManagementPage() {
 
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={() => window.print()}
-                icon={<Print />}
+                startIcon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Print
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={() => handleExport('pdf')}
-                icon={<Download />}
+                startIcon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 PDF
               </Button>
               <Button
-                variant="outline"
-                size="sm"
+                variant="outlined"
+                size="small"
                 onClick={() => handleExport('excel')}
-                icon={<Download />}
+                startIcon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Excel
@@ -530,7 +529,7 @@ export default function UserLedgerManagementPage() {
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                           <Chip
                             label={entry.type}
-                            size="sm"
+                            size="small"
                             icon={entry.type === 'DEBIT' ? <TrendingUpIcon /> : <TrendingDownIcon />}
                             sx={{
                               backgroundColor: entry.type === 'DEBIT' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
@@ -549,14 +548,14 @@ export default function UserLedgerManagementPage() {
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                             <IconButton
-                              size="sm"
+                              size="small"
                               onClick={() => openEditModal(entry)}
                               sx={{ color: 'var(--accent-gold)' }}
                             >
                               <Edit fontSize="small" />
                             </IconButton>
                             <IconButton
-                              size="sm"
+                              size="small"
                               onClick={() => handleDeleteEntry(entry.id)}
                               sx={{ color: '#ef4444' }}
                             >
@@ -578,21 +577,21 @@ export default function UserLedgerManagementPage() {
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant="outlined"
+                      size="small"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      icon={<ChevronLeft />}
+                      startIcon={<ChevronLeft />}
                       sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                     >
                       Previous
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant="outlined"
+                      size="small"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      icon={<ChevronRight />}
+                      endIcon={<ChevronRight />}
                       sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                     >
                       Next
@@ -610,7 +609,7 @@ export default function UserLedgerManagementPage() {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6">Add Transaction</Typography>
-            <IconButton onClick={() => setShowAddModal(false)} size="sm">
+            <IconButton onClick={() => setShowAddModal(false)} size="small">
               <Close />
             </IconButton>
           </Box>
@@ -666,7 +665,7 @@ export default function UserLedgerManagementPage() {
             <Button onClick={() => setShowAddModal(false)} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" icon={<Check />} sx={{ textTransform: 'none' }}>
+            <Button type="submit" variant="contained" startIcon={<Check />} sx={{ textTransform: 'none' }}>
               Add Transaction
             </Button>
           </DialogActions>
@@ -678,7 +677,7 @@ export default function UserLedgerManagementPage() {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6">Edit Transaction</Typography>
-            <IconButton onClick={() => setShowEditModal(false)} size="sm">
+            <IconButton onClick={() => setShowEditModal(false)} size="small">
               <Close />
             </IconButton>
           </Box>
@@ -726,7 +725,7 @@ export default function UserLedgerManagementPage() {
             <Button onClick={() => setShowEditModal(false)} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" icon={<Check />} sx={{ textTransform: 'none' }}>
+            <Button type="submit" variant="contained" startIcon={<Check />} sx={{ textTransform: 'none' }}>
               Update Transaction
             </Button>
           </DialogActions>

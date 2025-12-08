@@ -32,7 +32,8 @@ import {
   Ship,
 } from 'lucide-react';
 import { Tabs, Tab, Box, ImageList, ImageListItem, ImageListItemBar, IconButton as MuiIconButton } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { toast } from '@/lib/toast';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 interface ShipmentEvent {
   id: string;

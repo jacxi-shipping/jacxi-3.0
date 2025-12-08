@@ -112,9 +112,9 @@ export default function InvoicesPage() {
 				description="Manage and track all invoices"
 				actions={
 					<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-						<Button variant="primary" icon={<Plus className="w-4 h-4" />}>
+						<ActionButton variant="primary" icon={<Plus className="w-4 h-4" />}>
 							New Invoice
-						</Button>
+						</ActionButton>
 					</Link>
 				}
 			/>
@@ -214,7 +214,7 @@ export default function InvoicesPage() {
 						action={
 							!searchTerm && statusFilter === 'all' && (
 								<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-									<Button variant="primary">Create Invoice</Button>
+									<ActionButton variant="primary">Create Invoice</ActionButton>
 								</Link>
 							)
 						}

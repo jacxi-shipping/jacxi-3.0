@@ -1051,7 +1051,7 @@ export default function NewShipmentPage() {
 
 					{/* Navigation Buttons */}
 					<Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-						<Button
+						<ActionButton
 							type="button"
 							variant="outline"
 							onClick={handleBack}
@@ -1059,26 +1059,26 @@ export default function NewShipmentPage() {
 							icon={<ArrowLeft className="w-4 h-4" />}
 						>
 							Back
-						</Button>
+						</ActionButton>
 
 						<Box sx={{ display: 'flex', gap: 2 }}>
 							<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-								<Button type="button" variant="ghost">
+								<ActionButton type="button" variant="ghost">
 									Cancel
-								</Button>
+								</ActionButton>
 							</Link>
 							
 							{activeStep === steps.length - 1 ? (
-								<Button
+								<ActionButton
 									type="submit"
 									variant="primary"
 									disabled={isSubmitting}
 									icon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
 								>
 									{isSubmitting ? 'Creating...' : 'Create Shipment'}
-								</Button>
+								</ActionButton>
 							) : (
-								<Button
+								<ActionButton
 									type="button"
 									variant="primary"
 									onClick={handleNext}
@@ -1086,7 +1086,7 @@ export default function NewShipmentPage() {
 									iconPosition="end"
 								>
 									Next
-								</Button>
+								</ActionButton>
 							)}
 						</Box>
 					</Box>

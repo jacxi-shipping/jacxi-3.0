@@ -24,7 +24,6 @@ import {
 	Snackbar,
 	Button as MuiButton,
 } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 
 export default function CreateUserPage() {
 	const router = useRouter();
@@ -56,7 +55,7 @@ export default function CreateUserPage() {
 					<Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Access Restricted</Typography>
 					<Typography sx={{ mb: 3 }}>Only administrators can create user accounts.</Typography>
 					<Link href="/dashboard" style={{ textDecoration: 'none' }}>
-						<MuiButton variant="primary" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
+						<MuiButton variant="contained" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
 							Go to Dashboard
 						</MuiButton>
 					</Link>
@@ -77,13 +76,13 @@ export default function CreateUserPage() {
 		setIsLoading(true);
 
 		if (formData.password !== formData.confirmPassword) {
-			toast.error('Passwords do not match');
+			setSnackbar({ open: true, message: 'Passwords do not match', severity: 'error' });
 			setIsLoading(false);
 			return;
 		}
 
 		if (formData.password.length < 6) {
-			toast.error('Password must be at least 6 characters');
+			setSnackbar({ open: true, message: 'Password must be at least 6 characters', severity: 'error' });
 			setIsLoading(false);
 			return;
 		}
@@ -112,7 +111,7 @@ export default function CreateUserPage() {
 					}
 				}
 
-				toast.success('User created successfully');
+				setSnackbar({ open: true, message: 'User created successfully', severity: 'success' });
 				setTimeout(() => router.push('/dashboard/users'), 800);
 			} else {
 				const msg = data?.message || 'Registration failed';
@@ -394,9 +393,9 @@ export default function CreateUserPage() {
 								<MuiButton
 									type="submit"
 									disabled={isLoading}
-									variant="primary"
-									size="lg"
-									icon={!isLoading && <ArrowForward />}
+									variant="contained"
+									size="large"
+									endIcon={!isLoading && <ArrowForward />}
 									sx={{
 										width: '100%',
 										bgcolor: 'var(--accent-gold)',
