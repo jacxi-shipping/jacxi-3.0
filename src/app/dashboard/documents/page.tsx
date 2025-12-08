@@ -202,33 +202,27 @@ export default function DocumentsPage() {
 					value={stats.total}
 					subtitle="All documents"
 				/>
-				<StatsCard
-					icon={<Folder style={{ fontSize: 18 }} />}
-					title="Categories"
-					value={stats.categories}
-					subtitle="Document types"
-					iconColor="rgb(59, 130, 246)"
-					iconBg="rgba(59, 130, 246, 0.15)"
-					delay={0.1}
-				/>
-				<StatsCard
-					icon={<ShieldCheck style={{ fontSize: 18 }} />}
-					title="Required"
-					value={stats.required}
-					subtitle="Must be updated"
-					iconColor="rgb(239, 68, 68)"
-					iconBg="rgba(239, 68, 68, 0.15)"
-					delay={0.2}
-				/>
-				<StatsCard
-					icon={<Upload style={{ fontSize: 18 }} />}
-					title="Storage"
-					value={stats.storage}
-					subtitle="Total size"
-					iconColor="rgb(168, 85, 247)"
-					iconBg="rgba(168, 85, 247, 0.15)"
-					delay={0.3}
-				/>
+			<StatsCard
+				icon={<Folder style={{ fontSize: 18 }} />}
+				title="Categories"
+				value={stats.categories}
+				variant="info"
+				size="md"
+			/>
+			<StatsCard
+				icon={<ShieldCheck style={{ fontSize: 18 }} />}
+				title="Required"
+				value={stats.required}
+				variant="error"
+				size="md"
+			/>
+			<StatsCard
+				icon={<Upload style={{ fontSize: 18 }} />}
+				title="Storage"
+				value={stats.storage}
+				variant="default"
+				size="md"
+			/>
 			</DashboardGrid>
 
 			{/* Search */}

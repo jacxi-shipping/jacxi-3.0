@@ -2,7 +2,7 @@
 
 import { Box, Typography, Fade } from '@mui/material';
 import { ReactNode, useState, useEffect } from 'react';
-import { colors, designSystemShadows } from '@/lib/design-tokens';
+import { colors } from '@/lib/design-tokens';
 
 /**
  * StatsCard Component
@@ -77,25 +77,26 @@ export default function StatsCard({
 			<Box
 				component="article"
 				sx={{
-					height: '100%',
-					borderRadius: 2,
-					border: '1px solid var(--border)',
-					background: 'var(--panel)',
-					boxShadow: designSystemShadows.card,
-					padding: sizes.padding,
-					display: 'flex',
-					alignItems: 'center',
-					gap: 1.5,
-					position: 'relative',
-					overflow: 'hidden',
-					minWidth: 0,
-					width: '100%',
-					boxSizing: 'border-box',
-					transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-					'&:hover': {
-						transform: 'translateY(-4px)',
-						boxShadow: designSystemShadows.cardHover,
-					},
+				height: '100%',
+				borderRadius: 2,
+				border: '1px solid var(--border)',
+				background: 'var(--panel)',
+				boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+				padding: sizes.padding,
+			display: 'flex',
+				alignItems: 'center',
+				gap: 1.5,
+				position: 'relative',
+				overflow: 'hidden',
+				minWidth: 0,
+				width: '100%',
+				boxSizing: 'border-box',
+				transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+				boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+				'&:hover': {
+					transform: 'translateY(-4px)',
+					boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+				},
 				}}
 			>
 				<Box

@@ -772,7 +772,7 @@ export default function NewShipmentPage() {
 												)}
 												<Box sx={{ mt: 2 }}>
 													<Link href="/dashboard/containers/new" target="_blank" style={{ textDecoration: 'none' }}>
-														<Button type="button" variant="outline" size="small">
+														<Button type="button" variant="outline" size="sm">
 															Create New Container
 														</Button>
 													</Link>

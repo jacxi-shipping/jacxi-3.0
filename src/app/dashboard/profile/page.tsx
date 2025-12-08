@@ -203,7 +203,7 @@ export default function ProfilePage() {
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div className="flex items-center gap-3">
 						<Link href="/dashboard">
-							<Button variant="outline" size="small" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+							<Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Dashboard
 							</Button>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
 							<p className="text-white/60 text-sm">Manage your personal information and account security.</p>
 						</div>
 					</div>
-					<Button variant="outline" size="small" className="border-white/20 text-white/70 hover:bg-white/10" disabled>
+					<Button variant="outline" size="sm" className="border-white/20 text-white/70 hover:bg-white/10" disabled>
 						Manage Passwords
 					</Button>
 				</div>

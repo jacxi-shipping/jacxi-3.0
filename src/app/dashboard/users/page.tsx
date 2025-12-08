@@ -303,16 +303,16 @@ export default function UsersPage() {
 
 						<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1 }}>
 							<Link href={`/dashboard/users/${user.id}`} style={{ textDecoration: 'none' }}>
-								<Button variant="outline" size="small" icon={<VisibilityIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
+								<Button variant="outline" size="sm" icon={<VisibilityIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
 									View
 								</Button>
 							</Link>
 							<Link href={`/dashboard/users/${user.id}/edit`} style={{ textDecoration: 'none' }}>
-								<Button variant="ghost" size="small" icon={<EditIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
+								<Button variant="ghost" size="sm" icon={<EditIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
 									Edit
 								</Button>
 							</Link>
-								<Button variant="ghost" size="small" icon={<DeleteIcon />} onClick={() => handleDeleteClick(user.id)} sx={{ color: 'var(--error)' }}>
+								<Button variant="ghost" size="sm" icon={<DeleteIcon />} onClick={() => handleDeleteClick(user.id)} sx={{ color: 'var(--error)' }}>
 									Delete
 								</Button>
 						</Box>
@@ -347,7 +347,7 @@ export default function UsersPage() {
 				noBodyPadding
 				actions={
 					<Link href="/dashboard/users/new" style={{ textDecoration: 'none' }}>
-						<Button variant="primary" size="small" sx={{ textTransform: 'none', fontWeight: 600 }}>
+						<Button variant="primary" size="sm" sx={{ textTransform: 'none', fontWeight: 600 }}>
 							<UserPlus style={{ width: 16, height: 16, marginRight: 8 }} />
 							Create User
 						</Button>
@@ -419,7 +419,7 @@ export default function UsersPage() {
 						<User style={{ width: 48, height: 48, color: 'rgba(255,255,255,0.25)' }} />
 						<Typography sx={{ color: 'var(--text-secondary)' }}>No users found</Typography>
 						<Link href="/dashboard/users/new" style={{ textDecoration: 'none' }}>
-							<Button variant="primary" size="small" sx={{ mt: 1, textTransform: 'none' }}>
+							<Button variant="primary" size="sm" sx={{ mt: 1, textTransform: 'none' }}>
 								<UserPlus style={{ width: 16, height: 16, marginRight: 8 }} /> Create User
 							</Button>
 						</Link>
@@ -434,11 +434,11 @@ export default function UsersPage() {
 
 						{/* Pagination Controls */}
 						<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
-							<Button variant="outline" size="small" onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); fetchUsers(currentPage - 1, searchFilters.query); }} disabled={currentPage === 1} sx={{ textTransform: 'none' }}>
+							<Button variant="outline" size="sm" onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); fetchUsers(currentPage - 1, searchFilters.query); }} disabled={currentPage === 1} sx={{ textTransform: 'none' }}>
 								Previous
 							</Button>
 							<Typography sx={{ color: 'var(--text-secondary)' }}>Page {currentPage} of {totalPages}</Typography>
-							<Button variant="outline" size="small" onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); fetchUsers(currentPage + 1, searchFilters.query); }} disabled={currentPage === totalPages} sx={{ textTransform: 'none' }}>
+							<Button variant="outline" size="sm" onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); fetchUsers(currentPage + 1, searchFilters.query); }} disabled={currentPage === totalPages} sx={{ textTransform: 'none' }}>
 								Next
 							</Button>
 						</Box>

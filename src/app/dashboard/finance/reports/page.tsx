@@ -208,7 +208,7 @@ export default function FinancialReportsPage() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-start gap-3 min-w-0 flex-1">
               <Link href="/dashboard/finance">
-                <Button variant="outline" size="small" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>

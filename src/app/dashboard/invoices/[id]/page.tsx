@@ -346,7 +346,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 				<div className="relative z-10">
 					<div className="flex items-center gap-6">
 						<Link href="/dashboard/invoices">
-							<Button variant="outline" size="small" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+							<Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Back
 							</Button>

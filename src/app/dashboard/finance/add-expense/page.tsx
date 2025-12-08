@@ -6,10 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, DollarSign, AlertCircle, CheckCircle, Package } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
 
 interface Shipment {
   id: string;
@@ -174,7 +174,7 @@ export default function AddExpensePage() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-3 min-w-0 flex-1">
               <Link href={shipmentIdParam ? `/dashboard/shipments/${shipmentIdParam}` : '/dashboard/finance'}>
-                <Button variant="outline" size="small" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>

@@ -508,7 +508,7 @@ export default function ShipmentDetailPage() {
           
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/dashboard/shipments">
-              <Button variant="outline" size="small">
+              <Button variant="outline" size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
@@ -526,12 +526,12 @@ export default function ShipmentDetailPage() {
             {isAdmin && (
               <div className="flex items-center gap-2">
                 <Link href={`/dashboard/shipments/${shipment.id}/edit`}>
-                  <Button size="small">
+                  <Button size="sm">
                     <PenLine className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
                 </Link>
-                <Button variant="outline" size="small" onClick={handleDelete} className="border-[var(--error)] text-[var(--error)]">
+                <Button variant="outline" size="sm" onClick={handleDelete} className="border-[var(--error)] text-[var(--error)]">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </Button>
@@ -664,7 +664,7 @@ export default function ShipmentDetailPage() {
                 title="Container Shipping Info"
                 actions={
                   <Link href={`/dashboard/containers/${shipment.containerId}`}>
-                    <Button variant="outline" size="small">
+                    <Button variant="outline" size="sm">
                       View Container
                     </Button>
                   </Link>
