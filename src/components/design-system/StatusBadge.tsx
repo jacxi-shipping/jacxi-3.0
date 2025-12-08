@@ -39,7 +39,7 @@ export type GenericStatus =
 
 export type StatusType = ShipmentStatus | PaymentStatus | GenericStatus | string;
 
-interface StatusBadgeProps {
+export interface StatusBadgeProps {
   status: StatusType;
   variant?: 'default' | 'dot' | 'outline';
   size?: 'sm' | 'md' | 'lg';

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button, Breadcrumbs } from '@/components/design-system';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';

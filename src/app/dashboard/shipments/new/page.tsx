@@ -279,7 +279,7 @@ export default function NewShipmentPage() {
 					description="Add vehicle information with guided steps"
 					actions={
 						<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-							<Button variant="outline" icon={<ArrowLeft className="w-4 h-4" />} iconPosition="start" size="small">
+							<Button variant="outline" icon={<ArrowLeft className="w-4 h-4" />} iconPosition="start" size="sm">
 								Back
 							</Button>
 						</Link>
@@ -359,7 +359,7 @@ export default function NewShipmentPage() {
 										<Button
 											type="button"
 											variant="outline"
-											size="small"
+											size="sm"
 											onClick={() => vinValue && decodeVIN(vinValue)}
 											disabled={!vinValue || vinValue.length !== 17 || decodingVin}
 											loading={decodingVin}

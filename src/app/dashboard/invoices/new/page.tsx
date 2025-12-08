@@ -7,9 +7,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
 import Section from '@/components/layout/Section';
-import { toast } from '@/lib/toast';
 
 type ContainerItem = {
 	id: string;
@@ -92,12 +91,12 @@ export default function NewInvoicePage() {
 
 	const handleCreateInvoice = async () => {
 		if (!containerId) {
-			toast.warning('Missing information', { description: 'Container information is required' });
+			toast.warning("Missing information");
 			return;
 		}
 
 		if (selectedItems.length === 0) {
-			toast.warning('No items selected', { description: 'Please select at least one item' });
+			toast.warning("No items selected");
 			return;
 		}
 
@@ -123,7 +122,7 @@ export default function NewInvoicePage() {
 			}
 		} catch (error) {
 			console.error('Error creating invoice:', error);
-			toast.error('Failed to create invoice', { description: 'An error occurred. Please try again' });
+			toast.error("Failed to create invoice");
 		} finally {
 			setIsCreating(false);
 		}

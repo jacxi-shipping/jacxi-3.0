@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/design-system';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -366,7 +366,7 @@ export default function ShipmentDetailPage() {
     } catch (error) {
       console.error('Error uploading file:', error);
       const message = error instanceof Error ? error.message : 'Failed to upload image';
-      toast.error('Upload failed', message);
+      toast.error(message);
       return null;
     } finally {
       setUploading(false);
@@ -502,7 +502,7 @@ export default function ShipmentDetailPage() {
           <Breadcrumbs 
             items={[
               { label: 'Shipments', href: '/dashboard/shipments' },
-              { label: shipment.vehicleVIN || `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'Details' },
+              { label: shipment.vehicleVIN || `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''}`.trim() || 'Details', href: '' },
             ]}
           />
           
@@ -962,7 +962,7 @@ export default function ShipmentDetailPage() {
                 canUploadArrivalPhotos ? (
                   <Button
                     variant="outline"
-                    size="small"
+                    size="sm"
                     onClick={() => setShowArrivalUpload((prev) => !prev)}
                   >
                     <Upload className="mr-2 h-4 w-4" />
@@ -1274,7 +1274,7 @@ export default function ShipmentDetailPage() {
                 {lightbox.images.length > 1 && (
                   <Button
                     variant="outline"
-                    size="small"
+                    size="sm"
                     onClick={() => downloadAllPhotos(lightbox.images, lightbox.title)}
                     disabled={downloading}
                   >
@@ -1284,7 +1284,7 @@ export default function ShipmentDetailPage() {
                 )}
                 <Button
                   variant="outline"
-                  size="small"
+                  size="sm"
                   onClick={() => downloadPhoto(
                     lightbox.images[lightbox.index],
                     `${lightbox.title.replace(/\s+/g, '-')}-${lightbox.index + 1}.jpg`

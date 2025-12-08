@@ -55,9 +55,9 @@ export default function CreateUserPage() {
 					<Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Access Restricted</Typography>
 					<Typography sx={{ mb: 3 }}>Only administrators can create user accounts.</Typography>
 					<Link href="/dashboard" style={{ textDecoration: 'none' }}>
-						<MuiButton variant="primary" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
-							Go to Dashboard
-						</MuiButton>
+					<MuiButton variant="contained" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
+						Go to Dashboard
+					</MuiButton>
 					</Link>
 				</Paper>
 			</Box>
@@ -390,19 +390,18 @@ export default function CreateUserPage() {
 
 							{/* Submit Button - span full width */}
 							<Box sx={{ gridColumn: '1 / -1' }}>
-								<MuiButton
-									type="submit"
-									disabled={isLoading}
-									variant="primary"
-									size="lg"
-									icon={!isLoading && <ArrowForward />}
-									sx={{
-										width: '100%',
-										bgcolor: 'var(--accent-gold)',
-										color: 'var(--background)',
-										fontWeight: 600,
-										py: 1.5,
-										fontSize: '1rem',
+							<MuiButton
+								type="submit"
+								disabled={isLoading}
+								variant="contained"
+								size="large"
+								sx={{
+									width: '100%',
+									bgcolor: 'var(--accent-gold)',
+									color: 'var(--background)',
+									fontWeight: 600,
+									py: 1.5,
+									fontSize: '1rem',
 										'&:hover': {
 											bgcolor: 'var(--accent-gold)',
 										},

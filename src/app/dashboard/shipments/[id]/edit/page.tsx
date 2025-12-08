@@ -28,11 +28,6 @@ export default function EditShipmentPage() {
   const [trackingMessage, setTrackingMessage] = useState<string | null>(null);
   const [trackingError, setTrackingError] = useState<string | null>(null);
   const [trackingNumber, setTrackingNumber] = useState('');
-  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'warning' }>({ 
-    open: false, 
-    message: '', 
-    severity: 'success' 
-  });
   
   const [formData, setFormData] = useState({
     userId: '',
@@ -144,7 +139,7 @@ export default function EditShipmentPage() {
     if (!tracking) {
       const errorMsg = 'Tracking number is required.';
       setTrackingError(errorMsg);
-      setSnackbar({ open: true, message: errorMsg, severity: 'warning' });
+      toast.warning(errorMsg);
       return;
     }
 
@@ -188,7 +183,7 @@ export default function EditShipmentPage() {
       console.error('Error fetching tracking details:', error);
       const message = error instanceof Error ? error.message : 'Failed to fetch tracking details.';
       setTrackingError(message);
-      setSnackbar({ open: true, message, severity: 'error' });
+      toast.error(message);
     } finally {
       setTrackingFetching(false);
     }
@@ -251,7 +246,7 @@ export default function EditShipmentPage() {
     if (formData.vehicleYear) {
       const year = parseInt(formData.vehicleYear);
       if (isNaN(year) || year < 1900 || year > new Date().getFullYear() + 1) {
-        setSnackbar({ open: true, message: `Please enter a valid year between 1900 and ${new Date().getFullYear() + 1}`, severity: 'warning' });
+        toast.warning(`Please enter a valid year between 1900 and ${new Date().getFullYear() + 1}`);
         setErrors({ vehicleYear: 'Invalid year' });
         return;
       }
@@ -320,13 +315,13 @@ export default function EditShipmentPage() {
       } else {
         const errorMessage = data.message || 'Failed to update shipment';
         setErrors({ submit: errorMessage });
-        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error('Error updating shipment:', error);
       const errorMessage = 'An error occurred while updating the shipment';
       setErrors({ submit: errorMessage });
-      setSnackbar({ open: true, message: errorMessage, severity: 'error' });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -374,7 +369,7 @@ export default function EditShipmentPage() {
       console.error('Error uploading photo:', error);
       const message = error instanceof Error ? error.message : 'Failed to upload photo';
       setErrors((prev) => ({ ...prev, submit: message }));
-      setSnackbar({ open: true, message, severity: 'error' });
+      toast.error(message);
     } finally {
       setUploading({ section: null, state: false });
     }
@@ -1147,21 +1142,6 @@ export default function EditShipmentPage() {
           </form>
         </Section>
 
-        {/* Snackbar for Toast Notifications */}
-        <Snackbar 
-          open={snackbar.open} 
-          autoHideDuration={6000} 
-          onClose={() => setSnackbar({ ...snackbar, open: false })} 
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert 
-            onClose={() => setSnackbar({ ...snackbar, open: false })} 
-            severity={snackbar.severity} 
-            sx={{ width: '100%' }}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </div>
     </ProtectedRoute>
   );

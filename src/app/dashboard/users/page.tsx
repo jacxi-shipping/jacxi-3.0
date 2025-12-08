@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { User, UserPlus, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { Box, CircularProgress, Typography, IconButton, Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Alert } from '@mui/material';
-import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, Button } from '@/components/design-system';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -38,7 +38,6 @@ export default function UsersPage() {
 		query: '',
 		type: 'users',
 	});
-	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 	const [showEmailsFor, setShowEmailsFor] = useState<Set<string>>(new Set());
 	const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 	const [highlightedUserId, setHighlightedUserId] = useState<string | null>(null);
@@ -460,12 +459,6 @@ export default function UsersPage() {
 				</DialogActions>
 			</Dialog>
 
-			{/* Snackbar for feedback */}
-			<Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-				<Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
-					{snackbar.message}
-				</Alert>
-			</Snackbar>
 		</DashboardSurface>
 	);
 }

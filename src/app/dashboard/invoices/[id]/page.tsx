@@ -6,10 +6,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/design-system';
 import Section from '@/components/layout/Section';
 import { pdf } from '@react-pdf/renderer';
-import { toast } from '@/lib/toast';
+import { toast } from '@/components/design-system';
 import {
 	InvoicePdfTemplate,
 	InvoicePdfCompanyInfo,
@@ -177,11 +177,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				toast.error('Failed to update invoice', { description: 'Please try again' });
+				toast.error('Failed to update invoice');
 			}
 		} catch (error) {
 			console.error('Error updating invoice:', error);
-			toast.error('Failed to update invoice', { description: 'An error occurred. Please try again' });
+			toast.error('Failed to update invoice');
 		} finally {
 			setIsUpdating(false);
 		}
@@ -202,11 +202,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				toast.error('Failed to update wire transfer details', { description: 'Please try again' });
+				toast.error('Failed to update wire transfer details');
 			}
 		} catch (error) {
 			console.error('Error updating wire details:', error);
-			toast.error('Failed to update wire transfer details', { description: 'An error occurred. Please try again' });
+			toast.error('Failed to update wire transfer details');
 		} finally {
 			setIsUpdating(false);
 		}
@@ -291,7 +291,7 @@ export default function InvoiceDetailPage() {
 			setTimeout(() => URL.revokeObjectURL(url), 0);
 		} catch (error) {
 			console.error('Error exporting invoice PDF:', error);
-			toast.error('Failed to generate PDF', { description: 'Unable to export. Please try again' });
+			toast.error('Failed to generate PDF');
 		} finally {
 			setIsExporting(false);
 		}
@@ -535,7 +535,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 								{!showWireDetailsForm && (
 									<Button
 										variant="outline"
-										size="small"
+										size="sm"
 										onClick={() => setShowWireDetailsForm(true)}
 										className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
 									>

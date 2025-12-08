@@ -223,7 +223,7 @@ export default function FinancialReportsPage() {
             <div className="flex gap-2 flex-wrap">
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => setShowFilters(!showFilters)}
                 className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
               >
@@ -232,7 +232,7 @@ export default function FinancialReportsPage() {
               </Button>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => handleExportReport('json')}
                 className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
               >

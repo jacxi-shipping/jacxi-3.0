@@ -225,7 +225,7 @@ export default function LedgerPage() {
           actions={
             <Button
               variant="outline"
-              size="small"
+              size="sm"
               onClick={() => setShowFilters(!showFilters)}
               icon={<FilterList />}
               sx={{ textTransform: 'none', fontSize: '0.78rem' }}
@@ -291,7 +291,7 @@ export default function LedgerPage() {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={handlePrint}
                 icon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -300,7 +300,7 @@ export default function LedgerPage() {
               </Button>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => handleExport('pdf')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -309,7 +309,7 @@ export default function LedgerPage() {
               </Button>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => handleExport('excel')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -404,7 +404,7 @@ export default function LedgerPage() {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                       variant="outline"
-                      size="small"
+                      size="sm"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       icon={<ChevronLeft />}
@@ -414,7 +414,7 @@ export default function LedgerPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      size="small"
+                      size="sm"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       icon={<ChevronRight />}
