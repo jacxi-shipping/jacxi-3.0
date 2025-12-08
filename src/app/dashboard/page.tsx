@@ -153,7 +153,7 @@ export default function DashboardPage() {
 				actions={
 					shipments.length > 0 ? (
 						<Link href="/dashboard/shipments" style={{ textDecoration: 'none' }}>
-							<Button variant="outline" size="sm">
+							<Button variant="outline" size="small">
 								Open board
 							</Button>
 						</Link>

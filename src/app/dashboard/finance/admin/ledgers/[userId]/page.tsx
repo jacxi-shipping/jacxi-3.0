@@ -23,7 +23,6 @@ import {
   AccountBalance,
 } from '@mui/icons-material';
 import {
-  Button,
   Box,
   CircularProgress,
   Typography,
@@ -336,7 +335,7 @@ export default function UserLedgerManagementPage() {
           <Link href="/dashboard/finance/admin/ledgers" style={{ textDecoration: 'none' }}>
             <Button
               variant="outline"
-              size="sm"
+              size="small"
               icon={<ArrowBack />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', mb: 2 }}
             >
@@ -380,7 +379,7 @@ export default function UserLedgerManagementPage() {
           actions={
             <Button
               variant="primary"
-              size="sm"
+              size="small"
               onClick={() => setShowAddModal(true)}
               icon={<Add />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
@@ -393,7 +392,7 @@ export default function UserLedgerManagementPage() {
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <TextField
                 placeholder="Search transactions..."
-                size="sm"
+                size="small"
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 InputProps={{
@@ -403,7 +402,7 @@ export default function UserLedgerManagementPage() {
               />
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => setShowFilters(!showFilters)}
                 icon={<FilterList />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem', minWidth: 120 }}
@@ -414,7 +413,7 @@ export default function UserLedgerManagementPage() {
 
             {showFilters && (
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
-                <FormControl size="sm" fullWidth>
+                <FormControl size="small" fullWidth>
                   <InputLabel>Type</InputLabel>
                   <Select
                     value={filters.type}
@@ -429,7 +428,7 @@ export default function UserLedgerManagementPage() {
                 <TextField
                   label="Start Date"
                   type="date"
-                  size="sm"
+                  size="small"
                   value={filters.startDate}
                   onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
@@ -438,7 +437,7 @@ export default function UserLedgerManagementPage() {
                 <TextField
                   label="End Date"
                   type="date"
-                  size="sm"
+                  size="small"
                   value={filters.endDate}
                   onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
@@ -450,7 +449,7 @@ export default function UserLedgerManagementPage() {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => window.print()}
                 icon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -459,7 +458,7 @@ export default function UserLedgerManagementPage() {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => handleExport('pdf')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -468,7 +467,7 @@ export default function UserLedgerManagementPage() {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => handleExport('excel')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -530,7 +529,7 @@ export default function UserLedgerManagementPage() {
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                           <Chip
                             label={entry.type}
-                            size="sm"
+                            size="small"
                             icon={entry.type === 'DEBIT' ? <TrendingUpIcon /> : <TrendingDownIcon />}
                             sx={{
                               backgroundColor: entry.type === 'DEBIT' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
@@ -549,14 +548,14 @@ export default function UserLedgerManagementPage() {
                         <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                             <IconButton
-                              size="sm"
+                              size="small"
                               onClick={() => openEditModal(entry)}
                               sx={{ color: 'var(--accent-gold)' }}
                             >
                               <Edit fontSize="small" />
                             </IconButton>
                             <IconButton
-                              size="sm"
+                              size="small"
                               onClick={() => handleDeleteEntry(entry.id)}
                               sx={{ color: '#ef4444' }}
                             >
@@ -579,7 +578,7 @@ export default function UserLedgerManagementPage() {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="small"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       icon={<ChevronLeft />}
@@ -589,7 +588,7 @@ export default function UserLedgerManagementPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="small"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       icon={<ChevronRight />}
@@ -610,7 +609,7 @@ export default function UserLedgerManagementPage() {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6">Add Transaction</Typography>
-            <IconButton onClick={() => setShowAddModal(false)} size="sm">
+            <IconButton onClick={() => setShowAddModal(false)} size="small">
               <Close />
             </IconButton>
           </Box>
@@ -678,7 +677,7 @@ export default function UserLedgerManagementPage() {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6">Edit Transaction</Typography>
-            <IconButton onClick={() => setShowEditModal(false)} size="sm">
+            <IconButton onClick={() => setShowEditModal(false)} size="small">
               <Close />
             </IconButton>
           </Box>

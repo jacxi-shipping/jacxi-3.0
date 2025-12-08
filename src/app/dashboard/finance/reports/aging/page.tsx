@@ -1,4 +1,5 @@
 'use client';
+import { Box } from '@mui/material';
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -145,11 +146,16 @@ export default function AgingReportPage() {
   return (
     <AdminRoute>
       <div className="min-h-screen bg-[var(--background)]">
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
         <Section className="pt-6 pb-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-3 min-w-0 flex-1">
               <Link href="/dashboard/finance/reports">
-                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+                <Button variant="outline" size="small" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
@@ -165,6 +171,11 @@ export default function AgingReportPage() {
         </Section>
 
         {/* Summary Cards */}
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
         <Section className="pb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Current (0-30 days) */}
@@ -266,6 +277,11 @@ export default function AgingReportPage() {
         </Section>
 
         {/* Total Summary */}
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
         <Section className="pb-6">
           <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
             <CardContent className="p-6">
@@ -286,6 +302,11 @@ export default function AgingReportPage() {
         </Section>
 
         {/* Details Table */}
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
         <Section className="pb-16">
           <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
             <CardHeader className="p-4 border-b border-white/5">

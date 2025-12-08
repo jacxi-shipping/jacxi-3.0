@@ -1,4 +1,5 @@
 'use client';
+import { Box } from '@mui/material';
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -6,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Section from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
 import {
 	ArrowLeft,
 	Mail,
@@ -183,6 +184,11 @@ export default function ProfilePage() {
 
 	return (
 		<div className="min-h-screen bg-[var(--text-primary)]">
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: 'relative', zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 			<div className="absolute inset-0 -z-10 opacity-[0.04]">
 				<svg className="h-full w-full" preserveAspectRatio="none">
@@ -197,7 +203,7 @@ export default function ProfilePage() {
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div className="flex items-center gap-3">
 						<Link href="/dashboard">
-							<Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+							<Button variant="outline" size="small" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Dashboard
 							</Button>
@@ -207,7 +213,7 @@ export default function ProfilePage() {
 							<p className="text-white/60 text-sm">Manage your personal information and account security.</p>
 						</div>
 					</div>
-					<Button variant="outline" size="sm" className="border-white/20 text-white/70 hover:bg-white/10" disabled>
+					<Button variant="outline" size="small" className="border-white/20 text-white/70 hover:bg-white/10" disabled>
 						Manage Passwords
 					</Button>
 				</div>

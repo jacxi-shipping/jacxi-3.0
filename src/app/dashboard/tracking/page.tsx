@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Box, Typography } from '@mui/material';
 import { AlertCircle, CheckCircle2, Clock, MapPin, Search, Package, Ship, Calendar, TrendingUp } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
+import { PageHeader, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast, StatusBadge } from '@/components/design-system';
 
 interface TrackingEventEntry {
 	id: string;
@@ -129,6 +129,11 @@ export default function DashboardTrackingPage() {
 
 	return (
 		<DashboardSurface>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2 }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<PageHeader
 				title="Shipment Tracking"
 				description="Monitor containers and track shipment milestones in real-time"

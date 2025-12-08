@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Receipt, CheckCircle, Clock, AlertCircle, Search as SearchIcon, Plus } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast } from '@/components/design-system';
 
 interface Invoice {
 	id: string;
@@ -107,6 +107,11 @@ export default function InvoicesPage() {
 
 	return (
 		<DashboardSurface>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2 }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<PageHeader
 				title="Invoices"
 				description="Manage and track all invoices"

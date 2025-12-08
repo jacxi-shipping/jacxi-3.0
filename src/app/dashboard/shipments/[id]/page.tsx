@@ -32,7 +32,7 @@ import {
   Ship,
 } from 'lucide-react';
 import { Tabs, Tab, Box, ImageList, ImageListItem, ImageListItemBar, IconButton as MuiIconButton } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 
 interface ShipmentEvent {
   id: string;
@@ -233,7 +233,7 @@ export default function ShipmentDetailPage() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Error downloading photo:', error);
-      toast.error('Failed to download photo', 'Please try again');
+      toast.error('Failed to download photo', { description: 'Please try again' });
     } finally {
       setDownloading(false);
     }
@@ -264,7 +264,7 @@ export default function ShipmentDetailPage() {
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Error downloading photos:', error);
-      toast.error('Failed to download photos', 'Please try again');
+      toast.error('Failed to download photos', { description: 'Please try again' });
     } finally {
       setDownloading(false);
     }
@@ -335,7 +335,7 @@ export default function ShipmentDetailPage() {
       }
     } catch (error) {
       console.error('Error deleting shipment:', error);
-      toast.error('Failed to delete shipment', 'An error occurred. Please try again');
+      toast.error('Failed to delete shipment', { description: 'An error occurred. Please try again' });
     }
   };
 
@@ -406,7 +406,7 @@ export default function ShipmentDetailPage() {
         }
       } catch (error) {
         console.error('Error saving arrival photos:', error);
-        toast.error('Failed to save photos', 'An error occurred. Please try again');
+        toast.error('Failed to save photos', { description: 'An error occurred. Please try again' });
       }
     }
 
@@ -439,7 +439,7 @@ export default function ShipmentDetailPage() {
     } catch (error) {
       setArrivalPhotos(arrivalPhotos);
       console.error('Error removing photo:', error);
-      toast.error('Failed to remove photo', 'An error occurred. Please try again');
+      toast.error('Failed to remove photo', { description: 'An error occurred. Please try again' });
     }
   };
 
@@ -508,7 +508,7 @@ export default function ShipmentDetailPage() {
           
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/dashboard/shipments">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="small">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
@@ -526,12 +526,12 @@ export default function ShipmentDetailPage() {
             {isAdmin && (
               <div className="flex items-center gap-2">
                 <Link href={`/dashboard/shipments/${shipment.id}/edit`}>
-                  <Button size="sm">
+                  <Button size="small">
                     <PenLine className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={handleDelete} className="border-[var(--error)] text-[var(--error)]">
+                <Button variant="outline" size="small" onClick={handleDelete} className="border-[var(--error)] text-[var(--error)]">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
                 </Button>
@@ -664,7 +664,7 @@ export default function ShipmentDetailPage() {
                 title="Container Shipping Info"
                 actions={
                   <Link href={`/dashboard/containers/${shipment.containerId}`}>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="small">
                       View Container
                     </Button>
                   </Link>
@@ -962,7 +962,7 @@ export default function ShipmentDetailPage() {
                 canUploadArrivalPhotos ? (
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="small"
                     onClick={() => setShowArrivalUpload((prev) => !prev)}
                   >
                     <Upload className="mr-2 h-4 w-4" />
@@ -1274,7 +1274,7 @@ export default function ShipmentDetailPage() {
                 {lightbox.images.length > 1 && (
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="small"
                     onClick={() => downloadAllPhotos(lightbox.images, lightbox.title)}
                     disabled={downloading}
                   >
@@ -1284,7 +1284,7 @@ export default function ShipmentDetailPage() {
                 )}
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="small"
                   onClick={() => downloadPhoto(
                     lightbox.images[lightbox.index],
                     `${lightbox.title.replace(/\s+/g, '-')}-${lightbox.index + 1}.jpg`

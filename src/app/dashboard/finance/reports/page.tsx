@@ -13,10 +13,11 @@ import {
   Users,
   Package,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
+import { Box } from '@mui/material';
 
 type UserBalance = {
   userId: string;
@@ -198,11 +199,16 @@ export default function FinancialReportsPage() {
   return (
     <AdminRoute>
       <div className="min-h-screen bg-[var(--background)]">
+        {/* Breadcrumbs */}
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Breadcrumbs />
+        </Box>
+        
         <Section className="pt-6 pb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-start gap-3 min-w-0 flex-1">
               <Link href="/dashboard/finance">
-                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
+                <Button variant="outline" size="small" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back
                 </Button>
@@ -217,7 +223,7 @@ export default function FinancialReportsPage() {
             <div className="flex gap-2 flex-wrap">
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => setShowFilters(!showFilters)}
                 className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
               >
@@ -226,7 +232,7 @@ export default function FinancialReportsPage() {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => handleExportReport('json')}
                 className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
               >

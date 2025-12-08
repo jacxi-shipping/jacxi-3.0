@@ -1,7 +1,7 @@
 "use client";
 
 import { Toaster as SonnerToaster, toast as sonnerToast } from 'sonner';
-import { CheckCircle, Warning, XCircle, Info } from '@mui/icons-material';
+import { CheckCircle, Warning, Error as ErrorIcon, Info } from '@mui/icons-material';
 
 /**
  * Toast Notification System
@@ -48,7 +48,7 @@ export const toast = {
     sonnerToast.error(message, {
       description: options?.description,
       duration: options?.duration || 5000,
-      icon: <XCircle sx={{ fontSize: 20, color: 'var(--error)' }} />,
+      icon: <ErrorIcon sx={{ fontSize: 20, color: 'var(--error)' }} />,
     });
   },
 

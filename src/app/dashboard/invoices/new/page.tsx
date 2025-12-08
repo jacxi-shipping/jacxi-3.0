@@ -1,4 +1,5 @@
 'use client';
+import { Box } from '@mui/material';
 
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -91,12 +92,12 @@ export default function NewInvoicePage() {
 
 	const handleCreateInvoice = async () => {
 		if (!containerId) {
-			toast.warning('Missing information', 'Container information is required');
+			toast.warning('Missing information', { description: 'Container information is required' });
 			return;
 		}
 
 		if (selectedItems.length === 0) {
-			toast.warning('No items selected', 'Please select at least one item');
+			toast.warning('No items selected', { description: 'Please select at least one item' });
 			return;
 		}
 
@@ -122,7 +123,7 @@ export default function NewInvoicePage() {
 			}
 		} catch (error) {
 			console.error('Error creating invoice:', error);
-			toast.error('Failed to create invoice', 'An error occurred. Please try again');
+			toast.error('Failed to create invoice', { description: 'An error occurred. Please try again' });
 		} finally {
 			setIsCreating(false);
 		}
@@ -151,6 +152,11 @@ export default function NewInvoicePage() {
 
 	return (
 		<>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
 			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">
@@ -167,7 +173,7 @@ export default function NewInvoicePage() {
 				<div className="relative z-10">
 					<div className="flex items-center gap-6">
 						<Link href={`/dashboard/containers/${containerId ?? ''}`}>
-							<Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+							<Button variant="outline" size="small" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Back
 							</Button>
@@ -179,6 +185,11 @@ export default function NewInvoicePage() {
 					</div>
 				</div>
 			</Section>
+
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
 
 			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-4xl mx-auto space-y-6">

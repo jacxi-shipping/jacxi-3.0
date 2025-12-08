@@ -15,8 +15,8 @@ import {
   Payment,
   AddCircle,
 } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import {  Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -132,7 +132,7 @@ export default function AdminLedgersPage() {
       return (
         <Chip
           label={formatCurrency(balance)}
-          size="sm"
+          size="small"
           icon={<TrendingUpIcon />}
           sx={{
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
@@ -147,7 +147,7 @@ export default function AdminLedgersPage() {
       return (
         <Chip
           label={formatCurrency(Math.abs(balance))}
-          size="sm"
+          size="small"
           icon={<TrendingDownIcon />}
           sx={{
             backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -161,7 +161,7 @@ export default function AdminLedgersPage() {
     return (
       <Chip
         label={formatCurrency(0)}
-        size="sm"
+        size="small"
         sx={{
           backgroundColor: 'rgba(var(--text-secondary-rgb), 0.1)',
           color: 'var(--text-secondary)',
@@ -194,6 +194,10 @@ export default function AdminLedgersPage() {
     return (
       <ProtectedRoute>
         <DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
           <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
           </Box>
@@ -205,6 +209,10 @@ export default function AdminLedgersPage() {
   return (
     <ProtectedRoute>
       <DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
         {/* Summary Cards */}
         <DashboardGrid className="grid-cols-1 md:grid-cols-4">
           <StatsCard
@@ -241,7 +249,7 @@ export default function AdminLedgersPage() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr auto' }, gap: 2 }}>
             <TextField
               placeholder="Search by name or email..."
-              size="sm"
+              size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -249,7 +257,7 @@ export default function AdminLedgersPage() {
               }}
               fullWidth
             />
-            <FormControl size="sm" sx={{ minWidth: 200 }}>
+            <FormControl size="small" sx={{ minWidth: 200 }}>
               <InputLabel>Balance Filter</InputLabel>
               <Select
                 value={filterBalance}
@@ -276,7 +284,7 @@ export default function AdminLedgersPage() {
               <Link href="/dashboard/finance/record-payment" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="small"
                   icon={<Payment />}
                   sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
                 >
@@ -286,7 +294,7 @@ export default function AdminLedgersPage() {
               <Link href="/dashboard/finance/add-expense" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="small"
                   icon={<AddCircle />}
                   sx={{ textTransform: 'none', fontSize: '0.78rem' }}
                 >
@@ -347,7 +355,7 @@ export default function AdminLedgersPage() {
                         <Link href={`/dashboard/finance/admin/ledgers/${user.userId}`} style={{ textDecoration: 'none' }}>
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="small"
                             icon={<Visibility />}
                             sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                           >

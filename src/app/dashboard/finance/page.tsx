@@ -16,7 +16,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, ActionButton, LoadingState } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, LoadingState, Breadcrumbs, toast } from '@/components/design-system';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface FinancialSummary {
@@ -104,6 +104,11 @@ export default function FinancePage() {
   return (
     <ProtectedRoute>
       <DashboardSurface>
+        {/* Breadcrumbs */}
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Breadcrumbs />
+        </Box>
+        
         <PageHeader
           title="Accounting & Finance"
           description="Manage ledgers, payments, and financial reports"

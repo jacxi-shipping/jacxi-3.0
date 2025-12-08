@@ -177,11 +177,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				toast.error('Failed to update invoice', 'Please try again');
+				toast.error('Failed to update invoice', { description: 'Please try again' });
 			}
 		} catch (error) {
 			console.error('Error updating invoice:', error);
-			toast.error('Failed to update invoice', 'An error occurred. Please try again');
+			toast.error('Failed to update invoice', { description: 'An error occurred. Please try again' });
 		} finally {
 			setIsUpdating(false);
 		}
@@ -202,11 +202,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				toast.error('Failed to update wire transfer details', 'Please try again');
+				toast.error('Failed to update wire transfer details', { description: 'Please try again' });
 			}
 		} catch (error) {
 			console.error('Error updating wire details:', error);
-			toast.error('Failed to update wire transfer details', 'An error occurred. Please try again');
+			toast.error('Failed to update wire transfer details', { description: 'An error occurred. Please try again' });
 		} finally {
 			setIsUpdating(false);
 		}
@@ -291,7 +291,7 @@ export default function InvoiceDetailPage() {
 			setTimeout(() => URL.revokeObjectURL(url), 0);
 		} catch (error) {
 			console.error('Error exporting invoice PDF:', error);
-			toast.error('Failed to generate PDF', 'Unable to export. Please try again');
+			toast.error('Failed to generate PDF', { description: 'Unable to export. Please try again' });
 		} finally {
 			setIsExporting(false);
 		}
@@ -346,7 +346,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 				<div className="relative z-10">
 					<div className="flex items-center gap-6">
 						<Link href="/dashboard/invoices">
-							<Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+							<Button variant="outline" size="small" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Back
 							</Button>
@@ -535,7 +535,7 @@ const formatAed = (value: number) => `${value.toFixed(2)} AED`;
 								{!showWireDetailsForm && (
 									<Button
 										variant="outline"
-										size="sm"
+										size="small"
 										onClick={() => setShowWireDetailsForm(true)}
 										className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"
 									>

@@ -15,8 +15,8 @@ import {
   TrendingDown as TrendingDownIcon,
   AttachMoney,
 } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import {  Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -177,6 +177,10 @@ export default function LedgerPage() {
     return (
       <ProtectedRoute>
         <DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
           <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
           </Box>
@@ -188,6 +192,10 @@ export default function LedgerPage() {
   return (
     <ProtectedRoute>
       <DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
         {/* Stats Cards */}
         <DashboardGrid className="grid-cols-1 md:grid-cols-3">
           <StatsCard
@@ -217,7 +225,7 @@ export default function LedgerPage() {
           actions={
             <Button
               variant="outline"
-              size="sm"
+              size="small"
               onClick={() => setShowFilters(!showFilters)}
               icon={<FilterList />}
               sx={{ textTransform: 'none', fontSize: '0.78rem' }}
@@ -230,7 +238,7 @@ export default function LedgerPage() {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField
                 placeholder="Search transactions..."
-                size="sm"
+                size="small"
                 value={filters.search}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 InputProps={{
@@ -239,7 +247,7 @@ export default function LedgerPage() {
                 fullWidth
               />
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 2 }}>
-                <FormControl size="sm" fullWidth>
+                <FormControl size="small" fullWidth>
                   <InputLabel>Type</InputLabel>
                   <Select
                     value={filters.type}
@@ -254,7 +262,7 @@ export default function LedgerPage() {
                 <TextField
                   label="Start Date"
                   type="date"
-                  size="sm"
+                  size="small"
                   value={filters.startDate}
                   onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
@@ -263,7 +271,7 @@ export default function LedgerPage() {
                 <TextField
                   label="End Date"
                   type="date"
-                  size="sm"
+                  size="small"
                   value={filters.endDate}
                   onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
@@ -283,7 +291,7 @@ export default function LedgerPage() {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={handlePrint}
                 icon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -292,7 +300,7 @@ export default function LedgerPage() {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => handleExport('pdf')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -301,7 +309,7 @@ export default function LedgerPage() {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => handleExport('excel')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -396,7 +404,7 @@ export default function LedgerPage() {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="small"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       icon={<ChevronLeft />}
@@ -406,7 +414,7 @@ export default function LedgerPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="small"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       icon={<ChevronRight />}

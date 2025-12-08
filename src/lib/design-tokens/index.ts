@@ -20,7 +20,7 @@ export * from './dark-mode';
 export { colors, cssVariables, rgbVariables } from './colors';
 export { typography, typographyPresets, responsiveTypography } from './typography';
 export { spacing, semanticSpacing, muiSpacing } from './spacing';
-export { shadows, designSystemShadows, elevation } from './shadows';
+export { shadows, designSystemShadows } from './shadows';
 export { animations, motionVariants, muiFadeTiming, keyframes } from './animations';
 export { borders, semanticBorders, muiBorderRadius } from './borders';
 export { darkModeColors, generateDarkModeCss } from './dark-mode';

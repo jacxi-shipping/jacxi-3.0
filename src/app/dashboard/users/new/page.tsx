@@ -38,7 +38,6 @@ export default function CreateUserPage() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
 	if (status === 'loading') {
 		return (
@@ -116,11 +115,11 @@ export default function CreateUserPage() {
 				setTimeout(() => router.push('/dashboard/users'), 800);
 			} else {
 				const msg = data?.message || 'Registration failed';
-				setSnackbar({ open: true, message: msg, severity: 'error' });
+				toast.error(msg);
 			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'An error occurred. Please try again.';
-			setSnackbar({ open: true, message, severity: 'error' });
+			toast.error(message);
 		} finally {
 			setIsLoading(false);
 		}
@@ -450,13 +449,6 @@ export default function CreateUserPage() {
 					</Box>
 				</Paper>
 			</motion.div>
-
-			{/* Snackbar */}
-			<Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-				<Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
-					{snackbar.message}
-				</Alert>
-			</Snackbar>
 		</Box>
 	);
 }

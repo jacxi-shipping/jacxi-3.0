@@ -111,7 +111,7 @@ export default function ShipmentsListPage() {
 						<Link href="/dashboard/shipments/new" style={{ textDecoration: 'none' }}>
 							<Button
 								variant="primary"
-								size="sm"
+								size="small"
 								icon={<Add fontSize="small" />}
 								iconPosition="start"
 							>
@@ -197,7 +197,7 @@ export default function ShipmentsListPage() {
 							>
 								<Button
 									variant="outline"
-									size="sm"
+									size="small"
 									icon={<ChevronLeft sx={{ fontSize: { xs: 12, sm: 14 } }} />}
 									iconPosition="start"
 									onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -211,7 +211,7 @@ export default function ShipmentsListPage() {
 								</Typography>
 								<Button
 									variant="outline"
-									size="sm"
+									size="small"
 									icon={<ChevronRight sx={{ fontSize: { xs: 12, sm: 14 } }} />}
 									iconPosition="end"
 									onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
