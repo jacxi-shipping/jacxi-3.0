@@ -54,7 +54,7 @@ export function FloatingActionButton() {
       )}
 
       {/* Quick Actions */}
-      <div className="fixed right-6 bottom-20 lg:bottom-6 z-50 flex flex-col-reverse gap-3">
+      <div className="fixed right-4 bottom-24 sm:right-6 sm:bottom-28 lg:right-6 lg:bottom-6 z-[60] flex flex-col-reverse gap-3">
         {quickActions.map((action, index) => (
           <Zoom
             key={action.href}
