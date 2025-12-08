@@ -335,7 +335,7 @@ export default function UserLedgerManagementPage() {
           <Link href="/dashboard/finance/admin/ledgers" style={{ textDecoration: 'none' }}>
             <Button
               variant="outline"
-              size="small"
+              size="sm"
               icon={<ArrowBack />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', mb: 2 }}
             >
@@ -379,7 +379,7 @@ export default function UserLedgerManagementPage() {
           actions={
             <Button
               variant="primary"
-              size="small"
+              size="sm"
               onClick={() => setShowAddModal(true)}
               icon={<Add />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
@@ -402,7 +402,7 @@ export default function UserLedgerManagementPage() {
               />
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => setShowFilters(!showFilters)}
                 icon={<FilterList />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem', minWidth: 120 }}
@@ -449,7 +449,7 @@ export default function UserLedgerManagementPage() {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => window.print()}
                 icon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -458,7 +458,7 @@ export default function UserLedgerManagementPage() {
               </Button>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => handleExport('pdf')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -467,7 +467,7 @@ export default function UserLedgerManagementPage() {
               </Button>
               <Button
                 variant="outline"
-                size="small"
+                size="sm"
                 onClick={() => handleExport('excel')}
                 icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -578,7 +578,7 @@ export default function UserLedgerManagementPage() {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                       variant="outline"
-                      size="small"
+                      size="sm"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
                       icon={<ChevronLeft />}
@@ -588,7 +588,7 @@ export default function UserLedgerManagementPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      size="small"
+                      size="sm"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
                       icon={<ChevronRight />}

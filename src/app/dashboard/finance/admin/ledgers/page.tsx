@@ -16,7 +16,7 @@ import {
   AddCircle,
 } from '@mui/icons-material';
 import {  Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
-import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -284,7 +284,7 @@ export default function AdminLedgersPage() {
               <Link href="/dashboard/finance/record-payment" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="primary"
-                  size="small"
+                  size="sm"
                   icon={<Payment />}
                   sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
                 >
@@ -294,7 +294,7 @@ export default function AdminLedgersPage() {
               <Link href="/dashboard/finance/add-expense" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="outline"
-                  size="small"
+                  size="sm"
                   icon={<AddCircle />}
                   sx={{ textTransform: 'none', fontSize: '0.78rem' }}
                 >
@@ -355,7 +355,7 @@ export default function AdminLedgersPage() {
                         <Link href={`/dashboard/finance/admin/ledgers/${user.userId}`} style={{ textDecoration: 'none' }}>
                           <Button
                             variant="outline"
-                            size="small"
+                            size="sm"
                             icon={<Visibility />}
                             sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                           >
