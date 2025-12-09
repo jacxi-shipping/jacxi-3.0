@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Urbanist } from "next/font/google";
 import "./globals.css";
+import "./print.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "@/components/design-system";

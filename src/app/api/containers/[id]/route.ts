@@ -66,6 +66,23 @@ export async function GET(
         invoices: {
           orderBy: { date: 'desc' },
         },
+        userInvoices: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            _count: {
+              select: {
+                lineItems: true,
+              },
+            },
+          },
+          orderBy: { issueDate: 'desc' },
+        },
         documents: {
           orderBy: { uploadedAt: 'desc' },
         },
@@ -113,6 +130,23 @@ export async function GET(
               },
               invoices: {
                 orderBy: { date: 'desc' },
+              },
+              userInvoices: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                  _count: {
+                    select: {
+                      lineItems: true,
+                    },
+                  },
+                },
+                orderBy: { issueDate: 'desc' },
               },
               documents: {
                 orderBy: { uploadedAt: 'desc' },

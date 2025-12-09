@@ -1,304 +1,373 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Receipt, CheckCircle, Clock, AlertCircle, Search as SearchIcon, Plus } from 'lucide-react';
-import { Box, Typography } from '@mui/material';
-import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
+import { 
+	Box, 
+	Table, 
+	TableBody, 
+	TableCell, 
+	TableContainer, 
+	TableHead, 
+	TableRow,
+	Chip,
+	MenuItem,
+	Select,
+	FormControl,
+	InputLabel,
+	TextField,
+	InputAdornment,
+} from '@mui/material';
+import {
+	FileText,
+	Search,
+	Download,
+	Eye,
+	Calendar,
+	DollarSign,
+	User,
+	Package,
+} from 'lucide-react';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
+import { 
+	PageHeader, 
+	Button, 
+	Breadcrumbs, 
+	toast, 
+	LoadingState, 
+	EmptyState, 
+	StatsCard,
+	DashboardPageSkeleton,
+} from '@/components/design-system';
 
 interface Invoice {
 	id: string;
 	invoiceNumber: string;
+	userId: string;
+	containerId: string;
 	status: string;
-	totalUSD: number;
-	totalAED: number;
+	issueDate: string;
 	dueDate: string | null;
-	paidDate: string | null;
-	overdue: boolean;
-	createdAt: string;
+	total: number;
+	user: {
+		name: string | null;
+		email: string;
+	};
 	container: {
 		containerNumber: string;
 	};
+	_count: {
+		lineItems: number;
+	};
 }
 
+const statusConfig: Record<string, { label: string; color: 'success' | 'warning' | 'error' | 'info' | 'default' }> = {
+	DRAFT: { label: 'Draft', color: 'default' },
+	PENDING: { label: 'Pending', color: 'warning' },
+	SENT: { label: 'Sent', color: 'info' },
+	PAID: { label: 'Paid', color: 'success' },
+	OVERDUE: { label: 'Overdue', color: 'error' },
+	CANCELLED: { label: 'Cancelled', color: 'default' },
+};
+
 export default function InvoicesPage() {
-	const { data: session, status } = useSession();
 	const router = useRouter();
+	const { data: session } = useSession();
 	const [invoices, setInvoices] = useState<Invoice[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [statusFilter, setStatusFilter] = useState('all');
 
-	const fetchInvoices = useCallback(async () => {
+	const isAdmin = session?.user?.role === 'admin';
+
+	useEffect(() => {
+		fetchInvoices();
+	}, [statusFilter]);
+
+	const fetchInvoices = async () => {
 		try {
 			setLoading(true);
-			const response = await fetch('/api/invoices');
-			if (!response.ok) {
-				setInvoices([]);
-				return;
+			const params = new URLSearchParams();
+			if (statusFilter !== 'all') {
+				params.append('status', statusFilter.toUpperCase());
 			}
-			const data = (await response.json()) as { invoices?: Invoice[] };
-			setInvoices(data.invoices ?? []);
+			
+			const response = await fetch(`/api/invoices?${params}`);
+			const data = await response.json();
+
+			if (response.ok) {
+				setInvoices(data.invoices || []);
+			} else {
+				toast.error('Failed to load invoices');
+			}
 		} catch (error) {
 			console.error('Error fetching invoices:', error);
-			setInvoices([]);
+			toast.error('An error occurred');
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	};
 
-	useEffect(() => {
-		if (status === 'loading') return;
-		const role = session?.user?.role;
-		if (!session || role !== 'admin') {
-			router.replace('/dashboard');
-			return;
+	const handleDownloadPDF = async (invoice: Invoice) => {
+		try {
+			toast.success('Generating PDF...', {
+				description: 'Please wait a moment'
+			});
+
+			// Fetch full invoice details
+			const response = await fetch(`/api/invoices/${invoice.id}`);
+			const fullInvoice = await response.json();
+
+			// Dynamically import the PDF generator
+			const { downloadInvoicePDF } = await import('@/lib/utils/generateInvoicePDF');
+			
+			// Generate and download the PDF
+			downloadInvoicePDF(fullInvoice);
+
+			toast.success('PDF downloaded successfully!', {
+				description: 'Check your downloads folder'
+			});
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			toast.error('Failed to generate PDF', {
+				description: 'Please try again'
+			});
 		}
-		void fetchInvoices();
-	}, [fetchInvoices, router, session, status]);
-
-	const filteredInvoices = useMemo(
-		() =>
-			invoices.filter((invoice) => {
-				const term = searchTerm.trim().toLowerCase();
-				const matchesSearch =
-					invoice.invoiceNumber.toLowerCase().includes(term) ||
-					invoice.container.containerNumber.toLowerCase().includes(term);
-				const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
-				return matchesSearch && matchesStatus;
-			}),
-		[invoices, searchTerm, statusFilter]
-	);
-
-	const stats = useMemo(
-		() => ({
-			total: invoices.length,
-			paid: invoices.filter((i) => i.status === 'PAID').length,
-			overdue: invoices.filter((i) => i.overdue || i.status === 'OVERDUE').length,
-			pending: invoices.filter((i) => i.status === 'SENT' || i.status === 'DRAFT').length,
-		}),
-		[invoices]
-	);
-
-	const getStatusColor = (status: string, overdue: boolean) => {
-		if (status === 'PAID') return { bg: 'rgba(34, 197, 94, 0.15)', text: 'rgb(34, 197, 94)', border: 'rgba(34, 197, 94, 0.3)' };
-		if (overdue || status === 'OVERDUE') return { bg: 'rgba(239, 68, 68, 0.15)', text: 'rgb(239, 68, 68)', border: 'rgba(239, 68, 68, 0.3)' };
-		if (status === 'SENT') return { bg: 'rgba(14, 165, 233, 0.15)', text: 'rgb(14, 165, 233)', border: 'rgba(14, 165, 233, 0.3)' };
-		return { bg: 'rgba(156, 163, 175, 0.15)', text: 'rgb(156, 163, 175)', border: 'rgba(156, 163, 175, 0.3)' };
 	};
 
-	const getStatusIcon = (status: string, overdue: boolean) => {
-		if (status === 'PAID') return <CheckCircle style={{ fontSize: 16 }} />;
-		if (overdue || status === 'OVERDUE') return <AlertCircle style={{ fontSize: 16 }} />;
-		return <Clock style={{ fontSize: 16 }} />;
+	const formatCurrency = (amount: number) => {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+		}).format(amount);
 	};
 
-	if (status === 'loading' || loading) {
+	const formatDate = (date: string | null) => {
+		if (!date) return 'N/A';
+		return new Date(date).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		});
+	};
+
+	// Filter invoices based on search
+	const filteredInvoices = invoices.filter(invoice => {
+		const searchLower = searchTerm.toLowerCase();
+		return (
+			invoice.invoiceNumber.toLowerCase().includes(searchLower) ||
+			invoice.user.email.toLowerCase().includes(searchLower) ||
+			(invoice.user.name && invoice.user.name.toLowerCase().includes(searchLower)) ||
+			invoice.container.containerNumber.toLowerCase().includes(searchLower)
+		);
+	});
+
+	// Calculate stats
+	const stats = {
+		total: invoices.length,
+		paid: invoices.filter(i => i.status === 'PAID').length,
+		pending: invoices.filter(i => i.status === 'PENDING' || i.status === 'SENT').length,
+		overdue: invoices.filter(i => i.status === 'OVERDUE').length,
+		totalAmount: invoices.reduce((sum, i) => sum + i.total, 0),
+		paidAmount: invoices.filter(i => i.status === 'PAID').reduce((sum, i) => sum + i.total, 0),
+	};
+
+	if (loading) {
 		return <DashboardPageSkeleton />;
 	}
 
-	const role = session?.user?.role;
-	if (!session || role !== 'admin') {
-		return null;
-	}
-
 	return (
-		<DashboardSurface>
+		<Box sx={{ maxWidth: '1400px', mx: 'auto', p: { xs: 2, md: 3 } }}>
 			{/* Breadcrumbs */}
-			<Box sx={{ px: 2, pt: 2 }}>
-				<Breadcrumbs />
-			</Box>
-			
-			<PageHeader
-				title="Invoices"
-				description="Manage and track all invoices"
-				actions={
-					<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-						<Button variant="primary" icon={<Plus className="w-4 h-4" />}>
-							New Invoice
-						</Button>
-					</Link>
-				}
+			<Breadcrumbs
+				items={[
+					{ label: 'Dashboard', href: '/dashboard' },
+					{ label: isAdmin ? 'All Invoices' : 'My Invoices', href: '#' },
+				]}
 			/>
 
-			{/* Stats */}
-			<DashboardGrid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+			{/* Page Header */}
+			<PageHeader
+				title={isAdmin ? 'All Invoices' : 'My Invoices'}
+				description={isAdmin ? 'Manage customer invoices' : 'View and download your invoices'}
+			/>
+
+			{/* Stats Cards */}
+			<Box sx={{ 
+				display: 'grid', 
+				gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }, 
+				gap: 3, 
+				mb: 3 
+			}}>
 				<StatsCard
-					icon={<Receipt style={{ fontSize: 18 }} />}
 					title="Total Invoices"
 					value={stats.total}
-					subtitle="All invoices"
+					icon={<FileText className="w-5 h-5" />}
+					trend={{ value: 0, isPositive: true }}
 				/>
-			<StatsCard
-				icon={<CheckCircle style={{ fontSize: 18 }} />}
-				title="Paid"
-				value={stats.paid}
-				variant="success"
-				size="md"
-			/>
-			<StatsCard
-				icon={<AlertCircle style={{ fontSize: 18 }} />}
-				title="Overdue"
-				value={stats.overdue}
-				variant="error"
-				size="md"
-			/>
-			<StatsCard
-				icon={<Clock style={{ fontSize: 18 }} />}
-				title="Pending"
-				value={stats.pending}
-				variant="info"
-				size="md"
-			/>
-			</DashboardGrid>
+				<StatsCard
+					title="Paid"
+					value={stats.paid}
+					subtitle={formatCurrency(stats.paidAmount)}
+					icon={<DollarSign className="w-5 h-5" />}
+					trend={{ value: 0, isPositive: true }}
+					variant="success"
+				/>
+				<StatsCard
+					title="Pending"
+					value={stats.pending}
+					icon={<Calendar className="w-5 h-5" />}
+					trend={{ value: 0, isPositive: true }}
+					variant="warning"
+				/>
+				<StatsCard
+					title="Overdue"
+					value={stats.overdue}
+					icon={<FileText className="w-5 h-5" />}
+					trend={{ value: 0, isPositive: false }}
+					variant="error"
+				/>
+			</Box>
 
-			{/* Filters */}
-			<DashboardPanel title="Search & Filter" description="Find invoices quickly">
-				<Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
-					<Box sx={{ flex: 1 }}>
-						<FormField
-							label=""
-							placeholder="Search by invoice number or container..."
+			{/* Main Content */}
+			<DashboardSurface>
+				<DashboardPanel 
+					title="Invoices"
+					description={`${filteredInvoices.length} invoice(s)`}
+				>
+					{/* Filters */}
+					<Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+						<TextField
+							placeholder="Search by invoice #, customer, or container..."
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
-							leftIcon={<SearchIcon style={{ fontSize: 20, color: 'var(--text-secondary)' }} />}
+							size="small"
+							sx={{ flex: 1, minWidth: '250px' }}
+							InputProps={{
+								startAdornment: (
+									<InputAdornment position="start">
+										<Search className="w-4 h-4" />
+									</InputAdornment>
+								),
+							}}
 						/>
+						<FormControl size="small" sx={{ minWidth: 150 }}>
+							<InputLabel>Status</InputLabel>
+							<Select
+								value={statusFilter}
+								label="Status"
+								onChange={(e) => setStatusFilter(e.target.value)}
+							>
+								<MenuItem value="all">All Status</MenuItem>
+								<MenuItem value="draft">Draft</MenuItem>
+								<MenuItem value="pending">Pending</MenuItem>
+								<MenuItem value="sent">Sent</MenuItem>
+								<MenuItem value="paid">Paid</MenuItem>
+								<MenuItem value="overdue">Overdue</MenuItem>
+								<MenuItem value="cancelled">Cancelled</MenuItem>
+							</Select>
+						</FormControl>
 					</Box>
-					<Box sx={{ minWidth: { xs: '100%', md: 200 } }}>
-						<Typography
-							component="label"
-							sx={{
-								display: 'block',
-								fontSize: '0.875rem',
-								fontWeight: 500,
-								color: 'var(--text-primary)',
-								mb: 1,
-							}}
-						>
-							Status Filter
-						</Typography>
-						<select
-							value={statusFilter}
-							onChange={(e) => setStatusFilter(e.target.value)}
-							style={{
-								width: '100%',
-								padding: '10px 12px',
-								borderRadius: '16px',
-								border: '1px solid rgba(var(--border-rgb), 0.9)',
-								backgroundColor: 'var(--background)',
-								color: 'var(--text-primary)',
-								fontSize: '0.875rem',
-							}}
-						>
-							<option value="all">All Status</option>
-							<option value="DRAFT">Draft</option>
-							<option value="SENT">Sent</option>
-							<option value="PAID">Paid</option>
-							<option value="OVERDUE">Overdue</option>
-						</select>
-					</Box>
-				</Box>
-			</DashboardPanel>
 
-			{/* Invoices List */}
-			<DashboardPanel title={`All Invoices (${filteredInvoices.length})`} description="Click to view details" fullHeight>
-				{filteredInvoices.length === 0 ? (
-					<EmptyState
-						icon={<Receipt />}
-						title="No invoices found"
-						description={searchTerm || statusFilter !== 'all' ? "Try adjusting your filters" : "Create your first invoice to get started"}
-						action={
-							!searchTerm && statusFilter === 'all' && (
-								<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-									<Button variant="primary">Create Invoice</Button>
-								</Link>
-							)
-						}
-					/>
-				) : (
-					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-						{filteredInvoices.map((invoice, index) => {
-							const statusStyle = getStatusColor(invoice.status, invoice.overdue);
-							return (
-								<Link key={invoice.id} href={`/dashboard/invoices/${invoice.id}`} style={{ textDecoration: 'none' }}>
-									<Box
-										sx={{
-											borderRadius: 2,
-											border: '1px solid var(--border)',
-											background: 'var(--panel)',
-											boxShadow: '0 8px 20px rgba(var(--text-primary-rgb), 0.06)',
-											p: 2,
-											cursor: 'pointer',
-											transition: 'all 0.2s ease',
-											'&:hover': {
-												transform: 'translateY(-2px)',
-												boxShadow: '0 16px 32px rgba(var(--text-primary-rgb), 0.1)',
-												borderColor: 'var(--accent-gold)',
-											},
-										}}
-									>
-										<Box
-											sx={{
-												display: 'flex',
-												flexDirection: { xs: 'column', sm: 'row' },
-												justifyContent: 'space-between',
-												alignItems: { xs: 'flex-start', sm: 'center' },
-												gap: 2,
-											}}
-										>
-											<Box sx={{ flex: 1, minWidth: 0 }}>
-												<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
-													<Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-														{invoice.invoiceNumber}
-													</Typography>
-													<Box
-														sx={{
-															px: 1.5,
-															py: 0.5,
-															borderRadius: 1,
-															fontSize: '0.7rem',
+					{/* Invoices Table */}
+					{filteredInvoices.length === 0 ? (
+						<EmptyState
+							icon={<FileText className="w-12 h-12" />}
+							title="No Invoices"
+							description={searchTerm ? 'No invoices match your search' : 'No invoices have been created yet'}
+						/>
+					) : (
+						<TableContainer>
+							<Table size="small">
+								<TableHead>
+									<TableRow>
+										<TableCell sx={{ fontWeight: 600 }}>Invoice #</TableCell>
+										{isAdmin && <TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>}
+										<TableCell sx={{ fontWeight: 600 }}>Container</TableCell>
+										<TableCell sx={{ fontWeight: 600 }}>Issue Date</TableCell>
+										<TableCell sx={{ fontWeight: 600 }}>Due Date</TableCell>
+										<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+										<TableCell sx={{ fontWeight: 600 }} align="right">Total</TableCell>
+										<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{filteredInvoices.map((invoice) => {
+										const statusInfo = statusConfig[invoice.status] || { label: invoice.status, color: 'default' };
+										return (
+											<TableRow key={invoice.id} hover>
+												<TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>
+													{invoice.invoiceNumber}
+												</TableCell>
+												{isAdmin && (
+													<TableCell>
+														<Box>
+															<Box sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+																{invoice.user.name || 'N/A'}
+															</Box>
+															<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+																{invoice.user.email}
+															</Box>
+														</Box>
+													</TableCell>
+												)}
+												<TableCell>
+													<Link 
+														href={`/dashboard/containers/${invoice.containerId}`}
+														style={{ 
+															color: 'var(--accent-gold)', 
+															textDecoration: 'none',
+															fontFamily: 'monospace',
 															fontWeight: 600,
-															display: 'flex',
-															alignItems: 'center',
-															gap: 0.5,
-															...statusStyle,
-															border: `1px solid ${statusStyle.border}`,
-															bgcolor: statusStyle.bg,
-															color: statusStyle.text,
 														}}
 													>
-														{getStatusIcon(invoice.status, invoice.overdue)}
-														{invoice.status} {invoice.overdue && '(Overdue)'}
+														{invoice.container.containerNumber}
+													</Link>
+												</TableCell>
+												<TableCell>{formatDate(invoice.issueDate)}</TableCell>
+												<TableCell>{formatDate(invoice.dueDate)}</TableCell>
+												<TableCell>
+													<Chip 
+														label={statusInfo.label} 
+														size="small"
+														color={statusInfo.color}
+														sx={{ fontSize: '0.75rem' }}
+													/>
+												</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--accent-gold)' }}>
+													{formatCurrency(invoice.total)}
+												</TableCell>
+												<TableCell align="right">
+													<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Eye className="w-3 h-3" />}
+															onClick={() => router.push(`/dashboard/invoices/${invoice.id}`)}
+														>
+															View
+														</Button>
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Download className="w-3 h-3" />}
+															onClick={() => handleDownloadPDF(invoice)}
+														>
+															PDF
+														</Button>
 													</Box>
-												</Box>
-												<Typography sx={{ fontSize: '0.8rem', color: 'var(--text-secondary)', mb: 0.5 }}>
-													Container: {invoice.container.containerNumber}
-												</Typography>
-												{invoice.dueDate && (
-													<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-														Due: {new Date(invoice.dueDate).toLocaleDateString()}
-													</Typography>
-												)}
-											</Box>
-											<Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-												<Typography sx={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
-													${invoice.totalUSD.toFixed(2)}
-												</Typography>
-												<Typography sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-													{invoice.totalAED.toFixed(2)} AED
-												</Typography>
-											</Box>
-										</Box>
-									</Box>
-								</Link>
-							);
-						})}
-					</Box>
-				)}
-			</DashboardPanel>
-		</DashboardSurface>
+												</TableCell>
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					)}
+				</DashboardPanel>
+			</DashboardSurface>
+		</Box>
 	);
 }

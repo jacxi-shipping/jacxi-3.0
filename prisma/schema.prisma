@@ -63,6 +63,7 @@ model User {
   shipments        Shipment[]
   settings         UserSettings?
   ledgerEntries    LedgerEntry[]
+  invoices         UserInvoice[]
 }
 
 model VerificationToken {
@@ -121,6 +122,7 @@ model Shipment {
   payments            Payment[]
   qualityChecks       QualityCheck[]
   ledgerEntries       LedgerEntry[]
+  invoiceLineItems    InvoiceLineItem[]
   
   @@index([userId])
   @@index([containerId])
@@ -179,6 +181,7 @@ model Container {
   documents            ContainerDocument[]
   trackingEvents       ContainerTrackingEvent[]
   auditLogs            ContainerAuditLog[]
+  userInvoices         UserInvoice[]
   
   @@index([status])
   @@index([shippingLine])
@@ -449,6 +452,79 @@ model Route {
 // Shipments are directly assigned to Containers
 
 // ============================================
+// USER INVOICE MODELS (Customer Invoicing)
+// ============================================
+
+model UserInvoice {
+  id              String              @id @default(cuid())
+  invoiceNumber   String              @unique // INV-2025-001
+  userId          String
+  containerId     String
+  
+  // Invoice Details
+  status          UserInvoiceStatus   @default(PENDING)
+  issueDate       DateTime            @default(now())
+  dueDate         DateTime?
+  paidDate        DateTime?
+  
+  // Amounts
+  subtotal        Float               // Sum of all line items
+  tax             Float               @default(0)
+  discount        Float               @default(0)
+  total           Float
+  
+  // Payment
+  paymentMethod   String?
+  paymentReference String?
+  
+  // Notes
+  notes           String?
+  internalNotes   String?
+  
+  // Metadata
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  // Relations
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  container       Container           @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  lineItems       InvoiceLineItem[]
+  
+  @@index([userId])
+  @@index([containerId])
+  @@index([status])
+  @@index([invoiceNumber])
+  @@index([issueDate])
+  @@index([dueDate])
+}
+
+model InvoiceLineItem {
+  id          String          @id @default(cuid())
+  invoiceId   String
+  
+  // Line Item Details
+  description String          // "2015 Honda Accord - Vehicle Price"
+  shipmentId  String?         // Link to shipment
+  type        LineItemType    // VEHICLE_PRICE, INSURANCE, SHARED_EXPENSE
+  
+  quantity    Float           @default(1)
+  unitPrice   Float
+  amount      Float           // quantity × unitPrice
+  
+  // Metadata
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  
+  // Relations
+  invoice     UserInvoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  shipment    Shipment?       @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  
+  @@index([invoiceId])
+  @@index([shipmentId])
+  @@index([type])
+}
+
+// ============================================
 // FINANCIAL MODELS (From Accounting System)
 // ============================================
 
@@ -617,6 +693,26 @@ enum InvoiceStatus {
   OVERDUE
   CANCELLED
   PENDING
+}
+
+enum UserInvoiceStatus {
+  DRAFT
+  PENDING
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum LineItemType {
+  VEHICLE_PRICE
+  INSURANCE
+  SHIPPING_FEE
+  CUSTOMS_FEE
+  STORAGE_FEE
+  HANDLING_FEE
+  OTHER_FEE
+  DISCOUNT
 }
 
 enum PaymentMode {

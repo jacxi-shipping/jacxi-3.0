@@ -30,6 +30,10 @@ import {
 	Eye,
 	Plus,
 	Trash2,
+	AlertTriangle,
+	Copy,
+	Printer,
+	FileDown,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import { 
@@ -40,11 +44,15 @@ import {
 	LoadingState, 
 	EmptyState, 
 	StatsCard,
- DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
+	DashboardPageSkeleton, 
+	DetailPageSkeleton, 
+	FormPageSkeleton
+} from '@/components/design-system';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import AddExpenseModal from '@/components/containers/AddExpenseModal';
 import AddInvoiceModal from '@/components/containers/AddInvoiceModal';
 import AddTrackingEventModal from '@/components/containers/AddTrackingEventModal';
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 interface Shipment {
 	id: string;
@@ -52,6 +60,11 @@ interface Shipment {
 	vehicleModel: string | null;
 	vehicleVIN: string | null;
 	status: string;
+	user?: {
+		id: string;
+		name: string | null;
+		email: string;
+	};
 }
 
 interface Expense {
@@ -88,6 +101,23 @@ interface TrackingEvent {
 	eventDate: string;
 }
 
+interface UserInvoice {
+	id: string;
+	invoiceNumber: string;
+	userId: string;
+	status: string;
+	issueDate: string;
+	dueDate: string | null;
+	total: number;
+	user: {
+		name: string | null;
+		email: string;
+	};
+	_count: {
+		lineItems: number;
+	};
+}
+
 interface Container {
 	id: string;
 	containerNumber: string;
@@ -109,10 +139,12 @@ interface Container {
 	maxCapacity: number;
 	currentCount: number;
 	notes: string | null;
+	autoTrackingEnabled: boolean;
 	createdAt: string;
 	shipments: Shipment[];
 	expenses: Expense[];
 	invoices: Invoice[];
+	userInvoices?: UserInvoice[];
 	documents: Document[];
 	trackingEvents: TrackingEvent[];
 	totals: {
@@ -145,6 +177,13 @@ export default function ContainerDetailPage() {
 	const [deletingInvoiceId, setDeletingInvoiceId] = useState<string | null>(null);
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 	const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [deleting, setDeleting] = useState(false);
+	const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+	const [duplicating, setDuplicating] = useState(false);
+	const [newContainerNumber, setNewContainerNumber] = useState('');
+	const [generatingInvoices, setGeneratingInvoices] = useState(false);
+	const [invoiceGenerationModalOpen, setInvoiceGenerationModalOpen] = useState(false);
 
 	useEffect(() => {
 		if (params.id) {
@@ -285,6 +324,164 @@ export default function ContainerDetailPage() {
 		}
 	};
 
+	const handleDeleteContainer = async () => {
+		if (!container) return;
+
+		setDeleting(true);
+		try {
+			const response = await fetch(`/api/containers/${params.id}`, {
+				method: 'DELETE',
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success('Container deleted successfully', {
+					description: 'Redirecting to containers list...'
+				});
+				setTimeout(() => {
+					router.push('/dashboard/containers');
+				}, 1000);
+			} else {
+				toast.error('Failed to delete container', {
+					description: data.error || 'Please try again'
+				});
+			}
+		} catch (error) {
+			console.error('Error deleting container:', error);
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
+		} finally {
+			setDeleting(false);
+			setDeleteModalOpen(false);
+		}
+	};
+
+	const handleDuplicateContainer = async () => {
+		if (!container || !newContainerNumber.trim()) {
+			toast.error('Please enter a container number');
+			return;
+		}
+
+		setDuplicating(true);
+		try {
+			// Create new container with same details but new number
+			const payload = {
+				containerNumber: newContainerNumber.trim(),
+				trackingNumber: container.trackingNumber,
+				vesselName: container.vesselName,
+				voyageNumber: container.voyageNumber,
+				shippingLine: container.shippingLine,
+				bookingNumber: '', // Don't copy booking number
+				loadingPort: container.loadingPort,
+				destinationPort: container.destinationPort,
+				transshipmentPorts: container.transshipmentPorts,
+				loadingDate: container.loadingDate,
+				departureDate: container.departureDate,
+				estimatedArrival: container.estimatedArrival,
+				maxCapacity: container.maxCapacity,
+				notes: container.notes,
+				autoTrackingEnabled: container.autoTrackingEnabled,
+			};
+
+			const response = await fetch('/api/containers', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success('Container duplicated successfully!', {
+					description: 'Redirecting to new container...'
+				});
+				setTimeout(() => {
+					router.push(`/dashboard/containers/${data.container.id}`);
+				}, 1000);
+			} else {
+				toast.error('Failed to duplicate container', {
+					description: data.error || 'Please try again'
+				});
+			}
+		} catch (error) {
+			console.error('Error duplicating container:', error);
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
+		} finally {
+			setDuplicating(false);
+			setDuplicateModalOpen(false);
+		}
+	};
+
+	const handlePrint = () => {
+		window.print();
+	};
+
+	const handleDownloadPDF = async () => {
+		if (!container) return;
+
+		try {
+			toast.success('Generating PDF...', {
+				description: 'Please wait a moment'
+			});
+
+			// Dynamically import the PDF generator to avoid SSR issues
+			const { downloadContainerPDF } = await import('@/lib/utils/generateContainerPDF');
+			
+			// Generate and download the PDF
+			downloadContainerPDF(container as any);
+
+			toast.success('PDF downloaded successfully!', {
+				description: 'Check your downloads folder'
+			});
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			toast.error('Failed to generate PDF', {
+				description: 'Please try again'
+			});
+		}
+	};
+
+	const handleGenerateInvoices = async () => {
+		if (!container) return;
+
+		setGeneratingInvoices(true);
+		try {
+			const response = await fetch('/api/invoices/generate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					containerId: container.id,
+					sendEmail: false,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success('Invoices generated successfully!', {
+					description: `Created ${data.summary.newInvoices} new invoice(s)`
+				});
+				fetchContainer();
+				setInvoiceGenerationModalOpen(false);
+			} else {
+				toast.error('Failed to generate invoices', {
+					description: data.error || 'Please try again'
+				});
+			}
+		} catch (error) {
+			console.error('Error generating invoices:', error);
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
+		} finally {
+			setGeneratingInvoices(false);
+		}
+	};
+
 	const formatCurrency = (amount: number, currency: string = 'USD') => {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -347,14 +544,70 @@ export default function ContainerDetailPage() {
 					title={container.containerNumber}
 					description={container.trackingNumber ? `Tracking: ${container.trackingNumber}` : 'Container details and management'}
 					actions={
-						<Box sx={{ display: 'flex', gap: 1 }}>
+						<Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
 							<Chip 
 								label={statusConfig[container.status]?.label || container.status}
 								color={statusConfig[container.status]?.color || 'default'}
 								sx={{ fontWeight: 600 }}
+								className="no-print"
 							/>
+							<Button 
+								variant="outline" 
+								size="sm" 
+								icon={<Copy className="w-4 h-4" />}
+								onClick={() => {
+									setNewContainerNumber('');
+									setDuplicateModalOpen(true);
+								}}
+								className="no-print"
+							>
+								Duplicate
+							</Button>
+							<Button 
+								variant="primary" 
+								size="sm" 
+								icon={<FileDown className="w-4 h-4" />}
+								onClick={handleDownloadPDF}
+								className="no-print"
+								sx={{
+									bgcolor: 'var(--accent-gold)',
+									color: 'white',
+									'&:hover': {
+										bgcolor: 'var(--accent-gold)',
+										opacity: 0.9,
+									}
+								}}
+							>
+								Download PDF
+							</Button>
+							<Button 
+								variant="outline" 
+								size="sm" 
+								icon={<Printer className="w-4 h-4" />}
+								onClick={handlePrint}
+								className="no-print"
+							>
+								Print
+							</Button>
+							<Button 
+								variant="outline" 
+								size="sm" 
+								icon={<Trash2 className="w-4 h-4" />}
+								onClick={() => setDeleteModalOpen(true)}
+								sx={{
+									borderColor: 'var(--error)',
+									color: 'var(--error)',
+									'&:hover': {
+										bgcolor: 'rgba(var(--error-rgb), 0.1)',
+										borderColor: 'var(--error)',
+									}
+								}}
+								className="no-print"
+							>
+								Delete
+							</Button>
 							<Link href="/dashboard/containers" style={{ textDecoration: 'none' }}>
-								<Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
+								<Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />} className="no-print">
 									Back
 								</Button>
 							</Link>
@@ -443,6 +696,7 @@ export default function ContainerDetailPage() {
 						<Tab label={`Shipments (${container.shipments.length})`} />
 						<Tab label={`Expenses (${container.expenses.length})`} />
 						<Tab label={`Invoices (${container.invoices.length})`} />
+						<Tab label={`User Invoices (${container.userInvoices?.length || 0})`} />
 						<Tab label={`Documents (${container.documents.length})`} />
 						<Tab label={`Tracking (${container.trackingEvents?.length || 0})`} />
 					</Tabs>
@@ -930,8 +1184,105 @@ export default function ContainerDetailPage() {
 						</DashboardPanel>
 					)}
 
-					{/* Documents Tab */}
+					{/* User Invoices Tab */}
 					{activeTab === 4 && (
+						<DashboardPanel
+							title="User Invoices"
+							description="Customer invoices for shipments in this container"
+						>
+							<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+								<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+									{container.shipments.length > 0 
+										? `${new Set(container.shipments.map(s => s.user?.id)).size} unique customer(s) with shipments`
+										: 'No shipments in container'
+									}
+								</Box>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setInvoiceGenerationModalOpen(true)}
+									disabled={container.shipments.length === 0}
+								>
+									Generate Invoices
+								</Button>
+							</Box>
+
+							{!container.userInvoices || container.userInvoices.length === 0 ? (
+								<EmptyState
+									icon={<FileText className="w-12 h-12" />}
+									title="No User Invoices"
+									description={
+										container.shipments.length > 0
+											? 'Click "Generate Invoices" to create invoices for all customers'
+											: 'Add shipments to this container before generating invoices'
+									}
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Invoice #</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Issue Date</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Total</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.userInvoices.map((invoice) => (
+												<TableRow key={invoice.id} hover>
+													<TableCell sx={{ fontFamily: 'monospace' }}>{invoice.invoiceNumber}</TableCell>
+													<TableCell>
+														<Box>
+															<Box sx={{ fontWeight: 600 }}>{invoice.user.name || 'N/A'}</Box>
+															<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+																{invoice.user.email}
+															</Box>
+														</Box>
+													</TableCell>
+													<TableCell>{formatDate(invoice.issueDate)}</TableCell>
+													<TableCell>
+														<Chip 
+															label={invoice.status} 
+															size="small"
+															color={
+																invoice.status === 'PAID' ? 'success' : 
+																invoice.status === 'OVERDUE' ? 'error' :
+																invoice.status === 'SENT' ? 'info' : 
+																'default'
+															}
+															sx={{ fontSize: '0.75rem' }}
+														/>
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--success)' }}>
+														{formatCurrency(invoice.total)}
+													</TableCell>
+													<TableCell align="right">
+														<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+															<Button
+																variant="outline"
+																size="sm"
+																icon={<Eye className="w-3 h-3" />}
+																onClick={() => router.push(`/dashboard/invoices/${invoice.id}`)}
+															>
+																View
+															</Button>
+														</Box>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Documents Tab */}
+					{activeTab === 5 && (
 						<DashboardPanel
 							title="Container Documents"
 							description="Files and documents related to this container"
@@ -981,7 +1332,7 @@ export default function ContainerDetailPage() {
 					)}
 
 					{/* Tracking Tab */}
-					{activeTab === 5 && (
+					{activeTab === 6 && (
 						<DashboardPanel
 							title="Tracking History"
 							description="Location updates and status changes"
@@ -1104,6 +1455,473 @@ export default function ContainerDetailPage() {
 					containerId={container.id}
 					onSuccess={fetchContainer}
 				/>
+
+				{/* Duplicate Container Modal */}
+				<Dialog
+					open={duplicateModalOpen}
+					onClose={() => !duplicating && setDuplicateModalOpen(false)}
+					maxWidth="sm"
+					fullWidth
+					PaperProps={{
+						sx: {
+							bgcolor: 'var(--panel)',
+							backgroundImage: 'none',
+							border: '1px solid var(--border)',
+							borderRadius: 2,
+						}
+					}}
+				>
+					<DialogTitle
+						sx={{
+							color: 'var(--text-primary)',
+							fontWeight: 700,
+							fontSize: '1.25rem',
+							borderBottom: '1px solid var(--border)',
+							display: 'flex',
+							alignItems: 'center',
+							gap: 1.5,
+						}}
+					>
+						<Box
+							sx={{
+								width: 40,
+								height: 40,
+								borderRadius: '50%',
+								bgcolor: 'rgba(var(--accent-gold-rgb), 0.1)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<Copy className="w-5 h-5" style={{ color: 'var(--accent-gold)' }} />
+						</Box>
+						Duplicate Container
+					</DialogTitle>
+					<DialogContent sx={{ py: 3 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+							<Box sx={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+								Create a copy of container <strong>{container.containerNumber}</strong> with all settings.
+							</Box>
+							
+							<Box
+								sx={{
+									p: 2,
+									borderRadius: 1,
+									bgcolor: 'rgba(99, 102, 241, 0.1)',
+									border: '1px solid rgba(99, 102, 241, 0.3)',
+								}}
+							>
+								<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+									<strong style={{ color: 'var(--text-primary)' }}>What will be copied:</strong>
+								</Box>
+								<Box component="ul" sx={{ mt: 1, pl: 2.5, fontSize: '0.875rem', color: 'var(--text-secondary)', '& li': { mb: 0.5 } }}>
+									<li>Vessel and voyage information</li>
+									<li>Shipping line and ports</li>
+									<li>Dates and capacity settings</li>
+									<li>Notes and preferences</li>
+								</Box>
+								<Box sx={{ mt: 1.5, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+									<strong style={{ color: 'var(--text-primary)' }}>What won't be copied:</strong>
+								</Box>
+								<Box component="ul" sx={{ mt: 0.5, pl: 2.5, fontSize: '0.875rem', color: 'var(--text-secondary)', '& li': { mb: 0.5 } }}>
+									<li>Assigned shipments</li>
+									<li>Expenses and invoices</li>
+									<li>Documents and tracking events</li>
+									<li>Booking number</li>
+								</Box>
+							</Box>
+
+							<Box>
+								<Box
+									component="label"
+									sx={{
+										display: 'block',
+										fontSize: '0.875rem',
+										fontWeight: 600,
+										color: 'var(--text-primary)',
+										mb: 1,
+									}}
+								>
+									New Container Number <span style={{ color: 'var(--error)' }}>*</span>
+								</Box>
+								<input
+									type="text"
+									value={newContainerNumber}
+									onChange={(e) => setNewContainerNumber(e.target.value)}
+									placeholder="e.g., ABCU9876543"
+									disabled={duplicating}
+									style={{
+										width: '100%',
+										padding: '10px 12px',
+										borderRadius: '8px',
+										border: '1px solid var(--border)',
+										backgroundColor: 'var(--background)',
+										color: 'var(--text-primary)',
+										fontSize: '0.95rem',
+									}}
+									autoFocus
+								/>
+							</Box>
+						</Box>
+					</DialogContent>
+					<DialogActions
+						sx={{
+							px: 3,
+							py: 2,
+							borderTop: '1px solid var(--border)',
+							gap: 1,
+						}}
+					>
+						<Button
+							variant="outline"
+							onClick={() => setDuplicateModalOpen(false)}
+							disabled={duplicating}
+							sx={{
+								color: 'var(--text-secondary)',
+								borderColor: 'var(--border)',
+								'&:hover': {
+									bgcolor: 'var(--background)',
+								}
+							}}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleDuplicateContainer}
+							disabled={duplicating || !newContainerNumber.trim()}
+							sx={{
+								bgcolor: 'var(--accent-gold)',
+								color: 'white',
+								'&:hover': {
+									bgcolor: 'var(--accent-gold)',
+									opacity: 0.9,
+								},
+								'&:disabled': {
+									opacity: 0.5,
+									cursor: 'not-allowed',
+								}
+							}}
+						>
+							{duplicating ? (
+								<>
+									<Box
+										component="span"
+										sx={{
+											display: 'inline-block',
+											width: 16,
+											height: 16,
+											mr: 1,
+											border: '2px solid white',
+											borderTopColor: 'transparent',
+											borderRadius: '50%',
+											animation: 'spin 0.6s linear infinite',
+											'@keyframes spin': {
+												'0%': { transform: 'rotate(0deg)' },
+												'100%': { transform: 'rotate(360deg)' },
+											},
+										}}
+									/>
+									Duplicating...
+								</>
+							) : (
+								<>
+									<Copy className="w-4 h-4 mr-2" />
+									Duplicate Container
+								</>
+							)}
+						</Button>
+					</DialogActions>
+				</Dialog>
+
+				{/* Generate Invoices Modal */}
+				<Dialog
+					open={invoiceGenerationModalOpen}
+					onClose={() => !generatingInvoices && setInvoiceGenerationModalOpen(false)}
+					maxWidth="md"
+					fullWidth
+					PaperProps={{
+						sx: {
+							bgcolor: 'var(--panel)',
+							backgroundImage: 'none',
+							border: '1px solid var(--border)',
+							borderRadius: 2,
+						}
+					}}
+				>
+					<DialogTitle
+						sx={{
+							color: 'var(--text-primary)',
+							fontWeight: 700,
+							fontSize: '1.25rem',
+							borderBottom: '1px solid var(--border)',
+						}}
+					>
+						Generate User Invoices
+					</DialogTitle>
+					<DialogContent sx={{ py: 3 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+							<Box sx={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+								Generate invoices for all customers with shipments in container <strong>{container.containerNumber}</strong>.
+							</Box>
+
+							{/* Summary */}
+							<Box
+								sx={{
+									p: 2,
+									bgcolor: 'var(--background)',
+									border: '1px solid var(--border)',
+									borderRadius: 1,
+								}}
+							>
+								<Box sx={{ fontWeight: 600, mb: 1.5, color: 'var(--text-primary)' }}>
+									Invoice Summary
+								</Box>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Total Shipments:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{container.shipments.length}
+										</Box>
+									</Box>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Unique Customers:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{new Set(container.shipments.map(s => s.user?.id)).size}
+										</Box>
+									</Box>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Container Expenses:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{formatCurrency(container.totals.expenses)}
+										</Box>
+									</Box>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Expense per Vehicle:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{formatCurrency(
+												container.shipments.length > 0
+													? container.totals.expenses / container.shipments.length
+													: 0
+											)}
+										</Box>
+									</Box>
+								</Box>
+							</Box>
+
+							{/* Info */}
+							<Box
+								sx={{
+									p: 2,
+									bgcolor: 'rgba(var(--info-rgb), 0.1)',
+									border: '1px solid rgba(var(--info-rgb), 0.3)',
+									borderRadius: 1,
+									fontSize: '0.875rem',
+									color: 'var(--text-secondary)',
+									lineHeight: 1.6,
+								}}
+							>
+								<strong>How it works:</strong>
+								<ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+									<li>One invoice per customer</li>
+									<li>Each invoice includes all their vehicles in this container</li>
+									<li>Vehicle prices and insurance are per-vehicle</li>
+									<li>Container expenses are divided equally among all vehicles</li>
+									<li>Invoices will be created as DRAFT status</li>
+								</ul>
+							</Box>
+						</Box>
+					</DialogContent>
+					<DialogActions sx={{ p: 3, borderTop: '1px solid var(--border)' }}>
+						<Button
+							variant="outline"
+							onClick={() => setInvoiceGenerationModalOpen(false)}
+							disabled={generatingInvoices}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleGenerateInvoices}
+							disabled={generatingInvoices}
+							icon={<FileText className="w-4 h-4" />}
+						>
+							{generatingInvoices ? 'Generating...' : 'Generate Invoices'}
+						</Button>
+					</DialogActions>
+				</Dialog>
+
+				{/* Delete Confirmation Modal */}
+				<Dialog
+					open={deleteModalOpen}
+					onClose={() => !deleting && setDeleteModalOpen(false)}
+					maxWidth="sm"
+					fullWidth
+					PaperProps={{
+						sx: {
+							bgcolor: 'var(--panel)',
+							backgroundImage: 'none',
+							border: '1px solid var(--border)',
+							borderRadius: 2,
+						}
+					}}
+				>
+					<DialogTitle
+						sx={{
+							color: 'var(--text-primary)',
+							fontWeight: 700,
+							fontSize: '1.25rem',
+							borderBottom: '1px solid var(--border)',
+							display: 'flex',
+							alignItems: 'center',
+							gap: 1.5,
+						}}
+					>
+						<Box
+							sx={{
+								width: 40,
+								height: 40,
+								borderRadius: '50%',
+								bgcolor: 'rgba(var(--error-rgb), 0.1)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<AlertTriangle className="w-5 h-5" style={{ color: 'var(--error)' }} />
+						</Box>
+						Delete Container
+					</DialogTitle>
+					<DialogContent sx={{ py: 3 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+							<Box sx={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+								Are you sure you want to delete container <strong>{container.containerNumber}</strong>?
+							</Box>
+							
+							{container.shipments.length > 0 && (
+								<Box
+									sx={{
+										p: 2,
+										borderRadius: 1,
+										bgcolor: 'rgba(var(--error-rgb), 0.1)',
+										border: '1px solid rgba(var(--error-rgb), 0.3)',
+									}}
+								>
+									<Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5 }}>
+										<AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
+										<Box>
+											<Box sx={{ fontWeight: 600, color: 'var(--error)', fontSize: '0.875rem', mb: 0.5 }}>
+												Warning: Container has {container.shipments.length} assigned shipment{container.shipments.length !== 1 ? 's' : ''}
+											</Box>
+											<Box sx={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+												You must remove all shipments from this container before deleting it.
+											</Box>
+										</Box>
+									</Box>
+								</Box>
+							)}
+
+							{container.shipments.length === 0 && (
+								<Box
+									sx={{
+										p: 2,
+										borderRadius: 1,
+										bgcolor: 'rgba(251, 191, 36, 0.1)',
+										border: '1px solid rgba(251, 191, 36, 0.3)',
+									}}
+								>
+									<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+										<strong style={{ color: 'var(--text-primary)' }}>This action cannot be undone.</strong> This will permanently delete:
+									</Box>
+									<Box component="ul" sx={{ mt: 1, pl: 2.5, fontSize: '0.875rem', color: 'var(--text-secondary)', '& li': { mb: 0.5 } }}>
+										<li>Container details and tracking information</li>
+										<li>All tracking events ({container.trackingEvents?.length || 0} events)</li>
+										<li>All expenses ({container.expenses.length} expenses)</li>
+										<li>All invoices ({container.invoices.length} invoices)</li>
+										<li>All documents ({container.documents.length} documents)</li>
+										<li>All audit logs</li>
+									</Box>
+								</Box>
+							)}
+						</Box>
+					</DialogContent>
+					<DialogActions
+						sx={{
+							px: 3,
+							py: 2,
+							borderTop: '1px solid var(--border)',
+							gap: 1,
+						}}
+					>
+						<Button
+							variant="outline"
+							onClick={() => setDeleteModalOpen(false)}
+							disabled={deleting}
+							sx={{
+								color: 'var(--text-secondary)',
+								borderColor: 'var(--border)',
+								'&:hover': {
+									bgcolor: 'var(--background)',
+								}
+							}}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleDeleteContainer}
+							disabled={deleting || container.shipments.length > 0}
+							sx={{
+								bgcolor: 'var(--error)',
+								color: 'white',
+								'&:hover': {
+									bgcolor: 'var(--error)',
+									opacity: 0.9,
+								},
+								'&:disabled': {
+									opacity: 0.5,
+									cursor: 'not-allowed',
+								}
+							}}
+						>
+							{deleting ? (
+								<>
+									<Box
+										component="span"
+										sx={{
+											display: 'inline-block',
+											width: 16,
+											height: 16,
+											mr: 1,
+											border: '2px solid white',
+											borderTopColor: 'transparent',
+											borderRadius: '50%',
+											animation: 'spin 0.6s linear infinite',
+											'@keyframes spin': {
+												'0%': { transform: 'rotate(0deg)' },
+												'100%': { transform: 'rotate(360deg)' },
+											},
+										}}
+									/>
+									Deleting...
+								</>
+							) : (
+								<>
+									<Trash2 className="w-4 h-4 mr-2" />
+									Delete Container
+								</>
+							)}
+						</Button>
+					</DialogActions>
+				</Dialog>
 			</DashboardSurface>
 		</AdminRoute>
 	);

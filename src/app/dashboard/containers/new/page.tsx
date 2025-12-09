@@ -35,6 +35,9 @@ export default function NewContainerPage() {
     maxCapacity: 4,
     notes: '',
     autoTrackingEnabled: true,
+    trackingEvents: [] as any[],
+    progress: 0,
+    currentLocation: '',
   });
 
   const fetchContainerData = async () => {
@@ -65,9 +68,13 @@ export default function NewContainerPage() {
           estimatedArrival: trackingData.estimatedArrival ? new Date(trackingData.estimatedArrival).toISOString().split('T')[0] : prev.estimatedArrival,
           departureDate: trackingData.departureDate ? new Date(trackingData.departureDate).toISOString().split('T')[0] : prev.departureDate,
           loadingDate: trackingData.loadingDate ? new Date(trackingData.loadingDate).toISOString().split('T')[0] : prev.loadingDate,
+          trackingEvents: trackingData.trackingEvents || [],
+          progress: trackingData.progress || 0,
+          currentLocation: trackingData.currentLocation || prev.currentLocation,
         }));
         
-        setFetchSuccess('Container data fetched successfully! Please review and adjust as needed.');
+        const eventCount = trackingData.trackingEvents?.length || 0;
+        setFetchSuccess(`Container data fetched successfully! Retrieved ${eventCount} tracking event${eventCount !== 1 ? 's' : ''}. Please review and adjust as needed.`);
       } else {
         setFetchError(data.message || 'Could not fetch container data. Please enter details manually.');
       }
