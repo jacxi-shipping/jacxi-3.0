@@ -33,6 +33,7 @@ import {
 	AlertTriangle,
 	Copy,
 	Printer,
+	FileDown,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import { 
@@ -394,6 +395,31 @@ export default function ContainerDetailPage() {
 		window.print();
 	};
 
+	const handleDownloadPDF = async () => {
+		if (!container) return;
+
+		try {
+			toast.success('Generating PDF...', {
+				description: 'Please wait a moment'
+			});
+
+			// Dynamically import the PDF generator to avoid SSR issues
+			const { downloadContainerPDF } = await import('@/lib/utils/generateContainerPDF');
+			
+			// Generate and download the PDF
+			downloadContainerPDF(container as any);
+
+			toast.success('PDF downloaded successfully!', {
+				description: 'Check your downloads folder'
+			});
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			toast.error('Failed to generate PDF', {
+				description: 'Please try again'
+			});
+		}
+	};
+
 	const formatCurrency = (amount: number, currency: string = 'USD') => {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -474,6 +500,23 @@ export default function ContainerDetailPage() {
 								className="no-print"
 							>
 								Duplicate
+							</Button>
+							<Button 
+								variant="primary" 
+								size="sm" 
+								icon={<FileDown className="w-4 h-4" />}
+								onClick={handleDownloadPDF}
+								className="no-print"
+								sx={{
+									bgcolor: 'var(--accent-gold)',
+									color: 'white',
+									'&:hover': {
+										bgcolor: 'var(--accent-gold)',
+										opacity: 0.9,
+									}
+								}}
+							>
+								Download PDF
 							</Button>
 							<Button 
 								variant="outline" 
