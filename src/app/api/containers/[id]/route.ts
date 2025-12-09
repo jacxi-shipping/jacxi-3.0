@@ -84,6 +84,60 @@ export async function GET(
       return NextResponse.json({ error: 'Container not found' }, { status: 404 });
     }
 
+    // Auto-sync tracking if enabled and has tracking number
+    if (container.autoTrackingEnabled && container.trackingNumber) {
+      try {
+        const { trackingSync } = await import('@/lib/services/tracking-sync');
+        const syncResult = await trackingSync.syncContainerTracking(params.id);
+        
+        if (syncResult.newEvents > 0) {
+          console.log(`Synced ${syncResult.newEvents} new tracking events for container ${params.id}`);
+          
+          // Re-fetch container with updated tracking events
+          const updatedContainer = await prisma.container.findUnique({
+            where: { id: params.id },
+            include: {
+              shipments: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      email: true,
+                    },
+                  },
+                },
+              },
+              expenses: {
+                orderBy: { date: 'desc' },
+              },
+              invoices: {
+                orderBy: { date: 'desc' },
+              },
+              documents: {
+                orderBy: { uploadedAt: 'desc' },
+              },
+              trackingEvents: {
+                orderBy: { eventDate: 'desc' },
+                take: 20,
+              },
+              auditLogs: {
+                orderBy: { timestamp: 'desc' },
+                take: 50,
+              },
+            },
+          });
+          
+          if (updatedContainer) {
+            Object.assign(container, updatedContainer);
+          }
+        }
+      } catch (syncError) {
+        console.error('Error auto-syncing tracking:', syncError);
+        // Continue even if sync fails
+      }
+    }
+
     // Calculate totals
     const totalExpenses = container.expenses.reduce((sum, exp) => sum + exp.amount, 0);
     const totalInvoices = container.invoices.reduce((sum, inv) => sum + inv.amount, 0);
