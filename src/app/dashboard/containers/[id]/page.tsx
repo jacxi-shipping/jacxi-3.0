@@ -28,6 +28,8 @@ import {
 	TrendingUp,
 	Download,
 	Eye,
+	Plus,
+	Trash2,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import { 
@@ -40,6 +42,7 @@ import {
 	StatsCard,
  DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import { AdminRoute } from '@/components/auth/AdminRoute';
+import AddExpenseModal from '@/components/containers/AddExpenseModal';
 
 interface Shipment {
 	id: string;
@@ -134,6 +137,8 @@ export default function ContainerDetailPage() {
 	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState(0);
 	const [updating, setUpdating] = useState(false);
+	const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+	const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (params.id) {
@@ -185,6 +190,30 @@ export default function ContainerDetailPage() {
 			toast.error('An error occurred');
 		} finally {
 			setUpdating(false);
+		}
+	};
+
+	const handleDeleteExpense = async (expenseId: string) => {
+		if (!confirm('Are you sure you want to delete this expense?')) return;
+
+		setDeletingExpenseId(expenseId);
+		try {
+			const response = await fetch(`/api/containers/${params.id}/expenses?expenseId=${expenseId}`, {
+				method: 'DELETE',
+			});
+
+			if (response.ok) {
+				toast.success('Expense deleted successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to delete expense');
+			}
+		} catch (error) {
+			console.error('Error deleting expense:', error);
+			toast.error('An error occurred');
+		} finally {
+			setDeletingExpenseId(null);
 		}
 	};
 
@@ -641,6 +670,17 @@ export default function ContainerDetailPage() {
 							title="Container Expenses"
 							description="All costs and expenses for this container"
 						>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setExpenseModalOpen(true)}
+								>
+									Add Expense
+								</Button>
+							</Box>
+
 							{container.expenses.length === 0 ? (
 								<EmptyState
 									icon={<DollarSign className="w-12 h-12" />}
@@ -656,6 +696,7 @@ export default function ContainerDetailPage() {
 												<TableCell sx={{ fontWeight: 600 }}>Vendor</TableCell>
 												<TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
 												<TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
 											</TableRow>
 										</TableHead>
 										<TableBody>
@@ -667,10 +708,26 @@ export default function ContainerDetailPage() {
 													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--error)' }}>
 														{formatCurrency(expense.amount, expense.currency)}
 													</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Trash2 className="w-3 h-3" />}
+															onClick={() => handleDeleteExpense(expense.id)}
+															disabled={deletingExpenseId === expense.id}
+															sx={{ 
+																color: 'var(--error)',
+																borderColor: 'var(--error)',
+																'&:hover': { bgcolor: 'rgba(var(--error-rgb), 0.1)' }
+															}}
+														>
+															{deletingExpenseId === expense.id ? 'Deleting...' : 'Delete'}
+														</Button>
+													</TableCell>
 												</TableRow>
 											))}
 											<TableRow>
-												<TableCell colSpan={3} sx={{ fontWeight: 700 }}>Total Expenses</TableCell>
+												<TableCell colSpan={4} sx={{ fontWeight: 700 }}>Total Expenses</TableCell>
 												<TableCell align="right" sx={{ fontWeight: 700, color: 'var(--error)' }}>
 													{formatCurrency(container.totals.expenses)}
 												</TableCell>
@@ -847,6 +904,14 @@ export default function ContainerDetailPage() {
 						</DashboardPanel>
 					)}
 				</Box>
+
+				{/* Add Expense Modal */}
+				<AddExpenseModal
+					open={expenseModalOpen}
+					onClose={() => setExpenseModalOpen(false)}
+					containerId={container.id}
+					onSuccess={fetchContainer}
+				/>
 			</DashboardSurface>
 		</AdminRoute>
 	);
