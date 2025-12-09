@@ -160,7 +160,21 @@ export default function ContainerDetailPage() {
 			const data = await response.json();
 
 			if (response.ok) {
-				setContainer(data.container);
+				const containerData = data.container;
+				// Ensure trackingEvents is an array
+				if (!containerData.trackingEvents) {
+					containerData.trackingEvents = [];
+				}
+				// Ensure progress is a number
+				if (typeof containerData.progress !== 'number') {
+					containerData.progress = 0;
+				}
+				setContainer(containerData);
+				console.log('Container loaded:', {
+					id: containerData.id,
+					trackingEvents: containerData.trackingEvents.length,
+					progress: containerData.progress
+				});
 			} else {
 				toast.error('Container not found');
 				router.push('/dashboard/containers');
@@ -430,7 +444,7 @@ export default function ContainerDetailPage() {
 						<Tab label={`Expenses (${container.expenses.length})`} />
 						<Tab label={`Invoices (${container.invoices.length})`} />
 						<Tab label={`Documents (${container.documents.length})`} />
-						<Tab label={`Tracking (${container.trackingEvents.length})`} />
+						<Tab label={`Tracking (${container.trackingEvents?.length || 0})`} />
 					</Tabs>
 				</Box>
 
@@ -983,7 +997,7 @@ export default function ContainerDetailPage() {
 								</Button>
 							</Box>
 
-							{container.trackingEvents.length === 0 ? (
+							{(!container.trackingEvents || container.trackingEvents.length === 0) ? (
 								<EmptyState
 									icon={<MapPin className="w-12 h-12" />}
 									title="No Tracking Events"

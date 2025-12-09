@@ -756,6 +756,77 @@ export default function ShipmentDetailPage() {
                       </div>
                     )}
                   </dl>
+
+                  {/* Container Tracking Timeline */}
+                  {shipment.container.trackingEvents && shipment.container.trackingEvents.length > 0 && (
+                    <div className="mt-6">
+                      <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
+                        <History className="h-4 w-4" />
+                        Container Tracking Timeline ({shipment.container.trackingEvents.length} events)
+                      </h3>
+                      <div className="space-y-3">
+                        {shipment.container.trackingEvents.map((event, index) => (
+                          <div 
+                            key={event.id}
+                            className="relative pl-6"
+                            style={{
+                              borderLeft: index < (shipment.container?.trackingEvents.length || 0) - 1 ? '2px solid var(--border)' : 'none',
+                              paddingBottom: index < (shipment.container?.trackingEvents.length || 0) - 1 ? '12px' : '0',
+                            }}
+                          >
+                            {/* Timeline Dot */}
+                            <div
+                              className="absolute left-[-9px] top-0 h-4 w-4 rounded-full border-2"
+                              style={{
+                                backgroundColor: event.completed ? 'var(--success)' : 'var(--accent-gold)',
+                                borderColor: 'var(--background)',
+                              }}
+                            />
+                            
+                            {/* Event Content */}
+                            <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] p-3">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <p className="font-semibold text-[var(--text-primary)] text-sm">
+                                    {event.status}
+                                  </p>
+                                  {(event as any).vesselName && (
+                                    <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                                      🚢 {(event as any).vesselName}
+                                    </p>
+                                  )}
+                                  {event.location && (
+                                    <p className="mt-1 flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+                                      <MapPin className="h-3 w-3" />
+                                      {event.location}
+                                    </p>
+                                  )}
+                                  {event.description && (
+                                    <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                                      {event.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs font-medium text-[var(--text-primary)]">
+                                    {new Date(event.eventDate).toLocaleDateString()}
+                                  </p>
+                                  <p className="text-xs text-[var(--text-secondary)]">
+                                    {new Date(event.eventDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                  {(event as any).source && (
+                                    <p className="mt-1 text-xs italic text-[var(--text-tertiary)]">
+                                      Source: {(event as any).source}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </DashboardPanel>
             )}
