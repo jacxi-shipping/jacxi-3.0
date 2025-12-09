@@ -252,8 +252,8 @@ export default function ContainerDetailPage() {
 					actions={
 						<Box sx={{ display: 'flex', gap: 1 }}>
 							<Chip 
-								label={statusConfig[container.status].label}
-								color={statusConfig[container.status].color}
+								label={statusConfig[container.status]?.label || container.status}
+								color={statusConfig[container.status]?.color || 'default'}
 								sx={{ fontWeight: 600 }}
 							/>
 							<Link href="/dashboard/containers" style={{ textDecoration: 'none' }}>
@@ -292,8 +292,8 @@ export default function ContainerDetailPage() {
 						<StatsCard
 							icon={<Ship style={{ fontSize: 18 }} />}
 							title="Status"
-							value={statusConfig[container.status].label}
-							variant={statusConfig[container.status].color as 'success' | 'warning' | 'error' | 'info' | 'default'}
+							value={statusConfig[container.status]?.label || container.status}
+							variant={statusConfig[container.status]?.color || 'default'}
 							size="md"
 						/>
 					</DashboardGrid>
@@ -353,13 +353,499 @@ export default function ContainerDetailPage() {
 
 				{/* Tab Content */}
 				<Box sx={{ px: 2, pb: 4 }}>
-					{/* Overview Tab - See CONTAINER_VIEW_REDESIGN_COMPLETE.md for implementation details */}
-					{activeTab === 0 && <Box>Overview content loaded successfully</Box>}
-					{activeTab === 1 && <Box>Shipments tab loaded successfully</Box>}
-					{activeTab === 2 && <Box>Expenses tab loaded successfully</Box>}
-					{activeTab === 3 && <Box>Invoices tab loaded successfully</Box>}
-					{activeTab === 4 && <Box>Documents tab loaded successfully</Box>}
-					{activeTab === 5 && <Box>Tracking tab loaded successfully</Box>}
+					{/* Overview Tab */}
+					{activeTab === 0 && (
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+							<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+								{/* Container Information */}
+								<DashboardPanel 
+									title="Container Information"
+									description="Basic container details"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Container Number</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{container.containerNumber}
+											</Box>
+										</Box>
+										{container.trackingNumber && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Tracking Number</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.trackingNumber}
+												</Box>
+											</Box>
+										)}
+										{container.bookingNumber && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Booking Number</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.bookingNumber}
+												</Box>
+											</Box>
+										)}
+										<Divider sx={{ borderColor: 'var(--border)' }} />
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Capacity</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{container.currentCount} / {container.maxCapacity} vehicles ({capacityPercentage.toFixed(0)}%)
+											</Box>
+										</Box>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Created</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{formatDate(container.createdAt)}
+											</Box>
+										</Box>
+									</Box>
+								</DashboardPanel>
+
+								{/* Shipping Details */}
+								<DashboardPanel 
+									title="Shipping Details"
+									description="Vessel and shipping information"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										{container.vesselName && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Vessel Name</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.vesselName}
+												</Box>
+											</Box>
+										)}
+										{container.voyageNumber && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Voyage Number</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.voyageNumber}
+												</Box>
+											</Box>
+										)}
+										{container.shippingLine && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Shipping Line</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.shippingLine}
+												</Box>
+											</Box>
+										)}
+										<Divider sx={{ borderColor: 'var(--border)' }} />
+										{container.loadingPort && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Loading Port</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.loadingPort}
+												</Box>
+											</Box>
+										)}
+										{container.destinationPort && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Destination Port</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.destinationPort}
+												</Box>
+											</Box>
+										)}
+										{container.currentLocation && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Current Location</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.currentLocation}
+												</Box>
+											</Box>
+										)}
+									</Box>
+								</DashboardPanel>
+
+								{/* Important Dates */}
+								<DashboardPanel 
+									title="Important Dates"
+									description="Shipping timeline"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										{container.loadingDate && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Loading Date</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.loadingDate)}
+												</Box>
+											</Box>
+										)}
+										{container.departureDate && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Departure Date</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.departureDate)}
+												</Box>
+											</Box>
+										)}
+										{container.estimatedArrival && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Estimated Arrival</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.estimatedArrival)}
+												</Box>
+											</Box>
+										)}
+										{container.actualArrival && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Actual Arrival</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.actualArrival)}
+												</Box>
+											</Box>
+										)}
+									</Box>
+								</DashboardPanel>
+
+								{/* Financial Summary */}
+								<DashboardPanel 
+									title="Financial Summary"
+									description="Revenue and expenses"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Expenses</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--error)' }}>
+												{formatCurrency(container.totals.expenses)}
+											</Box>
+										</Box>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Revenue</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--success)' }}>
+												{formatCurrency(container.totals.invoices)}
+											</Box>
+										</Box>
+										<Divider sx={{ borderColor: 'var(--border)' }} />
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Net Profit</Box>
+											<Box sx={{ 
+												fontSize: '1rem', 
+												fontWeight: 700, 
+												color: netProfit >= 0 ? 'var(--success)' : 'var(--error)' 
+											}}>
+												{formatCurrency(netProfit)}
+											</Box>
+										</Box>
+									</Box>
+								</DashboardPanel>
+							</Box>
+
+							{/* Notes */}
+							{container.notes && (
+								<DashboardPanel title="Notes" description="Additional information">
+									<Box sx={{ 
+										fontSize: '0.875rem', 
+										color: 'var(--text-secondary)', 
+										lineHeight: 1.6,
+										whiteSpace: 'pre-wrap',
+									}}>
+										{container.notes}
+									</Box>
+								</DashboardPanel>
+							)}
+
+							{/* Status Management */}
+							<DashboardPanel 
+								title="Update Container Status"
+								description="Change the container's current status"
+							>
+								<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+									{Object.entries(statusConfig).map(([status, config]) => (
+										<Button
+											key={status}
+											variant={container.status === status ? 'primary' : 'outline'}
+											size="sm"
+											onClick={() => handleStatusUpdate(status)}
+											disabled={updating || container.status === status}
+										>
+											{config.label}
+										</Button>
+									))}
+								</Box>
+							</DashboardPanel>
+						</Box>
+					)}
+
+					{/* Shipments Tab */}
+					{activeTab === 1 && (
+						<DashboardPanel
+							title={`Assigned Vehicles (${container.currentCount}/${container.maxCapacity})`}
+							description="Vehicles currently loaded in this container"
+						>
+							{container.shipments.length === 0 ? (
+								<EmptyState
+									icon={<Package className="w-12 h-12" />}
+									title="No Vehicles Assigned"
+									description="This container doesn't have any vehicles assigned yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Vehicle</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>VIN</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.shipments.map((shipment) => (
+												<TableRow 
+													key={shipment.id}
+													hover
+													sx={{ cursor: 'pointer' }}
+													onClick={() => router.push(`/dashboard/shipments/${shipment.id}`)}
+												>
+													<TableCell>
+														{shipment.vehicleMake} {shipment.vehicleModel}
+													</TableCell>
+													<TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+														{shipment.vehicleVIN || 'N/A'}
+													</TableCell>
+													<TableCell>
+														<Chip 
+															label={shipment.status} 
+															size="small"
+															sx={{ fontSize: '0.75rem' }}
+														/>
+													</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Eye className="w-3 h-3" />}
+															onClick={(e) => {
+																e.stopPropagation();
+																router.push(`/dashboard/shipments/${shipment.id}`);
+															}}
+														>
+															View
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Expenses Tab */}
+					{activeTab === 2 && (
+						<DashboardPanel
+							title="Container Expenses"
+							description="All costs and expenses for this container"
+						>
+							{container.expenses.length === 0 ? (
+								<EmptyState
+									icon={<DollarSign className="w-12 h-12" />}
+									title="No Expenses Recorded"
+									description="No expenses have been added to this container yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Vendor</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.expenses.map((expense) => (
+												<TableRow key={expense.id} hover>
+													<TableCell>{expense.type}</TableCell>
+													<TableCell>{expense.vendor || 'N/A'}</TableCell>
+													<TableCell>{formatDate(expense.date)}</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--error)' }}>
+														{formatCurrency(expense.amount, expense.currency)}
+													</TableCell>
+												</TableRow>
+											))}
+											<TableRow>
+												<TableCell colSpan={3} sx={{ fontWeight: 700 }}>Total Expenses</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, color: 'var(--error)' }}>
+													{formatCurrency(container.totals.expenses)}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Invoices Tab */}
+					{activeTab === 3 && (
+						<DashboardPanel
+							title="Container Invoices"
+							description="Billing and revenue for this container"
+						>
+							{container.invoices.length === 0 ? (
+								<EmptyState
+									icon={<FileText className="w-12 h-12" />}
+									title="No Invoices"
+									description="No invoices have been created for this container yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Invoice #</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.invoices.map((invoice) => (
+												<TableRow key={invoice.id} hover>
+													<TableCell sx={{ fontFamily: 'monospace' }}>{invoice.invoiceNumber}</TableCell>
+													<TableCell>{formatDate(invoice.date)}</TableCell>
+													<TableCell>
+														<Chip 
+															label={invoice.status} 
+															size="small"
+															color={invoice.status === 'PAID' ? 'success' : 'default'}
+															sx={{ fontSize: '0.75rem' }}
+														/>
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--success)' }}>
+														{formatCurrency(invoice.amount, invoice.currency)}
+													</TableCell>
+												</TableRow>
+											))}
+											<TableRow>
+												<TableCell colSpan={3} sx={{ fontWeight: 700 }}>Total Revenue</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, color: 'var(--success)' }}>
+													{formatCurrency(container.totals.invoices)}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Documents Tab */}
+					{activeTab === 4 && (
+						<DashboardPanel
+							title="Container Documents"
+							description="Files and documents related to this container"
+						>
+							{container.documents.length === 0 ? (
+								<EmptyState
+									icon={<FileText className="w-12 h-12" />}
+									title="No Documents"
+									description="No documents have been uploaded for this container yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Uploaded</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.documents.map((doc) => (
+												<TableRow key={doc.id} hover>
+													<TableCell>{doc.name}</TableCell>
+													<TableCell>
+														<Chip label={doc.type} size="small" sx={{ fontSize: '0.75rem' }} />
+													</TableCell>
+													<TableCell>{formatDate(doc.uploadedAt)}</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Download className="w-3 h-3" />}
+															onClick={() => window.open(doc.fileUrl, '_blank')}
+														>
+															Download
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Tracking Tab */}
+					{activeTab === 5 && (
+						<DashboardPanel
+							title="Tracking History"
+							description="Location updates and status changes"
+						>
+							{container.trackingEvents.length === 0 ? (
+								<EmptyState
+									icon={<MapPin className="w-12 h-12" />}
+									title="No Tracking Events"
+									description="No tracking updates have been recorded yet"
+								/>
+							) : (
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+									{container.trackingEvents.map((event, index) => (
+										<Box 
+											key={event.id}
+											sx={{ 
+												position: 'relative',
+												pl: 4,
+												borderLeft: index < container.trackingEvents.length - 1 ? '2px solid var(--border)' : 'none',
+												pb: index < container.trackingEvents.length - 1 ? 3 : 0,
+											}}
+										>
+											<Box
+												sx={{
+													position: 'absolute',
+													left: -9,
+													top: 0,
+													width: 16,
+													height: 16,
+													borderRadius: '50%',
+													bgcolor: 'var(--accent-gold)',
+													border: '2px solid var(--background)',
+												}}
+											/>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{event.status}
+												</Box>
+												<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+													{new Date(event.eventDate).toLocaleString()}
+												</Box>
+											</Box>
+											{event.location && (
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', mb: 0.5 }}>
+													📍 {event.location}
+												</Box>
+											)}
+											{event.description && (
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+													{event.description}
+												</Box>
+											)}
+										</Box>
+									))}
+								</Box>
+							)}
+						</DashboardPanel>
+					)}
 				</Box>
 			</DashboardSurface>
 		</AdminRoute>
