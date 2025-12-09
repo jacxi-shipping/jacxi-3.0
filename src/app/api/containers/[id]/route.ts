@@ -223,6 +223,27 @@ export async function PATCH(
       },
     });
 
+    // Auto-generate invoice if status changed to RELEASED or CLOSED
+    if (
+      validatedData.status &&
+      (validatedData.status === 'RELEASED' || validatedData.status === 'CLOSED') &&
+      container.status !== validatedData.status
+    ) {
+      try {
+        const { autoInvoice } = await import('@/lib/services/auto-invoice');
+        const invoiceResult = await autoInvoice.generateInvoiceForContainer(params.id);
+        
+        if (invoiceResult.success) {
+          console.log(`✅ Auto-generated invoice for container ${params.id}:`, invoiceResult.message);
+        } else {
+          console.log(`ℹ️ Invoice not generated for container ${params.id}:`, invoiceResult.message);
+        }
+      } catch (error) {
+        console.error('Error auto-generating invoice:', error);
+        // Don't fail the status update if invoice generation fails
+      }
+    }
+
     // Create audit logs for significant changes
     const auditLogs = [];
 

@@ -671,6 +671,9 @@ export default function ContainerDetailPage() {
 											<TableRow>
 												<TableCell sx={{ fontWeight: 600 }}>Vehicle</TableCell>
 												<TableCell sx={{ fontWeight: 600 }}>VIN</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Payment</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Price</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Insurance</TableCell>
 												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
 												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
 											</TableRow>
@@ -690,9 +693,34 @@ export default function ContainerDetailPage() {
 														{shipment.vehicleVIN || 'N/A'}
 													</TableCell>
 													<TableCell>
+														<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+															{(shipment as any).paymentMode && (
+																<Chip 
+																	label={(shipment as any).paymentMode} 
+																	size="small"
+																	color={(shipment as any).paymentMode === 'CASH' ? 'success' : 'warning'}
+																	sx={{ fontSize: '0.7rem', width: 'fit-content' }}
+																/>
+															)}
+															<Chip 
+																label={(shipment as any).paymentStatus || 'PENDING'} 
+																size="small"
+																color={(shipment as any).paymentStatus === 'COMPLETED' ? 'success' : 'default'}
+																sx={{ fontSize: '0.7rem', width: 'fit-content' }}
+															/>
+														</Box>
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+														{(shipment as any).price ? formatCurrency((shipment as any).price) : 'N/A'}
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--accent-gold)' }}>
+														{(shipment as any).insuranceValue ? formatCurrency((shipment as any).insuranceValue) : 'N/A'}
+													</TableCell>
+													<TableCell>
 														<Chip 
 															label={shipment.status} 
 															size="small"
+															color="primary"
 															sx={{ fontSize: '0.75rem' }}
 														/>
 													</TableCell>
@@ -711,6 +739,19 @@ export default function ContainerDetailPage() {
 													</TableCell>
 												</TableRow>
 											))}
+											{/* Totals Row */}
+											<TableRow sx={{ bgcolor: 'var(--surface)' }}>
+												<TableCell colSpan={3} sx={{ fontWeight: 700, borderTop: '2px solid var(--border)' }}>
+													Total Revenue from Shipments
+												</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, borderTop: '2px solid var(--border)', color: 'var(--success)' }}>
+													{formatCurrency(container.shipments.reduce((sum, s) => sum + ((s as any).price || 0), 0))}
+												</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, borderTop: '2px solid var(--border)', color: 'var(--accent-gold)' }}>
+													{formatCurrency(container.shipments.reduce((sum, s) => sum + ((s as any).insuranceValue || 0), 0))}
+												</TableCell>
+												<TableCell colSpan={2} sx={{ borderTop: '2px solid var(--border)' }}></TableCell>
+											</TableRow>
 										</TableBody>
 									</Table>
 								</TableContainer>
