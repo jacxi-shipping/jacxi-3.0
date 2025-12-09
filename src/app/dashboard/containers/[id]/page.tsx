@@ -30,6 +30,7 @@ import {
 	Eye,
 	Plus,
 	Trash2,
+	AlertTriangle,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import { 
@@ -40,11 +41,15 @@ import {
 	LoadingState, 
 	EmptyState, 
 	StatsCard,
- DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
+	DashboardPageSkeleton, 
+	DetailPageSkeleton, 
+	FormPageSkeleton
+} from '@/components/design-system';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import AddExpenseModal from '@/components/containers/AddExpenseModal';
 import AddInvoiceModal from '@/components/containers/AddInvoiceModal';
 import AddTrackingEventModal from '@/components/containers/AddTrackingEventModal';
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 interface Shipment {
 	id: string;
@@ -145,6 +150,8 @@ export default function ContainerDetailPage() {
 	const [deletingInvoiceId, setDeletingInvoiceId] = useState<string | null>(null);
 	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 	const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 
 	useEffect(() => {
 		if (params.id) {
@@ -285,6 +292,40 @@ export default function ContainerDetailPage() {
 		}
 	};
 
+	const handleDeleteContainer = async () => {
+		if (!container) return;
+
+		setDeleting(true);
+		try {
+			const response = await fetch(`/api/containers/${params.id}`, {
+				method: 'DELETE',
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success('Container deleted successfully', {
+					description: 'Redirecting to containers list...'
+				});
+				setTimeout(() => {
+					router.push('/dashboard/containers');
+				}, 1000);
+			} else {
+				toast.error('Failed to delete container', {
+					description: data.error || 'Please try again'
+				});
+			}
+		} catch (error) {
+			console.error('Error deleting container:', error);
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
+		} finally {
+			setDeleting(false);
+			setDeleteModalOpen(false);
+		}
+	};
+
 	const formatCurrency = (amount: number, currency: string = 'USD') => {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -347,12 +388,28 @@ export default function ContainerDetailPage() {
 					title={container.containerNumber}
 					description={container.trackingNumber ? `Tracking: ${container.trackingNumber}` : 'Container details and management'}
 					actions={
-						<Box sx={{ display: 'flex', gap: 1 }}>
+						<Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
 							<Chip 
 								label={statusConfig[container.status]?.label || container.status}
 								color={statusConfig[container.status]?.color || 'default'}
 								sx={{ fontWeight: 600 }}
 							/>
+							<Button 
+								variant="outline" 
+								size="sm" 
+								icon={<Trash2 className="w-4 h-4" />}
+								onClick={() => setDeleteModalOpen(true)}
+								sx={{
+									borderColor: 'var(--error)',
+									color: 'var(--error)',
+									'&:hover': {
+										bgcolor: 'rgba(var(--error-rgb), 0.1)',
+										borderColor: 'var(--error)',
+									}
+								}}
+							>
+								Delete
+							</Button>
 							<Link href="/dashboard/containers" style={{ textDecoration: 'none' }}>
 								<Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
 									Back
@@ -1104,6 +1161,170 @@ export default function ContainerDetailPage() {
 					containerId={container.id}
 					onSuccess={fetchContainer}
 				/>
+
+				{/* Delete Confirmation Modal */}
+				<Dialog
+					open={deleteModalOpen}
+					onClose={() => !deleting && setDeleteModalOpen(false)}
+					maxWidth="sm"
+					fullWidth
+					PaperProps={{
+						sx: {
+							bgcolor: 'var(--panel)',
+							backgroundImage: 'none',
+							border: '1px solid var(--border)',
+							borderRadius: 2,
+						}
+					}}
+				>
+					<DialogTitle
+						sx={{
+							color: 'var(--text-primary)',
+							fontWeight: 700,
+							fontSize: '1.25rem',
+							borderBottom: '1px solid var(--border)',
+							display: 'flex',
+							alignItems: 'center',
+							gap: 1.5,
+						}}
+					>
+						<Box
+							sx={{
+								width: 40,
+								height: 40,
+								borderRadius: '50%',
+								bgcolor: 'rgba(var(--error-rgb), 0.1)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<AlertTriangle className="w-5 h-5" style={{ color: 'var(--error)' }} />
+						</Box>
+						Delete Container
+					</DialogTitle>
+					<DialogContent sx={{ py: 3 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+							<Box sx={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+								Are you sure you want to delete container <strong>{container.containerNumber}</strong>?
+							</Box>
+							
+							{container.shipments.length > 0 && (
+								<Box
+									sx={{
+										p: 2,
+										borderRadius: 1,
+										bgcolor: 'rgba(var(--error-rgb), 0.1)',
+										border: '1px solid rgba(var(--error-rgb), 0.3)',
+									}}
+								>
+									<Box sx={{ display: 'flex', alignItems: 'start', gap: 1.5 }}>
+										<AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />
+										<Box>
+											<Box sx={{ fontWeight: 600, color: 'var(--error)', fontSize: '0.875rem', mb: 0.5 }}>
+												Warning: Container has {container.shipments.length} assigned shipment{container.shipments.length !== 1 ? 's' : ''}
+											</Box>
+											<Box sx={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+												You must remove all shipments from this container before deleting it.
+											</Box>
+										</Box>
+									</Box>
+								</Box>
+							)}
+
+							{container.shipments.length === 0 && (
+								<Box
+									sx={{
+										p: 2,
+										borderRadius: 1,
+										bgcolor: 'rgba(251, 191, 36, 0.1)',
+										border: '1px solid rgba(251, 191, 36, 0.3)',
+									}}
+								>
+									<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+										<strong style={{ color: 'var(--text-primary)' }}>This action cannot be undone.</strong> This will permanently delete:
+									</Box>
+									<Box component="ul" sx={{ mt: 1, pl: 2.5, fontSize: '0.875rem', color: 'var(--text-secondary)', '& li': { mb: 0.5 } }}>
+										<li>Container details and tracking information</li>
+										<li>All tracking events ({container.trackingEvents?.length || 0} events)</li>
+										<li>All expenses ({container.expenses.length} expenses)</li>
+										<li>All invoices ({container.invoices.length} invoices)</li>
+										<li>All documents ({container.documents.length} documents)</li>
+										<li>All audit logs</li>
+									</Box>
+								</Box>
+							)}
+						</Box>
+					</DialogContent>
+					<DialogActions
+						sx={{
+							px: 3,
+							py: 2,
+							borderTop: '1px solid var(--border)',
+							gap: 1,
+						}}
+					>
+						<Button
+							variant="outline"
+							onClick={() => setDeleteModalOpen(false)}
+							disabled={deleting}
+							sx={{
+								color: 'var(--text-secondary)',
+								borderColor: 'var(--border)',
+								'&:hover': {
+									bgcolor: 'var(--background)',
+								}
+							}}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleDeleteContainer}
+							disabled={deleting || container.shipments.length > 0}
+							sx={{
+								bgcolor: 'var(--error)',
+								color: 'white',
+								'&:hover': {
+									bgcolor: 'var(--error)',
+									opacity: 0.9,
+								},
+								'&:disabled': {
+									opacity: 0.5,
+									cursor: 'not-allowed',
+								}
+							}}
+						>
+							{deleting ? (
+								<>
+									<Box
+										component="span"
+										sx={{
+											display: 'inline-block',
+											width: 16,
+											height: 16,
+											mr: 1,
+											border: '2px solid white',
+											borderTopColor: 'transparent',
+											borderRadius: '50%',
+											animation: 'spin 0.6s linear infinite',
+											'@keyframes spin': {
+												'0%': { transform: 'rotate(0deg)' },
+												'100%': { transform: 'rotate(360deg)' },
+											},
+										}}
+									/>
+									Deleting...
+								</>
+							) : (
+								<>
+									<Trash2 className="w-4 h-4 mr-2" />
+									Delete Container
+								</>
+							)}
+						</Button>
+					</DialogActions>
+				</Dialog>
 			</DashboardSurface>
 		</AdminRoute>
 	);
