@@ -43,6 +43,7 @@ import {
  DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import AddExpenseModal from '@/components/containers/AddExpenseModal';
+import AddInvoiceModal from '@/components/containers/AddInvoiceModal';
 
 interface Shipment {
 	id: string;
@@ -139,6 +140,8 @@ export default function ContainerDetailPage() {
 	const [updating, setUpdating] = useState(false);
 	const [expenseModalOpen, setExpenseModalOpen] = useState(false);
 	const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
+	const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+	const [deletingInvoiceId, setDeletingInvoiceId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (params.id) {
@@ -214,6 +217,30 @@ export default function ContainerDetailPage() {
 			toast.error('An error occurred');
 		} finally {
 			setDeletingExpenseId(null);
+		}
+	};
+
+	const handleDeleteInvoice = async (invoiceId: string) => {
+		if (!confirm('Are you sure you want to delete this invoice?')) return;
+
+		setDeletingInvoiceId(invoiceId);
+		try {
+			const response = await fetch(`/api/containers/${params.id}/invoices?invoiceId=${invoiceId}`, {
+				method: 'DELETE',
+			});
+
+			if (response.ok) {
+				toast.success('Invoice deleted successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to delete invoice');
+			}
+		} catch (error) {
+			console.error('Error deleting invoice:', error);
+			toast.error('An error occurred');
+		} finally {
+			setDeletingInvoiceId(null);
 		}
 	};
 
@@ -745,6 +772,17 @@ export default function ContainerDetailPage() {
 							title="Container Invoices"
 							description="Billing and revenue for this container"
 						>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setInvoiceModalOpen(true)}
+								>
+									Create Invoice
+								</Button>
+							</Box>
+
 							{container.invoices.length === 0 ? (
 								<EmptyState
 									icon={<FileText className="w-12 h-12" />}
@@ -760,6 +798,7 @@ export default function ContainerDetailPage() {
 												<TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
 												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
 												<TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
 											</TableRow>
 										</TableHead>
 										<TableBody>
@@ -778,10 +817,26 @@ export default function ContainerDetailPage() {
 													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--success)' }}>
 														{formatCurrency(invoice.amount, invoice.currency)}
 													</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Trash2 className="w-3 h-3" />}
+															onClick={() => handleDeleteInvoice(invoice.id)}
+															disabled={deletingInvoiceId === invoice.id}
+															sx={{ 
+																color: 'var(--error)',
+																borderColor: 'var(--error)',
+																'&:hover': { bgcolor: 'rgba(var(--error-rgb), 0.1)' }
+															}}
+														>
+															{deletingInvoiceId === invoice.id ? 'Deleting...' : 'Delete'}
+														</Button>
+													</TableCell>
 												</TableRow>
 											))}
 											<TableRow>
-												<TableCell colSpan={3} sx={{ fontWeight: 700 }}>Total Revenue</TableCell>
+												<TableCell colSpan={4} sx={{ fontWeight: 700 }}>Total Revenue</TableCell>
 												<TableCell align="right" sx={{ fontWeight: 700, color: 'var(--success)' }}>
 													{formatCurrency(container.totals.invoices)}
 												</TableCell>
@@ -909,6 +964,14 @@ export default function ContainerDetailPage() {
 				<AddExpenseModal
 					open={expenseModalOpen}
 					onClose={() => setExpenseModalOpen(false)}
+					containerId={container.id}
+					onSuccess={fetchContainer}
+				/>
+
+				{/* Add Invoice Modal */}
+				<AddInvoiceModal
+					open={invoiceModalOpen}
+					onClose={() => setInvoiceModalOpen(false)}
 					containerId={container.id}
 					onSuccess={fetchContainer}
 				/>
