@@ -343,7 +343,7 @@ export default function InvoiceDetailPage() {
 
 				{/* Main Content */}
 				<DashboardSurface>
-					<DashboardGrid columns={3}>
+					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
 						{/* Invoice Information */}
 						<DashboardPanel 
 							title="Invoice Details"
@@ -508,14 +508,14 @@ export default function InvoiceDetailPage() {
 								</Button>
 							</Box>
 						</DashboardPanel>
-					</DashboardGrid>
+					</Box>
 
 					{/* Line Items */}
-					<DashboardPanel 
-						title="Line Items"
-						description="Detailed breakdown of charges"
-						sx={{ mt: 3 }}
-					>
+					<Box sx={{ mt: 3 }}>
+						<DashboardPanel 
+							title="Line Items"
+							description="Detailed breakdown of charges"
+						>
 						<TableContainer>
 							<Table size="small">
 								<TableHead>
@@ -612,15 +612,16 @@ export default function InvoiceDetailPage() {
 								</TableBody>
 							</Table>
 						</TableContainer>
-					</DashboardPanel>
+						</DashboardPanel>
+					</Box>
 
 					{/* Notes */}
 					{(invoice.notes || invoice.internalNotes) && (
-						<DashboardPanel 
-							title="Notes"
-							description="Additional information"
-							sx={{ mt: 3 }}
-						>
+						<Box sx={{ mt: 3 }}>
+							<DashboardPanel 
+								title="Notes"
+								description="Additional information"
+							>
 							<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 								{invoice.notes && (
 									<Box>
@@ -656,7 +657,8 @@ export default function InvoiceDetailPage() {
 									</Box>
 								)}
 							</Box>
-						</DashboardPanel>
+							</DashboardPanel>
+						</Box>
 					)}
 				</DashboardSurface>
 			</Box>

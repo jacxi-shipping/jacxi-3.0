@@ -49,13 +49,13 @@ interface Invoice {
 
 // Design system colors
 const COLORS = {
-  dark: [25, 28, 31],       // #191C1F
-  gold: [218, 165, 32],      // #DAA520
-  success: [34, 197, 94],    // #22C55E
-  error: [239, 68, 68],      // #EF4444
-  text: [100, 116, 139],     // #64748B
-  background: [248, 250, 252], // #F8FAFC
-  white: [255, 255, 255],
+  dark: [25, 28, 31] as [number, number, number],       // #191C1F
+  gold: [218, 165, 32] as [number, number, number],      // #DAA520
+  success: [34, 197, 94] as [number, number, number],    // #22C55E
+  error: [239, 68, 68] as [number, number, number],      // #EF4444
+  text: [100, 116, 139] as [number, number, number],     // #64748B
+  background: [248, 250, 252] as [number, number, number], // #F8FAFC
+  white: [255, 255, 255] as [number, number, number],
 };
 
 // Helper functions
@@ -105,7 +105,7 @@ export const generateInvoicePDF = (invoice: Invoice) => {
   const statusX = pageWidth - statusWidth - 20;
   
   // Status color
-  const statusColors: Record<string, number[]> = {
+  const statusColors: Record<string, [number, number, number]> = {
     'PAID': COLORS.success,
     'OVERDUE': COLORS.error,
     'SENT': [59, 130, 246],    // Blue

@@ -60,6 +60,11 @@ interface Shipment {
 	vehicleModel: string | null;
 	vehicleVIN: string | null;
 	status: string;
+	user?: {
+		id: string;
+		name: string | null;
+		email: string;
+	};
 }
 
 interface Expense {

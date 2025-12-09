@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 // Schema for generating invoices
@@ -18,7 +17,7 @@ const generateInvoicesSchema = z.object({
  */
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -111,7 +110,7 @@ export async function POST(req: NextRequest) {
           lineItems.push({
             description: `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''} - Vehicle Price`.trim(),
             shipmentId: shipment.id,
-            type: 'VEHICLE_PRICE',
+            type: 'VEHICLE_PRICE' as const,
             quantity: 1,
             unitPrice: shipment.price,
             amount: shipment.price,
@@ -124,7 +123,7 @@ export async function POST(req: NextRequest) {
           lineItems.push({
             description: `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''} - Insurance`.trim(),
             shipmentId: shipment.id,
-            type: 'INSURANCE',
+            type: 'INSURANCE' as const,
             quantity: 1,
             unitPrice: shipment.insuranceValue,
             amount: shipment.insuranceValue,
@@ -143,7 +142,7 @@ export async function POST(req: NextRequest) {
 
         for (const [expenseType, totalAmount] of Object.entries(expenseTypes)) {
           const shareAmount = totalAmount / vehicleCount;
-          const lineItemType = mapExpenseTypeToLineItemType(expenseType);
+          const lineItemType = mapExpenseTypeToLineItemType(expenseType) as any;
           
           lineItems.push({
             description: `${shipment.vehicleYear || ''} ${shipment.vehicleMake || ''} ${shipment.vehicleModel || ''} - ${expenseType} (${1}/${vehicleCount} share)`.trim(),
@@ -222,7 +221,7 @@ export async function POST(req: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }
