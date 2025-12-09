@@ -31,6 +31,8 @@ import {
 	Plus,
 	Trash2,
 	AlertTriangle,
+	Copy,
+	Printer,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import { 
@@ -152,6 +154,9 @@ export default function ContainerDetailPage() {
 	const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [deleting, setDeleting] = useState(false);
+	const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+	const [duplicating, setDuplicating] = useState(false);
+	const [newContainerNumber, setNewContainerNumber] = useState('');
 
 	useEffect(() => {
 		if (params.id) {
@@ -326,6 +331,68 @@ export default function ContainerDetailPage() {
 		}
 	};
 
+	const handleDuplicateContainer = async () => {
+		if (!container || !newContainerNumber.trim()) {
+			toast.error('Please enter a container number');
+			return;
+		}
+
+		setDuplicating(true);
+		try {
+			// Create new container with same details but new number
+			const payload = {
+				containerNumber: newContainerNumber.trim(),
+				trackingNumber: container.trackingNumber,
+				vesselName: container.vesselName,
+				voyageNumber: container.voyageNumber,
+				shippingLine: container.shippingLine,
+				bookingNumber: '', // Don't copy booking number
+				loadingPort: container.loadingPort,
+				destinationPort: container.destinationPort,
+				transshipmentPorts: container.transshipmentPorts,
+				loadingDate: container.loadingDate,
+				departureDate: container.departureDate,
+				estimatedArrival: container.estimatedArrival,
+				maxCapacity: container.maxCapacity,
+				notes: container.notes,
+				autoTrackingEnabled: container.autoTrackingEnabled,
+			};
+
+			const response = await fetch('/api/containers', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success('Container duplicated successfully!', {
+					description: 'Redirecting to new container...'
+				});
+				setTimeout(() => {
+					router.push(`/dashboard/containers/${data.container.id}`);
+				}, 1000);
+			} else {
+				toast.error('Failed to duplicate container', {
+					description: data.error || 'Please try again'
+				});
+			}
+		} catch (error) {
+			console.error('Error duplicating container:', error);
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
+		} finally {
+			setDuplicating(false);
+			setDuplicateModalOpen(false);
+		}
+	};
+
+	const handlePrint = () => {
+		window.print();
+	};
+
 	const formatCurrency = (amount: number, currency: string = 'USD') => {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -393,7 +460,29 @@ export default function ContainerDetailPage() {
 								label={statusConfig[container.status]?.label || container.status}
 								color={statusConfig[container.status]?.color || 'default'}
 								sx={{ fontWeight: 600 }}
+								className="no-print"
 							/>
+							<Button 
+								variant="outline" 
+								size="sm" 
+								icon={<Copy className="w-4 h-4" />}
+								onClick={() => {
+									setNewContainerNumber('');
+									setDuplicateModalOpen(true);
+								}}
+								className="no-print"
+							>
+								Duplicate
+							</Button>
+							<Button 
+								variant="outline" 
+								size="sm" 
+								icon={<Printer className="w-4 h-4" />}
+								onClick={handlePrint}
+								className="no-print"
+							>
+								Print
+							</Button>
 							<Button 
 								variant="outline" 
 								size="sm" 
@@ -407,11 +496,12 @@ export default function ContainerDetailPage() {
 										borderColor: 'var(--error)',
 									}
 								}}
+								className="no-print"
 							>
 								Delete
 							</Button>
 							<Link href="/dashboard/containers" style={{ textDecoration: 'none' }}>
-								<Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
+								<Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />} className="no-print">
 									Back
 								</Button>
 							</Link>
@@ -1161,6 +1251,184 @@ export default function ContainerDetailPage() {
 					containerId={container.id}
 					onSuccess={fetchContainer}
 				/>
+
+				{/* Duplicate Container Modal */}
+				<Dialog
+					open={duplicateModalOpen}
+					onClose={() => !duplicating && setDuplicateModalOpen(false)}
+					maxWidth="sm"
+					fullWidth
+					PaperProps={{
+						sx: {
+							bgcolor: 'var(--panel)',
+							backgroundImage: 'none',
+							border: '1px solid var(--border)',
+							borderRadius: 2,
+						}
+					}}
+				>
+					<DialogTitle
+						sx={{
+							color: 'var(--text-primary)',
+							fontWeight: 700,
+							fontSize: '1.25rem',
+							borderBottom: '1px solid var(--border)',
+							display: 'flex',
+							alignItems: 'center',
+							gap: 1.5,
+						}}
+					>
+						<Box
+							sx={{
+								width: 40,
+								height: 40,
+								borderRadius: '50%',
+								bgcolor: 'rgba(var(--accent-gold-rgb), 0.1)',
+								display: 'flex',
+								alignItems: 'center',
+								justifyContent: 'center',
+							}}
+						>
+							<Copy className="w-5 h-5" style={{ color: 'var(--accent-gold)' }} />
+						</Box>
+						Duplicate Container
+					</DialogTitle>
+					<DialogContent sx={{ py: 3 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+							<Box sx={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+								Create a copy of container <strong>{container.containerNumber}</strong> with all settings.
+							</Box>
+							
+							<Box
+								sx={{
+									p: 2,
+									borderRadius: 1,
+									bgcolor: 'rgba(99, 102, 241, 0.1)',
+									border: '1px solid rgba(99, 102, 241, 0.3)',
+								}}
+							>
+								<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+									<strong style={{ color: 'var(--text-primary)' }}>What will be copied:</strong>
+								</Box>
+								<Box component="ul" sx={{ mt: 1, pl: 2.5, fontSize: '0.875rem', color: 'var(--text-secondary)', '& li': { mb: 0.5 } }}>
+									<li>Vessel and voyage information</li>
+									<li>Shipping line and ports</li>
+									<li>Dates and capacity settings</li>
+									<li>Notes and preferences</li>
+								</Box>
+								<Box sx={{ mt: 1.5, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+									<strong style={{ color: 'var(--text-primary)' }}>What won't be copied:</strong>
+								</Box>
+								<Box component="ul" sx={{ mt: 0.5, pl: 2.5, fontSize: '0.875rem', color: 'var(--text-secondary)', '& li': { mb: 0.5 } }}>
+									<li>Assigned shipments</li>
+									<li>Expenses and invoices</li>
+									<li>Documents and tracking events</li>
+									<li>Booking number</li>
+								</Box>
+							</Box>
+
+							<Box>
+								<Box
+									component="label"
+									sx={{
+										display: 'block',
+										fontSize: '0.875rem',
+										fontWeight: 600,
+										color: 'var(--text-primary)',
+										mb: 1,
+									}}
+								>
+									New Container Number <span style={{ color: 'var(--error)' }}>*</span>
+								</Box>
+								<input
+									type="text"
+									value={newContainerNumber}
+									onChange={(e) => setNewContainerNumber(e.target.value)}
+									placeholder="e.g., ABCU9876543"
+									disabled={duplicating}
+									style={{
+										width: '100%',
+										padding: '10px 12px',
+										borderRadius: '8px',
+										border: '1px solid var(--border)',
+										backgroundColor: 'var(--background)',
+										color: 'var(--text-primary)',
+										fontSize: '0.95rem',
+									}}
+									autoFocus
+								/>
+							</Box>
+						</Box>
+					</DialogContent>
+					<DialogActions
+						sx={{
+							px: 3,
+							py: 2,
+							borderTop: '1px solid var(--border)',
+							gap: 1,
+						}}
+					>
+						<Button
+							variant="outline"
+							onClick={() => setDuplicateModalOpen(false)}
+							disabled={duplicating}
+							sx={{
+								color: 'var(--text-secondary)',
+								borderColor: 'var(--border)',
+								'&:hover': {
+									bgcolor: 'var(--background)',
+								}
+							}}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleDuplicateContainer}
+							disabled={duplicating || !newContainerNumber.trim()}
+							sx={{
+								bgcolor: 'var(--accent-gold)',
+								color: 'white',
+								'&:hover': {
+									bgcolor: 'var(--accent-gold)',
+									opacity: 0.9,
+								},
+								'&:disabled': {
+									opacity: 0.5,
+									cursor: 'not-allowed',
+								}
+							}}
+						>
+							{duplicating ? (
+								<>
+									<Box
+										component="span"
+										sx={{
+											display: 'inline-block',
+											width: 16,
+											height: 16,
+											mr: 1,
+											border: '2px solid white',
+											borderTopColor: 'transparent',
+											borderRadius: '50%',
+											animation: 'spin 0.6s linear infinite',
+											'@keyframes spin': {
+												'0%': { transform: 'rotate(0deg)' },
+												'100%': { transform: 'rotate(360deg)' },
+											},
+										}}
+									/>
+									Duplicating...
+								</>
+							) : (
+								<>
+									<Copy className="w-4 h-4 mr-2" />
+									Duplicate Container
+								</>
+							)}
+						</Button>
+					</DialogActions>
+				</Dialog>
 
 				{/* Delete Confirmation Modal */}
 				<Dialog

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Box, Typography } from '@mui/material';
-import { Package, Ship, MapPin, TrendingUp, Calendar, FileText, DollarSign, Receipt } from 'lucide-react';
+import { Box, Typography, Menu, MenuItem, IconButton, Divider } from '@mui/material';
+import { Package, Ship, MapPin, TrendingUp, Calendar, FileText, DollarSign, Receipt, MoreVertical, Eye, Copy, Trash2 } from 'lucide-react';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import { PageHeader, StatsCard, Button, EmptyState, FormField, Breadcrumbs, toast, SkeletonCard, DashboardPageSkeleton, CompactSkeleton } from '@/components/design-system';
@@ -60,6 +60,8 @@ export default function ContainersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedContainer, setSelectedContainer] = useState<Container | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -102,6 +104,69 @@ export default function ContainersPage() {
     e.preventDefault();
     setPage(1);
     fetchContainers();
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, container: Container) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedContainer(container);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedContainer(null);
+  };
+
+  const handleViewContainer = () => {
+    if (selectedContainer) {
+      router.push(`/dashboard/containers/${selectedContainer.id}`);
+    }
+    handleMenuClose();
+  };
+
+  const handleDuplicateContainer = () => {
+    if (selectedContainer) {
+      router.push(`/dashboard/containers/${selectedContainer.id}?action=duplicate`);
+    }
+    handleMenuClose();
+  };
+
+  const handleDeleteContainer = async () => {
+    if (!selectedContainer) return;
+    
+    if (selectedContainer.currentCount > 0) {
+      toast.error('Cannot delete container', {
+        description: 'Remove all shipments first'
+      });
+      handleMenuClose();
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to delete container ${selectedContainer.containerNumber}?`)) {
+      handleMenuClose();
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/containers/${selectedContainer.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast.success('Container deleted successfully');
+        fetchContainers();
+      } else {
+        const data = await response.json();
+        toast.error('Failed to delete container', {
+          description: data.error
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting container:', error);
+      toast.error('An error occurred');
+    }
+    
+    handleMenuClose();
   };
 
   const stats = {
@@ -265,7 +330,7 @@ export default function ContainersPage() {
                   >
                     {/* Header */}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
-                      <Box>
+                      <Box sx={{ flex: 1 }}>
                         <Typography sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                           {container.containerNumber}
                         </Typography>
@@ -275,20 +340,34 @@ export default function ContainersPage() {
                           </Typography>
                         )}
                       </Box>
-                      <Box
-                        sx={{
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: 1,
-                          fontSize: '0.7rem',
-                          fontWeight: 600,
-                          ...statusColors[container.status],
-                          border: `1px solid ${statusColors[container.status].border}`,
-                          bgcolor: statusColors[container.status].bg,
-                          color: statusColors[container.status].text,
-                        }}
-                      >
-                        {statusLabels[container.status]}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box
+                          sx={{
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 1,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            ...statusColors[container.status],
+                            border: `1px solid ${statusColors[container.status].border}`,
+                            bgcolor: statusColors[container.status].bg,
+                            color: statusColors[container.status].text,
+                          }}
+                        >
+                          {statusLabels[container.status]}
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, container)}
+                          sx={{
+                            color: 'var(--text-secondary)',
+                            '&:hover': {
+                              bgcolor: 'rgba(var(--text-primary-rgb), 0.05)',
+                            },
+                          }}
+                        >
+                          <MoreVertical style={{ fontSize: 18 }} />
+                        </IconButton>
                       </Box>
                     </Box>
 
@@ -412,6 +491,71 @@ export default function ContainersPage() {
             </>
           )}
         </DashboardPanel>
+
+        {/* Quick Actions Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          PaperProps={{
+            sx: {
+              bgcolor: 'var(--panel)',
+              border: '1px solid var(--border)',
+              borderRadius: 2,
+              minWidth: 180,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+            },
+          }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem
+            onClick={handleViewContainer}
+            sx={{
+              fontSize: '0.875rem',
+              py: 1.5,
+              px: 2,
+              color: 'var(--text-primary)',
+              '&:hover': {
+                bgcolor: 'rgba(var(--accent-gold-rgb), 0.1)',
+              },
+            }}
+          >
+            <Eye style={{ fontSize: 16, marginRight: 12 }} />
+            View Details
+          </MenuItem>
+          <MenuItem
+            onClick={handleDuplicateContainer}
+            sx={{
+              fontSize: '0.875rem',
+              py: 1.5,
+              px: 2,
+              color: 'var(--text-primary)',
+              '&:hover': {
+                bgcolor: 'rgba(var(--accent-gold-rgb), 0.1)',
+              },
+            }}
+          >
+            <Copy style={{ fontSize: 16, marginRight: 12 }} />
+            Duplicate
+          </MenuItem>
+          <Divider sx={{ my: 0.5, borderColor: 'var(--border)' }} />
+          <MenuItem
+            onClick={handleDeleteContainer}
+            sx={{
+              fontSize: '0.875rem',
+              py: 1.5,
+              px: 2,
+              color: 'var(--error)',
+              '&:hover': {
+                bgcolor: 'rgba(var(--error-rgb), 0.1)',
+              },
+            }}
+          >
+            <Trash2 style={{ fontSize: 16, marginRight: 12 }} />
+            Delete
+          </MenuItem>
+        </Menu>
       </DashboardSurface>
     </AdminRoute>
   );
