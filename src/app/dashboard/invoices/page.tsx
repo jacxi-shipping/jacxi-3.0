@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Receipt, CheckCircle, Clock, AlertCircle, Search as SearchIcon, Plus } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 interface Invoice {
 	id: string;
@@ -97,7 +97,7 @@ export default function InvoicesPage() {
 	};
 
 	if (status === 'loading' || loading) {
-		return <LoadingState fullScreen message="Loading invoices..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	const role = session?.user?.role;

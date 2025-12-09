@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { FileText, ShieldCheck, Download, Upload, Search as SearchIcon, Folder } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 type DocumentCategory = {
 	id: string;
@@ -174,7 +174,7 @@ export default function DocumentsPage() {
 
 	const role = session?.user?.role;
 	if (status === 'loading' || !session || role !== 'admin') {
-		return <LoadingState fullScreen message="Loading documents..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	return (

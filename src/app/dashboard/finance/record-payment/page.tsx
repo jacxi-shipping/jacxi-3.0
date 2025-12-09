@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Box, TextField, Grid, Select, MenuItem, FormControl, InputLabel, Checkbox, Divider, InputAdornment } from '@mui/material';
 import { ArrowLeft, DollarSign, AlertCircle, CheckCircle2, User, CreditCard, FileText } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, Button, Breadcrumbs, toast, LoadingState, EmptyState, StatusBadge, StatsCard } from '@/components/design-system';
+import { PageHeader, Button, Breadcrumbs, toast, LoadingState, EmptyState, StatusBadge, StatsCard , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import AdminRoute from '@/components/auth/AdminRoute';
 
 interface User {
@@ -162,7 +162,7 @@ export default function RecordPaymentPage() {
   if (status === 'loading') {
     return (
       <AdminRoute>
-        <LoadingState fullScreen message="Loading..." />
+        <DashboardPageSkeleton />
       </AdminRoute>
     );
   }

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Box, Typography } from '@mui/material';
 import { AlertCircle, CheckCircle2, Clock, MapPin, Search, Package, Ship, Calendar, TrendingUp } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast, StatusBadge } from '@/components/design-system';
+import { PageHeader, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast, StatusBadge , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 interface TrackingEventEntry {
 	id: string;
@@ -113,7 +113,7 @@ export default function DashboardTrackingPage() {
 	};
 
 	if (status === 'loading') {
-		return <LoadingState fullScreen message="Loading tracking..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	if (!session) {

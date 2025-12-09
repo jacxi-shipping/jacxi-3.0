@@ -15,7 +15,7 @@ import {
 	RotateCcw,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, Button, Breadcrumbs, toast, LoadingState, EmptyState, StatsCard } from '@/components/design-system';
+import { PageHeader, Button, Breadcrumbs, toast, LoadingState, EmptyState, StatsCard , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 type ProfileFormState = {
 	name: string;
@@ -145,7 +145,7 @@ export default function ProfilePage() {
 	};
 
 	if (status === 'loading' || loading) {
-		return <LoadingState fullScreen message="Loading your profile..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	if (!profile) {

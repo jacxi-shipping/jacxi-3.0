@@ -63,6 +63,16 @@ export {
   SkeletonGroup
 } from './Skeleton';
 
+// Page Skeletons (Phase 4)
+export {
+  DashboardPageSkeleton,
+  DetailPageSkeleton,
+  FormPageSkeleton,
+  CompactSkeleton,
+  TableSkeleton,
+  StatsGridSkeleton,
+} from './PageSkeletons';
+
 // Tooltips (Phase 4)
 export { default as Tooltip, InfoTooltip } from './Tooltip';
 export type { TooltipProps } from './Tooltip';

@@ -16,7 +16,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, Button, LoadingState, Breadcrumbs, toast } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, LoadingState, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface FinancialSummary {
@@ -96,7 +96,7 @@ export default function FinancePage() {
   if (status === 'loading' || loading) {
     return (
       <ProtectedRoute>
-        <LoadingState fullScreen message="Loading financial data..." />
+        <DashboardPageSkeleton />
       </ProtectedRoute>
     );
   }

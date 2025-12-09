@@ -39,7 +39,7 @@ import {
 	toast,
 	LoadingState,
 	EmptyState,
-} from '@/components/design-system';
+ DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 type PhotoSection = 'container' | 'arrival';
@@ -231,7 +231,7 @@ export default function EditShipmentPage() {
 	if (loadingData) {
 		return (
 			<ProtectedRoute>
-				<LoadingState fullScreen message="Loading shipment data..." />
+				<FormPageSkeleton />
 			</ProtectedRoute>
 		);
 	}

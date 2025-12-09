@@ -8,7 +8,7 @@ import { Box, Typography } from '@mui/material';
 import { Package, Ship, MapPin, TrendingUp, Calendar, FileText, DollarSign, Receipt } from 'lucide-react';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast, SkeletonCard } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, FormField, Breadcrumbs, toast, SkeletonCard, DashboardPageSkeleton, CompactSkeleton } from '@/components/design-system';
 
 interface Container {
   id: string;
@@ -114,16 +114,11 @@ export default function ContainersPage() {
   };
 
   if (loading && containers.length === 0) {
-  return (
-    <AdminRoute>
-      <DashboardSurface>
-        <Box sx={{ px: 2, pt: 2 }}>
-          <Breadcrumbs />
-        </Box>
-        <LoadingState fullScreen message="Loading containers..." />
-      </DashboardSurface>
-    </AdminRoute>
-  );
+    return (
+      <AdminRoute>
+        <DashboardPageSkeleton />
+      </AdminRoute>
+    );
   }
 
   return (
@@ -235,7 +230,7 @@ export default function ContainersPage() {
         {/* Container Grid */}
         <DashboardPanel title={`All Containers (${containers.length})`} fullHeight>
           {loading ? (
-            <LoadingState message="Loading containers..." />
+            <CompactSkeleton />
           ) : containers.length === 0 ? (
             <EmptyState
               icon={<Package />}

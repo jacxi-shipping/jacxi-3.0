@@ -38,7 +38,7 @@ import {
 	LoadingState, 
 	EmptyState, 
 	StatsCard,
-} from '@/components/design-system';
+ DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 
 interface Shipment {
@@ -207,7 +207,7 @@ export default function ContainerDetailPage() {
 	if (loading) {
 		return (
 			<AdminRoute>
-				<LoadingState fullScreen message="Loading container details..." />
+				<DetailPageSkeleton />
 			</AdminRoute>
 		);
 	}
