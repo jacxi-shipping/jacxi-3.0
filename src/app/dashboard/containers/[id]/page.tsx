@@ -96,6 +96,23 @@ interface TrackingEvent {
 	eventDate: string;
 }
 
+interface UserInvoice {
+	id: string;
+	invoiceNumber: string;
+	userId: string;
+	status: string;
+	issueDate: string;
+	dueDate: string | null;
+	total: number;
+	user: {
+		name: string | null;
+		email: string;
+	};
+	_count: {
+		lineItems: number;
+	};
+}
+
 interface Container {
 	id: string;
 	containerNumber: string;
@@ -122,6 +139,7 @@ interface Container {
 	shipments: Shipment[];
 	expenses: Expense[];
 	invoices: Invoice[];
+	userInvoices?: UserInvoice[];
 	documents: Document[];
 	trackingEvents: TrackingEvent[];
 	totals: {
@@ -159,6 +177,8 @@ export default function ContainerDetailPage() {
 	const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
 	const [duplicating, setDuplicating] = useState(false);
 	const [newContainerNumber, setNewContainerNumber] = useState('');
+	const [generatingInvoices, setGeneratingInvoices] = useState(false);
+	const [invoiceGenerationModalOpen, setInvoiceGenerationModalOpen] = useState(false);
 
 	useEffect(() => {
 		if (params.id) {
@@ -420,6 +440,43 @@ export default function ContainerDetailPage() {
 		}
 	};
 
+	const handleGenerateInvoices = async () => {
+		if (!container) return;
+
+		setGeneratingInvoices(true);
+		try {
+			const response = await fetch('/api/invoices/generate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					containerId: container.id,
+					sendEmail: false,
+				}),
+			});
+
+			const data = await response.json();
+
+			if (response.ok) {
+				toast.success('Invoices generated successfully!', {
+					description: `Created ${data.summary.newInvoices} new invoice(s)`
+				});
+				fetchContainer();
+				setInvoiceGenerationModalOpen(false);
+			} else {
+				toast.error('Failed to generate invoices', {
+					description: data.error || 'Please try again'
+				});
+			}
+		} catch (error) {
+			console.error('Error generating invoices:', error);
+			toast.error('An error occurred', {
+				description: 'Please try again later'
+			});
+		} finally {
+			setGeneratingInvoices(false);
+		}
+	};
+
 	const formatCurrency = (amount: number, currency: string = 'USD') => {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -634,6 +691,7 @@ export default function ContainerDetailPage() {
 						<Tab label={`Shipments (${container.shipments.length})`} />
 						<Tab label={`Expenses (${container.expenses.length})`} />
 						<Tab label={`Invoices (${container.invoices.length})`} />
+						<Tab label={`User Invoices (${container.userInvoices?.length || 0})`} />
 						<Tab label={`Documents (${container.documents.length})`} />
 						<Tab label={`Tracking (${container.trackingEvents?.length || 0})`} />
 					</Tabs>
@@ -1121,8 +1179,105 @@ export default function ContainerDetailPage() {
 						</DashboardPanel>
 					)}
 
-					{/* Documents Tab */}
+					{/* User Invoices Tab */}
 					{activeTab === 4 && (
+						<DashboardPanel
+							title="User Invoices"
+							description="Customer invoices for shipments in this container"
+						>
+							<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+								<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+									{container.shipments.length > 0 
+										? `${new Set(container.shipments.map(s => s.user?.id)).size} unique customer(s) with shipments`
+										: 'No shipments in container'
+									}
+								</Box>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setInvoiceGenerationModalOpen(true)}
+									disabled={container.shipments.length === 0}
+								>
+									Generate Invoices
+								</Button>
+							</Box>
+
+							{!container.userInvoices || container.userInvoices.length === 0 ? (
+								<EmptyState
+									icon={<FileText className="w-12 h-12" />}
+									title="No User Invoices"
+									description={
+										container.shipments.length > 0
+											? 'Click "Generate Invoices" to create invoices for all customers'
+											: 'Add shipments to this container before generating invoices'
+									}
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Invoice #</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Customer</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Issue Date</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Total</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.userInvoices.map((invoice) => (
+												<TableRow key={invoice.id} hover>
+													<TableCell sx={{ fontFamily: 'monospace' }}>{invoice.invoiceNumber}</TableCell>
+													<TableCell>
+														<Box>
+															<Box sx={{ fontWeight: 600 }}>{invoice.user.name || 'N/A'}</Box>
+															<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+																{invoice.user.email}
+															</Box>
+														</Box>
+													</TableCell>
+													<TableCell>{formatDate(invoice.issueDate)}</TableCell>
+													<TableCell>
+														<Chip 
+															label={invoice.status} 
+															size="small"
+															color={
+																invoice.status === 'PAID' ? 'success' : 
+																invoice.status === 'OVERDUE' ? 'error' :
+																invoice.status === 'SENT' ? 'info' : 
+																'default'
+															}
+															sx={{ fontSize: '0.75rem' }}
+														/>
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--success)' }}>
+														{formatCurrency(invoice.total)}
+													</TableCell>
+													<TableCell align="right">
+														<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+															<Button
+																variant="outline"
+																size="sm"
+																icon={<Eye className="w-3 h-3" />}
+																onClick={() => router.push(`/dashboard/invoices/${invoice.id}`)}
+															>
+																View
+															</Button>
+														</Box>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Documents Tab */}
+					{activeTab === 5 && (
 						<DashboardPanel
 							title="Container Documents"
 							description="Files and documents related to this container"
@@ -1172,7 +1327,7 @@ export default function ContainerDetailPage() {
 					)}
 
 					{/* Tracking Tab */}
-					{activeTab === 5 && (
+					{activeTab === 6 && (
 						<DashboardPanel
 							title="Tracking History"
 							description="Location updates and status changes"
@@ -1470,6 +1625,131 @@ export default function ContainerDetailPage() {
 									Duplicate Container
 								</>
 							)}
+						</Button>
+					</DialogActions>
+				</Dialog>
+
+				{/* Generate Invoices Modal */}
+				<Dialog
+					open={invoiceGenerationModalOpen}
+					onClose={() => !generatingInvoices && setInvoiceGenerationModalOpen(false)}
+					maxWidth="md"
+					fullWidth
+					PaperProps={{
+						sx: {
+							bgcolor: 'var(--panel)',
+							backgroundImage: 'none',
+							border: '1px solid var(--border)',
+							borderRadius: 2,
+						}
+					}}
+				>
+					<DialogTitle
+						sx={{
+							color: 'var(--text-primary)',
+							fontWeight: 700,
+							fontSize: '1.25rem',
+							borderBottom: '1px solid var(--border)',
+						}}
+					>
+						Generate User Invoices
+					</DialogTitle>
+					<DialogContent sx={{ py: 3 }}>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+							<Box sx={{ color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: 1.6 }}>
+								Generate invoices for all customers with shipments in container <strong>{container.containerNumber}</strong>.
+							</Box>
+
+							{/* Summary */}
+							<Box
+								sx={{
+									p: 2,
+									bgcolor: 'var(--background)',
+									border: '1px solid var(--border)',
+									borderRadius: 1,
+								}}
+							>
+								<Box sx={{ fontWeight: 600, mb: 1.5, color: 'var(--text-primary)' }}>
+									Invoice Summary
+								</Box>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Total Shipments:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{container.shipments.length}
+										</Box>
+									</Box>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Unique Customers:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{new Set(container.shipments.map(s => s.user?.id)).size}
+										</Box>
+									</Box>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Container Expenses:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{formatCurrency(container.totals.expenses)}
+										</Box>
+									</Box>
+									<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+										<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+											Expense per Vehicle:
+										</Box>
+										<Box sx={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>
+											{formatCurrency(
+												container.shipments.length > 0
+													? container.totals.expenses / container.shipments.length
+													: 0
+											)}
+										</Box>
+									</Box>
+								</Box>
+							</Box>
+
+							{/* Info */}
+							<Box
+								sx={{
+									p: 2,
+									bgcolor: 'rgba(var(--info-rgb), 0.1)',
+									border: '1px solid rgba(var(--info-rgb), 0.3)',
+									borderRadius: 1,
+									fontSize: '0.875rem',
+									color: 'var(--text-secondary)',
+									lineHeight: 1.6,
+								}}
+							>
+								<strong>How it works:</strong>
+								<ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+									<li>One invoice per customer</li>
+									<li>Each invoice includes all their vehicles in this container</li>
+									<li>Vehicle prices and insurance are per-vehicle</li>
+									<li>Container expenses are divided equally among all vehicles</li>
+									<li>Invoices will be created as DRAFT status</li>
+								</ul>
+							</Box>
+						</Box>
+					</DialogContent>
+					<DialogActions sx={{ p: 3, borderTop: '1px solid var(--border)' }}>
+						<Button
+							variant="outline"
+							onClick={() => setInvoiceGenerationModalOpen(false)}
+							disabled={generatingInvoices}
+						>
+							Cancel
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleGenerateInvoices}
+							disabled={generatingInvoices}
+							icon={<FileText className="w-4 h-4" />}
+						>
+							{generatingInvoices ? 'Generating...' : 'Generate Invoices'}
 						</Button>
 					</DialogActions>
 				</Dialog>
