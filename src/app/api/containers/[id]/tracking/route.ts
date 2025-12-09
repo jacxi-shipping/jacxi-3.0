@@ -1,126 +1,130 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { z } from 'zod';
 
-const trackingEventSchema = z.object({
-  status: z.string().min(1),
-  location: z.string().optional(),
-  vesselName: z.string().optional(),
-  description: z.string().optional(),
-  eventDate: z.string(),
-  source: z.string().optional(),
-  completed: z.boolean().default(false),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-});
-
-// GET - Fetch tracking events for a container
 export async function GET(
-  request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+	request: NextRequest,
+	props: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  try {
-    const session = await auth();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+	const params = await props.params;
+	try {
+		const session = await auth();
+		if (!session?.user?.id) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
 
-    const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '50');
+		const events = await prisma.containerTrackingEvent.findMany({
+			where: { containerId: params.id },
+			orderBy: { eventDate: 'desc' },
+		});
 
-    const events = await prisma.containerTrackingEvent.findMany({
-      where: { containerId: params.id },
-      orderBy: { eventDate: 'desc' },
-      take: limit,
-    });
-
-    return NextResponse.json({
-      events,
-      count: events.length,
-    });
-  } catch (error) {
-    console.error('Error fetching tracking events:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tracking events' },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json(events);
+	} catch (error) {
+		console.error('Error fetching tracking events:', error);
+		return NextResponse.json(
+			{ error: 'Failed to fetch tracking events' },
+			{ status: 500 }
+		);
+	}
 }
 
-// POST - Add tracking event to container
 export async function POST(
-  request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+	request: NextRequest,
+	props: { params: Promise<{ id: string }> }
 ) {
-  const params = await props.params;
-  try {
-    const session = await auth();
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+	const params = await props.params;
+	try {
+		const session = await auth();
+		if (!session?.user?.id) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
 
-    // Only admins can add tracking events
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+		const body = await request.json();
+		const {
+			status,
+			location,
+			vesselName,
+			description,
+			eventDate,
+			source,
+			completed,
+			latitude,
+			longitude,
+		} = body;
 
-    // Verify container exists
-    const container = await prisma.container.findUnique({
-      where: { id: params.id },
-    });
+		// Validation
+		if (!status || !eventDate) {
+			return NextResponse.json(
+				{ error: 'Status and event date are required' },
+				{ status: 400 }
+			);
+		}
 
-    if (!container) {
-      return NextResponse.json({ error: 'Container not found' }, { status: 404 });
-    }
+		// Check if container exists
+		const container = await prisma.container.findUnique({
+			where: { id: params.id },
+		});
 
-    const body = await request.json();
-    const validatedData = trackingEventSchema.parse(body);
+		if (!container) {
+			return NextResponse.json(
+				{ error: 'Container not found' },
+				{ status: 404 }
+			);
+		}
 
-    const event = await prisma.containerTrackingEvent.create({
-      data: {
-        containerId: params.id,
-        status: validatedData.status,
-        location: validatedData.location,
-        vesselName: validatedData.vesselName,
-        description: validatedData.description,
-        eventDate: new Date(validatedData.eventDate),
-        source: validatedData.source || 'manual',
-        completed: validatedData.completed,
-        latitude: validatedData.latitude,
-        longitude: validatedData.longitude,
-      },
-    });
+		// Create tracking event
+		const event = await prisma.containerTrackingEvent.create({
+			data: {
+				containerId: params.id,
+				status,
+				location: location || undefined,
+				vesselName: vesselName || undefined,
+				description: description || undefined,
+				eventDate: new Date(eventDate),
+				source: source || 'Manual',
+				completed: completed || false,
+				latitude: latitude ? parseFloat(latitude) : undefined,
+				longitude: longitude ? parseFloat(longitude) : undefined,
+			},
+		});
 
-    // Update container's current location if provided
-    if (validatedData.location) {
-      await prisma.container.update({
-        where: { id: params.id },
-        data: {
-          currentLocation: validatedData.location,
-          lastLocationUpdate: new Date(),
-        },
-      });
-    }
+		return NextResponse.json(event, { status: 201 });
+	} catch (error) {
+		console.error('Error creating tracking event:', error);
+		return NextResponse.json(
+			{ error: 'Failed to create tracking event' },
+			{ status: 500 }
+		);
+	}
+}
 
-    return NextResponse.json({
-      event,
-      message: 'Tracking event added successfully',
-    }, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid data', details: error.issues },
-        { status: 400 }
-      );
-    }
-    console.error('Error adding tracking event:', error);
-    return NextResponse.json(
-      { error: 'Failed to add tracking event' },
-      { status: 500 }
-    );
-  }
+export async function DELETE(request: NextRequest) {
+	try {
+		const session = await auth();
+		if (!session?.user?.id) {
+			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+
+		const { searchParams } = new URL(request.url);
+		const eventId = searchParams.get('eventId');
+
+		if (!eventId) {
+			return NextResponse.json(
+				{ error: 'Event ID is required' },
+				{ status: 400 }
+			);
+		}
+
+		await prisma.containerTrackingEvent.delete({
+			where: { id: eventId },
+		});
+
+		return NextResponse.json({ success: true });
+	} catch (error) {
+		console.error('Error deleting tracking event:', error);
+		return NextResponse.json(
+			{ error: 'Failed to delete tracking event' },
+			{ status: 500 }
+		);
+	}
 }

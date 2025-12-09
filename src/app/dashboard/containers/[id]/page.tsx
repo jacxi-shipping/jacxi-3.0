@@ -44,6 +44,7 @@ import {
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import AddExpenseModal from '@/components/containers/AddExpenseModal';
 import AddInvoiceModal from '@/components/containers/AddInvoiceModal';
+import AddTrackingEventModal from '@/components/containers/AddTrackingEventModal';
 
 interface Shipment {
 	id: string;
@@ -142,6 +143,8 @@ export default function ContainerDetailPage() {
 	const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 	const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
 	const [deletingInvoiceId, setDeletingInvoiceId] = useState<string | null>(null);
+	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+	const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (params.id) {
@@ -241,6 +244,30 @@ export default function ContainerDetailPage() {
 			toast.error('An error occurred');
 		} finally {
 			setDeletingInvoiceId(null);
+		}
+	};
+
+	const handleDeleteTrackingEvent = async (eventId: string) => {
+		if (!confirm('Are you sure you want to delete this tracking event?')) return;
+
+		setDeletingEventId(eventId);
+		try {
+			const response = await fetch(`/api/containers/${params.id}/tracking?eventId=${eventId}`, {
+				method: 'DELETE',
+			});
+
+			if (response.ok) {
+				toast.success('Tracking event deleted successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to delete tracking event');
+			}
+		} catch (error) {
+			console.error('Error deleting tracking event:', error);
+			toast.error('An error occurred');
+		} finally {
+			setDeletingEventId(null);
 		}
 	};
 
@@ -904,6 +931,17 @@ export default function ContainerDetailPage() {
 							title="Tracking History"
 							description="Location updates and status changes"
 						>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setTrackingModalOpen(true)}
+								>
+									Add Tracking Event
+								</Button>
+							</Box>
+
 							{container.trackingEvents.length === 0 ? (
 								<EmptyState
 									icon={<MapPin className="w-12 h-12" />}
@@ -930,16 +968,39 @@ export default function ContainerDetailPage() {
 													width: 16,
 													height: 16,
 													borderRadius: '50%',
-													bgcolor: 'var(--accent-gold)',
+													bgcolor: (event as any).completed ? 'var(--success)' : 'var(--accent-gold)',
 													border: '2px solid var(--background)',
 												}}
 											/>
-											<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-													{event.status}
+											<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5, alignItems: 'start' }}>
+												<Box>
+													<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+														{event.status}
+													</Box>
+													{(event as any).vesselName && (
+														<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+															🚢 {(event as any).vesselName}
+														</Box>
+													)}
 												</Box>
-												<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-													{new Date(event.eventDate).toLocaleString()}
+												<Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+													<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+														{new Date(event.eventDate).toLocaleString()}
+													</Box>
+													<Button
+														variant="outline"
+														size="sm"
+														icon={<Trash2 className="w-3 h-3" />}
+														onClick={() => handleDeleteTrackingEvent(event.id)}
+														disabled={deletingEventId === event.id}
+														sx={{ 
+															color: 'var(--error)',
+															borderColor: 'var(--error)',
+															'&:hover': { bgcolor: 'rgba(var(--error-rgb), 0.1)' },
+															minWidth: 'auto',
+															px: 1,
+														}}
+													/>
 												</Box>
 											</Box>
 											{event.location && (
@@ -948,8 +1009,13 @@ export default function ContainerDetailPage() {
 												</Box>
 											)}
 											{event.description && (
-												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', mb: 0.5 }}>
 													{event.description}
+												</Box>
+											)}
+											{(event as any).source && (
+												<Box sx={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+													Source: {(event as any).source}
 												</Box>
 											)}
 										</Box>
@@ -972,6 +1038,14 @@ export default function ContainerDetailPage() {
 				<AddInvoiceModal
 					open={invoiceModalOpen}
 					onClose={() => setInvoiceModalOpen(false)}
+					containerId={container.id}
+					onSuccess={fetchContainer}
+				/>
+
+				{/* Add Tracking Event Modal */}
+				<AddTrackingEventModal
+					open={trackingModalOpen}
+					onClose={() => setTrackingModalOpen(false)}
 					containerId={container.id}
 					onSuccess={fetchContainer}
 				/>
