@@ -116,6 +116,7 @@ interface Container {
 	maxCapacity: number;
 	currentCount: number;
 	notes: string | null;
+	autoTrackingEnabled: boolean;
 	createdAt: string;
 	shipments: Shipment[];
 	expenses: Expense[];
