@@ -126,6 +126,24 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Schema for tracking event (used when creating containers with fetched tracking data)
+const trackingEventSchema = z.object({
+  status: z.string(),
+  location: z.string().optional(),
+  vesselName: z.string().optional(),
+  description: z.string().optional(),
+  eventDate: z.string(),
+  completed: z.boolean(),
+  source: z.string().optional(),
+});
+
+// Extended schema for creating a container with tracking events
+const createContainerWithTrackingSchema = createContainerSchema.extend({
+  trackingEvents: z.array(trackingEventSchema).optional(),
+  progress: z.number().int().min(0).max(100).optional(),
+  currentLocation: z.string().optional(),
+});
+
 // POST - Create a new container
 export async function POST(request: NextRequest) {
   try {
@@ -141,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const validatedData = createContainerSchema.parse(body);
+    const validatedData = createContainerWithTrackingSchema.parse(body);
 
     // Check for duplicate container number
     const existing = await prisma.container.findUnique({
@@ -179,9 +197,12 @@ export async function POST(request: NextRequest) {
         notes: validatedData.notes,
         autoTrackingEnabled: validatedData.autoTrackingEnabled ?? true,
         status: 'CREATED',
+        progress: validatedData.progress || 0,
+        currentLocation: validatedData.currentLocation,
       },
       include: {
         shipments: true,
+        trackingEvents: true,
         _count: {
           select: {
             shipments: true,
@@ -193,12 +214,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Create tracking events if provided
+    if (validatedData.trackingEvents && validatedData.trackingEvents.length > 0) {
+      await prisma.containerTrackingEvent.createMany({
+        data: validatedData.trackingEvents.map(event => ({
+          containerId: container.id,
+          status: event.status,
+          location: event.location,
+          vesselName: event.vesselName,
+          description: event.description,
+          eventDate: new Date(event.eventDate),
+          completed: event.completed,
+          source: event.source || 'API',
+        })),
+      });
+      
+      console.log(`✅ Created ${validatedData.trackingEvents.length} tracking events for container ${container.id}`);
+    }
+
     // Create audit log
     await prisma.containerAuditLog.create({
       data: {
         containerId: container.id,
         action: 'CONTAINER_CREATED',
-        description: `Container ${container.containerNumber} created`,
+        description: `Container ${container.containerNumber} created${validatedData.trackingEvents?.length ? ` with ${validatedData.trackingEvents.length} tracking events` : ''}`,
         performedBy: session.user.id as string,
         newValue: container.status,
       },

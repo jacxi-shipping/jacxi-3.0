@@ -155,7 +155,7 @@ async function fetchFromTimeToCargoAPI(containerNumber: string) {
         type: 'container',
       },
       company: 'AUTO',
-      need_route: false, // We don't need route info for container creation
+      need_route: true, // We need route info for tracking events
       lang: 'en',
     };
 
@@ -197,6 +197,41 @@ async function fetchFromTimeToCargoAPI(containerNumber: string) {
     const departureDate = toIsoString(entry.summary?.pol?.date);
     const estimatedArrival = toIsoString(entry.summary?.pod?.date || entry.summary?.destination?.date);
     
+    // Extract tracking events
+    const trackingEvents = (entry.container?.events || []).map((event, index) => {
+      const location = formatLocation(entry, event.location);
+      const terminal = entry.terminals?.find((term) => term.id === event.terminal);
+      
+      // Build description
+      const descParts = [
+        event.vessel ? `Vessel: ${event.vessel}` : null,
+        event.voyage ? `Voyage: ${event.voyage}` : null,
+        terminal?.name ? `Terminal: ${terminal.name}` : null,
+      ].filter(Boolean);
+      
+      // Determine if this is a completed event (actual vs estimated)
+      const isCompleted = Boolean(event.actual);
+      
+      return {
+        status: event.status || 'Status Update',
+        location: location || undefined,
+        vesselName: event.vessel || undefined,
+        description: descParts.length ? descParts.join(' • ') : undefined,
+        eventDate: toIsoString(event.date) || new Date().toISOString(),
+        completed: isCompleted,
+        source: 'API',
+      };
+    }).filter(event => event.status !== 'Status Update');
+    
+    // Calculate progress based on completed events
+    const completedEvents = trackingEvents.filter(e => e.completed).length;
+    const totalEvents = trackingEvents.length;
+    const progress = totalEvents > 0 ? Math.round((completedEvents / totalEvents) * 100) : 0;
+    
+    // Get current location from the most recent completed event
+    const latestCompletedEvent = trackingEvents.find(e => e.completed);
+    const currentLocation = latestCompletedEvent?.location || loadingPort;
+    
     // Construct tracking data in the format expected by the form
     return {
       containerNumber: entry.container?.number || containerNumber,
@@ -211,6 +246,9 @@ async function fetchFromTimeToCargoAPI(containerNumber: string) {
       estimatedArrival: estimatedArrival || undefined,
       containerType: entry.container?.type || undefined,
       status: entry.shipment_status || undefined,
+      trackingEvents: trackingEvents,
+      progress: progress,
+      currentLocation: currentLocation,
     };
   } catch (error) {
     console.error('Error calling TimeToargo API:', error);
