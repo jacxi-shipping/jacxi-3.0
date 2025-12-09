@@ -7,16 +7,6 @@
       {
         "path": "/api/cron/check-delivery-alerts",
         "schedule": "0 0 */2 * *"
-      },
-      {
-        "path": "/api/cron/sync-tracking",
-        "schedule": "0 * * * *",
-        "comment": "Sync container tracking every hour"
-      },
-      {
-        "path": "/api/cron/auto-generate-invoices",
-        "schedule": "0 0 * * *",
-        "comment": "Auto-generate invoices for completed containers daily"
       }
     ]
   }
