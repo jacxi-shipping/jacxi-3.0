@@ -4,10 +4,10 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Section from '@/components/layout/Section';
+import { Box, TextField, Grid, Select, MenuItem, FormControl, InputLabel, Checkbox, Divider, InputAdornment } from '@mui/material';
+import { ArrowLeft, DollarSign, AlertCircle, CheckCircle2, User, CreditCard, FileText } from 'lucide-react';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, Button, Breadcrumbs, toast, LoadingState, EmptyState, StatusBadge, StatsCard , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import AdminRoute from '@/components/auth/AdminRoute';
 
 interface User {
@@ -33,10 +33,9 @@ export default function RecordPaymentPage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [selectedShipmentIds, setSelectedShipmentIds] = useState<string[]>([]);
   const [amount, setAmount] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loadingShipments, setLoadingShipments] = useState(false);
 
   useEffect(() => {
@@ -66,6 +65,7 @@ export default function RecordPaymentPage() {
       }
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
     }
   };
 
@@ -75,7 +75,6 @@ export default function RecordPaymentPage() {
       const response = await fetch(`/api/shipments?userId=${userId}&limit=100`);
       if (response.ok) {
         const data = await response.json();
-        // Filter to show only shipments with pending or partially paid status
         const dueShipments = data.shipments.filter(
           (s: Shipment) => s.paymentStatus === 'PENDING' || s.paymentStatus === 'FAILED'
         );
@@ -83,6 +82,7 @@ export default function RecordPaymentPage() {
       }
     } catch (error) {
       console.error('Error fetching shipments:', error);
+      toast.error('Failed to load shipments');
     } finally {
       setLoadingShipments(false);
     }
@@ -98,20 +98,17 @@ export default function RecordPaymentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
-    // Validation
     if (!selectedUserId) {
-      setError('Please select a user');
+      toast.error('Please select a user');
       return;
     }
     if (selectedShipmentIds.length === 0) {
-      setError('Please select at least one shipment');
+      toast.error('Please select at least one shipment');
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      setError('Please enter a valid amount');
+      toast.error('Please enter a valid amount');
       return;
     }
 
@@ -126,6 +123,7 @@ export default function RecordPaymentPage() {
           userId: selectedUserId,
           shipmentIds: selectedShipmentIds,
           amount: parseFloat(amount),
+          paymentMethod,
           notes,
         }),
       });
@@ -133,24 +131,16 @@ export default function RecordPaymentPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccess(data.message || 'Payment recorded successfully!');
-        // Reset form
-        setSelectedShipmentIds([]);
-        setAmount('');
-        setNotes('');
-        // Refresh shipments
-        fetchUserShipments(selectedUserId);
-        
-        // Show success message and redirect after 2 seconds
+        toast.success('Payment recorded successfully!');
         setTimeout(() => {
           router.push('/dashboard/finance');
-        }, 2000);
+        }, 1500);
       } else {
-        setError(data.error || 'Failed to record payment');
+        toast.error(data.error || 'Failed to record payment');
       }
     } catch (error) {
       console.error('Error recording payment:', error);
-      setError('An error occurred while recording the payment');
+      toast.error('An error occurred while recording the payment');
     } finally {
       setLoading(false);
     }
@@ -167,236 +157,274 @@ export default function RecordPaymentPage() {
     .filter((s) => selectedShipmentIds.includes(s.id))
     .reduce((sum, s) => sum + (s.price || 0), 0);
 
+  const selectedUser = users.find(u => u.id === selectedUserId);
+
   if (status === 'loading') {
     return (
       <AdminRoute>
-        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-          <div className="text-center space-y-4 text-[var(--text-secondary)]">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)] mx-auto" />
-            <p>Loading...</p>
-          </div>
-        </div>
+        <DashboardPageSkeleton />
       </AdminRoute>
     );
   }
 
   return (
     <AdminRoute>
-      <div className="min-h-screen bg-[var(--background)]">
-        <Section className="pt-6 pb-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-start gap-3 min-w-0 flex-1">
-              <Link href="/dashboard/finance">
-                <Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
-              <div className="min-w-0 flex-1">
-                <h1 className="text-3xl font-semibold text-[var(--text-primary)]">Record Payment</h1>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  Record a payment received from a user
-                </p>
-              </div>
-            </div>
-          </div>
-        </Section>
+      <DashboardSurface>
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Breadcrumbs />
+        </Box>
 
-        <Section className="pb-16">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <PageHeader
+          title="Record Payment"
+          description="Record a payment received from a customer"
+          actions={
+            <Link href="/dashboard/finance" style={{ textDecoration: 'none' }}>
+              <Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
+                Back to Finance
+              </Button>
+            </Link>
+          }
+        />
+
+        {/* Stats Summary */}
+        {selectedUserId && (
+          <Box sx={{ px: 2, mb: 3 }}>
+            <DashboardGrid className="grid-cols-1 md:grid-cols-3">
+              <StatsCard
+                icon={<User style={{ fontSize: 18 }} />}
+                title="Selected Customer"
+                value={selectedUser?.name || selectedUser?.email || 'N/A'}
+                variant="info"
+                size="md"
+              />
+              <StatsCard
+                icon={<FileText style={{ fontSize: 18 }} />}
+                title="Pending Shipments"
+                value={shipments.length.toString()}
+                variant="warning"
+                size="md"
+              />
+              <StatsCard
+                icon={<DollarSign style={{ fontSize: 18 }} />}
+                title="Total Due"
+                value={formatCurrency(totalSelectedAmount)}
+                variant="success"
+                size="md"
+              />
+            </DashboardGrid>
+          </Box>
+        )}
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ px: 2, pb: 4 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* User Selection */}
-            <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-              <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Select User</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <div>
-                  <label htmlFor="user" className="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
-                    User <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    id="user"
+            <Box>
+              <DashboardPanel
+                title="Customer Selection"
+                description="Select the customer who made the payment"
+              >
+                <FormControl fullWidth size="small">
+                  <InputLabel>Select Customer *</InputLabel>
+                  <Select
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] focus:ring-2 focus:ring-cyan-500/40"
+                    label="Select Customer *"
                     required
                   >
-                    <option value="">Select a user...</option>
+                    <MenuItem value="">
+                      <em>Choose a customer...</em>
+                    </MenuItem>
                     {users.map((user) => (
-                      <option key={user.id} value={user.id}>
+                      <MenuItem key={user.id} value={user.id}>
                         {user.name || user.email}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </select>
-                </div>
-              </CardContent>
-            </Card>
+                  </Select>
+                  </FormControl>
+                </DashboardPanel>
+              </Box>
 
             {/* Shipments Selection */}
             {selectedUserId && (
-              <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-                <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                  <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Select Shipments</CardTitle>
-                  <p className="text-sm text-[var(--text-secondary)] mt-1">
-                    Select the shipment(s) this payment applies to
-                  </p>
-                </CardHeader>
-                <CardContent className="p-4 sm:p-6">
+              <Box>
+                <DashboardPanel
+                  title="Select Shipments"
+                  description="Choose which shipments this payment applies to"
+                >
                   {loadingShipments ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-[var(--border)] border-t-[var(--accent-gold)] mx-auto mb-4" />
-                      <p className="text-[var(--text-secondary)]">Loading shipments...</p>
-                    </div>
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <LoadingState message="Loading shipments..." />
+                    </Box>
                   ) : shipments.length === 0 ? (
-                    <div className="text-center py-8">
-                      <AlertCircle className="w-12 h-12 mx-auto mb-4 text-[var(--text-secondary)] opacity-50" />
-                      <p className="text-[var(--text-secondary)]">No pending shipments found for this user</p>
-                    </div>
+                    <EmptyState
+                      icon={<AlertCircle className="w-12 h-12" />}
+                      title="No Pending Shipments"
+                      description="This customer has no pending payments"
+                    />
                   ) : (
-                    <div className="space-y-2">
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                       {shipments.map((shipment) => (
-                        <label
+                        <Box
                           key={shipment.id}
-                          className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all hover:border-cyan-500/50 ${
-                            selectedShipmentIds.includes(shipment.id)
-                              ? 'border-cyan-500 bg-cyan-500/10'
-                              : 'border-white/10'
-                          }`}
+                          sx={{
+                            p: 2,
+                            border: '1px solid',
+                            borderColor: selectedShipmentIds.includes(shipment.id) 
+                              ? 'var(--accent-gold)' 
+                              : 'var(--border)',
+                            borderRadius: 2,
+                            bgcolor: selectedShipmentIds.includes(shipment.id) 
+                              ? 'rgba(201, 155, 47, 0.1)' 
+                              : 'transparent',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              borderColor: 'var(--accent-gold)',
+                              bgcolor: 'rgba(201, 155, 47, 0.05)',
+                            },
+                          }}
+                          onClick={() => handleShipmentToggle(shipment.id)}
                         >
-                          <input
-                            type="checkbox"
-                            checked={selectedShipmentIds.includes(shipment.id)}
-                            onChange={() => handleShipmentToggle(shipment.id)}
-                            className="w-5 h-5 text-cyan-500 border-cyan-500/30 focus:ring-cyan-500/50 rounded"
-                          />
-                          <div className="ml-3 flex-1">
-                            <div className="text-sm font-semibold text-[var(--text-primary)]">
-                              {shipment.trackingNumber}
-                            </div>
-                            <div className="text-xs text-[var(--text-secondary)]">
-                              {shipment.vehicleMake} {shipment.vehicleModel}
-                            </div>
-                          </div>
-                          <div className="text-sm font-semibold text-[var(--text-primary)]">
-                            {formatCurrency(shipment.price || 0)}
-                          </div>
-                        </label>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Checkbox
+                              checked={selectedShipmentIds.includes(shipment.id)}
+                              onChange={() => handleShipmentToggle(shipment.id)}
+                              sx={{ 
+                                color: 'var(--accent-gold)',
+                                '&.Mui-checked': { color: 'var(--accent-gold)' },
+                              }}
+                            />
+                            <Box sx={{ flex: 1 }}>
+                              <Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', mb: 0.5 }}>
+                                {shipment.trackingNumber}
+                              </Box>
+                              <Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                                {shipment.vehicleMake} {shipment.vehicleModel}
+                              </Box>
+                            </Box>
+                            <Box sx={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                              {formatCurrency(shipment.price || 0)}
+                            </Box>
+                          </Box>
+                        </Box>
                       ))}
-                    </div>
-                  )}
 
-                  {selectedShipmentIds.length > 0 && (
-                    <div className="mt-4 p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-[var(--text-primary)]">
-                          Total Selected Amount:
-                        </span>
-                        <span className="text-lg font-bold text-cyan-400">
-                          {formatCurrency(totalSelectedAmount)}
-                        </span>
-                      </div>
-                    </div>
+                      {selectedShipmentIds.length > 0 && (
+                        <>
+                          <Divider sx={{ my: 2, borderColor: 'var(--border)' }} />
+                          <Box
+                            sx={{
+                              p: 3,
+                              borderRadius: 2,
+                              bgcolor: 'rgba(201, 155, 47, 0.15)',
+                              border: '1px solid var(--accent-gold)',
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <Box sx={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                Total Selected Amount:
+                              </Box>
+                              <Box sx={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
+                                {formatCurrency(totalSelectedAmount)}
+                              </Box>
+                            </Box>
+                          </Box>
+                        </>
+                      )}
+                    </Box>
                   )}
-                </CardContent>
-              </Card>
+                </DashboardPanel>
+              </Box>
             )}
 
             {/* Payment Details */}
             {selectedUserId && selectedShipmentIds.length > 0 && (
-              <Card className="border-0 bg-[var(--panel)] backdrop-blur-md shadow-lg">
-                <CardHeader className="p-4 sm:p-6 border-b border-white/5">
-                  <CardTitle className="text-lg font-bold text-[var(--text-primary)]">Payment Details</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 sm:p-6 space-y-4">
-                  <div>
-                    <label htmlFor="amount" className="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
-                      Amount Received (USD) <span className="text-red-400">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSign className="h-5 w-5 text-[var(--text-secondary)]" />
-                      </div>
-                      <input
+              <Box>
+                <DashboardPanel
+                  title="Payment Details"
+                  description="Enter the payment amount and method"
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+                      <TextField
+                        fullWidth
+                        label="Amount Received (USD)"
                         type="number"
-                        id="amount"
-                        step="0.01"
-                        min="0.01"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full pl-10 pr-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40"
                         required
+                        size="small"
+                        inputProps={{ step: '0.01', min: '0.01' }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <DollarSign className="w-4 h-4 text-[var(--text-secondary)]" />
+                            </InputAdornment>
+                          ),
+                        }}
+                        helperText={
+                          parseFloat(amount) > totalSelectedAmount
+                            ? '⚠ Amount exceeds total. Excess will remain as credit.'
+                            : ''
+                        }
                       />
-                    </div>
-                    {parseFloat(amount) > totalSelectedAmount && (
-                      <p className="mt-2 text-xs text-yellow-400">
-                        ⚠ Amount exceeds total selected shipments. Excess will remain as unapplied credit.
-                      </p>
-                    )}
-                  </div>
 
-                  <div>
-                    <label htmlFor="notes" className="block text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-2">
-                      Notes (Optional)
-                    </label>
-                    <textarea
-                      id="notes"
-                      rows={3}
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Additional notes about this payment..."
-                      className="w-full px-4 py-2 rounded-lg border border-white/10 bg-white/3 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:ring-2 focus:ring-cyan-500/40 resize-none"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Payment Method</InputLabel>
+                        <Select
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          label="Payment Method"
+                        >
+                          <MenuItem value="CASH">Cash</MenuItem>
+                          <MenuItem value="BANK_TRANSFER">Bank Transfer</MenuItem>
+                          <MenuItem value="CHECK">Check</MenuItem>
+                          <MenuItem value="CREDIT_CARD">Credit Card</MenuItem>
+                          <MenuItem value="WIRE">Wire Transfer</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
 
-            {/* Error/Success Messages */}
-            {error && (
-              <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
-                </div>
-              </div>
-            )}
+                    <TextField
+                        fullWidth
+                        label="Notes (Optional)"
+                        multiline
+                        rows={3}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Additional notes about this payment..."
+                        size="small"
+                      />
 
-            {success && (
-              <div className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-200">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  {success}
-                </div>
-              </div>
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+                        <Link href="/dashboard/finance" style={{ textDecoration: 'none' }}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={loading}
+                          >
+                            Cancel
+                          </Button>
+                        </Link>
+                        <Button
+                          type="submit"
+                          variant="primary"
+                          size="sm"
+                          icon={<CheckCircle2 className="w-4 h-4" />}
+                          disabled={loading}
+                        >
+                          {loading ? 'Recording...' : 'Record Payment'}
+                        </Button>
+                      </Box>
+                  </Box>
+                </DashboardPanel>
+              </Box>
             )}
-
-            {/* Submit Button */}
-            {selectedUserId && selectedShipmentIds.length > 0 && (
-              <div className="flex justify-end gap-3">
-                <Link href="/dashboard/finance">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={loading}
-                    className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10"
-                  >
-                    Cancel
-                  </Button>
-                </Link>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-[var(--accent-gold)] hover:bg-[var(--accent-gold)]"
-                  style={{ color: 'white' }}
-                >
-                  {loading ? 'Recording...' : 'Record Payment'}
-                </Button>
-              </div>
-            )}
-          </form>
-        </Section>
-      </div>
+          </Box>
+        </Box>
+      </DashboardSurface>
     </AdminRoute>
   );
 }

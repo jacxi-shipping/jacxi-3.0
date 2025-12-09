@@ -15,7 +15,8 @@ import {
   TrendingDown as TrendingDownIcon,
   AttachMoney,
 } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import {  Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, TableSkeleton } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -176,8 +177,12 @@ export default function LedgerPage() {
     return (
       <ProtectedRoute>
         <DashboardSurface>
-          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
+          <Box sx={{ px: 2 }}>
+            <TableSkeleton rows={5} />
           </Box>
         </DashboardSurface>
       </ProtectedRoute>
@@ -187,6 +192,10 @@ export default function LedgerPage() {
   return (
     <ProtectedRoute>
       <DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
         {/* Stats Cards */}
         <DashboardGrid className="grid-cols-1 md:grid-cols-3">
           <StatsCard
@@ -215,10 +224,10 @@ export default function LedgerPage() {
           description="Filter and search transactions"
           actions={
             <Button
-              variant="outlined"
-              size="small"
+              variant="outline"
+              size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              startIcon={<FilterList />}
+              icon={<FilterList />}
               sx={{ textTransform: 'none', fontSize: '0.78rem' }}
             >
               {showFilters ? 'Hide' : 'Show'} Filters
@@ -281,28 +290,28 @@ export default function LedgerPage() {
           actions={
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={handlePrint}
-                startIcon={<Print />}
+                icon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Print
               </Button>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={() => handleExport('pdf')}
-                startIcon={<Download />}
+                icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 PDF
               </Button>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={() => handleExport('excel')}
-                startIcon={<Download />}
+                icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Excel
@@ -311,9 +320,7 @@ export default function LedgerPage() {
           }
         >
           {loading ? (
-            <Box sx={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
-            </Box>
+            <TableSkeleton rows={5} />
           ) : entries.length === 0 ? (
             <Box sx={{ minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
               <AccountBalance sx={{ fontSize: 48, color: 'var(--text-secondary)', opacity: 0.5 }} />
@@ -394,21 +401,21 @@ export default function LedgerPage() {
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
-                      variant="outlined"
-                      size="small"
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      startIcon={<ChevronLeft />}
+                      icon={<ChevronLeft />}
                       sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                     >
                       Previous
                     </Button>
                     <Button
-                      variant="outlined"
-                      size="small"
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      endIcon={<ChevronRight />}
+                      icon={<ChevronRight />}
                       sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                     >
                       Next

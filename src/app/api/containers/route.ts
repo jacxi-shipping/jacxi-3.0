@@ -43,7 +43,14 @@ export async function GET(request: NextRequest) {
     const where: Record<string, unknown> = {};
 
     if (status) {
-      where.status = status;
+      // Handle special "active" status to get containers that can accept shipments
+      if (status === 'active') {
+        where.status = {
+          in: ['CREATED', 'WAITING_FOR_LOADING', 'LOADED', 'IN_TRANSIT'],
+        };
+      } else {
+        where.status = status;
+      }
     }
 
     if (shippingLine) {
@@ -95,13 +102,19 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
+    // If filtering for active containers, only return those with available space
+    let filteredContainers = containers;
+    if (status === 'active') {
+      filteredContainers = containers.filter(c => c.currentCount < c.maxCapacity);
+    }
+
     return NextResponse.json({
-      containers,
+      containers: filteredContainers,
       pagination: {
         page,
         limit,
-        totalCount,
-        totalPages: Math.ceil(totalCount / limit),
+        totalCount: status === 'active' ? filteredContainers.length : totalCount,
+        totalPages: Math.ceil((status === 'active' ? filteredContainers.length : totalCount) / limit),
       },
     });
   } catch (error) {

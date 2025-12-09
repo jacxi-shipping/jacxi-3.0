@@ -19,11 +19,12 @@ import {
 	CartesianGrid,
 	XAxis,
 	YAxis,
-	Tooltip,
+	Tooltip as ChartTooltip,
 	BarChart,
 	Bar,
 } from 'recharts';
-import { Box, Button, Typography, Zoom, CircularProgress } from '@mui/material';
+import { Box, Typography, Zoom, CircularProgress } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
 
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 
@@ -261,9 +262,9 @@ export default function AnalyticsPage() {
 						</Box>
 					))}
 					<Button
-						variant="outlined"
-						size="small"
-						startIcon={<RefreshCcw size={14} />}
+						variant="outline"
+						size="sm"
+						icon={<RefreshCcw size={14} />}
 						onClick={handleRefresh}
 						disabled={refreshing}
 						sx={{ textTransform: 'none', fontSize: '0.75rem' }}
@@ -343,7 +344,7 @@ export default function AnalyticsPage() {
 								<CartesianGrid strokeDasharray="3 3" stroke="var(--text-primary)" />
 								<XAxis dataKey="month" stroke="var(--text-secondary)" tickLine={false} axisLine={false} />
 								<YAxis allowDecimals={false} stroke="var(--text-secondary)" tickLine={false} axisLine={false} />
-								<Tooltip contentStyle={{ backgroundColor: 'var(--text-primary)', border: '1px solid var(--text-primary)', borderRadius: 8 }} />
+								<ChartTooltip contentStyle={{ backgroundColor: 'var(--text-primary)', border: '1px solid var(--text-primary)', borderRadius: 8 }} />
 								<Line type="monotone" dataKey="count" stroke="var(--accent-gold)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
 							</LineChart>
 						</ResponsiveContainer>
@@ -357,7 +358,7 @@ export default function AnalyticsPage() {
 								<CartesianGrid strokeDasharray="3 3" stroke="var(--text-primary)" />
 								<XAxis dataKey="month" stroke="var(--text-secondary)" tickLine={false} axisLine={false} />
 								<YAxis tickFormatter={(value) => `${Math.round(value / 1000)}k`} stroke="var(--text-secondary)" tickLine={false} axisLine={false} />
-								<Tooltip
+								<ChartTooltip
 									contentStyle={{ backgroundColor: 'var(--text-primary)', border: '1px solid var(--text-primary)', borderRadius: 8 }}
 									formatter={(value: number) => formatCurrency(value)}
 								/>

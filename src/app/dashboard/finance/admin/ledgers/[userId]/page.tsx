@@ -23,9 +23,7 @@ import {
   AccountBalance,
 } from '@mui/icons-material';
 import {
-  Button,
   Box,
-  CircularProgress,
   Typography,
   TextField,
   Select,
@@ -41,6 +39,7 @@ import {
   Snackbar,
   Chip,
 } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, DashboardPageSkeleton } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -162,7 +161,7 @@ export default function UserLedgerManagementPage() {
       setTotalPages(data.pagination.totalPages);
     } catch (error) {
       console.error('Error fetching ledger:', error);
-      setSnackbar({ open: true, message: 'Failed to load ledger', severity: 'error' });
+      toast.error('Failed to load ledger');
     } finally {
       setLoading(false);
     }
@@ -184,7 +183,7 @@ export default function UserLedgerManagementPage() {
       });
 
       if (response.ok) {
-        setSnackbar({ open: true, message: 'Transaction added successfully', severity: 'success' });
+        toast.success('Transaction added successfully');
         setShowAddModal(false);
         setFormData({ description: '', type: 'DEBIT', amount: '', notes: '' });
         fetchLedgerEntries();
@@ -194,7 +193,7 @@ export default function UserLedgerManagementPage() {
       }
     } catch (error) {
       console.error('Error adding entry:', error);
-      setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
+      toast.error('An error occurred');
     }
   };
 
@@ -213,7 +212,7 @@ export default function UserLedgerManagementPage() {
       });
 
       if (response.ok) {
-        setSnackbar({ open: true, message: 'Transaction updated successfully', severity: 'success' });
+        toast.success('Transaction updated successfully');
         setShowEditModal(false);
         setSelectedEntry(null);
         setFormData({ description: '', type: 'DEBIT', amount: '', notes: '' });
@@ -224,7 +223,7 @@ export default function UserLedgerManagementPage() {
       }
     } catch (error) {
       console.error('Error updating entry:', error);
-      setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
+      toast.error('An error occurred');
     }
   };
 
@@ -239,7 +238,7 @@ export default function UserLedgerManagementPage() {
       });
 
       if (response.ok) {
-        setSnackbar({ open: true, message: 'Transaction deleted successfully', severity: 'success' });
+        toast.success('Transaction deleted successfully');
         fetchLedgerEntries();
       } else {
         const error = await response.json();
@@ -247,7 +246,7 @@ export default function UserLedgerManagementPage() {
       }
     } catch (error) {
       console.error('Error deleting entry:', error);
-      setSnackbar({ open: true, message: 'An error occurred', severity: 'error' });
+      toast.error('An error occurred');
     }
   };
 
@@ -285,10 +284,10 @@ export default function UserLedgerManagementPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      setSnackbar({ open: true, message: 'Ledger exported successfully', severity: 'success' });
+      toast.success('Ledger exported successfully');
     } catch (error) {
       console.error('Error exporting ledger:', error);
-      setSnackbar({ open: true, message: 'Failed to export ledger', severity: 'error' });
+      toast.error('Failed to export ledger');
     }
   };
 
@@ -319,9 +318,7 @@ export default function UserLedgerManagementPage() {
     return (
       <ProtectedRoute>
         <DashboardSurface>
-          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
-          </Box>
+          <DashboardPageSkeleton />
         </DashboardSurface>
       </ProtectedRoute>
     );
@@ -334,9 +331,9 @@ export default function UserLedgerManagementPage() {
         <Box sx={{ mb: 2 }}>
           <Link href="/dashboard/finance/admin/ledgers" style={{ textDecoration: 'none' }}>
             <Button
-              variant="outlined"
-              size="small"
-              startIcon={<ArrowBack />}
+              variant="outline"
+              size="sm"
+              icon={<ArrowBack />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', mb: 2 }}
             >
               Back to All Ledgers
@@ -378,10 +375,10 @@ export default function UserLedgerManagementPage() {
           description="Search and filter transactions"
           actions={
             <Button
-              variant="contained"
-              size="small"
+              variant="primary"
+              size="sm"
               onClick={() => setShowAddModal(true)}
-              startIcon={<Add />}
+              icon={<Add />}
               sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
             >
               Add Transaction
@@ -401,10 +398,10 @@ export default function UserLedgerManagementPage() {
                 fullWidth
               />
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={() => setShowFilters(!showFilters)}
-                startIcon={<FilterList />}
+                icon={<FilterList />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem', minWidth: 120 }}
               >
                 {showFilters ? 'Hide' : 'Show'} Filters
@@ -448,28 +445,28 @@ export default function UserLedgerManagementPage() {
 
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={() => window.print()}
-                startIcon={<Print />}
+                icon={<Print />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Print
               </Button>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={() => handleExport('pdf')}
-                startIcon={<Download />}
+                icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 PDF
               </Button>
               <Button
-                variant="outlined"
-                size="small"
+                variant="outline"
+                size="sm"
                 onClick={() => handleExport('excel')}
-                startIcon={<Download />}
+                icon={<Download />}
                 sx={{ textTransform: 'none', fontSize: '0.75rem' }}
               >
                 Excel
@@ -577,21 +574,21 @@ export default function UserLedgerManagementPage() {
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
-                      variant="outlined"
-                      size="small"
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      startIcon={<ChevronLeft />}
+                      icon={<ChevronLeft />}
                       sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                     >
                       Previous
                     </Button>
                     <Button
-                      variant="outlined"
-                      size="small"
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      endIcon={<ChevronRight />}
+                      icon={<ChevronRight />}
                       sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                     >
                       Next
@@ -665,7 +662,7 @@ export default function UserLedgerManagementPage() {
             <Button onClick={() => setShowAddModal(false)} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" startIcon={<Check />} sx={{ textTransform: 'none' }}>
+            <Button type="submit" variant="primary" icon={<Check />} sx={{ textTransform: 'none' }}>
               Add Transaction
             </Button>
           </DialogActions>
@@ -725,7 +722,7 @@ export default function UserLedgerManagementPage() {
             <Button onClick={() => setShowEditModal(false)} sx={{ textTransform: 'none' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" startIcon={<Check />} sx={{ textTransform: 'none' }}>
+            <Button type="submit" variant="primary" icon={<Check />} sx={{ textTransform: 'none' }}>
               Update Transaction
             </Button>
           </DialogActions>

@@ -2,6 +2,14 @@
 
 import { Box, Typography, Fade } from '@mui/material';
 import { ReactNode, useState, useEffect } from 'react';
+import { colors } from '@/lib/design-tokens';
+
+/**
+ * StatsCard Component
+ * 
+ * Display key metrics with icons, values, and optional trends.
+ * Now uses design tokens for consistent styling.
+ */
 
 interface StatsCardProps {
 	icon: ReactNode;
@@ -12,9 +20,8 @@ interface StatsCardProps {
 		value: number;
 		isPositive: boolean;
 	};
-	delay?: number;
-	iconColor?: string;
-	iconBg?: string;
+	variant?: 'default' | 'success' | 'warning' | 'error' | 'info';
+	size?: 'sm' | 'md' | 'lg';
 }
 
 export default function StatsCard({
@@ -23,55 +30,86 @@ export default function StatsCard({
 	value,
 	subtitle,
 	trend,
-	delay = 0,
-	iconColor = 'var(--accent-gold)',
-	iconBg = 'rgba(var(--accent-gold-rgb), 0.15)',
+	variant = 'default',
+	size = 'md',
 }: StatsCardProps) {
 	const [isVisible, setIsVisible] = useState(false);
 
 	useEffect(() => {
-		const timer = setTimeout(() => setIsVisible(true), delay * 1000);
-		return () => clearTimeout(timer);
-	}, [delay]);
+		setIsVisible(true);
+	}, []);
+
+	// Variant colors
+	const variantConfig = {
+		default: {
+			iconColor: 'var(--accent-gold)',
+			iconBg: 'rgba(var(--accent-gold-rgb), 0.15)',
+		},
+		success: {
+			iconColor: 'var(--success)',
+			iconBg: 'rgba(var(--success-rgb), 0.15)',
+		},
+		warning: {
+			iconColor: 'var(--warning)',
+			iconBg: 'rgba(var(--warning-rgb), 0.15)',
+		},
+		error: {
+			iconColor: 'var(--error)',
+			iconBg: 'rgba(var(--error-rgb), 0.15)',
+		},
+		info: {
+			iconColor: 'var(--info)',
+			iconBg: 'rgba(var(--info-rgb), 0.15)',
+		},
+	};
+
+	const sizeConfig = {
+		sm: { iconSize: 36, padding: 1.5, fontSize: '1.125rem' },
+		md: { iconSize: 48, padding: 2, fontSize: '1.5rem' },
+		lg: { iconSize: 56, padding: 2.5, fontSize: '1.75rem' },
+	};
+
+	const colors = variantConfig[variant];
+	const sizes = sizeConfig[size];
 
 	return (
 		<Fade in={isVisible} timeout={600}>
 			<Box
 				component="article"
 				sx={{
-					height: '100%',
-					borderRadius: 2,
-					border: '1px solid var(--border)',
-					background: 'var(--panel)',
-					boxShadow: '0 12px 30px rgba(var(--text-primary-rgb), 0.08)',
-					padding: { xs: 1.5, sm: 1.75, md: 2 },
-					display: 'flex',
-					alignItems: 'center',
-					gap: { xs: 1.25, sm: 1.5 },
-					position: 'relative',
-					overflow: 'hidden',
-					minWidth: 0,
-					width: '100%',
-					boxSizing: 'border-box',
-					transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-					'&:hover': {
-						transform: 'translateY(-4px)',
-						boxShadow: '0 20px 40px rgba(var(--text-primary-rgb), 0.12)',
-					},
+				height: '100%',
+				borderRadius: 2,
+				border: '1px solid var(--border)',
+				background: 'var(--panel)',
+				padding: sizes.padding,
+			display: 'flex',
+				alignItems: 'center',
+				gap: 1.5,
+				position: 'relative',
+				overflow: 'hidden',
+				minWidth: 0,
+				width: '100%',
+				boxSizing: 'border-box',
+				transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+				boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+				'&:hover': {
+					transform: 'translateY(-4px)',
+					boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+				},
 				}}
 			>
 				<Box
 					sx={{
-						width: { xs: 40, sm: 44, md: 48 },
-						height: { xs: 40, sm: 44, md: 48 },
+						width: sizes.iconSize,
+						height: sizes.iconSize,
 						borderRadius: 2,
 						border: '1px solid var(--border)',
-						background: iconBg,
+						background: colors.iconBg,
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
 						flexShrink: 0,
-						color: iconColor,
+						color: colors.iconColor,
 					}}
 				>
 					{icon}
@@ -93,7 +131,7 @@ export default function StatsCard({
 					</Typography>
 					<Typography
 						sx={{
-							fontSize: { xs: '1.25rem', sm: '1.4rem', md: '1.5rem' },
+							fontSize: sizes.fontSize,
 							fontWeight: 700,
 							color: 'var(--text-primary)',
 							lineHeight: 1.15,

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { User, UserPlus, Eye, EyeOff, Copy, Check } from 'lucide-react';
-import { Button, Box, CircularProgress, Typography, IconButton, Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, IconButton, Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Alert } from '@mui/material';
+import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, Button, CompactSkeleton } from '@/components/design-system';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,7 +38,6 @@ export default function UsersPage() {
 		query: '',
 		type: 'users',
 	});
-	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 	const [showEmailsFor, setShowEmailsFor] = useState<Set<string>>(new Set());
 	const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 	const [highlightedUserId, setHighlightedUserId] = useState<string | null>(null);
@@ -95,11 +95,11 @@ export default function UsersPage() {
 				setCurrentPage(data.page ?? page);
 			} else {
 				console.error('Failed to fetch users (response not ok)', response.status);
-				setSnackbar({ open: true, message: 'Failed to fetch users', severity: 'error' });
+				toast.error('Failed to fetch users');
 			}
 		} catch (error) {
 			console.error('Error fetching users:', error);
-			setSnackbar({ open: true, message: 'Error fetching users', severity: 'error' });
+			toast.error('Error fetching users');
 		} finally {
 			setLoading(false);
 		}
@@ -204,7 +204,7 @@ export default function UsersPage() {
 				setLoading(true);
 				const resp = await fetch(`/api/users/${deletingUserId}`, { method: 'DELETE' });
 				if (resp.ok) {
-					setSnackbar({ open: true, message: 'User deleted successfully', severity: 'success' });
+					toast.success('User deleted successfully');
 					setConfirmOpen(false);
 					setDeletingUserId(null);
 					// refresh current page (ensure we don't end up on an empty page)
@@ -212,11 +212,11 @@ export default function UsersPage() {
 					setCurrentPage(nextPage);
 					await fetchUsers(nextPage, searchFilters.query);
 				} else {
-					setSnackbar({ open: true, message: 'Failed to delete user', severity: 'error' });
+					toast.error('Failed to delete user');
 				}
 			} catch (err) {
 				console.error('Error deleting user:', err);
-				setSnackbar({ open: true, message: 'Error deleting user', severity: 'error' });
+				toast.error('Error deleting user');
 			} finally {
 				setLoading(false);
 			}
@@ -302,16 +302,16 @@ export default function UsersPage() {
 
 						<Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', mt: 1 }}>
 							<Link href={`/dashboard/users/${user.id}`} style={{ textDecoration: 'none' }}>
-								<Button variant="outlined" size="small" startIcon={<VisibilityIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
+								<Button variant="outline" size="sm" icon={<VisibilityIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
 									View
 								</Button>
 							</Link>
 							<Link href={`/dashboard/users/${user.id}/edit`} style={{ textDecoration: 'none' }}>
-								<Button variant="text" size="small" startIcon={<EditIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
+								<Button variant="ghost" size="sm" icon={<EditIcon />} sx={{ textTransform: 'none', fontSize: '0.7rem' }}>
 									Edit
 								</Button>
 							</Link>
-								<Button variant="text" size="small" startIcon={<DeleteIcon />} onClick={() => handleDeleteClick(user.id)} sx={{ color: 'var(--error)' }}>
+								<Button variant="ghost" size="sm" icon={<DeleteIcon />} onClick={() => handleDeleteClick(user.id)} sx={{ color: 'var(--error)' }}>
 									Delete
 								</Button>
 						</Box>
@@ -320,11 +320,16 @@ export default function UsersPage() {
 			);
 		}
 
-	if (status === 'loading' || loading) {
+	if (status === 'loading') {
 		return (
-			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]"></div>
-			</div>
+			<DashboardSurface>
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
+				<DashboardPanel>
+					<CompactSkeleton />
+				</DashboardPanel>
+			</DashboardSurface>
 		);
 	}
 
@@ -335,6 +340,10 @@ export default function UsersPage() {
 
 	return (
 		<DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
 			{/* Search Panel */}
 			<DashboardPanel
 				title="Team directory"
@@ -342,7 +351,7 @@ export default function UsersPage() {
 				noBodyPadding
 				actions={
 					<Link href="/dashboard/users/new" style={{ textDecoration: 'none' }}>
-						<Button variant="contained" size="small" sx={{ textTransform: 'none', fontWeight: 600 }}>
+						<Button variant="primary" size="sm" sx={{ textTransform: 'none', fontWeight: 600 }}>
 							<UserPlus style={{ width: 16, height: 16, marginRight: 8 }} />
 							Create User
 						</Button>
@@ -406,15 +415,17 @@ export default function UsersPage() {
 
 				{/* Content */}
 				{loading ? (
-					<Box sx={{ minHeight: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-						<CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
+					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+						{[...Array(6)].map((_, i) => (
+							<SkeletonCard key={i} />
+						))}
 					</Box>
 				) : paginatedUsers.length === 0 ? (
 					<Box sx={{ minHeight: 240, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
 						<User style={{ width: 48, height: 48, color: 'rgba(255,255,255,0.25)' }} />
 						<Typography sx={{ color: 'var(--text-secondary)' }}>No users found</Typography>
 						<Link href="/dashboard/users/new" style={{ textDecoration: 'none' }}>
-							<Button variant="contained" size="small" sx={{ mt: 1, textTransform: 'none' }}>
+							<Button variant="primary" size="sm" sx={{ mt: 1, textTransform: 'none' }}>
 								<UserPlus style={{ width: 16, height: 16, marginRight: 8 }} /> Create User
 							</Button>
 						</Link>
@@ -429,11 +440,11 @@ export default function UsersPage() {
 
 						{/* Pagination Controls */}
 						<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
-							<Button variant="outlined" size="small" onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); fetchUsers(currentPage - 1, searchFilters.query); }} disabled={currentPage === 1} sx={{ textTransform: 'none' }}>
+							<Button variant="outline" size="sm" onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); fetchUsers(currentPage - 1, searchFilters.query); }} disabled={currentPage === 1} sx={{ textTransform: 'none' }}>
 								Previous
 							</Button>
 							<Typography sx={{ color: 'var(--text-secondary)' }}>Page {currentPage} of {totalPages}</Typography>
-							<Button variant="outlined" size="small" onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); fetchUsers(currentPage + 1, searchFilters.query); }} disabled={currentPage === totalPages} sx={{ textTransform: 'none' }}>
+							<Button variant="outline" size="sm" onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); fetchUsers(currentPage + 1, searchFilters.query); }} disabled={currentPage === totalPages} sx={{ textTransform: 'none' }}>
 								Next
 							</Button>
 						</Box>
@@ -450,17 +461,11 @@ export default function UsersPage() {
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleCancelDelete} variant="text">Cancel</Button>
-					<Button onClick={handleConfirmDelete} variant="contained" color="error">Delete</Button>
+					<Button onClick={handleCancelDelete} variant="ghost">Cancel</Button>
+					<Button onClick={handleConfirmDelete} variant="primary" color="error">Delete</Button>
 				</DialogActions>
 			</Dialog>
 
-			{/* Snackbar for feedback */}
-			<Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-				<Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
-					{snackbar.message}
-				</Alert>
-			</Snackbar>
 		</DashboardSurface>
 	);
 }

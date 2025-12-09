@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Receipt, CheckCircle, Clock, AlertCircle, Search as SearchIcon, Plus } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 interface Invoice {
 	id: string;
@@ -97,7 +97,7 @@ export default function InvoicesPage() {
 	};
 
 	if (status === 'loading' || loading) {
-		return <LoadingState fullScreen message="Loading invoices..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	const role = session?.user?.role;
@@ -107,14 +107,19 @@ export default function InvoicesPage() {
 
 	return (
 		<DashboardSurface>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2 }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<PageHeader
 				title="Invoices"
 				description="Manage and track all invoices"
 				actions={
 					<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-						<ActionButton variant="primary" icon={<Plus className="w-4 h-4" />}>
+						<Button variant="primary" icon={<Plus className="w-4 h-4" />}>
 							New Invoice
-						</ActionButton>
+						</Button>
 					</Link>
 				}
 			/>
@@ -127,33 +132,27 @@ export default function InvoicesPage() {
 					value={stats.total}
 					subtitle="All invoices"
 				/>
-				<StatsCard
-					icon={<CheckCircle style={{ fontSize: 18 }} />}
-					title="Paid"
-					value={stats.paid}
-					subtitle="Completed payments"
-					iconColor="rgb(34, 197, 94)"
-					iconBg="rgba(34, 197, 94, 0.15)"
-					delay={0.1}
-				/>
-				<StatsCard
-					icon={<AlertCircle style={{ fontSize: 18 }} />}
-					title="Overdue"
-					value={stats.overdue}
-					subtitle="Requires attention"
-					iconColor="rgb(239, 68, 68)"
-					iconBg="rgba(239, 68, 68, 0.15)"
-					delay={0.2}
-				/>
-				<StatsCard
-					icon={<Clock style={{ fontSize: 18 }} />}
-					title="Pending"
-					value={stats.pending}
-					subtitle="Awaiting payment"
-					iconColor="rgb(14, 165, 233)"
-					iconBg="rgba(14, 165, 233, 0.15)"
-					delay={0.3}
-				/>
+			<StatsCard
+				icon={<CheckCircle style={{ fontSize: 18 }} />}
+				title="Paid"
+				value={stats.paid}
+				variant="success"
+				size="md"
+			/>
+			<StatsCard
+				icon={<AlertCircle style={{ fontSize: 18 }} />}
+				title="Overdue"
+				value={stats.overdue}
+				variant="error"
+				size="md"
+			/>
+			<StatsCard
+				icon={<Clock style={{ fontSize: 18 }} />}
+				title="Pending"
+				value={stats.pending}
+				variant="info"
+				size="md"
+			/>
 			</DashboardGrid>
 
 			{/* Filters */}
@@ -214,7 +213,7 @@ export default function InvoicesPage() {
 						action={
 							!searchTerm && statusFilter === 'all' && (
 								<Link href="/dashboard/invoices/new" style={{ textDecoration: 'none' }}>
-									<ActionButton variant="primary">Create Invoice</ActionButton>
+									<Button variant="primary">Create Invoice</Button>
 								</Link>
 							)
 						}

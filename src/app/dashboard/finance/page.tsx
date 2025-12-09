@@ -16,7 +16,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, ActionButton, LoadingState } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, LoadingState, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 interface FinancialSummary {
@@ -96,7 +96,7 @@ export default function FinancePage() {
   if (status === 'loading' || loading) {
     return (
       <ProtectedRoute>
-        <LoadingState fullScreen message="Loading financial data..." />
+        <DashboardPageSkeleton />
       </ProtectedRoute>
     );
   }
@@ -104,15 +104,20 @@ export default function FinancePage() {
   return (
     <ProtectedRoute>
       <DashboardSurface>
+        {/* Breadcrumbs */}
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Breadcrumbs />
+        </Box>
+        
         <PageHeader
           title="Accounting & Finance"
           description="Manage ledgers, payments, and financial reports"
           actions={
             isAdmin && (
               <Link href="/dashboard/finance/record-payment" style={{ textDecoration: 'none' }}>
-                <ActionButton variant="primary" icon={<PlusCircle className="w-4 h-4" />}>
+                <Button variant="primary" icon={<PlusCircle className="w-4 h-4" />}>
                   Record Payment
-                </ActionButton>
+                </Button>
               </Link>
             )
           }
@@ -124,36 +129,29 @@ export default function FinancePage() {
             icon={<TrendingUp style={{ fontSize: 18 }} />}
             title="Total Debit"
             value={formatCurrency(summary?.ledgerSummary.totalDebit || 0)}
-            subtitle={`${summary?.ledgerSummary.debitCount || 0} transactions`}
-            iconColor="rgb(248, 113, 113)"
-            iconBg="rgba(248, 113, 113, 0.15)"
+            variant="error"
+            size="md"
           />
           <StatsCard
             icon={<TrendingDown style={{ fontSize: 18 }} />}
             title="Total Credit"
             value={formatCurrency(summary?.ledgerSummary.totalCredit || 0)}
-            subtitle={`${summary?.ledgerSummary.creditCount || 0} transactions`}
-            iconColor="rgb(74, 222, 128)"
-            iconBg="rgba(74, 222, 128, 0.15)"
-            delay={0.1}
+            variant="success"
+            size="md"
           />
           <StatsCard
             icon={<DollarSign style={{ fontSize: 18 }} />}
             title="Net Balance"
             value={formatCurrency(Math.abs(summary?.ledgerSummary.netBalance || 0))}
-            subtitle={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'Receivable' : 'Payable'}
-            iconColor={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'rgb(74, 222, 128)' : 'rgb(248, 113, 113)'}
-            iconBg={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'rgba(74, 222, 128, 0.15)' : 'rgba(248, 113, 113, 0.15)'}
-            delay={0.2}
+            variant={(summary?.ledgerSummary.netBalance || 0) >= 0 ? 'success' : 'error'}
+            size="md"
           />
           <StatsCard
             icon={<Users style={{ fontSize: 18 }} />}
             title="Active Users"
             value={getUsersWithBalance()}
-            subtitle="With outstanding balance"
-            iconColor="rgb(34, 211, 238)"
-            iconBg="rgba(34, 211, 238, 0.15)"
-            delay={0.3}
+            variant="info"
+            size="md"
           />
         </DashboardGrid>
 

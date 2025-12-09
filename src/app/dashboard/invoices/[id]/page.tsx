@@ -6,10 +6,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, Download } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/design-system';
 import Section from '@/components/layout/Section';
 import { pdf } from '@react-pdf/renderer';
-import { toast } from '@/lib/toast';
+import { toast } from '@/components/design-system';
 import {
 	InvoicePdfTemplate,
 	InvoicePdfCompanyInfo,
@@ -177,11 +177,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				toast.error('Failed to update invoice', 'Please try again');
+				toast.error('Failed to update invoice');
 			}
 		} catch (error) {
 			console.error('Error updating invoice:', error);
-			toast.error('Failed to update invoice', 'An error occurred. Please try again');
+			toast.error('Failed to update invoice');
 		} finally {
 			setIsUpdating(false);
 		}
@@ -202,11 +202,11 @@ export default function InvoiceDetailPage() {
 				await fetchInvoice();
 				setShowWireDetailsForm(false);
 			} else {
-				toast.error('Failed to update wire transfer details', 'Please try again');
+				toast.error('Failed to update wire transfer details');
 			}
 		} catch (error) {
 			console.error('Error updating wire details:', error);
-			toast.error('Failed to update wire transfer details', 'An error occurred. Please try again');
+			toast.error('Failed to update wire transfer details');
 		} finally {
 			setIsUpdating(false);
 		}
@@ -291,7 +291,7 @@ export default function InvoiceDetailPage() {
 			setTimeout(() => URL.revokeObjectURL(url), 0);
 		} catch (error) {
 			console.error('Error exporting invoice PDF:', error);
-			toast.error('Failed to generate PDF', 'Unable to export. Please try again');
+			toast.error('Failed to generate PDF');
 		} finally {
 			setIsExporting(false);
 		}

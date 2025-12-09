@@ -13,10 +13,12 @@ import {
   Users,
   Package,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
+import { Button, Breadcrumbs, toast, DashboardPageSkeleton, TableSkeleton, SkeletonCard } from '@/components/design-system';
+import { Box } from '@mui/material';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 
 type UserBalance = {
   userId: string;
@@ -198,6 +200,11 @@ export default function FinancialReportsPage() {
   return (
     <AdminRoute>
       <div className="min-h-screen bg-[var(--background)]">
+        {/* Breadcrumbs */}
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Breadcrumbs />
+        </Box>
+        
         <Section className="pt-6 pb-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-start gap-3 min-w-0 flex-1">

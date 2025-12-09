@@ -95,21 +95,57 @@ html {
 }
 
 :root {
+	/* ===================================
+	   DESIGN SYSTEM TOKENS v1.0
+	   See: /src/lib/design-tokens/
+	   =================================== */
+	
+	/* Primary Colors */
 	--accent-gold: #D4AF37;
-	--background: #F9FAFB;
-	--panel: #E4E9F0;
-	--text-primary: #1C1C1E;
-	--text-secondary: #5F6368;
-	--border: #E0E0E0;
-	--error: #EF4444;
-	--radius: 0.75rem;
-	--text-primary-rgb: 28, 28, 30;
-	--text-secondary-rgb: 95, 99, 104;
 	--accent-gold-rgb: 212, 175, 55;
+	
+	/* Backgrounds & Surfaces */
+	--background: #F9FAFB;
 	--background-rgb: 249, 250, 251;
+	--panel: #E4E9F0;
 	--panel-rgb: 228, 233, 240;
+	
+	/* Borders */
+	--border: #E0E0E0;
 	--border-rgb: 224, 224, 224;
+	
+	/* Text */
+	--text-primary: #1C1C1E;
+	--text-primary-rgb: 28, 28, 30;
+	--text-secondary: #5F6368;
+	--text-secondary-rgb: 95, 99, 104;
+	
+	/* Semantic Colors - Success */
+	--success: #10B981;
+	--success-rgb: 16, 185, 129;
+	--success-light: #D1FAE5;
+	--success-dark: #047857;
+	
+	/* Semantic Colors - Warning */
+	--warning: #F59E0B;
+	--warning-rgb: 245, 158, 11;
+	--warning-light: #FEF3C7;
+	--warning-dark: #B45309;
+	
+	/* Semantic Colors - Error */
+	--error: #EF4444;
 	--error-rgb: 239, 68, 68;
+	--error-light: #FEE2E2;
+	--error-dark: #B91C1C;
+	
+	/* Semantic Colors - Info */
+	--info: #3B82F6;
+	--info-rgb: 59, 130, 246;
+	--info-light: #DBEAFE;
+	--info-dark: #1D4ED8;
+	
+	/* Other */
+	--radius: 0.75rem;
 }
 
 body {
@@ -391,7 +427,92 @@ body {
   /* System Colors - Jacxi Palette */
 }
 
+/* ===================================
+   DARK MODE THEME
+   =================================== */
+.dark-mode {
+  /* Main colors */
+  --accent-gold: #D4AF37;
+  --accent-gold-rgb: 212, 175, 55;
+  
+  /* Backgrounds & Surfaces */
+  --background: #0A0A0A;
+  --background-rgb: 10, 10, 10;
+  --panel: #1A1A1A;
+  --panel-rgb: 26, 26, 26;
+  
+  /* Borders */
+  --border: #2A2A2A;
+  --border-rgb: 42, 42, 42;
+  
+  /* Text */
+  --text-primary: #E5E5E5;
+  --text-primary-rgb: 229, 229, 229;
+  --text-secondary: #A0A0A0;
+  --text-secondary-rgb: 160, 160, 160;
+  
+  /* Semantic Colors - Success */
+  --success: #10B981;
+  --success-rgb: 16, 185, 129;
+  --success-light: #064E3B;
+  --success-dark: #D1FAE5;
+  
+  /* Semantic Colors - Warning */
+  --warning: #F59E0B;
+  --warning-rgb: 245, 158, 11;
+  --warning-light: #78350F;
+  --warning-dark: #FEF3C7;
+  
+  /* Semantic Colors - Error */
+  --error: #EF4444;
+  --error-rgb: 239, 68, 68;
+  --error-light: #7F1D1D;
+  --error-dark: #FEE2E2;
+  
+  /* Semantic Colors - Info */
+  --info: #3B82F6;
+  --info-rgb: 59, 130, 246;
+  --info-light: #1E3A8A;
+  --info-dark: #DBEAFE;
+}
+
 .dark {
+  /* Fallback for legacy .dark class */
+  --accent-gold: #D4AF37;
+  --accent-gold-rgb: 212, 175, 55;
+  
+  --background: #0A0A0A;
+  --background-rgb: 10, 10, 10;
+  --panel: #1A1A1A;
+  --panel-rgb: 26, 26, 26;
+  
+  --border: #2A2A2A;
+  --border-rgb: 42, 42, 42;
+  
+  --text-primary: #E5E5E5;
+  --text-primary-rgb: 229, 229, 229;
+  --text-secondary: #A0A0A0;
+  --text-secondary-rgb: 160, 160, 160;
+  
+  --success: #10B981;
+  --success-rgb: 16, 185, 129;
+  --success-light: #064E3B;
+  --success-dark: #D1FAE5;
+  
+  --warning: #F59E0B;
+  --warning-rgb: 245, 158, 11;
+  --warning-light: #78350F;
+  --warning-dark: #FEF3C7;
+  
+  --error: #EF4444;
+  --error-rgb: 239, 68, 68;
+  --error-light: #7F1D1D;
+  --error-dark: #FEE2E2;
+  
+  --info: #3B82F6;
+  --info-rgb: 59, 130, 246;
+  --info-light: #1E3A8A;
+  --info-dark: #DBEAFE;
 }
 
 * {

@@ -1,4 +1,5 @@
 'use client';
+import { Box } from '@mui/material';
 
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -6,9 +7,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
 import Section from '@/components/layout/Section';
-import { toast } from '@/lib/toast';
 
 type ContainerItem = {
 	id: string;
@@ -91,12 +91,12 @@ export default function NewInvoicePage() {
 
 	const handleCreateInvoice = async () => {
 		if (!containerId) {
-			toast.warning('Missing information', 'Container information is required');
+			toast.warning("Missing information");
 			return;
 		}
 
 		if (selectedItems.length === 0) {
-			toast.warning('No items selected', 'Please select at least one item');
+			toast.warning("No items selected");
 			return;
 		}
 
@@ -122,7 +122,7 @@ export default function NewInvoicePage() {
 			}
 		} catch (error) {
 			console.error('Error creating invoice:', error);
-			toast.error('Failed to create invoice', 'An error occurred. Please try again');
+			toast.error("Failed to create invoice");
 		} finally {
 			setIsCreating(false);
 		}
@@ -151,6 +151,11 @@ export default function NewInvoicePage() {
 
 	return (
 		<>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
 			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">
@@ -179,6 +184,11 @@ export default function NewInvoicePage() {
 					</div>
 				</div>
 			</Section>
+
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
 
 			<Section className="bg-[var(--text-primary)] py-8 sm:py-12">
 				<div className="max-w-4xl mx-auto space-y-6">

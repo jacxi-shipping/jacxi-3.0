@@ -1,4 +1,5 @@
 'use client';
+import { Box } from '@mui/material';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import Link from 'next/link';
@@ -8,8 +9,8 @@ import { motion } from 'framer-motion';
 import { User, ArrowLeft, Bell, Palette, Shield, Activity, Sun, Moon, Database, RefreshCw, UploadCloud } from 'lucide-react';
 
 import Section from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
 
 const DEFAULT_SETTINGS = {
 	theme: 'futuristic',
@@ -543,6 +544,11 @@ export default function SettingsPage() {
 
 	return (
 		<>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: 'relative', zIndex: 20, bgcolor: 'var(--background)' }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<Section className="relative bg-[var(--text-primary)] py-8 sm:py-12 lg:py-16 overflow-hidden">
 				<div className="absolute inset-0 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
 				<div className="absolute inset-0 opacity-[0.03]">

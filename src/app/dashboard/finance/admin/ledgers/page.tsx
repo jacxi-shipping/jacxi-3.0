@@ -15,7 +15,8 @@ import {
   Payment,
   AddCircle,
 } from '@mui/icons-material';
-import { Button, Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import {  Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, DashboardPageSkeleton } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -193,9 +194,11 @@ export default function AdminLedgersPage() {
     return (
       <ProtectedRoute>
         <DashboardSurface>
-          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
-          </Box>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
+          <DashboardPageSkeleton />
         </DashboardSurface>
       </ProtectedRoute>
     );
@@ -204,6 +207,10 @@ export default function AdminLedgersPage() {
   return (
     <ProtectedRoute>
       <DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
         {/* Summary Cards */}
         <DashboardGrid className="grid-cols-1 md:grid-cols-4">
           <StatsCard
@@ -274,9 +281,9 @@ export default function AdminLedgersPage() {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Link href="/dashboard/finance/record-payment" style={{ textDecoration: 'none' }}>
                 <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<Payment />}
+                  variant="primary"
+                  size="sm"
+                  icon={<Payment />}
                   sx={{ textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
                 >
                   Record Payment
@@ -284,9 +291,9 @@ export default function AdminLedgersPage() {
               </Link>
               <Link href="/dashboard/finance/add-expense" style={{ textDecoration: 'none' }}>
                 <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<AddCircle />}
+                  variant="outline"
+                  size="sm"
+                  icon={<AddCircle />}
                   sx={{ textTransform: 'none', fontSize: '0.78rem' }}
                 >
                   Add Expense
@@ -345,9 +352,9 @@ export default function AdminLedgersPage() {
                       <td style={{ padding: '12px 8px', textAlign: 'center' }}>
                         <Link href={`/dashboard/finance/admin/ledgers/${user.userId}`} style={{ textDecoration: 'none' }}>
                           <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<Visibility />}
+                            variant="outline"
+                            size="sm"
+                            icon={<Visibility />}
                             sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                           >
                             View Ledger

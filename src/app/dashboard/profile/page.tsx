@@ -3,22 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Section from '@/components/layout/Section';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Box, TextField, Grid, Avatar, Divider } from '@mui/material';
 import {
-	ArrowLeft,
+	User,
 	Mail,
 	Phone,
-	ShieldCheck,
-	User,
 	MapPin,
-	Loader2,
-	CheckCircle2,
-	AlertCircle,
+	Shield,
+	Calendar,
+	Save,
+	RotateCcw,
 } from 'lucide-react';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { PageHeader, Button, Breadcrumbs, toast, LoadingState, EmptyState, StatsCard , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 type ProfileFormState = {
 	name: string;
@@ -51,23 +48,6 @@ const initialFormState: ProfileFormState = {
 	country: '',
 };
 
-const accountInfoItems = (user: ProfileResponse['user']) => [
-	{ label: 'Email', icon: Mail, value: user.email },
-	{
-		label: 'Role',
-		icon: ShieldCheck,
-		value: user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase(),
-	},
-	{ label: 'Joined', icon: User, value: new Date(user.createdAt).toLocaleDateString() },
-];
-
-const personalInfoFields = (form: ProfileFormState) => [
-	{ label: 'Phone', name: 'phone', placeholder: '+971 55 123 4567', value: form.phone, icon: Phone, type: 'tel' as const },
-	{ label: 'Address', name: 'address', placeholder: 'Warehouse 5, Al Quoz', value: form.address, icon: MapPin, type: 'text' as const },
-	{ label: 'City', name: 'city', placeholder: 'Dubai', value: form.city, icon: MapPin, type: 'text' as const },
-	{ label: 'Country', name: 'country', placeholder: 'United Arab Emirates', value: form.country, icon: MapPin, type: 'text' as const },
-];
-
 export default function ProfilePage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
@@ -75,8 +55,6 @@ export default function ProfilePage() {
 	const [form, setForm] = useState<ProfileFormState>(initialFormState);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [serverMessage, setServerMessage] = useState<string | null>(null);
-	const [serverError, setServerError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (status === 'loading') return;
@@ -104,7 +82,7 @@ export default function ProfilePage() {
 				});
 			} catch (error) {
 				const message = error instanceof Error ? error.message : 'Unable to fetch profile information';
-				setServerError(message);
+				toast.error(message);
 			} finally {
 				setLoading(false);
 			}
@@ -123,8 +101,6 @@ export default function ProfilePage() {
 		if (!profile) return;
 
 		setSaving(true);
-		setServerMessage(null);
-		setServerError(null);
 
 		try {
 			const response = await fetch('/api/profile', {
@@ -147,220 +123,277 @@ export default function ProfilePage() {
 				city: payload.user.city ?? '',
 				country: payload.user.country ?? '',
 			});
-			setServerMessage('Profile updated successfully');
+			toast.success('Profile updated successfully');
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-			setServerError(message);
+			toast.error(message);
 		} finally {
 			setSaving(false);
 		}
 	};
 
+	const handleReset = () => {
+		if (!profile) return;
+		setForm({
+			name: profile.name ?? '',
+			phone: profile.phone ?? '',
+			address: profile.address ?? '',
+			city: profile.city ?? '',
+			country: profile.country ?? '',
+		});
+		toast.info('Form reset to saved values');
+	};
+
 	if (status === 'loading' || loading) {
-		return (
-			<Section className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="text-center space-y-4 text-white/70">
-					<div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500/30 border-t-cyan-400" />
-					<p>Loading your profile...</p>
-				</div>
-			</Section>
-		);
+		return <DashboardPageSkeleton />;
 	}
 
 	if (!profile) {
 		return (
-			<Section className="min-h-screen bg-[var(--text-primary)] flex items-center justify-center">
-				<div className="max-w-md space-y-4 text-center">
-					<h2 className="text-xl font-semibold text-white">Profile unavailable</h2>
-					<p className="text-white/70">{serverError || 'We could not load your profile details at the moment.'}</p>
-				</div>
-			</Section>
+			<DashboardSurface>
+				<EmptyState
+					icon={<User className="w-12 h-12" />}
+					title="Profile Unavailable"
+					description="We could not load your profile details at the moment."
+				/>
+			</DashboardSurface>
 		);
 	}
 
-	const accountInfo = accountInfoItems(profile);
-	const personalFields = personalInfoFields(form);
+	const memberSince = new Date(profile.createdAt).toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	});
 
 	return (
-		<div className="min-h-screen bg-[var(--text-primary)]">
-			<div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--text-primary)] via-[var(--text-primary)] to-[var(--text-primary)]" />
-			<div className="absolute inset-0 -z-10 opacity-[0.04]">
-				<svg className="h-full w-full" preserveAspectRatio="none">
-					<pattern id="profile-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-						<path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" strokeWidth="0.5" />
-					</pattern>
-					<rect width="100%" height="100%" fill="url(#profile-grid)" />
-				</svg>
-			</div>
+		<DashboardSurface>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2 }}>
+				<Breadcrumbs />
+			</Box>
 
-			<Section className="pb-4 pt-6">
-				<div className="flex flex-wrap items-center justify-between gap-4">
-					<div className="flex items-center gap-3">
-						<Link href="/dashboard">
-							<Button variant="outline" size="sm" className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
-								<ArrowLeft className="w-4 h-4 mr-2" />
-								Dashboard
-							</Button>
-						</Link>
-						<div>
-							<h1 className="text-2xl sm:text-3xl font-semibold text-white">Profile</h1>
-							<p className="text-white/60 text-sm">Manage your personal information and account security.</p>
-						</div>
-					</div>
-					<Button variant="outline" size="sm" className="border-white/20 text-white/70 hover:bg-white/10" disabled>
-						Manage Passwords
-					</Button>
-				</div>
-			</Section>
+			<PageHeader
+				title="Profile"
+				description="Manage your personal information and account settings"
+			/>
 
-			<Section className="pb-16">
-				<div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-					<motion.div
-						initial={{ opacity: 0, y: 12 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.4 }}
-						className="space-y-6 xl:col-span-2"
-					>
-						<Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
-							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-white text-lg">
-									<User className="h-5 w-5 text-cyan-300" />
-									Account Overview
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-								{accountInfo.map(({ label, icon: Icon, value }) => (
-									<div key={label} className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-2">
-										<div className="flex items-center gap-2 text-xs uppercase tracking-wide text-white/50">
-											<Icon className="h-4 w-4 text-cyan-300" />
-											<span>{label}</span>
-										</div>
-										<p className="text-sm text-white/80">{value}</p>
-									</div>
-								))}
-							</CardContent>
-						</Card>
+			{/* Account Stats */}
+			<Box sx={{ px: 2, mb: 3 }}>
+				<DashboardGrid className="grid-cols-1 md:grid-cols-3">
+					<StatsCard
+						icon={<Mail style={{ fontSize: 18 }} />}
+						title="Email"
+						value={profile.email}
+						variant="info"
+						size="md"
+					/>
+					<StatsCard
+						icon={<Shield style={{ fontSize: 18 }} />}
+						title="Role"
+						value={profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+						variant="success"
+						size="md"
+					/>
+					<StatsCard
+						icon={<Calendar style={{ fontSize: 18 }} />}
+						title="Member Since"
+						value={memberSince}
+						variant="default"
+						size="md"
+					/>
+				</DashboardGrid>
+			</Box>
 
-						<Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
-							<CardHeader>
-								<CardTitle className="text-white text-lg">Personal Details</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<form onSubmit={handleSubmit} className="space-y-6">
-									<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-										<div className="space-y-2">
-											<label htmlFor="name" className="text-sm font-medium text-white/70">Full Name</label>
-											<input
-												type="text"
-												id="name"
-												name="name"
-												value={form.name}
-												onChange={handleChange}
-												placeholder="Sara Al Mansouri"
-												className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-											/>
-										</div>
-										{personalFields.map(({ label, name, placeholder, value, icon: Icon, type }) => (
-											<div key={name} className="space-y-2">
-												<label htmlFor={name} className="text-sm font-medium text-white/70">{label}</label>
-												<div className="relative">
-													<Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-													<input
-														type={type}
-														id={name}
-														name={name}
-														value={value}
-														onChange={handleChange}
-														placeholder={placeholder}
-														className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 pl-9 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-													/>
-												</div>
-											</div>
-										))}
-									</div>
+			<Box sx={{ px: 2, pb: 4 }}>
+				<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 3 }}>
+					{/* Main Profile Form */}
+					<Box>
+						<DashboardPanel
+							title="Personal Information"
+							description="Update your personal details and contact information"
+						>
+							<Box component="form" onSubmit={handleSubmit}>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+									{/* Avatar Section */}
+									<Box>
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+											<Avatar
+												sx={{
+													width: 80,
+													height: 80,
+													bgcolor: 'var(--accent-gold)',
+													fontSize: '2rem',
+													fontWeight: 600,
+												}}
+											>
+												{(profile.name || profile.email)[0].toUpperCase()}
+											</Avatar>
+											<Box>
+												<Box sx={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', mb: 0.5 }}>
+													{profile.name || 'User'}
+												</Box>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+													{profile.email}
+												</Box>
+											</Box>
+										</Box>
+									</Box>
 
-									{serverMessage && (
-										<div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-											<CheckCircle2 className="h-4 w-4" />
-											<span>{serverMessage}</span>
-										</div>
-									)}
-									{serverError && (
-										<div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-											<AlertCircle className="h-4 w-4" />
-											<span>{serverError}</span>
-										</div>
-									)}
+									<Divider sx={{ borderColor: 'var(--border)' }} />
 
-									<div className="flex justify-end gap-3">
-										<Button
-											type="button"
-											variant="outline"
-											onClick={() => {
-												setForm({
-													name: profile.name ?? '',
-													phone: profile.phone ?? '',
-													address: profile.address ?? '',
-													city: profile.city ?? '',
-													country: profile.country ?? '',
-												});
-												setServerMessage(null);
-												setServerError(null);
+									{/* Name & Phone */}
+									<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+										<TextField
+											fullWidth
+											label="Full Name"
+											name="name"
+											value={form.name}
+											onChange={handleChange}
+											placeholder="Enter your full name"
+											variant="outlined"
+											size="small"
+											InputProps={{
+												startAdornment: <User className="w-4 h-4 mr-2 text-[var(--text-secondary)]" />,
 											}}
-											className="border-white/20 text-white/70 hover:bg-white/10"
-										>
-											Reset
-										</Button>
-										<Button
-											type="submit"
-											disabled={saving}
-											className="bg-[var(--accent-gold)] text-white hover:bg-[var(--accent-gold)] shadow-cyan-500/30"
-										>
-											{saving ? (
-												<>
-													<Loader2 className="h-4 w-4 animate-spin mr-2" />
-													Saving...
-												</>
-											) : (
-												'Update Profile'
-											)}
-										</Button>
-									</div>
-								</form>
-							</CardContent>
-						</Card>
-					</motion.div>
+										/>
 
-					<motion.div
-						initial={{ opacity: 0, y: 12 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.4, delay: 0.1 }}
-						className="space-y-6"
-					>
-						<Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
-							<CardHeader>
-								<CardTitle className="text-white text-lg">Security Tips</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-3 text-sm text-white/70">
-								<p>Protect your account by keeping your email secure and enabling two-factor authentication when available.</p>
-								<p>If you suspect unusual activity, reach out to support immediately.</p>
-							</CardContent>
-						</Card>
+										<TextField
+											fullWidth
+											label="Phone Number"
+											name="phone"
+											value={form.phone}
+											onChange={handleChange}
+											placeholder="+1 (555) 123-4567"
+											variant="outlined"
+											size="small"
+											InputProps={{
+												startAdornment: <Phone className="w-4 h-4 mr-2 text-[var(--text-secondary)]" />,
+											}}
+										/>
+									</Box>
 
-						<Card className="border-white/10 bg-white/[0.03] backdrop-blur-sm">
-							<CardHeader>
-								<CardTitle className="text-white text-lg">Need Assistance?</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-4 text-sm text-white/70">
-								<p>Our support team is available to help with any account updates or security concerns.</p>
-								<Button variant="outline" className="w-full border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10">
-									Contact Support
-								</Button>
-							</CardContent>
-						</Card>
-					</motion.div>
-				</div>
-			</Section>
-		</div>
+									{/* Address */}
+									<Box>
+										<TextField
+											fullWidth
+											label="Address"
+											name="address"
+											value={form.address}
+											onChange={handleChange}
+											placeholder="123 Main Street"
+											variant="outlined"
+											size="small"
+											InputProps={{
+												startAdornment: <MapPin className="w-4 h-4 mr-2 text-[var(--text-secondary)]" />,
+											}}
+										/>
+									</Box>
+
+									{/* City & Country */}
+									<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+										<TextField
+											fullWidth
+											label="City"
+											name="city"
+											value={form.city}
+											onChange={handleChange}
+											placeholder="New York"
+											variant="outlined"
+											size="small"
+											InputProps={{
+												startAdornment: <MapPin className="w-4 h-4 mr-2 text-[var(--text-secondary)]" />,
+											}}
+										/>
+
+										<TextField
+											fullWidth
+											label="Country"
+											name="country"
+											value={form.country}
+											onChange={handleChange}
+											placeholder="United States"
+											variant="outlined"
+											size="small"
+											InputProps={{
+												startAdornment: <MapPin className="w-4 h-4 mr-2 text-[var(--text-secondary)]" />,
+											}}
+										/>
+									</Box>
+
+									{/* Action Buttons */}
+									<Box>
+										<Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+											<Button
+												type="button"
+												variant="outline"
+												size="sm"
+												icon={<RotateCcw className="w-4 h-4" />}
+												onClick={handleReset}
+												disabled={saving}
+											>
+												Reset
+											</Button>
+											<Button
+												type="submit"
+												variant="primary"
+												size="sm"
+												icon={<Save className="w-4 h-4" />}
+												disabled={saving}
+											>
+												{saving ? 'Saving...' : 'Save Changes'}
+											</Button>
+										</Box>
+									</Box>
+								</Box>
+							</Box>
+						</DashboardPanel>
+					</Box>
+
+					{/* Sidebar - Security Tips */}
+					<Box>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+							<DashboardPanel
+								title="Security Tips"
+								description="Keep your account safe"
+							>
+								<Box sx={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.6 }}>
+									<ul style={{ listStyle: 'disc', paddingLeft: '1.25rem', margin: 0 }}>
+										<li style={{ marginBottom: '0.5rem' }}>Use a strong, unique password</li>
+										<li style={{ marginBottom: '0.5rem' }}>Enable two-factor authentication</li>
+										<li style={{ marginBottom: '0.5rem' }}>Keep your contact info up to date</li>
+										<li style={{ marginBottom: '0.5rem' }}>Review account activity regularly</li>
+									</ul>
+								</Box>
+							</DashboardPanel>
+
+							<DashboardPanel
+								title="Account Info"
+							>
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+									<Box>
+										<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mb: 0.5 }}>
+											Account ID
+										</Box>
+										<Box sx={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+											{profile.id.slice(0, 8)}...
+										</Box>
+									</Box>
+									<Divider sx={{ borderColor: 'var(--border)' }} />
+									<Box>
+										<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mb: 0.5 }}>
+											Last Updated
+										</Box>
+										<Box sx={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+											{new Date(profile.updatedAt).toLocaleDateString()}
+										</Box>
+									</Box>
+								</Box>
+							</DashboardPanel>
+						</Box>
+					</Box>
+				</Box>
+			</Box>
+		</DashboardSurface>
 	);
 }

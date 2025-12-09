@@ -20,10 +20,11 @@ import {
 	InputAdornment,
 	IconButton,
 	Alert,
-	CircularProgress,
 	Snackbar,
 	Button as MuiButton,
 } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, FormPageSkeleton } from '@/components/design-system';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 
 export default function CreateUserPage() {
 	const router = useRouter();
@@ -37,14 +38,9 @@ export default function CreateUserPage() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
 	if (status === 'loading') {
-		return (
-			<Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-				<CircularProgress />
-			</Box>
-		);
+		return <FormPageSkeleton />;
 	}
 
 	const role = session?.user?.role;
@@ -55,9 +51,9 @@ export default function CreateUserPage() {
 					<Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Access Restricted</Typography>
 					<Typography sx={{ mb: 3 }}>Only administrators can create user accounts.</Typography>
 					<Link href="/dashboard" style={{ textDecoration: 'none' }}>
-						<MuiButton variant="contained" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
-							Go to Dashboard
-						</MuiButton>
+					<MuiButton variant="contained" sx={{ bgcolor: 'var(--accent-gold)', color: 'var(--background)', '&:hover': { bgcolor: 'var(--accent-gold)' } }}>
+						Go to Dashboard
+					</MuiButton>
 					</Link>
 				</Paper>
 			</Box>
@@ -76,13 +72,13 @@ export default function CreateUserPage() {
 		setIsLoading(true);
 
 		if (formData.password !== formData.confirmPassword) {
-			setSnackbar({ open: true, message: 'Passwords do not match', severity: 'error' });
+			toast.error('Passwords do not match');
 			setIsLoading(false);
 			return;
 		}
 
 		if (formData.password.length < 6) {
-			setSnackbar({ open: true, message: 'Password must be at least 6 characters', severity: 'error' });
+			toast.error('Password must be at least 6 characters');
 			setIsLoading(false);
 			return;
 		}
@@ -111,15 +107,15 @@ export default function CreateUserPage() {
 					}
 				}
 
-				setSnackbar({ open: true, message: 'User created successfully', severity: 'success' });
+				toast.success('User created successfully');
 				setTimeout(() => router.push('/dashboard/users'), 800);
 			} else {
 				const msg = data?.message || 'Registration failed';
-				setSnackbar({ open: true, message: msg, severity: 'error' });
+				toast.error(msg);
 			}
 		} catch (error) {
 			const message = error instanceof Error ? error.message : 'An error occurred. Please try again.';
-			setSnackbar({ open: true, message, severity: 'error' });
+			toast.error(message);
 		} finally {
 			setIsLoading(false);
 		}
@@ -390,19 +386,18 @@ export default function CreateUserPage() {
 
 							{/* Submit Button - span full width */}
 							<Box sx={{ gridColumn: '1 / -1' }}>
-								<MuiButton
-									type="submit"
-									disabled={isLoading}
-									variant="contained"
-									size="large"
-									endIcon={!isLoading && <ArrowForward />}
-									sx={{
-										width: '100%',
-										bgcolor: 'var(--accent-gold)',
-										color: 'var(--background)',
-										fontWeight: 600,
-										py: 1.5,
-										fontSize: '1rem',
+							<MuiButton
+								type="submit"
+								disabled={isLoading}
+								variant="contained"
+								size="large"
+								sx={{
+									width: '100%',
+									bgcolor: 'var(--accent-gold)',
+									color: 'var(--background)',
+									fontWeight: 600,
+									py: 1.5,
+									fontSize: '1rem',
 										'&:hover': {
 											bgcolor: 'var(--accent-gold)',
 										},
@@ -412,14 +407,7 @@ export default function CreateUserPage() {
 										},
 									}}
 								>
-									{isLoading ? (
-										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-											<CircularProgress size={20} sx={{ color: 'var(--background)' }} />
-											<Typography component="span">Creating...</Typography>
-										</Box>
-									) : (
-										<Typography component="span">Create Account</Typography>
-									)}
+									{isLoading ? 'Creating...' : 'Create Account'}
 								</MuiButton>
 							</Box>
 						</Box>
@@ -449,13 +437,6 @@ export default function CreateUserPage() {
 					</Box>
 				</Paper>
 			</motion.div>
-
-			{/* Snackbar */}
-			<Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-				<Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
-					{snackbar.message}
-				</Alert>
-			</Snackbar>
 		</Box>
 	);
 }

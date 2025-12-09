@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { FileText, ShieldCheck, Download, Upload, Search as SearchIcon, Folder } from 'lucide-react';
 import { Box, Typography } from '@mui/material';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 type DocumentCategory = {
 	id: string;
@@ -174,7 +174,7 @@ export default function DocumentsPage() {
 
 	const role = session?.user?.role;
 	if (status === 'loading' || !session || role !== 'admin') {
-		return <LoadingState fullScreen message="Loading documents..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	return (
@@ -184,12 +184,12 @@ export default function DocumentsPage() {
 				description="Manage templates, uploads, and compliance documents"
 				actions={
 					<>
-						<ActionButton variant="outline" icon={<Download className="w-4 h-4" />} size="small">
+						<Button variant="outline" icon={<Download className="w-4 h-4" />} size="sm">
 							Download All
-						</ActionButton>
-						<ActionButton variant="primary" icon={<Upload className="w-4 h-4" />} size="small">
+						</Button>
+						<Button variant="primary" icon={<Upload className="w-4 h-4" />} size="sm">
 							Upload Document
-						</ActionButton>
+						</Button>
 					</>
 				}
 			/>
@@ -202,33 +202,27 @@ export default function DocumentsPage() {
 					value={stats.total}
 					subtitle="All documents"
 				/>
-				<StatsCard
-					icon={<Folder style={{ fontSize: 18 }} />}
-					title="Categories"
-					value={stats.categories}
-					subtitle="Document types"
-					iconColor="rgb(59, 130, 246)"
-					iconBg="rgba(59, 130, 246, 0.15)"
-					delay={0.1}
-				/>
-				<StatsCard
-					icon={<ShieldCheck style={{ fontSize: 18 }} />}
-					title="Required"
-					value={stats.required}
-					subtitle="Must be updated"
-					iconColor="rgb(239, 68, 68)"
-					iconBg="rgba(239, 68, 68, 0.15)"
-					delay={0.2}
-				/>
-				<StatsCard
-					icon={<Upload style={{ fontSize: 18 }} />}
-					title="Storage"
-					value={stats.storage}
-					subtitle="Total size"
-					iconColor="rgb(168, 85, 247)"
-					iconBg="rgba(168, 85, 247, 0.15)"
-					delay={0.3}
-				/>
+			<StatsCard
+				icon={<Folder style={{ fontSize: 18 }} />}
+				title="Categories"
+				value={stats.categories}
+				variant="info"
+				size="md"
+			/>
+			<StatsCard
+				icon={<ShieldCheck style={{ fontSize: 18 }} />}
+				title="Required"
+				value={stats.required}
+				variant="error"
+				size="md"
+			/>
+			<StatsCard
+				icon={<Upload style={{ fontSize: 18 }} />}
+				title="Storage"
+				value={stats.storage}
+				variant="default"
+				size="md"
+			/>
 			</DashboardGrid>
 
 			{/* Search */}
@@ -335,13 +329,13 @@ export default function DocumentsPage() {
 										</Box>
 
 										<Box sx={{ display: 'flex', gap: 1 }}>
-											<ActionButton variant="outline" size="small" sx={{ flex: 1 }}>
+											<Button variant="outline" size="sm" sx={{ flex: 1 }}>
 												<Download className="w-3 h-3 mr-1" />
 												Download
-											</ActionButton>
-											<ActionButton variant="ghost" size="small">
+											</Button>
+											<Button variant="ghost" size="sm">
 												View
-											</ActionButton>
+											</Button>
 										</Box>
 									</Box>
 								))}

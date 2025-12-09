@@ -8,7 +8,7 @@ import { Box, Typography } from '@mui/material';
 import { Package, Ship, MapPin, TrendingUp, Calendar, FileText, DollarSign, Receipt } from 'lucide-react';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, StatsCard, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
+import { PageHeader, StatsCard, Button, EmptyState, FormField, Breadcrumbs, toast, SkeletonCard, DashboardPageSkeleton, CompactSkeleton } from '@/components/design-system';
 
 interface Container {
   id: string;
@@ -116,7 +116,7 @@ export default function ContainersPage() {
   if (loading && containers.length === 0) {
     return (
       <AdminRoute>
-        <LoadingState fullScreen message="Loading containers..." />
+        <DashboardPageSkeleton />
       </AdminRoute>
     );
   }
@@ -124,14 +124,19 @@ export default function ContainersPage() {
   return (
     <AdminRoute>
       <DashboardSurface>
+        {/* Breadcrumbs */}
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Breadcrumbs />
+        </Box>
+        
         <PageHeader
           title="Containers"
           description="Manage shipping containers and tracking"
           actions={
             <Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
-              <ActionButton variant="primary" icon={<Package className="w-4 h-4" />}>
+              <Button variant="primary" icon={<Package className="w-4 h-4" />}>
                 New Container
-              </ActionButton>
+              </Button>
             </Link>
           }
         />
@@ -142,34 +147,29 @@ export default function ContainersPage() {
             icon={<Package style={{ fontSize: 18 }} />}
             title="Total Containers"
             value={stats.total}
-            subtitle="All containers"
+            variant="default"
+            size="md"
           />
           <StatsCard
             icon={<Ship style={{ fontSize: 18 }} />}
             title="In Transit"
             value={stats.inTransit}
-            subtitle="Currently shipping"
-            iconColor="rgb(99, 102, 241)"
-            iconBg="rgba(99, 102, 241, 0.15)"
-            delay={0.1}
+            variant="info"
+            size="md"
           />
           <StatsCard
             icon={<MapPin style={{ fontSize: 18 }} />}
             title="Arrived"
             value={stats.arrived}
-            subtitle="At destination"
-            iconColor="rgb(34, 197, 94)"
-            iconBg="rgba(34, 197, 94, 0.15)"
-            delay={0.2}
+            variant="success"
+            size="md"
           />
           <StatsCard
             icon={<TrendingUp style={{ fontSize: 18 }} />}
             title="Avg Capacity"
             value={`${stats.avgCapacity}%`}
-            subtitle="Container utilization"
-            iconColor="rgb(20, 184, 166)"
-            iconBg="rgba(20, 184, 166, 0.15)"
-            delay={0.3}
+            variant="warning"
+            size="md"
           />
         </DashboardGrid>
 
@@ -230,7 +230,7 @@ export default function ContainersPage() {
         {/* Container Grid */}
         <DashboardPanel title={`All Containers (${containers.length})`} fullHeight>
           {loading ? (
-            <LoadingState message="Loading containers..." />
+            <CompactSkeleton />
           ) : containers.length === 0 ? (
             <EmptyState
               icon={<Package />}
@@ -238,7 +238,7 @@ export default function ContainersPage() {
               description="Create your first container to get started"
               action={
                 <Link href="/dashboard/containers/new" style={{ textDecoration: 'none' }}>
-                  <ActionButton variant="primary">Create First Container</ActionButton>
+                  <Button variant="primary">Create First Container</Button>
                 </Link>
               }
             />
@@ -388,25 +388,25 @@ export default function ContainersPage() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mt: 3 }}>
-                  <ActionButton
+                  <Button
                     variant="outline"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    size="small"
+                    size="sm"
                   >
                     Previous
-                  </ActionButton>
+                  </Button>
                   <Typography sx={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     Page {page} of {totalPages}
                   </Typography>
-                  <ActionButton
+                  <Button
                     variant="outline"
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    size="small"
+                    size="sm"
                   >
                     Next
-                  </ActionButton>
+                  </Button>
                 </Box>
               )}
             </>

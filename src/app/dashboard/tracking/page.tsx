@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Box, Typography } from '@mui/material';
 import { AlertCircle, CheckCircle2, Clock, MapPin, Search, Package, Ship, Calendar, TrendingUp } from 'lucide-react';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
-import { PageHeader, ActionButton, EmptyState, LoadingState, FormField } from '@/components/design-system';
+import { PageHeader, Button, EmptyState, LoadingState, FormField, Breadcrumbs, toast, StatusBadge , DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 
 interface TrackingEventEntry {
 	id: string;
@@ -113,7 +113,7 @@ export default function DashboardTrackingPage() {
 	};
 
 	if (status === 'loading') {
-		return <LoadingState fullScreen message="Loading tracking..." />;
+		return <DashboardPageSkeleton />;
 	}
 
 	if (!session) {
@@ -129,6 +129,11 @@ export default function DashboardTrackingPage() {
 
 	return (
 		<DashboardSurface>
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2 }}>
+				<Breadcrumbs />
+			</Box>
+			
 			<PageHeader
 				title="Shipment Tracking"
 				description="Monitor containers and track shipment milestones in real-time"
@@ -153,14 +158,14 @@ export default function DashboardTrackingPage() {
 						/>
 					</Box>
 					<Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
-						<ActionButton
+						<Button
 							variant="primary"
 							onClick={handleTrack}
 							disabled={isLoading}
 							icon={isLoading ? <Clock className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
 						>
 							{isLoading ? 'Tracking...' : 'Track'}
-						</ActionButton>
+						</Button>
 					</Box>
 				</Box>
 

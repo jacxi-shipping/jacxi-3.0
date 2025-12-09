@@ -1,14 +1,15 @@
 'use client';
+import { Box } from '@mui/material';
 
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, DollarSign, AlertCircle, CheckCircle, Package } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
+import { Button, Breadcrumbs, toast } from '@/components/design-system';
 
 interface Shipment {
   id: string;
@@ -164,6 +165,11 @@ export default function AddExpensePage() {
   return (
     <AdminRoute>
       <div className="min-h-screen bg-[var(--background)]">
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
+
         <Section className="pt-6 pb-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -182,6 +188,11 @@ export default function AddExpensePage() {
             </div>
           </div>
         </Section>
+
+			{/* Breadcrumbs */}
+			<Box sx={{ px: 2, pt: 2, position: "relative", zIndex: 10 }}>
+				<Breadcrumbs />
+			</Box>
 
         <Section className="pb-16">
           <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">

@@ -2,551 +2,1109 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import Link from 'next/link';
+import { 
+	Box, 
+	Tabs, 
+	Tab, 
+	Table, 
+	TableBody, 
+	TableCell, 
+	TableContainer, 
+	TableHead, 
+	TableRow,
+	LinearProgress,
+	Divider,
+	Chip,
+} from '@mui/material';
+import {
+	ArrowLeft,
+	Package,
+	Ship,
+	Calendar,
+	DollarSign,
+	FileText,
+	MapPin,
+	TrendingUp,
+	Download,
+	Eye,
+	Plus,
+	Trash2,
+} from 'lucide-react';
+import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
+import { 
+	PageHeader, 
+	Button, 
+	Breadcrumbs, 
+	toast, 
+	LoadingState, 
+	EmptyState, 
+	StatsCard,
+ DashboardPageSkeleton, DetailPageSkeleton, FormPageSkeleton} from '@/components/design-system';
 import { AdminRoute } from '@/components/auth/AdminRoute';
-import { toast } from '@/lib/toast';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import AddExpenseModal from '@/components/containers/AddExpenseModal';
+import AddInvoiceModal from '@/components/containers/AddInvoiceModal';
+import AddTrackingEventModal from '@/components/containers/AddTrackingEventModal';
 
 interface Shipment {
-  id: string;
-  vehicleMake: string | null;
-  vehicleModel: string | null;
-  vehicleVIN: string | null;
-  status: string;
+	id: string;
+	vehicleMake: string | null;
+	vehicleModel: string | null;
+	vehicleVIN: string | null;
+	status: string;
 }
 
 interface Expense {
-  id: string;
-  type: string;
-  amount: number;
-  date: string;
+	id: string;
+	type: string;
+	amount: number;
+	currency: string;
+	date: string;
+	vendor: string | null;
 }
 
 interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  amount: number;
-  status: string;
+	id: string;
+	invoiceNumber: string;
+	amount: number;
+	currency: string;
+	status: string;
+	date: string;
 }
 
 interface Document {
-  id: string;
-  name: string;
-  type: string;
-  fileUrl: string;
+	id: string;
+	name: string;
+	type: string;
+	fileUrl: string;
+	uploadedAt: string;
 }
 
 interface TrackingEvent {
-  id: string;
-  status: string;
-  location: string | null;
-  description: string | null;
-  eventDate: string;
+	id: string;
+	status: string;
+	location: string | null;
+	description: string | null;
+	eventDate: string;
 }
 
 interface Container {
-  id: string;
-  containerNumber: string;
-  trackingNumber: string | null;
-  vesselName: string | null;
-  voyageNumber: string | null;
-  shippingLine: string | null;
-  bookingNumber: string | null;
-  loadingPort: string | null;
-  destinationPort: string | null;
-  transshipmentPorts: string[];
-  loadingDate: string | null;
-  departureDate: string | null;
-  estimatedArrival: string | null;
-  actualArrival: string | null;
-  status: string;
-  currentLocation: string | null;
-  progress: number;
-  maxCapacity: number;
-  currentCount: number;
-  notes: string | null;
-  createdAt: string;
-  shipments: Shipment[];
-  expenses: Expense[];
-  invoices: Invoice[];
-  documents: Document[];
-  trackingEvents: TrackingEvent[];
-  totals: {
-    expenses: number;
-    invoices: number;
-  };
+	id: string;
+	containerNumber: string;
+	trackingNumber: string | null;
+	vesselName: string | null;
+	voyageNumber: string | null;
+	shippingLine: string | null;
+	bookingNumber: string | null;
+	loadingPort: string | null;
+	destinationPort: string | null;
+	transshipmentPorts: string[];
+	loadingDate: string | null;
+	departureDate: string | null;
+	estimatedArrival: string | null;
+	actualArrival: string | null;
+	status: string;
+	currentLocation: string | null;
+	progress: number;
+	maxCapacity: number;
+	currentCount: number;
+	notes: string | null;
+	createdAt: string;
+	shipments: Shipment[];
+	expenses: Expense[];
+	invoices: Invoice[];
+	documents: Document[];
+	trackingEvents: TrackingEvent[];
+	totals: {
+		expenses: number;
+		invoices: number;
+	};
 }
 
-const statusColors: Record<string, string> = {
-  CREATED: 'bg-gray-500',
-  WAITING_FOR_LOADING: 'bg-yellow-500',
-  LOADED: 'bg-blue-500',
-  IN_TRANSIT: 'bg-indigo-600',
-  ARRIVED_PORT: 'bg-green-500',
-  CUSTOMS_CLEARANCE: 'bg-orange-500',
-  RELEASED: 'bg-teal-500',
-  CLOSED: 'bg-gray-700',
-};
-
-const statusLabels: Record<string, string> = {
-  CREATED: 'Created',
-  WAITING_FOR_LOADING: 'Waiting for Loading',
-  LOADED: 'Loaded',
-  IN_TRANSIT: 'In Transit',
-  ARRIVED_PORT: 'Arrived',
-  CUSTOMS_CLEARANCE: 'Customs',
-  RELEASED: 'Released',
-  CLOSED: 'Closed',
+const statusConfig: Record<string, { label: string; color: 'success' | 'warning' | 'error' | 'info' | 'default' }> = {
+	CREATED: { label: 'Created', color: 'default' },
+	WAITING_FOR_LOADING: { label: 'Waiting for Loading', color: 'warning' },
+	LOADED: { label: 'Loaded', color: 'info' },
+	IN_TRANSIT: { label: 'In Transit', color: 'info' },
+	ARRIVED_PORT: { label: 'Arrived at Port', color: 'success' },
+	CUSTOMS_CLEARANCE: { label: 'Customs Clearance', color: 'warning' },
+	RELEASED: { label: 'Released', color: 'success' },
+	CLOSED: { label: 'Closed', color: 'default' },
 };
 
 export default function ContainerDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [container, setContainer] = useState<Container | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [updating, setUpdating] = useState(false);
+	const params = useParams();
+	const router = useRouter();
+	const [container, setContainer] = useState<Container | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [activeTab, setActiveTab] = useState(0);
+	const [updating, setUpdating] = useState(false);
+	const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+	const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
+	const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+	const [deletingInvoiceId, setDeletingInvoiceId] = useState<string | null>(null);
+	const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+	const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (params.id) {
-      fetchContainer();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.id]);
+	useEffect(() => {
+		if (params.id) {
+			fetchContainer();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [params.id]);
 
-  const fetchContainer = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/containers/${params.id}`);
-      const data = await response.json();
+	const fetchContainer = async () => {
+		try {
+			setLoading(true);
+			const response = await fetch(`/api/containers/${params.id}`);
+			const data = await response.json();
 
-      if (response.ok) {
-        setContainer(data.container);
-      } else {
-        toast.error('Container not found', 'Redirecting to containers list...');
-        router.push('/dashboard/containers');
-      }
-    } catch (error) {
-      console.error('Error fetching container:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+			if (response.ok) {
+				const containerData = data.container;
+				// Ensure trackingEvents is an array
+				if (!containerData.trackingEvents) {
+					containerData.trackingEvents = [];
+				}
+				// Ensure progress is a number
+				if (typeof containerData.progress !== 'number') {
+					containerData.progress = 0;
+				}
+				setContainer(containerData);
+				console.log('Container loaded:', {
+					id: containerData.id,
+					trackingEvents: containerData.trackingEvents.length,
+					progress: containerData.progress
+				});
+			} else {
+				toast.error('Container not found');
+				router.push('/dashboard/containers');
+			}
+		} catch (error) {
+			console.error('Error fetching container:', error);
+			toast.error('Failed to load container');
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const handleStatusUpdate = async (newStatus: string) => {
-    if (!confirm(`Update container status to ${statusLabels[newStatus]}?`)) return;
+	const handleStatusUpdate = async (newStatus: string) => {
+		if (!container) return;
+		
+		try {
+			setUpdating(true);
+			const response = await fetch(`/api/containers/${params.id}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ status: newStatus }),
+			});
 
-    try {
-      setUpdating(true);
-      const response = await fetch(`/api/containers/${params.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
+			if (response.ok) {
+				toast.success('Status updated successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to update status');
+			}
+		} catch (error) {
+			console.error('Error updating status:', error);
+			toast.error('An error occurred');
+		} finally {
+			setUpdating(false);
+		}
+	};
 
-      if (response.ok) {
-        toast.success('Status updated successfully', 'Container status has been updated');
-        fetchContainer();
-      } else {
-        const data = await response.json();
-        toast.error('Failed to update status', data.error || 'Please try again');
-      }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast.error('Failed to update status', 'An error occurred. Please try again');
-    } finally {
-      setUpdating(false);
-    }
-  };
+	const handleDeleteExpense = async (expenseId: string) => {
+		if (!confirm('Are you sure you want to delete this expense?')) return;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading container...</p>
-        </div>
-      </div>
-    );
-  }
+		setDeletingExpenseId(expenseId);
+		try {
+			const response = await fetch(`/api/containers/${params.id}/expenses?expenseId=${expenseId}`, {
+				method: 'DELETE',
+			});
 
-  if (!container) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <Card className="text-center p-8">
-          <p className="text-gray-600 dark:text-gray-400">Container not found</p>
-          <Button className="mt-4" onClick={() => router.push('/dashboard/containers')}>
-            Back to Containers
-          </Button>
-        </Card>
-      </div>
-    );
-  }
+			if (response.ok) {
+				toast.success('Expense deleted successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to delete expense');
+			}
+		} catch (error) {
+			console.error('Error deleting expense:', error);
+			toast.error('An error occurred');
+		} finally {
+			setDeletingExpenseId(null);
+		}
+	};
 
-  return (
-    <AdminRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Breadcrumbs */}
-          <Breadcrumbs 
-            items={[
-              { label: 'Containers', href: '/dashboard/containers' },
-              { label: container.containerNumber },
-            ]}
-            className="mb-4"
-          />
-          
-          {/* Header */}
-          <div className="mb-6">
-            <Button onClick={() => router.push('/dashboard/containers')} className="mb-4">
-              ← Back to Containers
-            </Button>
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {container.containerNumber}
-                </h1>
-                {container.trackingNumber && (
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    Tracking: {container.trackingNumber}
-                  </p>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Badge className={statusColors[container.status]}>
-                  {statusLabels[container.status]}
-                </Badge>
-              </div>
-            </div>
-          </div>
+	const handleDeleteInvoice = async (invoiceId: string) => {
+		if (!confirm('Are you sure you want to delete this invoice?')) return;
 
-          {/* Progress Bar */}
-          <Card className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Shipping Progress
-              </span>
-              <span className="text-sm font-bold text-gray-900 dark:text-white">
-                {container.progress}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-              <div
-                className="bg-indigo-600 h-3 rounded-full transition-all"
-                style={{ width: `${container.progress}%` }}
-              />
-            </div>
-          </Card>
+		setDeletingInvoiceId(invoiceId);
+		try {
+			const response = await fetch(`/api/containers/${params.id}/invoices?invoiceId=${invoiceId}`, {
+				method: 'DELETE',
+			});
 
-          {/* Tabs */}
-          <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
-            <nav className="flex gap-4">
-              {['overview', 'shipments', 'expenses', 'invoices', 'documents', 'tracking', 'timeline'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 border-b-2 font-medium capitalize ${
-                    activeTab === tab
-                      ? 'border-indigo-600 text-indigo-600'
-                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  {tab}
-                  {tab === 'shipments' && ` (${container.shipments.length})`}
-                  {tab === 'expenses' && ` (${container.expenses.length})`}
-                  {tab === 'invoices' && ` (${container.invoices.length})`}
-                  {tab === 'documents' && ` (${container.documents.length})`}
-                  {tab === 'tracking' && ` (${container.trackingEvents.length})`}
-                </button>
-              ))}
-            </nav>
-          </div>
+			if (response.ok) {
+				toast.success('Invoice deleted successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to delete invoice');
+			}
+		} catch (error) {
+			console.error('Error deleting invoice:', error);
+			toast.error('An error occurred');
+		} finally {
+			setDeletingInvoiceId(null);
+		}
+	};
 
-          {/* Tab Content */}
-          <div>
-            {/* Overview Tab */}
-            {activeTab === 'overview' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <h3 className="text-lg font-bold mb-4">Container Information</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Container #:</span>
-                      <span className="font-medium">{container.containerNumber}</span>
-                    </div>
-                    {container.trackingNumber && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Tracking #:</span>
-                        <span className="font-medium">{container.trackingNumber}</span>
-                      </div>
-                    )}
-                    {container.bookingNumber && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Booking #:</span>
-                        <span className="font-medium">{container.bookingNumber}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
-                      <span className="font-medium">
-                        {container.currentCount} / {container.maxCapacity} vehicles
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Created:</span>
-                      <span className="font-medium">
-                        {new Date(container.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
+	const handleDeleteTrackingEvent = async (eventId: string) => {
+		if (!confirm('Are you sure you want to delete this tracking event?')) return;
 
-                <Card>
-                  <h3 className="text-lg font-bold mb-4">Shipping Details</h3>
-                  <div className="space-y-3 text-sm">
-                    {container.vesselName && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Vessel:</span>
-                        <span className="font-medium">{container.vesselName}</span>
-                      </div>
-                    )}
-                    {container.voyageNumber && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Voyage:</span>
-                        <span className="font-medium">{container.voyageNumber}</span>
-                      </div>
-                    )}
-                    {container.shippingLine && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Shipping Line:</span>
-                        <span className="font-medium">{container.shippingLine}</span>
-                      </div>
-                    )}
-                    {container.loadingPort && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Loading Port:</span>
-                        <span className="font-medium">{container.loadingPort}</span>
-                      </div>
-                    )}
-                    {container.destinationPort && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Destination:</span>
-                        <span className="font-medium">{container.destinationPort}</span>
-                      </div>
-                    )}
-                  </div>
-                </Card>
+		setDeletingEventId(eventId);
+		try {
+			const response = await fetch(`/api/containers/${params.id}/tracking?eventId=${eventId}`, {
+				method: 'DELETE',
+			});
 
-                <Card>
-                  <h3 className="text-lg font-bold mb-4">Important Dates</h3>
-                  <div className="space-y-3 text-sm">
-                    {container.loadingDate && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Loading Date:</span>
-                        <span className="font-medium">
-                          {new Date(container.loadingDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
-                    {container.departureDate && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Departure:</span>
-                        <span className="font-medium">
-                          {new Date(container.departureDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
-                    {container.estimatedArrival && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">ETA:</span>
-                        <span className="font-medium">
-                          {new Date(container.estimatedArrival).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
-                    {container.actualArrival && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Actual Arrival:</span>
-                        <span className="font-medium">
-                          {new Date(container.actualArrival).toLocaleDateString()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </Card>
+			if (response.ok) {
+				toast.success('Tracking event deleted successfully');
+				fetchContainer();
+			} else {
+				const data = await response.json();
+				toast.error(data.error || 'Failed to delete tracking event');
+			}
+		} catch (error) {
+			console.error('Error deleting tracking event:', error);
+			toast.error('An error occurred');
+		} finally {
+			setDeletingEventId(null);
+		}
+	};
 
-                <Card>
-                  <h3 className="text-lg font-bold mb-4">Financial Summary</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Total Expenses:</span>
-                      <span className="font-bold text-red-600">
-                        ${container.totals.expenses.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Total Invoices:</span>
-                      <span className="font-bold text-blue-600">
-                        ${container.totals.invoices.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <div className="flex justify-between text-lg font-bold">
-                        <span>Net:</span>
-                        <span className={container.totals.invoices - container.totals.expenses >= 0 ? 'text-green-600' : 'text-red-600'}>
-                          ${(container.totals.invoices - container.totals.expenses).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+	const formatCurrency = (amount: number, currency: string = 'USD') => {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency,
+		}).format(amount);
+	};
 
-                {container.notes && (
-                  <Card className="md:col-span-2">
-                    <h3 className="text-lg font-bold mb-4">Notes</h3>
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                      {container.notes}
-                    </p>
-                  </Card>
-                )}
+	const formatDate = (date: string | null) => {
+		if (!date) return 'N/A';
+		return new Date(date).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		});
+	};
 
-                {/* Status Update Actions */}
-                <Card className="md:col-span-2">
-                  <h3 className="text-lg font-bold mb-4">Update Status</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(statusLabels).map(([status, label]) => (
-                      <Button
-                        key={status}
-                        onClick={() => handleStatusUpdate(status)}
-                        disabled={updating || container.status === status}
-                        className={container.status === status ? 'opacity-50 cursor-not-allowed' : ''}
-                      >
-                        {label}
-                      </Button>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            )}
+	if (loading) {
+		return (
+			<AdminRoute>
+				<DetailPageSkeleton />
+			</AdminRoute>
+		);
+	}
 
-            {/* Shipments Tab */}
-            {activeTab === 'shipments' && (
-              <Card>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold">Assigned Vehicles ({container.shipments.length}/{container.maxCapacity})</h3>
-                  <Button onClick={() => router.push(`/dashboard/containers/${container.id}/assign-shipments`)}>
-                    + Assign Vehicles
-                  </Button>
-                </div>
-                {container.shipments.length === 0 ? (
-                  <p className="text-gray-600 dark:text-gray-400 text-center py-8">
-                    No vehicles assigned yet
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {container.shipments.map((shipment) => (
-                      <div
-                        key={shipment.id}
-                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                        onClick={() => router.push(`/dashboard/shipments/${shipment.id}`)}
-                      >
-                        <div className="flex justify-between">
-                          <div>
-                            <p className="font-medium">
-                              {shipment.vehicleMake} {shipment.vehicleModel}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              VIN: {shipment.vehicleVIN || 'N/A'}
-                            </p>
-                          </div>
-                          <Badge className={shipment.status === 'IN_TRANSIT' ? 'bg-blue-500' : 'bg-gray-500'}>
-                            {shipment.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            )}
+	if (!container) {
+		return (
+			<AdminRoute>
+				<DashboardSurface>
+					<EmptyState
+						icon={<Package className="w-12 h-12" />}
+						title="Container Not Found"
+						description="The container you're looking for doesn't exist"
+						action={
+							<Button 
+								variant="primary" 
+								onClick={() => router.push('/dashboard/containers')}
+							>
+								Back to Containers
+							</Button>
+						}
+					/>
+				</DashboardSurface>
+			</AdminRoute>
+		);
+	}
 
-            {/* Other tabs - simplified for now */}
-            {activeTab === 'expenses' && (
-              <Card>
-                <h3 className="text-lg font-bold mb-4">Expenses</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {container.expenses.length} expense(s) recorded
-                </p>
-                {/* Add expense list here */}
-              </Card>
-            )}
+	const capacityPercentage = (container.currentCount / container.maxCapacity) * 100;
+	const netProfit = container.totals.invoices - container.totals.expenses;
 
-            {activeTab === 'invoices' && (
-              <Card>
-                <h3 className="text-lg font-bold mb-4">Invoices</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {container.invoices.length} invoice(s) recorded
-                </p>
-                {/* Add invoice list here */}
-              </Card>
-            )}
+	return (
+		<AdminRoute>
+			<DashboardSurface>
+				{/* Breadcrumbs */}
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
 
-            {activeTab === 'documents' && (
-              <Card>
-                <h3 className="text-lg font-bold mb-4">Documents</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {container.documents.length} document(s) uploaded
-                </p>
-                {/* Add document list here */}
-              </Card>
-            )}
+				{/* Page Header */}
+				<PageHeader
+					title={container.containerNumber}
+					description={container.trackingNumber ? `Tracking: ${container.trackingNumber}` : 'Container details and management'}
+					actions={
+						<Box sx={{ display: 'flex', gap: 1 }}>
+							<Chip 
+								label={statusConfig[container.status]?.label || container.status}
+								color={statusConfig[container.status]?.color || 'default'}
+								sx={{ fontWeight: 600 }}
+							/>
+							<Link href="/dashboard/containers" style={{ textDecoration: 'none' }}>
+								<Button variant="outline" size="sm" icon={<ArrowLeft className="w-4 h-4" />}>
+									Back
+								</Button>
+							</Link>
+						</Box>
+					}
+				/>
 
-            {activeTab === 'tracking' && (
-              <Card>
-                <h3 className="text-lg font-bold mb-4">Tracking Events</h3>
-                {container.trackingEvents.length === 0 ? (
-                  <p className="text-gray-600 dark:text-gray-400">No tracking events yet</p>
-                ) : (
-                  <div className="space-y-4">
-                    {container.trackingEvents.map((event) => (
-                      <div key={event.id} className="border-l-4 border-indigo-600 pl-4">
-                        <div className="flex justify-between">
-                          <p className="font-medium">{event.status}</p>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {new Date(event.eventDate).toLocaleString()}
-                          </span>
-                        </div>
-                        {event.location && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            📍 {event.location}
-                          </p>
-                        )}
-                        {event.description && (
-                          <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                            {event.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            )}
+				{/* Stats Overview */}
+				<Box sx={{ px: 2, mb: 3 }}>
+					<DashboardGrid className="grid-cols-1 md:grid-cols-4">
+						<StatsCard
+							icon={<Package style={{ fontSize: 18 }} />}
+							title="Capacity"
+							value={`${container.currentCount}/${container.maxCapacity}`}
+							variant="info"
+							size="md"
+						/>
+						<StatsCard
+							icon={<DollarSign style={{ fontSize: 18 }} />}
+							title="Net Profit"
+							value={formatCurrency(netProfit)}
+							variant={netProfit >= 0 ? 'success' : 'error'}
+							size="md"
+						/>
+						<StatsCard
+							icon={<TrendingUp style={{ fontSize: 18 }} />}
+							title="Progress"
+							value={`${container.progress}%`}
+							variant="default"
+							size="md"
+						/>
+						<StatsCard
+							icon={<Ship style={{ fontSize: 18 }} />}
+							title="Status"
+							value={statusConfig[container.status]?.label || container.status}
+							variant={statusConfig[container.status]?.color || 'default'}
+							size="md"
+						/>
+					</DashboardGrid>
+				</Box>
 
-            {activeTab === 'timeline' && (
-              <Card>
-                <h3 className="text-lg font-bold mb-4">Container Timeline</h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Visual timeline will be displayed here
-                </p>
-                {/* Add timeline visualization */}
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
-    </AdminRoute>
-  );
+				{/* Progress Bar */}
+				{container.progress > 0 && (
+					<Box sx={{ px: 2, mb: 3 }}>
+						<DashboardPanel noHeaderBorder>
+							<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+								<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+									Shipping Progress
+								</Box>
+								<Box sx={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--accent-gold)' }}>
+									{container.progress}%
+								</Box>
+							</Box>
+							<LinearProgress 
+								variant="determinate" 
+								value={container.progress} 
+								sx={{
+									height: 8,
+									borderRadius: 1,
+									bgcolor: 'rgba(201, 155, 47, 0.1)',
+									'& .MuiLinearProgress-bar': {
+										bgcolor: 'var(--accent-gold)',
+									},
+								}}
+							/>
+						</DashboardPanel>
+					</Box>
+				)}
+
+				{/* Tabs */}
+				<Box sx={{ px: 2, mb: 2 }}>
+					<Tabs 
+						value={activeTab} 
+						onChange={(_, newValue) => setActiveTab(newValue)}
+						sx={{
+							borderBottom: 1,
+							borderColor: 'divider',
+							'& .MuiTab-root': {
+								textTransform: 'none',
+								fontWeight: 600,
+								fontSize: '0.875rem',
+							},
+						}}
+					>
+						<Tab label="Overview" />
+						<Tab label={`Shipments (${container.shipments.length})`} />
+						<Tab label={`Expenses (${container.expenses.length})`} />
+						<Tab label={`Invoices (${container.invoices.length})`} />
+						<Tab label={`Documents (${container.documents.length})`} />
+						<Tab label={`Tracking (${container.trackingEvents?.length || 0})`} />
+					</Tabs>
+				</Box>
+
+				{/* Tab Content */}
+				<Box sx={{ px: 2, pb: 4 }}>
+					{/* Overview Tab */}
+					{activeTab === 0 && (
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+							<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+								{/* Container Information */}
+								<DashboardPanel 
+									title="Container Information"
+									description="Basic container details"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Container Number</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{container.containerNumber}
+											</Box>
+										</Box>
+										{container.trackingNumber && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Tracking Number</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.trackingNumber}
+												</Box>
+											</Box>
+										)}
+										{container.bookingNumber && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Booking Number</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.bookingNumber}
+												</Box>
+											</Box>
+										)}
+										<Divider sx={{ borderColor: 'var(--border)' }} />
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Capacity</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{container.currentCount} / {container.maxCapacity} vehicles ({capacityPercentage.toFixed(0)}%)
+											</Box>
+										</Box>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Created</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+												{formatDate(container.createdAt)}
+											</Box>
+										</Box>
+									</Box>
+								</DashboardPanel>
+
+								{/* Shipping Details */}
+								<DashboardPanel 
+									title="Shipping Details"
+									description="Vessel and shipping information"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										{container.vesselName && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Vessel Name</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.vesselName}
+												</Box>
+											</Box>
+										)}
+										{container.voyageNumber && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Voyage Number</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.voyageNumber}
+												</Box>
+											</Box>
+										)}
+										{container.shippingLine && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Shipping Line</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.shippingLine}
+												</Box>
+											</Box>
+										)}
+										<Divider sx={{ borderColor: 'var(--border)' }} />
+										{container.loadingPort && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Loading Port</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.loadingPort}
+												</Box>
+											</Box>
+										)}
+										{container.destinationPort && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Destination Port</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.destinationPort}
+												</Box>
+											</Box>
+										)}
+										{container.currentLocation && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Current Location</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{container.currentLocation}
+												</Box>
+											</Box>
+										)}
+									</Box>
+								</DashboardPanel>
+
+								{/* Important Dates */}
+								<DashboardPanel 
+									title="Important Dates"
+									description="Shipping timeline"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										{container.loadingDate && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Loading Date</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.loadingDate)}
+												</Box>
+											</Box>
+										)}
+										{container.departureDate && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Departure Date</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.departureDate)}
+												</Box>
+											</Box>
+										)}
+										{container.estimatedArrival && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Estimated Arrival</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.estimatedArrival)}
+												</Box>
+											</Box>
+										)}
+										{container.actualArrival && (
+											<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Actual Arrival</Box>
+												<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+													{formatDate(container.actualArrival)}
+												</Box>
+											</Box>
+										)}
+									</Box>
+								</DashboardPanel>
+
+								{/* Financial Summary */}
+								<DashboardPanel 
+									title="Financial Summary"
+									description="Revenue and expenses"
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Expenses</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--error)' }}>
+												{formatCurrency(container.totals.expenses)}
+											</Box>
+										</Box>
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Total Revenue</Box>
+											<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--success)' }}>
+												{formatCurrency(container.totals.invoices)}
+											</Box>
+										</Box>
+										<Divider sx={{ borderColor: 'var(--border)' }} />
+										<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+											<Box sx={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Net Profit</Box>
+											<Box sx={{ 
+												fontSize: '1rem', 
+												fontWeight: 700, 
+												color: netProfit >= 0 ? 'var(--success)' : 'var(--error)' 
+											}}>
+												{formatCurrency(netProfit)}
+											</Box>
+										</Box>
+									</Box>
+								</DashboardPanel>
+							</Box>
+
+							{/* Notes */}
+							{container.notes && (
+								<DashboardPanel title="Notes" description="Additional information">
+									<Box sx={{ 
+										fontSize: '0.875rem', 
+										color: 'var(--text-secondary)', 
+										lineHeight: 1.6,
+										whiteSpace: 'pre-wrap',
+									}}>
+										{container.notes}
+									</Box>
+								</DashboardPanel>
+							)}
+
+							{/* Status Management */}
+							<DashboardPanel 
+								title="Update Container Status"
+								description="Change the container's current status"
+							>
+								<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+									{Object.entries(statusConfig).map(([status, config]) => (
+										<Button
+											key={status}
+											variant={container.status === status ? 'primary' : 'outline'}
+											size="sm"
+											onClick={() => handleStatusUpdate(status)}
+											disabled={updating || container.status === status}
+										>
+											{config.label}
+										</Button>
+									))}
+								</Box>
+							</DashboardPanel>
+						</Box>
+					)}
+
+					{/* Shipments Tab */}
+					{activeTab === 1 && (
+						<DashboardPanel
+							title={`Assigned Vehicles (${container.currentCount}/${container.maxCapacity})`}
+							description="Vehicles currently loaded in this container"
+						>
+							{container.shipments.length === 0 ? (
+								<EmptyState
+									icon={<Package className="w-12 h-12" />}
+									title="No Vehicles Assigned"
+									description="This container doesn't have any vehicles assigned yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Vehicle</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>VIN</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Payment</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Price</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Insurance</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.shipments.map((shipment) => (
+												<TableRow 
+													key={shipment.id}
+													hover
+													sx={{ cursor: 'pointer' }}
+													onClick={() => router.push(`/dashboard/shipments/${shipment.id}`)}
+												>
+													<TableCell>
+														{shipment.vehicleMake} {shipment.vehicleModel}
+													</TableCell>
+													<TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+														{shipment.vehicleVIN || 'N/A'}
+													</TableCell>
+													<TableCell>
+														<Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+															{(shipment as any).paymentMode && (
+																<Chip 
+																	label={(shipment as any).paymentMode} 
+																	size="small"
+																	color={(shipment as any).paymentMode === 'CASH' ? 'success' : 'warning'}
+																	sx={{ fontSize: '0.7rem', width: 'fit-content' }}
+																/>
+															)}
+															<Chip 
+																label={(shipment as any).paymentStatus || 'PENDING'} 
+																size="small"
+																color={(shipment as any).paymentStatus === 'COMPLETED' ? 'success' : 'default'}
+																sx={{ fontSize: '0.7rem', width: 'fit-content' }}
+															/>
+														</Box>
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+														{(shipment as any).price ? formatCurrency((shipment as any).price) : 'N/A'}
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--accent-gold)' }}>
+														{(shipment as any).insuranceValue ? formatCurrency((shipment as any).insuranceValue) : 'N/A'}
+													</TableCell>
+													<TableCell>
+														<Chip 
+															label={shipment.status} 
+															size="small"
+															color="primary"
+															sx={{ fontSize: '0.75rem' }}
+														/>
+													</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Eye className="w-3 h-3" />}
+															onClick={(e) => {
+																e.stopPropagation();
+																router.push(`/dashboard/shipments/${shipment.id}`);
+															}}
+														>
+															View
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+											{/* Totals Row */}
+											<TableRow sx={{ bgcolor: 'var(--surface)' }}>
+												<TableCell colSpan={3} sx={{ fontWeight: 700, borderTop: '2px solid var(--border)' }}>
+													Total Revenue from Shipments
+												</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, borderTop: '2px solid var(--border)', color: 'var(--success)' }}>
+													{formatCurrency(container.shipments.reduce((sum, s) => sum + ((s as any).price || 0), 0))}
+												</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, borderTop: '2px solid var(--border)', color: 'var(--accent-gold)' }}>
+													{formatCurrency(container.shipments.reduce((sum, s) => sum + ((s as any).insuranceValue || 0), 0))}
+												</TableCell>
+												<TableCell colSpan={2} sx={{ borderTop: '2px solid var(--border)' }}></TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Expenses Tab */}
+					{activeTab === 2 && (
+						<DashboardPanel
+							title="Container Expenses"
+							description="All costs and expenses for this container"
+						>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setExpenseModalOpen(true)}
+								>
+									Add Expense
+								</Button>
+							</Box>
+
+							{container.expenses.length === 0 ? (
+								<EmptyState
+									icon={<DollarSign className="w-12 h-12" />}
+									title="No Expenses Recorded"
+									description="No expenses have been added to this container yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Vendor</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.expenses.map((expense) => (
+												<TableRow key={expense.id} hover>
+													<TableCell>{expense.type}</TableCell>
+													<TableCell>{expense.vendor || 'N/A'}</TableCell>
+													<TableCell>{formatDate(expense.date)}</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--error)' }}>
+														{formatCurrency(expense.amount, expense.currency)}
+													</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Trash2 className="w-3 h-3" />}
+															onClick={() => handleDeleteExpense(expense.id)}
+															disabled={deletingExpenseId === expense.id}
+															sx={{ 
+																color: 'var(--error)',
+																borderColor: 'var(--error)',
+																'&:hover': { bgcolor: 'rgba(var(--error-rgb), 0.1)' }
+															}}
+														>
+															{deletingExpenseId === expense.id ? 'Deleting...' : 'Delete'}
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+											<TableRow>
+												<TableCell colSpan={4} sx={{ fontWeight: 700 }}>Total Expenses</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, color: 'var(--error)' }}>
+													{formatCurrency(container.totals.expenses)}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Invoices Tab */}
+					{activeTab === 3 && (
+						<DashboardPanel
+							title="Container Invoices"
+							description="Billing and revenue for this container"
+						>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setInvoiceModalOpen(true)}
+								>
+									Create Invoice
+								</Button>
+							</Box>
+
+							{container.invoices.length === 0 ? (
+								<EmptyState
+									icon={<FileText className="w-12 h-12" />}
+									title="No Invoices"
+									description="No invoices have been created for this container yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Invoice #</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Amount</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.invoices.map((invoice) => (
+												<TableRow key={invoice.id} hover>
+													<TableCell sx={{ fontFamily: 'monospace' }}>{invoice.invoiceNumber}</TableCell>
+													<TableCell>{formatDate(invoice.date)}</TableCell>
+													<TableCell>
+														<Chip 
+															label={invoice.status} 
+															size="small"
+															color={invoice.status === 'PAID' ? 'success' : 'default'}
+															sx={{ fontSize: '0.75rem' }}
+														/>
+													</TableCell>
+													<TableCell align="right" sx={{ fontWeight: 600, color: 'var(--success)' }}>
+														{formatCurrency(invoice.amount, invoice.currency)}
+													</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Trash2 className="w-3 h-3" />}
+															onClick={() => handleDeleteInvoice(invoice.id)}
+															disabled={deletingInvoiceId === invoice.id}
+															sx={{ 
+																color: 'var(--error)',
+																borderColor: 'var(--error)',
+																'&:hover': { bgcolor: 'rgba(var(--error-rgb), 0.1)' }
+															}}
+														>
+															{deletingInvoiceId === invoice.id ? 'Deleting...' : 'Delete'}
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+											<TableRow>
+												<TableCell colSpan={4} sx={{ fontWeight: 700 }}>Total Revenue</TableCell>
+												<TableCell align="right" sx={{ fontWeight: 700, color: 'var(--success)' }}>
+													{formatCurrency(container.totals.invoices)}
+												</TableCell>
+											</TableRow>
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Documents Tab */}
+					{activeTab === 4 && (
+						<DashboardPanel
+							title="Container Documents"
+							description="Files and documents related to this container"
+						>
+							{container.documents.length === 0 ? (
+								<EmptyState
+									icon={<FileText className="w-12 h-12" />}
+									title="No Documents"
+									description="No documents have been uploaded for this container yet"
+								/>
+							) : (
+								<TableContainer>
+									<Table size="small">
+										<TableHead>
+											<TableRow>
+												<TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+												<TableCell sx={{ fontWeight: 600 }}>Uploaded</TableCell>
+												<TableCell sx={{ fontWeight: 600 }} align="right">Actions</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{container.documents.map((doc) => (
+												<TableRow key={doc.id} hover>
+													<TableCell>{doc.name}</TableCell>
+													<TableCell>
+														<Chip label={doc.type} size="small" sx={{ fontSize: '0.75rem' }} />
+													</TableCell>
+													<TableCell>{formatDate(doc.uploadedAt)}</TableCell>
+													<TableCell align="right">
+														<Button
+															variant="outline"
+															size="sm"
+															icon={<Download className="w-3 h-3" />}
+															onClick={() => window.open(doc.fileUrl, '_blank')}
+														>
+															Download
+														</Button>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</TableContainer>
+							)}
+						</DashboardPanel>
+					)}
+
+					{/* Tracking Tab */}
+					{activeTab === 5 && (
+						<DashboardPanel
+							title="Tracking History"
+							description="Location updates and status changes"
+						>
+							<Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+								<Button
+									variant="primary"
+									size="sm"
+									icon={<Plus className="w-4 h-4" />}
+									onClick={() => setTrackingModalOpen(true)}
+								>
+									Add Tracking Event
+								</Button>
+							</Box>
+
+							{(!container.trackingEvents || container.trackingEvents.length === 0) ? (
+								<EmptyState
+									icon={<MapPin className="w-12 h-12" />}
+									title="No Tracking Events"
+									description="No tracking updates have been recorded yet"
+								/>
+							) : (
+								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+									{container.trackingEvents.map((event, index) => (
+										<Box 
+											key={event.id}
+											sx={{ 
+												position: 'relative',
+												pl: 4,
+												borderLeft: index < container.trackingEvents.length - 1 ? '2px solid var(--border)' : 'none',
+												pb: index < container.trackingEvents.length - 1 ? 3 : 0,
+											}}
+										>
+											<Box
+												sx={{
+													position: 'absolute',
+													left: -9,
+													top: 0,
+													width: 16,
+													height: 16,
+													borderRadius: '50%',
+													bgcolor: (event as any).completed ? 'var(--success)' : 'var(--accent-gold)',
+													border: '2px solid var(--background)',
+												}}
+											/>
+											<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5, alignItems: 'start' }}>
+												<Box>
+													<Box sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+														{event.status}
+													</Box>
+													{(event as any).vesselName && (
+														<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)', mt: 0.5 }}>
+															🚢 {(event as any).vesselName}
+														</Box>
+													)}
+												</Box>
+												<Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+													<Box sx={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+														{new Date(event.eventDate).toLocaleString()}
+													</Box>
+													<Button
+														variant="outline"
+														size="sm"
+														icon={<Trash2 className="w-3 h-3" />}
+														onClick={() => handleDeleteTrackingEvent(event.id)}
+														disabled={deletingEventId === event.id}
+														sx={{ 
+															color: 'var(--error)',
+															borderColor: 'var(--error)',
+															'&:hover': { bgcolor: 'rgba(var(--error-rgb), 0.1)' },
+															minWidth: 'auto',
+															px: 1,
+														}}
+													/>
+												</Box>
+											</Box>
+											{event.location && (
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', mb: 0.5 }}>
+													📍 {event.location}
+												</Box>
+											)}
+											{event.description && (
+												<Box sx={{ fontSize: '0.875rem', color: 'var(--text-secondary)', mb: 0.5 }}>
+													{event.description}
+												</Box>
+											)}
+											{(event as any).source && (
+												<Box sx={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+													Source: {(event as any).source}
+												</Box>
+											)}
+										</Box>
+									))}
+								</Box>
+							)}
+						</DashboardPanel>
+					)}
+				</Box>
+
+				{/* Add Expense Modal */}
+				<AddExpenseModal
+					open={expenseModalOpen}
+					onClose={() => setExpenseModalOpen(false)}
+					containerId={container.id}
+					onSuccess={fetchContainer}
+				/>
+
+				{/* Add Invoice Modal */}
+				<AddInvoiceModal
+					open={invoiceModalOpen}
+					onClose={() => setInvoiceModalOpen(false)}
+					containerId={container.id}
+					onSuccess={fetchContainer}
+				/>
+
+				{/* Add Tracking Event Modal */}
+				<AddTrackingEventModal
+					open={trackingModalOpen}
+					onClose={() => setTrackingModalOpen(false)}
+					containerId={container.id}
+					onSuccess={fetchContainer}
+				/>
+			</DashboardSurface>
+		</AdminRoute>
+	);
 }
