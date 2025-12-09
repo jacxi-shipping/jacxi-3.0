@@ -15,8 +15,8 @@ import {
   Payment,
   AddCircle,
 } from '@mui/icons-material';
-import {  Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import {  Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, DashboardPageSkeleton } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -198,9 +198,7 @@ export default function AdminLedgersPage() {
 				<Box sx={{ px: 2, pt: 2 }}>
 					<Breadcrumbs />
 				</Box>
-          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
-          </Box>
+          <DashboardPageSkeleton />
         </DashboardSurface>
       </ProtectedRoute>
     );

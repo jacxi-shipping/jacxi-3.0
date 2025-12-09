@@ -16,8 +16,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Section from '@/components/layout/Section';
 import AdminRoute from '@/components/auth/AdminRoute';
-import { Button, Breadcrumbs, toast } from '@/components/design-system';
+import { Button, Breadcrumbs, toast, DashboardPageSkeleton, TableSkeleton, SkeletonCard } from '@/components/design-system';
 import { Box } from '@mui/material';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 
 type UserBalance = {
   userId: string;

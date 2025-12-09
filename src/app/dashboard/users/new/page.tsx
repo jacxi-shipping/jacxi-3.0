@@ -20,11 +20,11 @@ import {
 	InputAdornment,
 	IconButton,
 	Alert,
-	CircularProgress,
 	Snackbar,
 	Button as MuiButton,
 } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, FormPageSkeleton } from '@/components/design-system';
+import { DashboardSurface, DashboardPanel } from '@/components/dashboard/DashboardSurface';
 
 export default function CreateUserPage() {
 	const router = useRouter();
@@ -40,11 +40,7 @@ export default function CreateUserPage() {
 	const [isLoading, setIsLoading] = useState(false);
 
 	if (status === 'loading') {
-		return (
-			<Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-				<CircularProgress />
-			</Box>
-		);
+		return <FormPageSkeleton />;
 	}
 
 	const role = session?.user?.role;
@@ -411,14 +407,7 @@ export default function CreateUserPage() {
 										},
 									}}
 								>
-									{isLoading ? (
-										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-											<CircularProgress size={20} sx={{ color: 'var(--background)' }} />
-											<Typography component="span">Creating...</Typography>
-										</Box>
-									) : (
-										<Typography component="span">Create Account</Typography>
-									)}
+									{isLoading ? 'Creating...' : 'Create Account'}
 								</MuiButton>
 							</Box>
 						</Box>

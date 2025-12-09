@@ -15,8 +15,8 @@ import {
   TrendingDown as TrendingDownIcon,
   AttachMoney,
 } from '@mui/icons-material';
-import {  Box, CircularProgress, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge } from '@/components/design-system';
+import {  Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Breadcrumbs, Button, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, TableSkeleton } from '@/components/design-system';
 import { DashboardSurface, DashboardPanel, DashboardGrid } from '@/components/dashboard/DashboardSurface';
 import StatsCard from '@/components/dashboard/StatsCard';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -181,8 +181,8 @@ export default function LedgerPage() {
 				<Box sx={{ px: 2, pt: 2 }}>
 					<Breadcrumbs />
 				</Box>
-          <Box sx={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress size={40} sx={{ color: 'var(--accent-gold)' }} />
+          <Box sx={{ px: 2 }}>
+            <TableSkeleton rows={5} />
           </Box>
         </DashboardSurface>
       </ProtectedRoute>
@@ -320,9 +320,7 @@ export default function LedgerPage() {
           }
         >
           {loading ? (
-            <Box sx={{ minHeight: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
-            </Box>
+            <TableSkeleton rows={5} />
           ) : entries.length === 0 ? (
             <Box sx={{ minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
               <AccountBalance sx={{ fontSize: 48, color: 'var(--text-secondary)', opacity: 0.5 }} />

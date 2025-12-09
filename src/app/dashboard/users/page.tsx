@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { User, UserPlus, Eye, EyeOff, Copy, Check } from 'lucide-react';
-import { Box, CircularProgress, Typography, IconButton, Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Alert } from '@mui/material';
-import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, Button } from '@/components/design-system';
+import { Box, Typography, IconButton, Slide, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Alert } from '@mui/material';
+import { Breadcrumbs, toast, EmptyState, SkeletonCard, SkeletonTable, Tooltip, StatusBadge, Button, CompactSkeleton } from '@/components/design-system';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -320,11 +320,16 @@ export default function UsersPage() {
 			);
 		}
 
-	if (status === 'loading' || loading) {
+	if (status === 'loading') {
 		return (
-			<div className="light-surface min-h-screen bg-[var(--background)] flex items-center justify-center">
-				<div className="animate-spin rounded-full h-12 w-12 border-4 border-[var(--border)] border-t-[var(--accent-gold)]"></div>
-			</div>
+			<DashboardSurface>
+				<Box sx={{ px: 2, pt: 2 }}>
+					<Breadcrumbs />
+				</Box>
+				<DashboardPanel>
+					<CompactSkeleton />
+				</DashboardPanel>
+			</DashboardSurface>
 		);
 	}
 
@@ -410,8 +415,10 @@ export default function UsersPage() {
 
 				{/* Content */}
 				{loading ? (
-					<Box sx={{ minHeight: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-						<CircularProgress size={30} sx={{ color: 'var(--accent-gold)' }} />
+					<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }, gap: 2 }}>
+						{[...Array(6)].map((_, i) => (
+							<SkeletonCard key={i} />
+						))}
 					</Box>
 				) : paginatedUsers.length === 0 ? (
 					<Box sx={{ minHeight: 240, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
